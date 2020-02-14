@@ -1,4 +1,5 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+﻿using AutoStartConfirm.AutoStartConnectors;
+using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -28,16 +29,22 @@ namespace AutoStartConfirm
         public static void Main()
         {
             Logger.Info("Starting app");
-            AutoStartConfirm.App app = new AutoStartConfirm.App();
-            app.InitializeComponent();
-            try
+            using (var connector = new BootExecuteConnector())
             {
-                app.Run();
+                // var currentAutoStarts = connector.GetCurrentAutoStarts();
+                connector.StartWartcher();
+                AutoStartConfirm.App app = new AutoStartConfirm.App();
+                app.InitializeComponent();
+                try
+                {
+                    app.Run();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(new Exception("Failed to run", e));
+                }
             }
-            catch (Exception e)
-            {
-                Logger.Error(new Exception("Failed to run", e));
-            }
+
             Logger.Info("Finished");
         }
 
