@@ -106,6 +106,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoStartConnectors\AutoStartConnectorCollection.cs" />
+    <Compile Include="AutoStartConnectors\Category.cs" />
     <Compile Include="AutoStartConnectors\RegistryConnector.cs" />
     <Compile Include="AutoStartConnectors\BootExecuteConnector.cs" />
     <Compile Include="AutoStartConnectors\IAutoStartConnector.cs" />

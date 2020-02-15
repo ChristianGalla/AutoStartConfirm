@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using AutoStartConfirm.Helpers;
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.AutoStartConnectors {
     class RegistryConnector : IAutoStartConnector, IDisposable {
-        public string EntryCategory;
+        public Category Category;
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -18,55 +17,6 @@ namespace AutoStartConfirm.AutoStartConnectors {
         protected RegistryChangeMonitor monitor = null;
 
         protected IEnumerable<AutoStartEntry> lastAutostarts = null;
-
-        public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("Getting current auto starts");
-            try {
-                var ret = new List<AutoStartEntry>();
-
-                foreach (var category in categories) {
-                    try {
-                        object value = Registry.GetValue(basePath, category, null);
-                        if (value == null) {
-                            continue;
-                        }
-                        if (value is IEnumerable) {
-                            foreach (var subValue in value as IEnumerable) {
-                                ret.Add(new AutoStartEntry {
-                                    Category = EntryCategory,
-                                    Name = subValue.ToString(),
-                                    Path = $"{basePath}\\{category}",
-                                });
-                            }
-                        } else {
-                            ret.Add(new AutoStartEntry {
-                                Category = EntryCategory,
-                                Name = value.ToString(),
-                                Path = $"{basePath}\\{category}",
-                            });
-                        }
-                    } catch (Exception ex) {
-                        var err = new Exception($"Failed to get category {category}", ex);
-                        throw err;
-                    }
-                }
-                Logger.Trace("Got current auto starts");
-                return ret;
-            } catch (Exception ex) {
-                var err = new Exception("Failed to get current auto starts", ex);
-                Logger.Error(err);
-                throw err;
-            }
-        }
-
-        public void StartWartcher() {
-            StopWartcher();
-            lastAutostarts = GetCurrentAutoStarts();
-            monitor = new RegistryChangeMonitor(basePath);
-            monitor.Changed += ChangeHandler;
-            monitor.Error += ErrorHandler;
-            monitor.Start();
-        }
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
             Logger.Trace("Change detected");
@@ -99,9 +49,11 @@ namespace AutoStartConfirm.AutoStartConnectors {
             }
             foreach (var addedAutostart in addedAutostarts) {
                 Logger.Info($"{addedAutostart.Category} autostart added: {addedAutostart.Path}\\{addedAutostart.Name}");
+                Add?.Invoke(addedAutostart);
             }
             foreach (var removedAutostart in removedAutostarts) {
                 Logger.Info($"{removedAutostart.Category} autostart removed: {removedAutostart.Path}\\{removedAutostart.Name}");
+                Remove?.Invoke(removedAutostart);
             }
             lastAutostarts = newAutostarts;
         }
@@ -110,13 +62,64 @@ namespace AutoStartConfirm.AutoStartConnectors {
             Logger.Trace("Error detected");
         }
 
-        public void StopWartcher() {
+        #region IAutoStartConnector implementation
+        public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+            Logger.Trace("Getting current auto starts");
+            try {
+                var ret = new List<AutoStartEntry>();
+
+                foreach (var category in categories) {
+                    try {
+                        object value = Registry.GetValue(basePath, category, null);
+                        if (value == null) {
+                            continue;
+                        }
+                        if (value is IEnumerable) {
+                            foreach (var subValue in value as IEnumerable) {
+                                ret.Add(new AutoStartEntry {
+                                    Category = Category,
+                                    Name = subValue.ToString(),
+                                    Path = $"{basePath}\\{category}",
+                                });
+                            }
+                        } else {
+                            ret.Add(new AutoStartEntry {
+                                Category = Category,
+                                Name = value.ToString(),
+                                Path = $"{basePath}\\{category}",
+                            });
+                        }
+                    } catch (Exception ex) {
+                        var err = new Exception($"Failed to get category {category}", ex);
+                        throw err;
+                    }
+                }
+                Logger.Trace("Got current auto starts");
+                return ret;
+            } catch (Exception ex) {
+                var err = new Exception("Failed to get current auto starts", ex);
+                Logger.Error(err);
+                throw err;
+            }
+        }
+
+        public void StartWatcher() {
+            StopWatcher();
+            lastAutostarts = GetCurrentAutoStarts();
+            monitor = new RegistryChangeMonitor(basePath);
+            monitor.Changed += ChangeHandler;
+            monitor.Error += ErrorHandler;
+            monitor.Start();
+        }
+
+        public void StopWatcher() {
             if (monitor == null) {
                 return;
             }
             monitor.Dispose();
             monitor = null;
         }
+        #endregion
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -124,7 +127,7 @@ namespace AutoStartConfirm.AutoStartConnectors {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    StopWartcher();
+                    StopWatcher();
                 }
 
                 disposedValue = true;
@@ -134,6 +137,11 @@ namespace AutoStartConfirm.AutoStartConnectors {
         public void Dispose() {
             Dispose(true);
         }
+        #endregion
+
+        #region Events
+        public event AddHandler Add;
+        public event RemoveHandler Remove;
         #endregion
     }
 }

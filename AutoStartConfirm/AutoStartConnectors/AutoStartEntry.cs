@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoStartConfirm.AutoStartConnectors
 {
-    class AutoStartEntry
+    [Serializable]
+    public class AutoStartEntry
     {
         public string Name;
 
         public string Path;
 
-        public string Category;
+        public Category Category;
+
+        public DateTime DateTime = DateTime.Now;
     }
 }

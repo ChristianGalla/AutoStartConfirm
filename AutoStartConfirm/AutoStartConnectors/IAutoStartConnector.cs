@@ -4,14 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.AutoStartConnectors
-{
-    interface IAutoStartConnector: IDisposable
+namespace AutoStartConfirm.AutoStartConnectors {
+
+    #region Delegates
+    delegate void AddHandler(AutoStartEntry e);
+    delegate void RemoveHandler(AutoStartEntry e);
+    #endregion
+
+    interface IAutoStartConnector : IDisposable
     {
         IEnumerable<AutoStartEntry> GetCurrentAutoStarts();
 
-        void StartWartcher();
+        #region Watcher
+        void StartWatcher();
+        void StopWatcher();
+        #endregion
 
-        void StopWartcher();
+        #region Events
+        event AddHandler Add;
+        event RemoveHandler Remove;
+        #endregion
     }
 }
