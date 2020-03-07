@@ -1,5 +1,7 @@
 ﻿using AutoStartConfirm.AutoStartConnectors;
+using AutoStartConfirm.DesktopNotifications;
 using Hardcodet.Wpf.TaskbarNotification;
+using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,14 +13,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Windows.Data.Xml.Dom;
+using Windows.UI.Notifications;
 
-namespace AutoStartConfirm
-{
+namespace AutoStartConfirm {
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : Application, IDisposable
-    {
+    public partial class App : Application, IDisposable {
         private string PathToLastAutoStarts = null;
 
         private static MainWindow Window = null;
@@ -30,6 +32,9 @@ namespace AutoStartConfirm
         private AutoStartConnectorCollection Connectors = new AutoStartConnectorCollection();
 
         public App() {
+            DesktopNotificationManagerCompat.RegisterAumidAndComServer<MyNotificationActivator>("ChristianGalla.AutoStartConfirm");
+            DesktopNotificationManagerCompat.RegisterActivator<MyNotificationActivator>();
+
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             PathToLastAutoStarts = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}LastAutoStarts.bin";
             try {
@@ -90,8 +95,7 @@ namespace AutoStartConfirm
         /// Application Entry Point.
         /// </summary>
         [System.STAThreadAttribute()]
-        public static void Main()
-        {
+        public static void Main() {
             Logger.Info("Starting app");
             using (App app = new App()) {
                 app.InitializeComponent();
@@ -104,8 +108,7 @@ namespace AutoStartConfirm
             }
         }
 
-        void App_Startup(object sender, StartupEventArgs e)
-        {
+        void App_Startup(object sender, StartupEventArgs e) {
             Icon = (TaskbarIcon)FindResource("NotifyIcon");
             Connectors.StartWatcher();
 
@@ -113,34 +116,26 @@ namespace AutoStartConfirm
             //t1.Start();
         }
 
-        public static void ToggleMainWindow()
-        {
+        public static void ToggleMainWindow() {
             Logger.Info("Toggling main window");
-            if (Window == null || Window.IsClosed)
-            {
+            if (Window == null || Window.IsClosed) {
                 Logger.Trace("Creating new main window");
                 Window = new MainWindow();
             }
-            if (Window.IsVisible)
-            {
+            if (Window.IsVisible) {
                 Logger.Trace("Closing main window");
                 Window.Close();
-            }
-            else
-            {
+            } else {
                 Logger.Trace("Showing main window");
                 Window.Show();
             }
         }
 
-        internal static void Close()
-        {
+        internal static void Close() {
             Logger.Info("Closing application");
-            try
-            {
+            try {
                 Current.Shutdown();
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Error(e);
             }
         }

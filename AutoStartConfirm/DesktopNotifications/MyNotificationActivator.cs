@@ -1,11 +1,11 @@
-﻿using DesktopNotifications;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static DesktopNotifications.NotificationActivator;
+using static Microsoft.Toolkit.Uwp.Notifications.NotificationActivator;
 
 namespace AutoStartConfirm.DesktopNotifications {
     // The GUID CLSID must be unique to your app. Create a new GUID if copying this code.

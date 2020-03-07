@@ -2,7 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using AutoStartConfirm.Helpers;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
+using Windows.Data.Xml.Dom;
+using Windows.UI.Notifications;
 
 namespace AutoStartConfirm.AutoStartConnectors {
     class RegistryConnector : IAutoStartConnector, IDisposable {
@@ -49,6 +52,34 @@ namespace AutoStartConfirm.AutoStartConnectors {
             }
             foreach (var addedAutostart in addedAutostarts) {
                 Logger.Info($"{addedAutostart.Category} autostart added: {addedAutostart.Path}\\{addedAutostart.Name}");
+
+
+                ToastContent toastContent = new ToastContent() {
+                    // Arguments when the user taps body of toast
+                    Launch = "action=viewConversation&conversationId=5",
+
+                    Visual = new ToastVisual() {
+                        BindingGeneric = new ToastBindingGeneric() {
+                            Children = {
+                                new AdaptiveText()
+                                {
+                                    Text = $"{addedAutostart.Category} autostart added: {addedAutostart.Path}\\{addedAutostart.Name}"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
+                var doc = new XmlDocument();
+                doc.LoadXml(toastContent.GetContent());
+
+                // And create the toast notification
+                var toast = new ToastNotification(doc);
+
+                // And then show it
+                DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
+
                 Add?.Invoke(addedAutostart);
             }
             foreach (var removedAutostart in removedAutostarts) {
