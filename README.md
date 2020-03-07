@@ -14,7 +14,7 @@ The program can not be used yet.
 
 Currently, the following startup locations are being monitored:
 
-- [ ] Boot execute
+- [x] Boot execute
 - [ ] Appinit DLLs
 - [ ] Explorer Addons
 - [ ] Image hijacks
@@ -39,3 +39,11 @@ However, it lacks a function to notify a user about a new startup program and to
 
 Sysinternals Autoruns is not an Open Source program, but there is a [Autoruns PowerShell Module](https://github.com/p0w3rsh3ll/AutoRuns)
 that can be used, for example, to determine where a program can be registered to start automatically with Windows.
+
+## How to build
+
+This program was created using Visual Studio 2019.
+
+There are some NuGet dependencies that must be installed before it can be compiled.
+
+The installer is build using [WiX Toolset build tools](https://wixtoolset.org/releases/) and the WiX Toolset Visual Studio 2019 Extension.
