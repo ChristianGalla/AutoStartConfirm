@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="Auto Start Confirm" Language="1033" Version="0.0.0.0" Manufacturer="Christian Galla" UpgradeCode="9795b8c4-0f77-4094-a3e4-43a914b674c2">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="Auto Start Confirm Installer" Manufacturer="Christian Galla" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Media Id="1" Cabinet="setup.cab" EmbedCab="yes" />
+
+		<Feature Id="Complete" Title="Complete" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationStartMenuShortcut" />
+      <ComponentRef Id="ApplicationDesktopShortcut" />
+		</Feature>
+
+    <Icon Id="icon.ico" SourceFile="$(var.AutoStartConfirm.ProjectDir)Assets\Icon.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+    
+	  <Directory Id="TARGETDIR" Name="SourceDir">
+		  <Directory Id="ProgramFilesFolder">
+			  <Directory Id="INSTALLFOLDER" Name="Auto Start Confirm" />
+		  </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Auto Start Confirm"/>
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+	</Product>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<Component Id="MainExecutable" Guid="{5DA0A1A5-9166-4DF6-9AEB-B527376A62D3}">
+        <File Id="MainExecutable" Source="$(var.AutoStartConfirm.TargetPath)" Name="$(var.AutoStartConfirm.TargetFileName)" KeyPath='yes' />
+			</Component>
+      <Component Id="Config" Guid="{6AEBE607-EC78-4086-A432-A2D31C03A4D6}">
+        <File Source="$(var.AutoStartConfirm.TargetPath).config" />
+      </Component>
+      <Component Id="Hardcodet.Wpf.TaskbarNotification.dll" Guid="{DF6C6C9C-F371-4230-A9D5-CC0645BA7643}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)Hardcodet.Wpf.TaskbarNotification.dll" />
+      </Component>
+      <Component Id="Nlog.config" Guid="{F312D60C-6876-4F0C-8FE0-4BBD22225ACB}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)Nlog.config" />
+      </Component>
+      <Component Id="NLog.dll" Guid="{579EB525-E1E7-4F7D-BD46-E07C34DEF849}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)NLog.dll" />
+      </Component>
+    </ComponentGroup>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationStartMenuShortcut" Guid="{CB1D72D9-27EF-4798-AE69-4FDC6BCCECBD}">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Auto Start Confirm"
+                  Target="[#MainExecutable]"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY">
+          <!--AUMID-->
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
+          <!--COM CLSID-->
+          <ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
+        </Shortcut>
+        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="StartMenuShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="ApplicationDesktopShortcut" Guid="{84E64D2C-AC8D-4B67-9DA0-8E3E2EFCE352}">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="Auto Start Confirm"
+                  Target="[#MainExecutable]"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY">
+          <!--AUMID-->
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
+          <!--COM CLSID-->
+          <ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
+        </Shortcut>
+        <RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="DesktopShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+	</Fragment>
+</Wix>
