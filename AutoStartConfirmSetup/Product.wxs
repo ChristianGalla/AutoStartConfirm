@@ -2,22 +2,29 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Id="*" Name="Auto Start Confirm" Language="1033" Version="0.0.0.0" Manufacturer="Christian Galla" UpgradeCode="9795b8c4-0f77-4094-a3e4-43a914b674c2">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="Auto Start Confirm Installer" Manufacturer="Christian Galla" />
-
+    
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="setup.cab" EmbedCab="yes" />
 
-		<Feature Id="Complete" Title="Complete" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
-      <ComponentRef Id="ApplicationStartMenuShortcut" />
-      <ComponentRef Id="ApplicationDesktopShortcut" />
+		<Feature Id="Complete" Title="Auto Start Confirm" Description='The complete package.' Level="1" Display='expand' ConfigurableDirectory='APPLICATIONFOLDER'>
+      <Feature Id='MainProgram' Title='Program' Description='The main executable.' Level='1'>
+        <ComponentGroupRef Id="ProductComponents" />
+        <ComponentRef Id="ApplicationStartMenuShortcut" />
+        <ComponentRef Id="ApplicationDesktopShortcut" />
+      </Feature>
 		</Feature>
 
     <Icon Id="icon.ico" SourceFile="$(var.AutoStartConfirm.ProjectDir)Assets\Icon.ico"/>
     <Property Id="ARPPRODUCTICON" Value="icon.ico" />
     
+    <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+    
 	  <Directory Id="TARGETDIR" Name="SourceDir">
 		  <Directory Id="ProgramFilesFolder">
-			  <Directory Id="INSTALLFOLDER" Name="Auto Start Confirm" />
+			  <Directory Id="APPLICATIONFOLDER" Name="Auto Start Confirm" />
 		  </Directory>
       <Directory Id="ProgramMenuFolder">
         <Directory Id="ApplicationProgramsFolder" Name="Auto Start Confirm"/>
@@ -27,7 +34,7 @@
 	</Product>
 
 	<Fragment>
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+		<ComponentGroup Id="ProductComponents" Directory="APPLICATIONFOLDER">
 			<Component Id="MainExecutable" Guid="{5DA0A1A5-9166-4DF6-9AEB-B527376A62D3}">
         <File Id="MainExecutable" Source="$(var.AutoStartConfirm.TargetPath)" Name="$(var.AutoStartConfirm.TargetFileName)" KeyPath='yes' />
 			</Component>
