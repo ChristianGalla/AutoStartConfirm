@@ -50,6 +50,12 @@
       <Component Id="NLog.dll" Guid="{579EB525-E1E7-4F7D-BD46-E07C34DEF849}">
         <File Source="$(var.AutoStartConfirm.TargetDir)NLog.dll" />
       </Component>
+      <Component Id="Microsoft.Toolkit.Uwp.Notifications.dll" Guid="{CAFA0E35-A8DC-4748-896B-F81DDFFAB59B}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Toolkit.Uwp.Notifications.dll" />
+      </Component>
+      <Component Id="System.ValueTuple.dll" Guid="{9E6D9472-4104-4055-8973-41199D6E2AC5}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)System.ValueTuple.dll" />
+      </Component>
     </ComponentGroup>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
