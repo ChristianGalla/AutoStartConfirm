@@ -12,6 +12,10 @@ namespace AutoStartConfirm.AutoStartConnectors {
 
         public AutoStartConnectorCollection() {
             Connectors.Add(new BootExecuteConnector());
+            foreach (var connector in Connectors) {
+                connector.Add += AddHandler;
+                connector.Remove += RemoveHandler;
+            }
         }
 
         public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
@@ -23,9 +27,23 @@ namespace AutoStartConfirm.AutoStartConnectors {
             return ret;
         }
 
-        #region IAutoStartConnector implementation
+        #region Events
         public event AddHandler Add;
+
         public event RemoveHandler Remove;
+        #endregion
+
+        #region Event handlers
+        private void AddHandler(AutoStartEntry addedAutostart) {
+            Add?.Invoke(addedAutostart);
+        }
+
+        private void RemoveHandler(AutoStartEntry removedAutostart) {
+            Remove?.Invoke(removedAutostart);
+        }
+        #endregion
+
+        #region IAutoStartConnector implementation
         public void StartWatcher() {
             foreach (var connector in Connectors) {
                 connector.StartWatcher();

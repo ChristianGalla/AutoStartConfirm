@@ -56,6 +56,9 @@
       <Component Id="System.ValueTuple.dll" Guid="{9E6D9472-4104-4055-8973-41199D6E2AC5}">
         <File Source="$(var.AutoStartConfirm.TargetDir)System.ValueTuple.dll" />
       </Component>
+      <Component Id="QueryString.NETCore.dll" Guid="{9372D359-7A01-4C36-AA47-F9280A63748C}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)QueryString.NETCore.dll" />
+      </Component>
     </ComponentGroup>
 
     <DirectoryRef Id="ApplicationProgramsFolder">

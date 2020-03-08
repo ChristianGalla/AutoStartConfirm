@@ -34,6 +34,8 @@ namespace AutoStartConfirm {
         public App() {
             DesktopNotificationManagerCompat.RegisterAumidAndComServer<MyNotificationActivator>("ChristianGalla.AutoStartConfirm");
             DesktopNotificationManagerCompat.RegisterActivator<MyNotificationActivator>();
+            Connectors.Add += AddHandler;
+            Connectors.Remove += RemoveHandler;
 
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             PathToLastAutoStarts = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}LastAutoStarts.bin";
@@ -69,7 +71,7 @@ namespace AutoStartConfirm {
                         }
                     }
                     if (!found) {
-                        Logger.Info($"{lastAutostart.Category} autostart removed: {lastAutostart.Path}\\{lastAutostart.Name}");
+                        RemoveHandler(lastAutostart);
                     }
                 }
                 foreach (var newAutostart in currentAutoStarts) {
@@ -81,7 +83,7 @@ namespace AutoStartConfirm {
                         }
                     }
                     if (!found) {
-                        Logger.Info($"{newAutostart.Category} autostart added: {newAutostart.Path}\\{newAutostart.Name}");
+                        AddHandler(newAutostart);
                     }
                 }
             } catch (Exception ex) {
@@ -126,6 +128,18 @@ namespace AutoStartConfirm {
                 Logger.Trace("Closing main window");
                 Window.Close();
             } else {
+                Logger.Trace("Showing main window");
+                Window.Show();
+            }
+        }
+
+        public static void ShowMainWindow() {
+            Logger.Info("Toggling main window");
+            if (Window == null || Window.IsClosed) {
+                Logger.Trace("Creating new main window");
+                Window = new MainWindow();
+            }
+            if (!Window.IsVisible) {
                 Logger.Trace("Showing main window");
                 Window.Show();
             }
@@ -213,6 +227,117 @@ namespace AutoStartConfirm {
                 base.OnExit(e);
             }
         }
+
+
+        #region Event handlers
+        private void AddHandler(AutoStartEntry addedAutostart) {
+            Logger.Info($"{addedAutostart.Category} autostart added: {addedAutostart.Path}\\{addedAutostart.Name}");
+            ToastContent toastContent = new ToastContent() {
+                // Arguments when the user taps body of toast
+                Launch = "action=view&changeId=1234",
+
+                Visual = new ToastVisual() {
+                    BindingGeneric = new ToastBindingGeneric() {
+                        AppLogoOverride = new ToastGenericAppLogo() {
+                            Source = $"{Directory.GetCurrentDirectory()}/Assets/AddIcon.png",
+                            HintCrop = ToastGenericAppLogoCrop.None
+                        },
+                        Children = {
+                            new AdaptiveText()
+                            {
+                                Text = $"Autostart added",
+                                HintStyle = AdaptiveTextStyle.Title
+                            },
+                            new AdaptiveText()
+                            {
+                                Text = addedAutostart.Name
+                            },
+                        },
+                        Attribution = new ToastGenericAttributionText() {
+                            Text = $"Via {addedAutostart.Category}",
+                        },
+                    }
+                },
+                Actions = new ToastActionsCustom() {
+                    Buttons =
+                        {
+                            new ToastButton("Ok", "action=confirm&changeId=1234")
+                            {
+                                ActivationType = ToastActivationType.Background
+                            },
+                            new ToastButton("Revert", "action=revert&changeId=1234")
+                            {
+                                ActivationType = ToastActivationType.Background
+                            },
+                        }
+                }
+            };
+
+            // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
+            var doc = new XmlDocument();
+            doc.LoadXml(toastContent.GetContent());
+
+            // And create the toast notification
+            var toast = new ToastNotification(doc);
+
+            // And then show it
+            DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
+        }
+
+        private void RemoveHandler(AutoStartEntry removedAutostart) {
+            Logger.Info($"{removedAutostart.Category} autostart removed: {removedAutostart.Path}\\{removedAutostart.Name}");
+            ToastContent toastContent = new ToastContent() {
+                // Arguments when the user taps body of toast
+                Launch = "action=view&changeId=1234",
+
+                Visual = new ToastVisual() {
+                    BindingGeneric = new ToastBindingGeneric() {
+                        AppLogoOverride = new ToastGenericAppLogo() {
+                            Source = $"{Directory.GetCurrentDirectory()}/Assets/RemoveIcon.png",
+                            HintCrop = ToastGenericAppLogoCrop.None
+                        },
+                        Children = {
+                            new AdaptiveText()
+                            {
+                                Text = $"Autostart removed",
+                                HintStyle = AdaptiveTextStyle.Title
+                            },
+                            new AdaptiveText()
+                            {
+                                Text = $"{removedAutostart.Name}"
+                            }
+                        },
+                        Attribution = new ToastGenericAttributionText() {
+                            Text = $"Via {removedAutostart.Category}",
+                        }
+                    }
+                },
+                Actions = new ToastActionsCustom() {
+                    Buttons =
+                        {
+                            new ToastButton("Ok", "action=confirm&changeId=1234")
+                            {
+                                ActivationType = ToastActivationType.Background
+                            },
+                            new ToastButton("Revert", "action=revert&changeId=1234")
+                            {
+                                ActivationType = ToastActivationType.Background
+                            },
+                        }
+                }
+            };
+
+            // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
+            var doc = new XmlDocument();
+            doc.LoadXml(toastContent.GetContent());
+
+            // And create the toast notification
+            var toast = new ToastNotification(doc);
+
+            // And then show it
+            DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
+        }
+        #endregion
 
         #region IDisposable Support
         private bool disposedValue = false;
