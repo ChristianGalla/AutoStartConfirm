@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using AutoStartConfirm.Helpers;
+using AutoStartConfirm.AutoStarts;
 using Microsoft.Win32;
 
-namespace AutoStartConfirm.AutoStartConnectors {
+namespace AutoStartConfirm.Connectors {
     class RegistryConnector : IAutoStartConnector, IDisposable {
         public Category Category;
 

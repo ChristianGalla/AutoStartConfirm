@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AutoStartConfirm.AutoStarts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.AutoStartConnectors {
+namespace AutoStartConfirm.Connectors {
 
     #region Delegates
     delegate void AddHandler(AutoStartEntry e);

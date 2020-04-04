@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoStartConfirm.Helpers;
+using System;
 
 namespace AutoStartConfirm.Helpers
 {

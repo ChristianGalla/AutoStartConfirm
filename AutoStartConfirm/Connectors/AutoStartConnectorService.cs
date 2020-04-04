@@ -1,16 +1,17 @@
-﻿using System;
+﻿using AutoStartConfirm.AutoStarts;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.AutoStartConnectors {
-    class AutoStartConnectorCollection: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
+namespace AutoStartConfirm.Connectors {
+    class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
 
         protected List<IAutoStartConnector> Connectors = new List<IAutoStartConnector>();
 
-        public AutoStartConnectorCollection() {
+        public AutoStartConnectorService() {
             Connectors.Add(new BootExecuteConnector());
             foreach (var connector in Connectors) {
                 connector.Add += AddHandler;

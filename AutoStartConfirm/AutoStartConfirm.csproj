@@ -130,15 +130,18 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoStartConnectors\AutoStartConnectorCollection.cs" />
-    <Compile Include="AutoStartConnectors\Category.cs" />
-    <Compile Include="AutoStartConnectors\RegistryConnector.cs" />
-    <Compile Include="AutoStartConnectors\BootExecuteConnector.cs" />
-    <Compile Include="AutoStartConnectors\IAutoStartConnector.cs" />
-    <Compile Include="AutoStartConnectors\AutoStartEntry.cs" />
-    <Compile Include="DesktopNotifications\MyNotificationActivator.cs" />
+    <Compile Include="AutoStarts\AutoStartService.cs" />
+    <Compile Include="Connectors\AutoStartConnectorService.cs" />
+    <Compile Include="AutoStarts\Category.cs" />
+    <Compile Include="Connectors\RegistryConnector.cs" />
+    <Compile Include="Connectors\BootExecuteConnector.cs" />
+    <Compile Include="Connectors\IAutoStartConnector.cs" />
+    <Compile Include="AutoStarts\AutoStartEntry.cs" />
+    <Compile Include="Notifications\MyNotificationActivator.cs" />
+    <Compile Include="AutoStarts\ConfirmStatus.cs" />
     <Compile Include="Helpers\RegistryChangeEventArgs.cs" />
     <Compile Include="Helpers\RegistryChangeMonitor.cs" />
+    <Compile Include="Notifications\NotificationService.cs" />
     <Compile Include="NotifyIcon.cs" />
     <Compile Include="NotifyIconDoubleClickCommand.cs" />
     <Page Include="App.xaml">

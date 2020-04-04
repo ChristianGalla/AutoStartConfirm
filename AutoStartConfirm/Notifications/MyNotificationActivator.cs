@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using static Microsoft.Toolkit.Uwp.Notifications.NotificationActivator;
 
-namespace AutoStartConfirm.DesktopNotifications {
+namespace AutoStartConfirm.Notifications {
     // The GUID CLSID must be unique to your app. Create a new GUID if copying this code.
     [ClassInterface(ClassInterfaceType.None)]
     [ComSourceInterfaces(typeof(INotificationActivationCallback))]
@@ -24,7 +24,8 @@ namespace AutoStartConfirm.DesktopNotifications {
                         App.ShowMainWindow();
                         break;
                     case "revert":
-                        App.ShowMainWindow();
+                        break;
+                    case "confirm":
                         break;
                     default:
                         break;

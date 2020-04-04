@@ -1,4 +1,6 @@
-﻿namespace AutoStartConfirm.AutoStartConnectors {
+﻿using AutoStartConfirm.AutoStarts;
+
+namespace AutoStartConfirm.Connectors {
     class BootExecuteConnector : RegistryConnector {
         public BootExecuteConnector() {
             Category = Category.BootExecute;
