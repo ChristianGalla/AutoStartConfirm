@@ -23,7 +23,7 @@ namespace AutoStartConfirm.Notifications {
             Logger.Info($"{addedAutostart.Category} autostart added: {addedAutostart.Path}\\{addedAutostart.Name}");
             ToastContent toastContent = new ToastContent() {
                 // Arguments when the user taps body of toast
-                Launch = $"action=view&id={addedAutostart.Id}",
+                Launch = $"action=viewAdd&id={addedAutostart.Id}",
 
                 Visual = new ToastVisual() {
                     BindingGeneric = new ToastBindingGeneric() {
@@ -50,11 +50,11 @@ namespace AutoStartConfirm.Notifications {
                 Actions = new ToastActionsCustom() {
                     Buttons =
                         {
-                            new ToastButton("Ok", $"action=confirm&id={addedAutostart.Id}")
+                            new ToastButton("Ok", $"action=confirmAdd&id={addedAutostart.Id}")
                             {
                                 ActivationType = ToastActivationType.Background
                             },
-                            new ToastButton("Revert", $"action=revert&id={addedAutostart.Id}")
+                            new ToastButton("Revert", $"action=revertAdd&id={addedAutostart.Id}")
                             {
                                 ActivationType = ToastActivationType.Background
                             },
@@ -77,7 +77,7 @@ namespace AutoStartConfirm.Notifications {
             Logger.Info($"{removedAutostart.Category} autostart removed: {removedAutostart.Path}\\{removedAutostart.Name}");
             ToastContent toastContent = new ToastContent() {
                 // Arguments when the user taps body of toast
-                Launch = $"action=view&id={removedAutostart.Id}",
+                Launch = $"action=viewRemove&id={removedAutostart.Id}",
 
                 Visual = new ToastVisual() {
                     BindingGeneric = new ToastBindingGeneric() {
@@ -104,11 +104,11 @@ namespace AutoStartConfirm.Notifications {
                 Actions = new ToastActionsCustom() {
                     Buttons =
                         {
-                            new ToastButton("Ok", $"action=confirm&id={removedAutostart.Id}")
+                            new ToastButton("Ok", $"action=confirmRemove&id={removedAutostart.Id}")
                             {
                                 ActivationType = ToastActivationType.Background
                             },
-                            new ToastButton("Revert", $"action=revert&id={removedAutostart.Id}")
+                            new ToastButton("Revert", $"action=revertRemove&id={removedAutostart.Id}")
                             {
                                 ActivationType = ToastActivationType.Background
                             },

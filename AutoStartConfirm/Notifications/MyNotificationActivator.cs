@@ -19,13 +19,25 @@ namespace AutoStartConfirm.Notifications {
             Application.Current.Dispatcher.Invoke(delegate
             {
                 QueryString args = QueryString.Parse(invokedArgs);
+                var app = App.GetInstance();
                 switch (args["action"]) {
-                    case "view":
-                        App.ShowMainWindow();
+                    case "viewRemoved":
+                        app.ShowRemoved(Guid.Parse(args["id"]));
                         break;
-                    case "revert":
+                    case "revertRemove":
+                        app.RevertRemove(Guid.Parse(args["id"]));
                         break;
-                    case "confirm":
+                    case "confirmRemove":
+                        app.ConfirmRemove(Guid.Parse(args["id"]));
+                        break;
+                    case "viewAdd":
+                        app.ShowAdd(Guid.Parse(args["id"]));
+                        break;
+                    case "revertAdd":
+                        app.RevertAdd(Guid.Parse(args["id"]));
+                        break;
+                    case "confirmAdd":
+                        app.ConfirmAdd(Guid.Parse(args["id"]));
                         break;
                     default:
                         break;

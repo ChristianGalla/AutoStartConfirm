@@ -32,7 +32,9 @@ namespace AutoStartConfirm {
 
         private readonly NotificationService NotificationService = new NotificationService();
 
-        public App() {
+        private static App AppInstance;
+
+        private App() {
             AutoStartService.GetCurrentAutoStarts();
             AutoStartService.Add += AddHandler;
             AutoStartService.Remove += RemoveHandler;
@@ -43,6 +45,10 @@ namespace AutoStartConfirm {
             }
         }
 
+        public static App GetInstance() {
+            return AppInstance;
+        }
+
 
         /// <summary>
         /// Application Entry Point.
@@ -51,6 +57,7 @@ namespace AutoStartConfirm {
         public static void Main() {
             Logger.Info("Starting app");
             using (App app = new App()) {
+                AppInstance = app;
                 app.InitializeComponent();
                 try {
                     app.Run(); // blocks until program is closing
@@ -59,6 +66,7 @@ namespace AutoStartConfirm {
                 }
                 Logger.Info("Finished");
             }
+            AppInstance = null;
         }
 
         void App_Startup(object sender, StartupEventArgs e) {
@@ -108,6 +116,30 @@ namespace AutoStartConfirm {
             } finally {
                 base.OnExit(e);
             }
+        }
+
+        public void ShowAdd(Guid Id) {
+            ShowMainWindow();
+        }
+
+        public void ShowRemoved(Guid Id) {
+            ShowMainWindow();
+        }
+
+        public void RevertAdd(Guid Id) {
+            AutoStartService.RevertAdd(Id);
+        }
+
+        public void RevertRemove(Guid Id) {
+            AutoStartService.RevertRemove(Id);
+        }
+
+        public void ConfirmAdd(Guid Id) {
+            AutoStartService.ConfirmAdd(Id);
+        }
+
+        public void ConfirmRemove(Guid Id) {
+            AutoStartService.ConfirmRemove(Id);
         }
 
 

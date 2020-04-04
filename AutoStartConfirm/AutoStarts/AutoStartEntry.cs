@@ -13,12 +13,13 @@ namespace AutoStartConfirm.AutoStarts
 
         public Category Category { get; set; }
 
-        public DateTime DateTime { get; set; }
+        public DateTime? AddDate { get; set; }
+
+        public DateTime? RemoveDate { get; set; }
 
         public ConfirmStatus ConfirmStatus { get; set; }
 
         public AutoStartEntry() {
-            DateTime = DateTime.Now;
             Id = Guid.NewGuid();
             ConfirmStatus = ConfirmStatus.None;
         }
