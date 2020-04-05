@@ -20,14 +20,14 @@ namespace AutoStartConfirm.Connectors {
         protected IEnumerable<AutoStartEntry> lastAutostarts = null;
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Trace("Change detected");
+            Logger.Trace("ChangeHandler called");
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<AutoStartEntry>();
             var removedAutostarts = new List<AutoStartEntry>();
             foreach (var newAutostart in newAutostarts) {
                 var found = false;
                 foreach (var lastAutostart in lastAutostarts) {
-                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Name == lastAutostart.Name) {
+                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
                         found = true;
                         break;
                     }
@@ -39,7 +39,7 @@ namespace AutoStartConfirm.Connectors {
             foreach (var lastAutostart in lastAutostarts) {
                 var found = false;
                 foreach (var newAutostart in newAutostarts) {
-                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Name == lastAutostart.Name) {
+                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
                         found = true;
                         break;
                     }
@@ -58,12 +58,12 @@ namespace AutoStartConfirm.Connectors {
         }
 
         private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Trace("Error detected");
+            Logger.Trace("ErrorHandler called");
         }
 
         #region IAutoStartConnector implementation
         public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("Getting current auto starts");
+            Logger.Trace("GetCurrentAutoStarts called");
             try {
                 var ret = new List<AutoStartEntry>();
 
@@ -77,14 +77,14 @@ namespace AutoStartConfirm.Connectors {
                             foreach (var subValue in value as IEnumerable) {
                                 ret.Add(new AutoStartEntry {
                                     Category = Category,
-                                    Name = subValue.ToString(),
+                                    Value = subValue.ToString(),
                                     Path = $"{basePath}\\{category}",
                                 });
                             }
                         } else {
                             ret.Add(new AutoStartEntry {
                                 Category = Category,
-                                Name = value.ToString(),
+                                Value = value.ToString(),
                                 Path = $"{basePath}\\{category}",
                             });
                         }
@@ -103,6 +103,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void StartWatcher() {
+            Logger.Trace("StartWatcher called");
             StopWatcher();
             lastAutostarts = GetCurrentAutoStarts();
             monitor = new RegistryChangeMonitor(basePath);
@@ -112,11 +113,76 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void StopWatcher() {
+            Logger.Trace("StopWatcher called");
             if (monitor == null) {
                 return;
             }
             monitor.Dispose();
             monitor = null;
+        }
+
+        public void AddAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("AddAutoStart called");
+            var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
+            var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
+            var category = autoStart.Path.Substring(lastDelimiterPos + 1);
+            try {
+                object value = Registry.GetValue(basePath, category, null);
+                var newValues = new List<string> {
+                    autoStart.Value
+                };
+                if (value == null) {
+                    Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
+                } else if (value is IEnumerable<string>) {
+                    bool exists = false;
+                    foreach (var subValue in value as IEnumerable<string>) {
+                        newValues.Add(subValue);
+                        if (string.Equals(subValue, autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
+                    }
+                } else {
+                    throw new Exception($"Don't know how to handle data type of key {autoStart.Path}");
+                }
+            } catch (Exception ex) {
+                var err = new Exception($"Failed to add auto start {autoStart.Value} to {autoStart.Path}", ex);
+                throw err;
+            }
+        }
+
+        public void RemoveAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("RemoveAutoStart called");
+            var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
+            var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
+            var category = autoStart.Path.Substring(lastDelimiterPos + 1);
+            try {
+                object value = Registry.GetValue(basePath, category, null);
+                var newValues = new List<string>();
+                if (value == null) {
+                    return;
+                } else if (value is IEnumerable<string>) {
+                    bool exists = false;
+                    foreach (var subValue in value as IEnumerable<string>) {
+                        if (string.Equals(subValue, autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                            exists = true;
+                        } else {
+                            newValues.Add(subValue);
+                        }
+                    }
+                    if (exists) {
+                        Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
+                    }
+                } else {
+                    throw new Exception($"Don't know how to handle data type of key {autoStart.Path}");
+                }
+            } catch (Exception ex) {
+                var err = new Exception($"Failed to remove auto start {autoStart.Value} from {autoStart.Path}", ex);
+                throw err;
+            }
         }
         #endregion
 

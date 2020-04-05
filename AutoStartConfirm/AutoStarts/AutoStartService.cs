@@ -40,72 +40,89 @@ namespace AutoStartConfirm.AutoStarts {
             Connectors.Remove += RemoveHandler;
         }
 
-        public AutoStartEntry GetCurrentAutoStart(Guid Id) {
-            if (CurrentAutoStarts.TryGetValue(Id, out AutoStartEntry ret)) {
-                return ret;
-            }
-            return null;
+        public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
+            Logger.Trace("TryGetCurrentAutoStart called");
+            return CurrentAutoStarts.TryGetValue(Id, out value);
         }
 
-        public AutoStartEntry GetAddedAutoStart(Guid Id) {
-            if (AddedAutoStarts.TryGetValue(Id, out AutoStartEntry ret)) {
-                return ret;
-            }
-            return null;
+        public bool TryGetAddedAutoStart(Guid Id, out AutoStartEntry value) {
+            Logger.Trace("TryGetAddedAutoStart called");
+            return AddedAutoStarts.TryGetValue(Id, out value);
         }
 
-        public AutoStartEntry GetRemovedAutoStart(Guid Id) {
-            if (RemovedAutoStarts.TryGetValue(Id, out AutoStartEntry ret)) {
-                return ret;
-            }
-            return null;
-        }
-
-        public AutoStartEntry GetAutoStart(Category category, string path, string name) {
-            return null;
+        public bool TryGetRemovedAutoStart(Guid Id, out AutoStartEntry value) {
+            Logger.Trace("TryGetRemovedAutoStart called");
+            return RemovedAutoStarts.TryGetValue(Id, out value);
         }
 
         public void ConfirmAdd(Guid Id) {
-            var autoStart = GetAddedAutoStart(Id);
-            if (autoStart != null) {
-                autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+            Logger.Trace("ConfirmAdd called");
+            if (TryGetAddedAutoStart(Id, out AutoStartEntry addedAutoStart)) {
+                addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                Logger.Info("Confirmed add of {@addedAutoStart}", addedAutoStart);
             }
-            autoStart = GetCurrentAutoStart(Id);
-            if (autoStart != null) {
-                autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry currentAutoStart)) {
+                currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
             }
         }
 
         public void ConfirmRemove(Guid Id) {
-            var autoStart = GetRemovedAutoStart(Id);
-            if (autoStart != null) {
+            Logger.Trace("ConfirmRemove called");
+            if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart)) {
                 autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                Logger.Info("Confirmed remove of {@autoStart}", autoStart);
             }
         }
 
         public void RevertAdd(Guid Id) {
-            var autoStart = GetAddedAutoStart(Id);
-            if (autoStart != null && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
-                // todo: revert auto start
+            Logger.Trace("RevertAdd called");
+            if (TryGetAddedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+                Connectors.RemoveAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.Info("Reverted add of {@autoStart}", autoStart);
+            }
+        }
+
+        public void RevertAdd(AutoStartEntry autoStart) {
+            Logger.Trace("RevertAdd called");
+            if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+                Connectors.RemoveAutoStart(autoStart);
+                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.Info("Reverted add of {@autoStart}", autoStart);
             }
         }
 
         public void RevertRemove(Guid Id) {
-            var autoStart = GetRemovedAutoStart(Id);
-            if (autoStart != null && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
-                // todo: revert auto start
+            Logger.Trace("RevertRemove called");
+            if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+                Connectors.AddAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.Info("Reverted remove of {@autoStart}", autoStart);
+            }
+        }
+
+        public void RevertRemove(AutoStartEntry autoStart) {
+            Logger.Trace("RevertRemove called");
+            if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+                Connectors.AddAutoStart(autoStart);
+                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.Info("Reverted remove of {@autoStart}", autoStart);
             }
         }
 
         public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+            Logger.Trace("GetCurrentAutoStarts called");
             return Connectors.GetCurrentAutoStarts();
         }
 
+        public bool GetAutoStartFileExists() {
+            Logger.Trace("GetAutoStartFileExists called");
+            return !File.Exists(PathToLastAutoStarts);
+        }
+
         public Dictionary<Guid, AutoStartEntry> GetSavedAutoStarts(string path) {
-            Logger.Info("Loading auto starts from file");
             try {
+                Logger.Trace("Loading auto starts from file {path}", path);
                 if (!File.Exists(path)) {
                     return new Dictionary<Guid, AutoStartEntry>();
                 }
@@ -113,10 +130,10 @@ namespace AutoStartConfirm.AutoStarts {
                     IFormatter formatter = new BinaryFormatter();
                     try {
                         var ret = (Dictionary<Guid, AutoStartEntry>)formatter.Deserialize(stream);
-                        Logger.Info("Deserialized last saved auto starts");
+                        Logger.Trace("Loaded last saved auto starts from file {path}", path);
                         return ret;
                     } catch (Exception ex) {
-                        var err = new Exception("Failed to deserialize", ex);
+                        var err = new Exception($"Failed to deserialize from file {path}", ex);
                         throw err;
                     }
                 }
@@ -130,12 +147,12 @@ namespace AutoStartConfirm.AutoStarts {
         public void SaveAutoStarts() {
             try {
                 Logger.Info("Saving current known auto starts");
+                Logger.Trace("Saving current auto starts to file {path}", PathToLastAutoStarts);
                 SaveAutoStarts(PathToLastAutoStarts, CurrentAutoStarts);
-                Logger.Debug("Saved current auto starts");
+                Logger.Trace("Saving added auto starts to file {path}", PathToAddedAutoStarts);
                 SaveAutoStarts(PathToAddedAutoStarts, AddedAutoStarts);
-                Logger.Debug("Saved added auto starts");
+                Logger.Trace("Saving removed auto starts to file {path}", PathToRemovedAutoStarts);
                 SaveAutoStarts(PathToRemovedAutoStarts, RemovedAutoStarts);
-                Logger.Debug("Saved removed auto starts");
                 Logger.Info("Saved all auto starts");
             } catch (Exception ex) {
                 var err = new Exception("Failed to save current auto starts", ex);
@@ -145,23 +162,25 @@ namespace AutoStartConfirm.AutoStarts {
         }
 
         private void SaveAutoStarts(string path, Dictionary<Guid, AutoStartEntry> dictionary) {
+            Logger.Trace("Saving auto starts to file {path}", path);
             try {
                 try {
                     var folderPath = PathToLastAutoStarts.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
                     Directory.CreateDirectory(folderPath);
                 } catch (Exception ex) {
-                    var err = new Exception("Failed to create folder", ex);
+                    var err = new Exception($"Failed to create folder for file {path}", ex);
                     throw err;
                 }
                 try {
                     using (Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
                         IFormatter formatter = new BinaryFormatter();
-                        formatter.Serialize(stream, CurrentAutoStarts);
+                        formatter.Serialize(stream, dictionary);
                     }
                 } catch (Exception ex) {
-                    var err = new Exception("Failed to write file", ex);
+                    var err = new Exception($"Failed to write file {path}", ex);
                     throw err;
                 }
+                Logger.Trace("Saved auto starts to file {path}", path);
             } catch (Exception ex) {
                 var err = new Exception($"Failed to save auto starts to file {path}", ex);
                 Logger.Error(err);
@@ -173,8 +192,8 @@ namespace AutoStartConfirm.AutoStarts {
         /// Loads current autostarts, compares to last saved and fires add or remove events if necessary
         /// </summary>
         public void LoadCurrentAutoStarts() {
-            Logger.Info("Comparing current auto starts to last saved");
             try {
+                Logger.Info("Comparing current auto starts to last saved");
                 try {
                     CurrentAutoStarts = GetSavedAutoStarts(PathToLastAutoStarts);
                 } catch (Exception ex) {
@@ -207,7 +226,7 @@ namespace AutoStartConfirm.AutoStarts {
                 foreach (var lastAutostart in lastAutostarts) {
                     var found = false;
                     foreach (var newAutostart in currentAutoStarts) {
-                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Name == lastAutostart.Name) {
+                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
                             found = true;
                             break;
                         }
@@ -219,7 +238,7 @@ namespace AutoStartConfirm.AutoStarts {
                 foreach (var newAutostart in currentAutoStarts) {
                     var found = false;
                     foreach (var lastAutostart in lastAutostarts) {
-                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Name == lastAutostart.Name) {
+                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
                             found = true;
                             break;
                         }
@@ -228,6 +247,7 @@ namespace AutoStartConfirm.AutoStarts {
                         AddHandler(newAutostart);
                     }
                 }
+                Logger.Trace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {
                 var err = new Exception("Failed to compare current auto starts to last saved", ex);
                 Logger.Error(err);
@@ -236,10 +256,12 @@ namespace AutoStartConfirm.AutoStarts {
         }
 
         public void StartWatcher() {
+            Logger.Trace("Starting watchers");
             Connectors.StartWatcher();
         }
 
         public void StopWatcher() {
+            Logger.Trace("Stopping watchers");
             Connectors.StopWatcher();
         }
         #endregion
@@ -252,21 +274,47 @@ namespace AutoStartConfirm.AutoStarts {
 
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
-            if (addedAutostart.AddDate == null) {
-                addedAutostart.AddDate = DateTime.Now;
+            try {
+                Logger.Info("Auto start added: {@value}", addedAutostart);
+                if (addedAutostart.AddDate == null) {
+                    addedAutostart.AddDate = DateTime.Now;
+                }
+                if (CurrentAutoStarts.ContainsKey(addedAutostart.Id)) {
+                    CurrentAutoStarts[addedAutostart.Id] = addedAutostart;
+                } else {
+                    CurrentAutoStarts.Add(addedAutostart.Id, addedAutostart);
+                }
+                if (AddedAutoStarts.ContainsKey(addedAutostart.Id)) {
+                    AddedAutoStarts[addedAutostart.Id] = addedAutostart;
+                } else {
+                    AddedAutoStarts.Add(addedAutostart.Id, addedAutostart);
+                }
+                Add?.Invoke(addedAutostart);
+                Logger.Trace("AddHandler finished");
+            } catch (Exception e) {
+                var err = new Exception("Add handler failed", e);
+                Logger.Error(err);
             }
-            CurrentAutoStarts.Add(addedAutostart.Id, addedAutostart);
-            AddedAutoStarts.Add(addedAutostart.Id, addedAutostart);
-            Add?.Invoke(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
-            if (removedAutostart.RemoveDate == null) {
-                removedAutostart.RemoveDate = DateTime.Now;
+            try {
+                Logger.Info("Auto start removed: {@value}", removedAutostart);
+                if (removedAutostart.RemoveDate == null) {
+                    removedAutostart.RemoveDate = DateTime.Now;
+                }
+                CurrentAutoStarts.Remove(removedAutostart.Id);
+                if (RemovedAutoStarts.ContainsKey(removedAutostart.Id)) {
+                    RemovedAutoStarts[removedAutostart.Id] = removedAutostart;
+                } else {
+                    RemovedAutoStarts.Add(removedAutostart.Id, removedAutostart);
+                }
+                Remove?.Invoke(removedAutostart);
+                Logger.Trace("RemoveHandler finished");
+            } catch (Exception e) {
+                var err = new Exception("Remove handler failed", e);
+                Logger.Error(err);
             }
-            CurrentAutoStarts.Remove(removedAutostart.Id);
-            RemovedAutoStarts.Add(removedAutostart.Id, removedAutostart);
-            Remove?.Invoke(removedAutostart);
         }
         #endregion
 

@@ -9,19 +9,22 @@ using System.Threading.Tasks;
 namespace AutoStartConfirm.Connectors {
     class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
 
-        protected List<IAutoStartConnector> Connectors = new List<IAutoStartConnector>();
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+        protected Dictionary<Category, IAutoStartConnector> Connectors = new Dictionary<Category, IAutoStartConnector>();
 
         public AutoStartConnectorService() {
-            Connectors.Add(new BootExecuteConnector());
-            foreach (var connector in Connectors) {
+            Connectors.Add(Category.BootExecute, new BootExecuteConnector());
+            foreach (var connector in Connectors.Values) {
                 connector.Add += AddHandler;
                 connector.Remove += RemoveHandler;
             }
         }
 
         public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+            Logger.Trace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
-            foreach(var connector in Connectors) {
+            foreach(var connector in Connectors.Values) {
                 var connectorAutoStarts = connector.GetCurrentAutoStarts();
                 ret.AddRange(connectorAutoStarts);
             }
@@ -36,23 +39,37 @@ namespace AutoStartConfirm.Connectors {
 
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
+            Logger.Trace("AddHandler called");
             Add?.Invoke(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
+            Logger.Trace("RemoveHandler called");
             Remove?.Invoke(removedAutostart);
         }
         #endregion
 
         #region IAutoStartConnector implementation
+        public void AddAutoStart(AutoStartEntry autoStart) {
+            Logger.Info("Adding auto start {@autoStart}", autoStart);
+            Connectors[autoStart.Category].AddAutoStart(autoStart);
+        }
+
+        public void RemoveAutoStart(AutoStartEntry autoStart) {
+            Logger.Info("Removing auto start {@autoStart}", autoStart);
+            Connectors[autoStart.Category].RemoveAutoStart(autoStart);
+        }
+
         public void StartWatcher() {
-            foreach (var connector in Connectors) {
+            Logger.Info("Starting watchers");
+            foreach (var connector in Connectors.Values) {
                 connector.StartWatcher();
             }
         }
 
         public void StopWatcher() {
-            foreach (var connector in Connectors) {
+            Logger.Info("Stopping watchers");
+            foreach (var connector in Connectors.Values) {
                 connector.StopWatcher();
             }
         }
@@ -64,7 +81,7 @@ namespace AutoStartConfirm.Connectors {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    foreach (var connector in Connectors) {
+                    foreach (var connector in Connectors.Values) {
                         connector.Dispose();
                     }
                     Connectors.Clear();
@@ -93,5 +110,6 @@ namespace AutoStartConfirm.Connectors {
             return ((IEnumerable<IAutoStartConnector>)Connectors).GetEnumerator();
         }
         #endregion
+
     }
 }

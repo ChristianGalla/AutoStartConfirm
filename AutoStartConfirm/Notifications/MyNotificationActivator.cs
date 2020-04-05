@@ -15,9 +15,13 @@ namespace AutoStartConfirm.Notifications {
     [ComSourceInterfaces(typeof(INotificationActivationCallback))]
     [Guid("DF651CDF-EC4A-4C98-9419-DE2709B00863"), ComVisible(true)]
     public class MyNotificationActivator : NotificationActivator {
+
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         public override void OnActivated(string invokedArgs, NotificationUserInput userInput, string appUserModelId) {
             Application.Current.Dispatcher.Invoke(delegate
             {
+                Logger.Trace("Called with {arguments}", invokedArgs);
                 QueryString args = QueryString.Parse(invokedArgs);
                 var app = App.GetInstance();
                 switch (args["action"]) {
