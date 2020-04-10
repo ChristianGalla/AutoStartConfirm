@@ -23,5 +23,20 @@ namespace AutoStartConfirm.AutoStarts
             Id = Guid.NewGuid();
             ConfirmStatus = ConfirmStatus.None;
         }
+
+        public override bool Equals(Object obj) {
+            // Check for null and compare run-time types.
+            if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+                return false;
+            } else {
+                AutoStartEntry o = (AutoStartEntry)obj;
+                return Id == o.Id ||
+                    Category == o.Category && Value == o.Value && Path == o.Path;
+            }
+        }
+
+        public override int GetHashCode() {
+            return Category.GetHashCode() ^ Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
+        }
     }
 }

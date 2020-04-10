@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace AutoStartConfirm.Connectors {
 
     #region Delegates
-    delegate void AddHandler(AutoStartEntry e);
-    delegate void RemoveHandler(AutoStartEntry e);
+    public delegate void AddHandler(AutoStartEntry e);
+    public delegate void RemoveHandler(AutoStartEntry e);
     #endregion
 
-    interface IAutoStartConnector : IDisposable
+    public interface IAutoStartConnector : IDisposable
     {
         #region Methods
-        IEnumerable<AutoStartEntry> GetCurrentAutoStarts();
+        IList<AutoStartEntry> GetCurrentAutoStarts();
 
         void AddAutoStart(AutoStartEntry autoStart);
         void RemoveAutoStart(AutoStartEntry autoStart);

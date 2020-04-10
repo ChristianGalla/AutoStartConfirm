@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.AutoStarts {
-    class AutoStartService : IDisposable {
+    public class AutoStartService : IDisposable {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -21,11 +21,11 @@ namespace AutoStartConfirm.AutoStarts {
 
         private readonly string PathToRemovedAutoStarts;
 
-        private Dictionary<Guid, AutoStartEntry> CurrentAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts = null;
 
-        private Dictionary<Guid, AutoStartEntry> AddedAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> AddedAutoStarts = null;
 
-        private Dictionary<Guid, AutoStartEntry> RemovedAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> RemovedAutoStarts = null;
         #endregion
 
         #region Methods
@@ -110,7 +110,7 @@ namespace AutoStartConfirm.AutoStarts {
             }
         }
 
-        public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+        public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
             return Connectors.GetCurrentAutoStarts();
         }
@@ -194,12 +194,13 @@ namespace AutoStartConfirm.AutoStarts {
         public void LoadCurrentAutoStarts() {
             try {
                 Logger.Info("Comparing current auto starts to last saved");
+                Dictionary<Guid, AutoStartEntry> lastSavedAutoStarts;
                 try {
-                    CurrentAutoStarts = GetSavedAutoStarts(PathToLastAutoStarts);
+                    lastSavedAutoStarts = GetSavedAutoStarts(PathToLastAutoStarts);
                 } catch (Exception ex) {
-                    var err = new Exception("Failed to load last auto starts", ex);
+                    var err = new Exception("Failed to load last saved auto starts", ex);
                     Logger.Error(err);
-                    CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                    lastSavedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 }
                 try {
                     AddedAutoStarts = GetSavedAutoStarts(PathToAddedAutoStarts);
@@ -215,37 +216,43 @@ namespace AutoStartConfirm.AutoStarts {
                     Logger.Error(err);
                     RemovedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 }
-                IEnumerable<AutoStartEntry> currentAutoStarts;
+                IList<AutoStartEntry> currentAutoStarts;
                 try {
                     currentAutoStarts = GetCurrentAutoStarts();
                 } catch (Exception ex) {
                     var err = new Exception("Failed to get current auto starts", ex);
                     throw err;
                 }
-                var lastAutostarts = CurrentAutoStarts.Values.ToList();
-                foreach (var lastAutostart in lastAutostarts) {
+                var autoStartsToRemove = new List<AutoStartEntry>();
+                foreach (var lastAutostart in lastSavedAutoStarts.Values) {
                     var found = false;
-                    foreach (var newAutostart in currentAutoStarts) {
-                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
+                    for (int i = 0; i< currentAutoStarts.Count(); i++) {
+                        var newAutostart = currentAutoStarts[i];
+                        if (newAutostart.Equals(lastAutostart)) {
                             found = true;
+                            currentAutoStarts[i] = lastAutostart;
                             break;
                         }
                     }
                     if (!found) {
-                        RemoveHandler(lastAutostart);
+                        autoStartsToRemove.Add(lastAutostart);
                     }
                 }
+                var autoStartsToAdd = new List<AutoStartEntry>();
                 foreach (var newAutostart in currentAutoStarts) {
-                    var found = false;
-                    foreach (var lastAutostart in lastAutostarts) {
-                        if (newAutostart.Category == lastAutostart.Category && newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
-                            found = true;
-                            break;
-                        }
+                    if (!lastSavedAutoStarts.ContainsKey(newAutostart.Id)) {
+                        autoStartsToAdd.Add(newAutostart);
                     }
-                    if (!found) {
-                        AddHandler(newAutostart);
-                    }
+                }
+                CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                foreach (var currentAutoStart in currentAutoStarts) {
+                    CurrentAutoStarts.Add(currentAutoStart.Id, currentAutoStart);
+                }
+                foreach (var removedAutoStart in autoStartsToRemove) {
+                    RemoveHandler(removedAutoStart);
+                }
+                foreach (var addedAutoStart in autoStartsToAdd) {
+                    AddHandler(addedAutoStart);
                 }
                 Logger.Trace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {
@@ -302,6 +309,13 @@ namespace AutoStartConfirm.AutoStarts {
                 Logger.Info("Auto start removed: {@value}", removedAutostart);
                 if (removedAutostart.RemoveDate == null) {
                     removedAutostart.RemoveDate = DateTime.Now;
+                }
+                // Don't directly use Dictionary.Remove() because removed auto start has different id
+                foreach (var currentAutoStart in CurrentAutoStarts.Values) {
+                    if (currentAutoStart.Equals(removedAutostart)) {
+                        CurrentAutoStarts.Remove(currentAutoStart.Id);
+                        break;
+                    }
                 }
                 CurrentAutoStarts.Remove(removedAutostart.Id);
                 if (RemovedAutoStarts.ContainsKey(removedAutostart.Id)) {

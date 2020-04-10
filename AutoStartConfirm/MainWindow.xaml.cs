@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoStartConfirm.AutoStarts;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -24,10 +25,19 @@ namespace AutoStartConfirm
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private App App {
+            get {
+                return App.GetInstance();
+            }
+        }
+
         public MainWindow()
         {
             Logger.Trace("Window opened");
             InitializeComponent();
+            App.AutoStartService.Add += ChurrentAutoStartChangeHandler;
+            App.AutoStartService.Remove += ChurrentAutoStartChangeHandler;
+            CurrentAutoStartGrid.ItemsSource = App.AutoStartService.CurrentAutoStarts.Values;
         }
 
         protected override void OnClosed(EventArgs e)
@@ -36,5 +46,14 @@ namespace AutoStartConfirm
             base.OnClosed(e);
             IsClosed = true;
         }
+
+
+        #region Event handlers
+        private void ChurrentAutoStartChangeHandler(AutoStartEntry addedAutostart) {
+            CurrentAutoStartGrid.ItemsSource = App.AutoStartService.CurrentAutoStarts.Values;
+            CurrentAutoStartGrid.Items.Refresh();
+        }
+        #endregion
+
     }
 }

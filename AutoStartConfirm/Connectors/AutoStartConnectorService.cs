@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
-    class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
+    public class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -21,7 +21,7 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+        public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
             foreach(var connector in Connectors.Values) {

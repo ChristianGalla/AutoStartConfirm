@@ -30,7 +30,7 @@ namespace AutoStartConfirm {
 
         public static TaskbarIcon Icon = null;
 
-        private readonly AutoStartService AutoStartService = new AutoStartService();
+        public readonly AutoStartService AutoStartService = new AutoStartService();
 
         private readonly NotificationService NotificationService = new NotificationService();
 

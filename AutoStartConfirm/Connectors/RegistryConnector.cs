@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AutoStartConfirm.Helpers;
 using AutoStartConfirm.AutoStarts;
 using Microsoft.Win32;
+using System.Windows;
 
 namespace AutoStartConfirm.Connectors {
     class RegistryConnector : IAutoStartConnector, IDisposable {
@@ -17,7 +18,7 @@ namespace AutoStartConfirm.Connectors {
 
         protected RegistryChangeMonitor monitor = null;
 
-        protected IEnumerable<AutoStartEntry> lastAutostarts = null;
+        protected IList<AutoStartEntry> lastAutostarts = null;
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
             Logger.Trace("ChangeHandler called");
@@ -27,7 +28,7 @@ namespace AutoStartConfirm.Connectors {
             foreach (var newAutostart in newAutostarts) {
                 var found = false;
                 foreach (var lastAutostart in lastAutostarts) {
-                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
+                    if (newAutostart.Equals(lastAutostart)) {
                         found = true;
                         break;
                     }
@@ -39,7 +40,7 @@ namespace AutoStartConfirm.Connectors {
             foreach (var lastAutostart in lastAutostarts) {
                 var found = false;
                 foreach (var newAutostart in newAutostarts) {
-                    if (newAutostart.Path == lastAutostart.Path && newAutostart.Value == lastAutostart.Value) {
+                    if (newAutostart.Equals(lastAutostart)) {
                         found = true;
                         break;
                     }
@@ -49,10 +50,14 @@ namespace AutoStartConfirm.Connectors {
                 }
             }
             foreach (var addedAutostart in addedAutostarts) {
-                Add?.Invoke(addedAutostart);
+                Application.Current.Dispatcher.Invoke(delegate {
+                    Add?.Invoke(addedAutostart);
+                });
             }
             foreach (var removedAutostart in removedAutostarts) {
-                Remove?.Invoke(removedAutostart);
+                Application.Current.Dispatcher.Invoke(delegate {
+                    Remove?.Invoke(removedAutostart);
+                });
             }
             lastAutostarts = newAutostarts;
         }
@@ -62,7 +67,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         #region IAutoStartConnector implementation
-        public IEnumerable<AutoStartEntry> GetCurrentAutoStarts() {
+        public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
             try {
                 var ret = new List<AutoStartEntry>();
