@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.AutoStarts {
+
+    public delegate void AutoStartsChangeHandler(AutoStartEntry e);
+
     public class AutoStartService : IDisposable {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -59,10 +62,13 @@ namespace AutoStartConfirm.AutoStarts {
             Logger.Trace("ConfirmAdd called");
             if (TryGetAddedAutoStart(Id, out AutoStartEntry addedAutoStart)) {
                 addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                AddAutoStartChange?.Invoke(addedAutoStart);
                 Logger.Info("Confirmed add of {@addedAutoStart}", addedAutoStart);
             }
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry currentAutoStart)) {
                 currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                Confirm?.Invoke(currentAutoStart);
+                CurrentAutoStartChange?.Invoke(currentAutoStart);
             }
         }
 
@@ -70,6 +76,7 @@ namespace AutoStartConfirm.AutoStarts {
             Logger.Trace("ConfirmRemove called");
             if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart)) {
                 autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                RemoveAutoStartChange?.Invoke(autoStart);
                 Logger.Info("Confirmed remove of {@autoStart}", autoStart);
             }
         }
@@ -274,9 +281,17 @@ namespace AutoStartConfirm.AutoStarts {
         #endregion
 
         #region Events
-        public event AddHandler Add;
+        public event AutoStartChangeHandler Add;
 
-        public event RemoveHandler Remove;
+        public event AutoStartChangeHandler Remove;
+
+        public event AutoStartChangeHandler Confirm;
+
+        public event AutoStartChangeHandler CurrentAutoStartChange;
+
+        public event AutoStartChangeHandler AddAutoStartChange;
+
+        public event AutoStartChangeHandler RemoveAutoStartChange;
         #endregion
 
         #region Event handlers
@@ -297,6 +312,9 @@ namespace AutoStartConfirm.AutoStarts {
                     AddedAutoStarts.Add(addedAutostart.Id, addedAutostart);
                 }
                 Add?.Invoke(addedAutostart);
+                CurrentAutoStartChange?.Invoke(addedAutostart);
+                AddAutoStartChange?.Invoke(addedAutostart); // todo: only fire on revert
+                RemoveAutoStartChange?.Invoke(addedAutostart);
                 Logger.Trace("AddHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Add handler failed", e);
@@ -317,13 +335,18 @@ namespace AutoStartConfirm.AutoStarts {
                         break;
                     }
                 }
-                CurrentAutoStarts.Remove(removedAutostart.Id);
+                // create a new instance to prevent conflicting changes from add and remove collection
+                var removedAutostartCopy = removedAutostart.DeepCopy();
+                removedAutostartCopy.ConfirmStatus = ConfirmStatus.New;
                 if (RemovedAutoStarts.ContainsKey(removedAutostart.Id)) {
-                    RemovedAutoStarts[removedAutostart.Id] = removedAutostart;
+                    RemovedAutoStarts[removedAutostart.Id] = removedAutostartCopy;
                 } else {
-                    RemovedAutoStarts.Add(removedAutostart.Id, removedAutostart);
+                    RemovedAutoStarts.Add(removedAutostart.Id, removedAutostartCopy);
                 }
-                Remove?.Invoke(removedAutostart);
+                Remove?.Invoke(removedAutostartCopy);
+                CurrentAutoStartChange?.Invoke(removedAutostart);
+                AddAutoStartChange?.Invoke(removedAutostart); // todo: only fire on revert
+                RemoveAutoStartChange?.Invoke(removedAutostartCopy);
                 Logger.Trace("RemoveHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Remove handler failed", e);

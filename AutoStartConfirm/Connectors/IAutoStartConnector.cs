@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 namespace AutoStartConfirm.Connectors {
 
     #region Delegates
-    public delegate void AddHandler(AutoStartEntry e);
-    public delegate void RemoveHandler(AutoStartEntry e);
+    public delegate void AutoStartChangeHandler(AutoStartEntry e);
     #endregion
 
     public interface IAutoStartConnector : IDisposable
@@ -27,8 +26,8 @@ namespace AutoStartConfirm.Connectors {
         #endregion
 
         #region Events
-        event AddHandler Add;
-        event RemoveHandler Remove;
+        event AutoStartChangeHandler Add;
+        event AutoStartChangeHandler Remove;
         #endregion
     }
 }

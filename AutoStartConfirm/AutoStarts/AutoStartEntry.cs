@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AutoStartConfirm.AutoStarts
 {
@@ -21,7 +23,7 @@ namespace AutoStartConfirm.AutoStarts
 
         public AutoStartEntry() {
             Id = Guid.NewGuid();
-            ConfirmStatus = ConfirmStatus.None;
+            ConfirmStatus = ConfirmStatus.New;
         }
 
         public override bool Equals(Object obj) {
@@ -37,6 +39,16 @@ namespace AutoStartConfirm.AutoStarts
 
         public override int GetHashCode() {
             return Category.GetHashCode() ^ Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
+        }
+
+        public AutoStartEntry DeepCopy() {
+            using (var ms = new MemoryStream()) {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(ms, this);
+                ms.Position = 0;
+
+                return (AutoStartEntry)formatter.Deserialize(ms);
+            }
         }
     }
 }

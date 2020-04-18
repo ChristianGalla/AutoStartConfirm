@@ -210,8 +210,8 @@ namespace AutoStartConfirm.Connectors {
         #endregion
 
         #region Events
-        public event AddHandler Add;
-        public event RemoveHandler Remove;
+        public event AutoStartChangeHandler Add;
+        public event AutoStartChangeHandler Remove;
         #endregion
     }
 }

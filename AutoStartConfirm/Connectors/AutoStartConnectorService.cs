@@ -32,9 +32,9 @@ namespace AutoStartConfirm.Connectors {
         }
 
         #region Events
-        public event AddHandler Add;
+        public event AutoStartChangeHandler Add;
 
-        public event RemoveHandler Remove;
+        public event AutoStartChangeHandler Remove;
         #endregion
 
         #region Event handlers

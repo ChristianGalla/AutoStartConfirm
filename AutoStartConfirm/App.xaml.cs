@@ -195,6 +195,7 @@ namespace AutoStartConfirm {
             try {
                 if (AutoStartService.TryGetAddedAutoStart(id, out AutoStartEntry autoStart)) {
                     StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 }
             } catch (Exception e) {
                 var err = new Exception("Failed to revert add", e);
@@ -237,6 +238,7 @@ namespace AutoStartConfirm {
             try {
                 if (AutoStartService.TryGetRemovedAutoStart(id, out AutoStartEntry autoStart)) {
                     StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 }
             } catch (Exception e) {
                 var err = new Exception("Failed to revert remove", e);

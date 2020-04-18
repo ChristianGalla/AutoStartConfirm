@@ -131,6 +131,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoStarts\AutoStartService.cs" />
+    <Compile Include="Converters\CanRevertConverter.cs" />
+    <Compile Include="Converters\CanConfirmConverter.cs" />
     <Compile Include="Connectors\AutoStartConnectorService.cs" />
     <Compile Include="AutoStarts\Category.cs" />
     <Compile Include="Connectors\RegistryConnector.cs" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.AutoStarts {
     public enum ConfirmStatus {
-        None,
+        New,
         Confirmed,
         Reverted,
     }
