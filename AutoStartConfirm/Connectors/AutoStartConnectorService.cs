@@ -15,6 +15,9 @@ namespace AutoStartConfirm.Connectors {
 
         public AutoStartConnectorService() {
             Connectors.Add(Category.BootExecute, new BootExecuteConnector());
+            Connectors.Add(Category.AppInit32, new AppInit32Connector());
+            Connectors.Add(Category.AppInit64, new AppInit64Connector());
+            Connectors.Add(Category.AppCertDll, new AppCertDllConnector());
             foreach (var connector in Connectors.Values) {
                 connector.Add += AddHandler;
                 connector.Remove += RemoveHandler;

@@ -23,7 +23,7 @@ The program can not be used yet.
 Currently, the following startup locations are being monitored:
 
 - [x] Boot execute
-- [ ] Appinit DLLs
+- [x] Appinit DLLs
 - [ ] Explorer Addons
 - [ ] Image hijacks
 - [ ] Internet Explorer Addons

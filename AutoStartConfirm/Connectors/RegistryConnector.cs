@@ -21,7 +21,7 @@ namespace AutoStartConfirm.Connectors {
         protected IList<AutoStartEntry> lastAutostarts = null;
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Trace("ChangeHandler called");
+            Logger.Trace("ChangeHandler called for {basePath}", basePath);
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<AutoStartEntry>();
             var removedAutostarts = new List<AutoStartEntry>();
@@ -68,36 +68,63 @@ namespace AutoStartConfirm.Connectors {
 
         #region IAutoStartConnector implementation
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("GetCurrentAutoStarts called");
+            Logger.Trace("GetCurrentAutoStarts called for {basePath}", basePath);
             try {
                 var ret = new List<AutoStartEntry>();
 
-                foreach (var category in categories) {
-                    try {
-                        object value = Registry.GetValue(basePath, category, null);
-                        if (value == null) {
-                            continue;
+                var currentCategories = new List<string>();
+                if (categories != null) {
+                    currentCategories.AddRange(categories);
+                }
+
+                if (currentCategories.Count == 0) {
+                    RegistryKey registryKey;
+                    if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+                        registryKey = Registry.LocalMachine;
+                    } else {
+                        throw new ArgumentOutOfRangeException($"Unknown registry base path for {basePath}");
+                    }
+                    using (RegistryKey rootKey = registryKey.OpenSubKey(basePath)) {
+                        if (rootKey != null) {
+                            string[] valueNames = rootKey.GetValueNames();
+                            foreach (string currSubKey in valueNames) {
+                                currentCategories.Add(currSubKey);
+                            }
+                            rootKey.Close();
                         }
-                        if (value is IEnumerable) {
-                            foreach (var subValue in value as IEnumerable) {
+
+                    }
+                }
+
+                if (currentCategories != null) {
+                    foreach (var category in currentCategories) {
+                        try {
+                            object value = Registry.GetValue(basePath, category, null);
+                            if (value == null) {
+                                continue;
+                            }
+                            if (value is IEnumerable) {
+                                foreach (var subValue in value as IEnumerable) {
+                                    ret.Add(new AutoStartEntry {
+                                        Category = Category,
+                                        Value = subValue.ToString(),
+                                        Path = $"{basePath}\\{category}",
+                                    });
+                                }
+                            } else {
                                 ret.Add(new AutoStartEntry {
                                     Category = Category,
-                                    Value = subValue.ToString(),
+                                    Value = value.ToString(),
                                     Path = $"{basePath}\\{category}",
                                 });
                             }
-                        } else {
-                            ret.Add(new AutoStartEntry {
-                                Category = Category,
-                                Value = value.ToString(),
-                                Path = $"{basePath}\\{category}",
-                            });
+                        } catch (Exception ex) {
+                            var err = new Exception($"Failed to get category {category}", ex);
+                            throw err;
                         }
-                    } catch (Exception ex) {
-                        var err = new Exception($"Failed to get category {category}", ex);
-                        throw err;
                     }
                 }
+
                 Logger.Trace("Got current auto starts");
                 return ret;
             } catch (Exception ex) {
@@ -108,26 +135,29 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void StartWatcher() {
-            Logger.Trace("StartWatcher called");
+            Logger.Trace("StartWatcher called for {basePath}",  basePath);
             StopWatcher();
             lastAutostarts = GetCurrentAutoStarts();
             monitor = new RegistryChangeMonitor(basePath);
             monitor.Changed += ChangeHandler;
             monitor.Error += ErrorHandler;
             monitor.Start();
+            Logger.Trace("Watcher started");
         }
 
         public void StopWatcher() {
-            Logger.Trace("StopWatcher called");
+            Logger.Trace("StopWatcher called for {basePath}", basePath);
             if (monitor == null) {
+                Logger.Trace("No watcher running");
                 return;
             }
+            Logger.Trace("Stopping watcher");
             monitor.Dispose();
             monitor = null;
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("AddAutoStart called");
+            Logger.Trace("AddAutoStart called for {Path}", autoStart.Path);
             var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
             var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
             var category = autoStart.Path.Substring(lastDelimiterPos + 1);
@@ -160,7 +190,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("RemoveAutoStart called");
+            Logger.Trace("RemoveAutoStart called for {Path}", autoStart.Path);
             var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
             var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
             var category = autoStart.Path.Substring(lastDelimiterPos + 1);
