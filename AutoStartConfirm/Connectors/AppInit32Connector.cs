@@ -2,10 +2,37 @@
 
 namespace AutoStartConfirm.Connectors {
     class AppInit32Connector : RegistryConnector {
-        public AppInit32Connector() {
-            Category = Category.AppInit32;
-            basePath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Windows";
-            categories = new string[] { "Appinit_Dlls" };
+
+        private readonly Category category = Category.AppInit32;
+
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Windows";
+
+        private readonly string[] subKeys = new string[] { "Appinit_Dlls" };
+
+        private readonly bool monitorSubkeys = false;
+
+        public override string BasePath {
+            get {
+                return basePath;
+            }
+        }
+
+        public override string[] SubKeys {
+            get {
+                return subKeys;
+            }
+        }
+
+        public override Category Category {
+            get {
+                return category;
+            }
+        }
+
+        public override bool MonitorSubkeys {
+            get {
+                return monitorSubkeys;
+            }
         }
     }
 }

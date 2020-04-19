@@ -7,21 +7,22 @@ using Microsoft.Win32;
 using System.Windows;
 
 namespace AutoStartConfirm.Connectors {
-    class RegistryConnector : IAutoStartConnector, IDisposable {
-        public Category Category;
+    abstract class RegistryConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public string basePath;
+        public abstract string BasePath { get; }
 
-        public string[] categories;
+        public abstract string[] SubKeys { get; }
+
+        public abstract bool MonitorSubkeys { get; }
 
         protected RegistryChangeMonitor monitor = null;
 
         protected IList<AutoStartEntry> lastAutostarts = null;
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Trace("ChangeHandler called for {basePath}", basePath);
+            Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<AutoStartEntry>();
             var removedAutostarts = new List<AutoStartEntry>();
@@ -67,59 +68,79 @@ namespace AutoStartConfirm.Connectors {
         }
 
         #region IAutoStartConnector implementation
+        public abstract Category Category { get; }
+
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("GetCurrentAutoStarts called for {basePath}", basePath);
+            Logger.Trace("GetCurrentAutoStarts called for {BasePath}", BasePath);
             try {
                 var ret = new List<AutoStartEntry>();
 
-                var currentCategories = new List<string>();
-                if (categories != null) {
-                    currentCategories.AddRange(categories);
-                }
+                var currentKeys = new List<string>();
 
-                if (currentCategories.Count == 0) {
+                if (MonitorSubkeys) {
                     RegistryKey registryKey;
-                    if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+                    if (BasePath.StartsWith("HKEY_LOCAL_MACHINE")) {
                         registryKey = Registry.LocalMachine;
                     } else {
-                        throw new ArgumentOutOfRangeException($"Unknown registry base path for {basePath}");
+                        throw new ArgumentOutOfRangeException($"Unknown registry base path for {BasePath}");
                     }
-                    using (RegistryKey rootKey = registryKey.OpenSubKey(basePath)) {
-                        if (rootKey != null) {
-                            string[] valueNames = rootKey.GetValueNames();
-                            foreach (string currSubKey in valueNames) {
-                                currentCategories.Add(currSubKey);
-                            }
-                            rootKey.Close();
+                    var paths = new List<string>();
+                    if (SubKeys != null) {
+                        foreach (var category in SubKeys) {
+                            paths.Add($"{BasePath}\\{category}");
                         }
+                    } else {
+                        paths.Add(BasePath);
+                    }
 
+                    foreach (var path in paths) {
+                        using (RegistryKey rootKey = registryKey.OpenSubKey(path)) {
+                            if (rootKey != null) {
+                                string[] valueNames = rootKey.GetValueNames();
+                                foreach (string currSubKey in valueNames) {
+                                    currentKeys.Add(currSubKey);
+                                }
+                                rootKey.Close();
+                            }
+
+                        }
+                    }
+                } else {
+                    if (SubKeys != null) {
+                        currentKeys.AddRange(SubKeys);
                     }
                 }
 
-                if (currentCategories != null) {
-                    foreach (var category in currentCategories) {
+                if (currentKeys != null) {
+                    foreach (var currentKey in currentKeys) {
                         try {
-                            object value = Registry.GetValue(basePath, category, null);
+                            object value = Registry.GetValue(BasePath, currentKey, null);
                             if (value == null) {
                                 continue;
                             }
-                            if (value is IEnumerable) {
+                            if (!(value is string) && value is IEnumerable) {
                                 foreach (var subValue in value as IEnumerable) {
-                                    ret.Add(new AutoStartEntry {
-                                        Category = Category,
-                                        Value = subValue.ToString(),
-                                        Path = $"{basePath}\\{category}",
-                                    });
+                                    var subValueAsString = subValue.ToString();
+                                    if (subValueAsString.Length > 0) {
+                                        ret.Add(new AutoStartEntry {
+                                            Category = Category,
+                                            Value = subValue.ToString(),
+                                            Path = $"{BasePath}\\{currentKey}",
+                                        });
+                                    }
                                 }
                             } else {
-                                ret.Add(new AutoStartEntry {
-                                    Category = Category,
-                                    Value = value.ToString(),
-                                    Path = $"{basePath}\\{category}",
-                                });
+                                var valueAsString = value.ToString();
+                                if (valueAsString.Length > 0) {
+                                    ret.Add(new AutoStartEntry {
+                                        Category = Category,
+                                        Value = value.ToString(),
+                                        Path = $"{BasePath}\\{currentKey}",
+                                    });
+                                }
                             }
                         } catch (Exception ex) {
-                            var err = new Exception($"Failed to get category {category}", ex);
+                            var err = new Exception($"Failed to get category {currentKey}", ex);
                             throw err;
                         }
                     }
@@ -134,11 +155,19 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
+        /// <summary>
+        /// Watches the assigned registry keys
+        /// </summary>
+        /// <remarks>
+        /// Because of API limitations no all changes are monitored.
+        /// See https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regnotifychangekeyvalue
+        /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
+        /// </remarks>
         public void StartWatcher() {
-            Logger.Trace("StartWatcher called for {basePath}",  basePath);
+            Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
             lastAutostarts = GetCurrentAutoStarts();
-            monitor = new RegistryChangeMonitor(basePath);
+            monitor = new RegistryChangeMonitor(BasePath);
             monitor.Changed += ChangeHandler;
             monitor.Error += ErrorHandler;
             monitor.Start();
@@ -146,7 +175,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void StopWatcher() {
-            Logger.Trace("StopWatcher called for {basePath}", basePath);
+            Logger.Trace("StopWatcher called for {BasePath}", BasePath);
             if (monitor == null) {
                 Logger.Trace("No watcher running");
                 return;

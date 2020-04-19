@@ -131,6 +131,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoStarts\AutoStartService.cs" />
+    <Compile Include="Connectors\WindowsCEServices32Connector.cs" />
+    <Compile Include="Connectors\WindowsCEServices64Connector.cs" />
+    <Compile Include="Connectors\IconServiceLibConnector.cs" />
+    <Compile Include="Connectors\ActiveSetup32Connector.cs" />
+    <Compile Include="Connectors\ActiveSetup64Connector.cs" />
+    <Compile Include="Connectors\GroupPolicyRunConnector.cs" />
+    <Compile Include="Connectors\Run64Connector.cs" />
+    <Compile Include="Connectors\TerminalServerInitialProgramConnector.cs" />
+    <Compile Include="Connectors\Run32Connector.cs" />
+    <Compile Include="Connectors\TerminalServerRunConnector.cs" />
+    <Compile Include="Connectors\TerminalServerStartupProgramsConnector.cs" />
+    <Compile Include="Connectors\AvailableShellsConnector.cs" />
+    <Compile Include="Connectors\AlternateShellConnector.cs" />
+    <Compile Include="Connectors\LocalGroupPolicyScriptConnector.cs" />
+    <Compile Include="Connectors\GroupPolicyExtensionsConnector.cs" />
+    <Compile Include="Connectors\DomainGroupPolicyScriptConnector.cs" />
+    <Compile Include="Connectors\GroupPolicyShellOverwriteConnector.cs" />
+    <Compile Include="Connectors\UserInitMprLogonScriptConnector.cs" />
+    <Compile Include="Connectors\LogonConnector.cs" />
     <Compile Include="Connectors\AppCertDllConnector.cs" />
     <Compile Include="Connectors\AppInit32Connector.cs" />
     <Compile Include="Connectors\AppInit64Connector.cs" />

@@ -1,14 +1,13 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class BootExecuteConnector : RegistryConnector {
+    class TerminalServerStartupProgramsConnector : RegistryConnector {
 
-        private readonly Category category = Category.BootExecute;
+        private readonly Category category = Category.TerminalServerStartupPrograms;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Terminal Server\Wds\rdpwd";
 
-        // todo: remove Test key
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand", "Test" };
+        private readonly string[] subKeys = new string[] { "StartupPrograms" };
 
         private readonly bool monitorSubkeys = false;
 

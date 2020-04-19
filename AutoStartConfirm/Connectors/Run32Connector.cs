@@ -1,16 +1,15 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class BootExecuteConnector : RegistryConnector {
+    class Run32Connector : RegistryConnector {
 
-        private readonly Category category = Category.BootExecute;
+        private readonly Category category = Category.Run32;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run";
 
-        // todo: remove Test key
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand", "Test" };
+        private readonly string[] subKeys = new string[] { "Run", "RunOnce", "RunOnceEx" };
 
-        private readonly bool monitorSubkeys = false;
+        private readonly bool monitorSubkeys = true;
 
         public override string BasePath {
             get {

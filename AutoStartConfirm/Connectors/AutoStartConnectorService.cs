@@ -14,10 +14,40 @@ namespace AutoStartConfirm.Connectors {
         protected Dictionary<Category, IAutoStartConnector> Connectors = new Dictionary<Category, IAutoStartConnector>();
 
         public AutoStartConnectorService() {
-            Connectors.Add(Category.BootExecute, new BootExecuteConnector());
-            Connectors.Add(Category.AppInit32, new AppInit32Connector());
-            Connectors.Add(Category.AppInit64, new AppInit64Connector());
-            Connectors.Add(Category.AppCertDll, new AppCertDllConnector());
+            // todo: filter for specifiy sub sub keys if needed
+            // todo: \ProgramData\Microsoft\Windows\Start Menu\Programs\Startup
+            var connectors = new List<IAutoStartConnector> {
+                new BootExecuteConnector(),
+                new AppInit32Connector(),
+                new AppInit64Connector(),
+                new AppCertDllConnector(),
+                new LogonConnector(),
+                new UserInitMprLogonScriptConnector(),
+                new GroupPolicyExtensionsConnector(),
+                new DomainGroupPolicyScriptConnector(),
+                new LocalGroupPolicyScriptConnector(),
+                new GroupPolicyShellOverwriteConnector(),
+                new AlternateShellConnector(),
+                new AvailableShellsConnector(),
+                new TerminalServerStartupProgramsConnector(),
+                new TerminalServerRunConnector(),
+                new TerminalServerInitialProgramConnector(),
+                new Run32Connector(),
+                new Run64Connector(),
+                new GroupPolicyRunConnector(),
+                new ActiveSetup32Connector(),
+                new ActiveSetup64Connector(),
+                new IconServiceLibConnector(),
+                new WindowsCEServices32Connector(),
+                new WindowsCEServices64Connector(),
+            };
+            foreach (var connector in connectors) {
+                try {
+                    Connectors.Add(connector.Category, connector);
+                } catch (Exception ex) {
+                    throw new Exception($"Failed to add {connector.GetType()}", ex);
+                }
+            }
             foreach (var connector in Connectors.Values) {
                 connector.Add += AddHandler;
                 connector.Remove += RemoveHandler;
@@ -53,6 +83,8 @@ namespace AutoStartConfirm.Connectors {
         #endregion
 
         #region IAutoStartConnector implementation
+        public Category Category => throw new NotImplementedException();
+
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Info("Adding auto start {@autoStart}", autoStart);
             Connectors[autoStart.Category].AddAutoStart(autoStart);
