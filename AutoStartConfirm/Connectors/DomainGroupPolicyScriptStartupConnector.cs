@@ -1,13 +1,14 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class DomainGroupPolicyScriptConnector : RegistryConnector {
+    class DomainGroupPolicyScriptStartupConnector : RegistryConnector {
 
-        private readonly Category category = Category.DomainGroupPolicyScript;
+        private readonly Category category = Category.DomainGroupPolicyScriptStartup;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\System\Scripts";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\System\Scripts\Startup";
 
-        private readonly string[] subKeys = new string[] { "Startup", "Shutdown", "Logon", "Logoff" };
+        // todo: only monitor sub sub keys script
+        private readonly string[] subKeys = null;
 
         private readonly bool monitorSubkeys = true;
 

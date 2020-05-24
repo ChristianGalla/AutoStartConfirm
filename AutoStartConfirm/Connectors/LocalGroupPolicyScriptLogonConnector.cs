@@ -1,19 +1,16 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class BootExecuteConnector : RegistryConnector {
+    class LocalGroupPolicyScriptLogonConnector : RegistryConnector {
 
-        private readonly Category category = Category.BootExecute;
+        private readonly Category category = Category.LocalGroupPolicyScriptLogon;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Group Policy\Scripts\Logon";
 
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand",
-#if DEBUG
-            "Test"
-#endif
-        };
+        // todo: only monitor sub sub keys script
+        private readonly string[] subKeys = null;
 
-        private readonly bool monitorSubkeys = false;
+        private readonly bool monitorSubkeys = true;
 
         public override string BasePath {
             get {

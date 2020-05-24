@@ -1,13 +1,14 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class WindowsCEServices32Connector : RegistryConnector {
+    class DomainGroupPolicyScriptLogoffConnector : RegistryConnector {
 
-        private readonly Category category = Category.WindowsCEServices32;
+        private readonly Category category = Category.DomainGroupPolicyScriptLogoff;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\System\Scripts\Logoff";
 
-        private readonly string[] subKeys = new string[] { "AutoStartOnConnect", "AutoStartOnDisconnect" };
+        // todo: only monitor sub sub keys script
+        private readonly string[] subKeys = null;
 
         private readonly bool monitorSubkeys = true;
 

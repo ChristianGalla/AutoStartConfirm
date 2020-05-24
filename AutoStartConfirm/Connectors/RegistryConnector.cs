@@ -81,6 +81,8 @@ namespace AutoStartConfirm.Connectors {
                     RegistryKey registryKey;
                     if (BasePath.StartsWith("HKEY_LOCAL_MACHINE")) {
                         registryKey = Registry.LocalMachine;
+                    } else if (BasePath.StartsWith("HKEY_CURRENT_USER")) {
+                        registryKey = Registry.CurrentUser;
                     } else {
                         throw new ArgumentOutOfRangeException($"Unknown registry base path for {BasePath}");
                     }
@@ -94,7 +96,8 @@ namespace AutoStartConfirm.Connectors {
                     }
 
                     foreach (var path in paths) {
-                        using (RegistryKey rootKey = registryKey.OpenSubKey(path)) {
+                        var subKeyPath = path.Substring(path.IndexOf('\\') + 1);
+                        using (RegistryKey rootKey = registryKey.OpenSubKey(subKeyPath)) {
                             if (rootKey != null) {
                                 string[] valueNames = rootKey.GetValueNames();
                                 foreach (string currSubKey in valueNames) {

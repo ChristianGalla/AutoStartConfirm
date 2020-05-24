@@ -1,19 +1,15 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class BootExecuteConnector : RegistryConnector {
+    class WindowsCEServicesAutoStartOnDisconnect32Connector : RegistryConnector {
 
-        private readonly Category category = Category.BootExecute;
+        private readonly Category category = Category.WindowsCEServicesAutoStartOnDisconnect32;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services\AutoStartOnDisconnect";
 
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand",
-#if DEBUG
-            "Test"
-#endif
-        };
+        private readonly string[] subKeys = null;
 
-        private readonly bool monitorSubkeys = false;
+        private readonly bool monitorSubkeys = true;
 
         public override string BasePath {
             get {

@@ -1,17 +1,13 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class BootExecuteConnector : RegistryConnector {
+    class CurrentUserLoadConnector : RegistryConnector {
 
-        private readonly Category category = Category.BootExecute;
+        private readonly Category category = Category.CurrentUserLoad;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
+        private readonly string basePath = @"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows";
 
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand",
-#if DEBUG
-            "Test"
-#endif
-        };
+        private readonly string[] subKeys = new string[] { "Load", "Run" };
 
         private readonly bool monitorSubkeys = false;
 

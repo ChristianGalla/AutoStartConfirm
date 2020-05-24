@@ -7,7 +7,7 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion";
 
-        private readonly string[] subKeys = new string[] { "Runonce", "RunonceEx", "Run" };
+        private readonly string[] subKeys = null;
 
         private readonly bool monitorSubkeys = true;
 

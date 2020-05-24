@@ -1,13 +1,13 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class WindowsCEServices64Connector : RegistryConnector {
+    class RunOnceEx32Connector : RegistryConnector {
 
-        private readonly Category category = Category.WindowsCEServices64;
+        private readonly Category category = Category.RunOnceEx32;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows CE Services";
+        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx";
 
-        private readonly string[] subKeys = new string[] { "AutoStartOnConnect", "AutoStartOnDisconnect" };
+        private readonly string[] subKeys = null;
 
         private readonly bool monitorSubkeys = true;
 

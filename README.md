@@ -1,6 +1,6 @@
 # Auto Start Confirm
 
-More and more programs want to start automatically when Windows starts or a user logs on.
+More and more programs want to start automatically when Windows starts, or a user logs on.
 
 Many startup programs can slow down the boot process.
 In addition, malicious software, such as keyloggers, can survive reboots.
@@ -18,17 +18,17 @@ Therefore, usually auto starts should not be blocked.
 ## State of development
 
 The development has just begun.
-The program can not be used yet.
+The program cannot be used yet.
 
 Currently, the following startup locations are being monitored:
 
 - [x] Boot execute
 - [x] Appinit DLLs
+- [x] Logon (partially)
 - [ ] Explorer Addons
 - [ ] Image hijacks
 - [ ] Internet Explorer Addons
 - [ ] Known DLLs
-- [ ] Logon
 - [ ] Winsock
 - [ ] Codecs
 - [ ] Office Add-Ins
@@ -39,14 +39,23 @@ Currently, the following startup locations are being monitored:
 - [ ] Winlogon
 - [ ] WMI
 
-## Links
+## Current limitations
+
+To be able to use as less privileges as needed, Auto Start Confirm currently runs in user mode and therefore can only monitor and react after changes occurred.
+There are a few advantages of this implementation, for example even users that are not administrators are able to run the program.
+Currently, it is not planned to change this implementation.
+
+Currently, it is not planned to create a 32-bit version of the program because most Windows installations are already 64-bit and additional work is needed
+for example, to access 64-bit registry keys from a 32-bit program.
+
+## Similar programs
 
 This program is similar to [Sysinternals Autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns).
 Sysinternals Autoruns is a great tool for analyzing and disabling or enabling existing autostart programs.
-However, it lacks a function to notify a user about a new startup program and to ask for his permission.
+However, it lacks the function to monitor auto start locations in background and ask users for permission when changes occurred.
 
 Sysinternals Autoruns is not an Open Source program, but there is a [Autoruns PowerShell Module](https://github.com/p0w3rsh3ll/AutoRuns)
-that can be used, for example, to determine where a program can be registered to start automatically with Windows.
+that was used as reference to determine where Auto Start Confirm should look for auto start locations.
 
 ## How to build and debug
 

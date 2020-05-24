@@ -15,7 +15,9 @@ namespace AutoStartConfirm.Connectors {
 
         public AutoStartConnectorService() {
             // todo: filter for specifiy sub sub keys if needed
-            // todo: \ProgramData\Microsoft\Windows\Start Menu\Programs\Startup
+            // todo: start menu links (\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup)
+            // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
+            // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)
             var connectors = new List<IAutoStartConnector> {
                 new BootExecuteConnector(),
                 new AppInit32Connector(),
@@ -24,22 +26,53 @@ namespace AutoStartConfirm.Connectors {
                 new LogonConnector(),
                 new UserInitMprLogonScriptConnector(),
                 new GroupPolicyExtensionsConnector(),
-                new DomainGroupPolicyScriptConnector(),
-                new LocalGroupPolicyScriptConnector(),
+                new DomainGroupPolicyScriptStartupConnector(),
+                new DomainGroupPolicyScriptShutdownConnector(),
+                new DomainGroupPolicyScriptLogonConnector(),
+                new DomainGroupPolicyScriptLogoffConnector(),
+                new LocalGroupPolicyScriptStartupConnector(),
+                new LocalGroupPolicyScriptShutdownConnector(),
+                new LocalGroupPolicyScriptLogonConnector(),
+                new LocalGroupPolicyScriptLogoffConnector(),
                 new GroupPolicyShellOverwriteConnector(),
                 new AlternateShellConnector(),
                 new AvailableShellsConnector(),
                 new TerminalServerStartupProgramsConnector(),
                 new TerminalServerRunConnector(),
+                new TerminalServerRunOnceConnector(),
+                new TerminalServerRunOnceExConnector(),
                 new TerminalServerInitialProgramConnector(),
                 new Run32Connector(),
+                new RunOnce32Connector(),
+                new RunOnceEx32Connector(),
                 new Run64Connector(),
+                new RunOnce64Connector(),
+                new RunOnceEx64Connector(),
                 new GroupPolicyRunConnector(),
                 new ActiveSetup32Connector(),
                 new ActiveSetup64Connector(),
                 new IconServiceLibConnector(),
-                new WindowsCEServices32Connector(),
-                new WindowsCEServices64Connector(),
+                new WindowsCEServicesAutoStartOnConnect32Connector(),
+                new WindowsCEServicesAutoStartOnDisconnect32Connector(),
+                new WindowsCEServicesAutoStartOnConnect64Connector(),
+                new WindowsCEServicesAutoStartOnDisconnect64Connector(),
+                new CurrentUserLocalGroupPolicyScriptStartupConnector(),
+                new CurrentUserLocalGroupPolicyScriptShutdownConnector(),
+                new CurrentUserLocalGroupPolicyScriptLogonConnector(),
+                new CurrentUserLocalGroupPolicyScriptLogoffConnector(),
+                new CurrentUserUserInitMprLogonScriptConnector(),
+                new CurrentUserGroupPolicyShellOverwriteConnector(),
+                new CurrentUserLoadConnector(),
+                new CurrentUserGroupPolicyRunConnector(),
+                new CurrentUserRun32Connector(),
+                new CurrentUserRunOnce32Connector(),
+                new CurrentUserRunOnceEx32Connector(),
+                new CurrentUserRun64Connector(),
+                new CurrentUserRunOnce64Connector(),
+                new CurrentUserRunOnceEx64Connector(),
+                new CurrentUserTerminalServerRunConnector(),
+                new CurrentUserTerminalServerRunOnceConnector(),
+                new CurrentUserTerminalServerRunOnceExConnector(),
             };
             foreach (var connector in connectors) {
                 try {

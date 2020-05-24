@@ -1,13 +1,13 @@
 ﻿using AutoStartConfirm.AutoStarts;
 
 namespace AutoStartConfirm.Connectors {
-    class LocalGroupPolicyScriptConnector : RegistryConnector {
+    class CurrentUserTerminalServerRunOnceExConnector : RegistryConnector {
 
-        private readonly Category category = Category.LocalGroupPolicyScript;
+        private readonly Category category = Category.CurrentUserTerminalServerRunOnceEx;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Group Policy\Scripts";
+        private readonly string basePath = @"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx";
 
-        private readonly string[] subKeys = new string[] { "Startup", "Shutdown", "Logon", "Logoff" };
+        private readonly string[] subKeys = null;
 
         private readonly bool monitorSubkeys = true;
 
