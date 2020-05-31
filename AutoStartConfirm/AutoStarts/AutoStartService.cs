@@ -117,6 +117,11 @@ namespace AutoStartConfirm.AutoStarts {
             }
         }
 
+        public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            Logger.Trace("GetIsAdminRequiredForChanges called");
+            return Connectors.GetIsAdminRequiredForChanges(autoStart);
+        }
+
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
             return Connectors.GetCurrentAutoStarts();

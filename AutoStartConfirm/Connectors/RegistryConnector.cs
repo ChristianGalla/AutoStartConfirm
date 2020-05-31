@@ -5,6 +5,9 @@ using AutoStartConfirm.Helpers;
 using AutoStartConfirm.AutoStarts;
 using Microsoft.Win32;
 using System.Windows;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Input;
 
 namespace AutoStartConfirm.Connectors {
     abstract class RegistryConnector : IAutoStartConnector, IDisposable {
@@ -13,19 +16,25 @@ namespace AutoStartConfirm.Connectors {
 
         public abstract string BasePath { get; }
 
-        public abstract string[] SubKeys { get; }
+        public abstract string[] ValueNames { get; }
 
         public abstract bool MonitorSubkeys { get; }
 
+        public bool IsAdminRequiredForChanges {
+            get {
+                return BasePath.StartsWith("HKEY_LOCAL_MACHINE");
+            }
+        }
+
         protected RegistryChangeMonitor monitor = null;
 
-        protected IList<AutoStartEntry> lastAutostarts = null;
+        protected List<RegistryAutoStartEntry> lastAutostarts = null;
 
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
             Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
-            var addedAutostarts = new List<AutoStartEntry>();
-            var removedAutostarts = new List<AutoStartEntry>();
+            var addedAutostarts = new List<RegistryAutoStartEntry>();
+            var removedAutostarts = new List<RegistryAutoStartEntry>();
             foreach (var newAutostart in newAutostarts) {
                 var found = false;
                 foreach (var lastAutostart in lastAutostarts) {
@@ -35,7 +44,7 @@ namespace AutoStartConfirm.Connectors {
                     }
                 }
                 if (!found) {
-                    addedAutostarts.Add(newAutostart);
+                    addedAutostarts.Add((RegistryAutoStartEntry)newAutostart);
                 }
             }
             foreach (var lastAutostart in lastAutostarts) {
@@ -60,7 +69,10 @@ namespace AutoStartConfirm.Connectors {
                     Remove?.Invoke(removedAutostart);
                 });
             }
-            lastAutostarts = newAutostarts;
+            lastAutostarts.Clear();
+            foreach (var newAutoStartEntry in newAutostarts) {
+                lastAutostarts.Add((RegistryAutoStartEntry)newAutoStartEntry);
+            }
         }
 
         private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
@@ -70,85 +82,105 @@ namespace AutoStartConfirm.Connectors {
         #region IAutoStartConnector implementation
         public abstract Category Category { get; }
 
+        /// <summary>
+        /// Gets all values inside the key as RegistryAutoStartEntry
+        /// </summary>
+        /// <param name="currentKey"></param>
+        /// <param name="recursive"></param>
+        /// <returns></returns>
+        public IList<RegistryAutoStartEntry> GetCurrentAutoStarts(RegistryKey currentKey, bool recursive = false) {
+            var ret = new List<RegistryAutoStartEntry>();
+            var valueNames = currentKey.GetValueNames();
+            foreach (var valueName in valueNames) {
+                try {
+                    var valueKind = currentKey.GetValueKind(valueName);
+                    switch (valueKind) {
+                        case RegistryValueKind.String:
+                        case RegistryValueKind.ExpandString: {
+                                string value = (string)currentKey.GetValue(valueName, null);
+                                if (value == null) {
+                                    continue;
+                                }
+                                if (value.Length > 0) {
+                                    ret.Add(new RegistryAutoStartEntry {
+                                        Category = Category,
+                                        Value = value.ToString(),
+                                        Path = currentKey.ToString(),
+                                        RegistryValueKind = valueKind,
+                                    });
+                                }
+                                break;
+                            }
+                        case RegistryValueKind.MultiString: {
+                                IEnumerable<string> value = (IEnumerable<string>)currentKey.GetValue(valueName, null);
+                                if (value == null) {
+                                    continue;
+                                }
+                                foreach (var subValue in value) {
+                                    if (subValue.Length > 0) {
+                                        ret.Add(new RegistryAutoStartEntry {
+                                            Category = Category,
+                                            Value = subValue.ToString(),
+                                            Path = $"{BasePath}\\{valueName}",
+                                            RegistryValueKind = valueKind,
+                                        });
+                                    }
+                                }
+                                break;
+                            }
+                        case RegistryValueKind.Binary:
+                        case RegistryValueKind.DWord:
+                        case RegistryValueKind.QWord:
+                        case RegistryValueKind.Unknown:
+                        case RegistryValueKind.None:
+                        default:
+                            Logger.Debug("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
+                            break;
+                    }
+                } catch (Exception ex) {
+                    var err = new Exception($"Failed to get {valueName} from {currentKey}", ex);
+                    throw err;
+                }
+            }
+            if (recursive) {
+                var subKeyNames = currentKey.GetSubKeyNames();
+                foreach (var subKeyName in subKeyNames) {
+                    using (var subKey = currentKey.OpenSubKey(subKeyName)) {
+                        if (subKey != null) {
+                            var subAutoStartEntries = GetCurrentAutoStarts(subKey, recursive);
+                            ret.AddRange(subAutoStartEntries);
+                        }
+                    }
+                }
+            }
+            return ret;
+        }
+
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called for {BasePath}", BasePath);
             try {
                 var ret = new List<AutoStartEntry>();
-
-                var currentKeys = new List<string>();
-
-                if (MonitorSubkeys) {
-                    RegistryKey registryKey;
-                    if (BasePath.StartsWith("HKEY_LOCAL_MACHINE")) {
-                        registryKey = Registry.LocalMachine;
-                    } else if (BasePath.StartsWith("HKEY_CURRENT_USER")) {
-                        registryKey = Registry.CurrentUser;
-                    } else {
-                        throw new ArgumentOutOfRangeException($"Unknown registry base path for {BasePath}");
-                    }
-                    var paths = new List<string>();
-                    if (SubKeys != null) {
-                        foreach (var category in SubKeys) {
-                            paths.Add($"{BasePath}\\{category}");
-                        }
-                    } else {
-                        paths.Add(BasePath);
-                    }
-
-                    foreach (var path in paths) {
-                        var subKeyPath = path.Substring(path.IndexOf('\\') + 1);
-                        using (RegistryKey rootKey = registryKey.OpenSubKey(subKeyPath)) {
-                            if (rootKey != null) {
-                                string[] valueNames = rootKey.GetValueNames();
-                                foreach (string currSubKey in valueNames) {
-                                    currentKeys.Add(currSubKey);
-                                }
-                                rootKey.Close();
-                            }
-
-                        }
-                    }
-                } else {
-                    if (SubKeys != null) {
-                        currentKeys.AddRange(SubKeys);
-                    }
-                }
-
-                if (currentKeys != null) {
-                    foreach (var currentKey in currentKeys) {
-                        try {
-                            object value = Registry.GetValue(BasePath, currentKey, null);
-                            if (value == null) {
-                                continue;
-                            }
-                            if (!(value is string) && value is IEnumerable) {
-                                foreach (var subValue in value as IEnumerable) {
-                                    var subValueAsString = subValue.ToString();
-                                    if (subValueAsString.Length > 0) {
-                                        ret.Add(new AutoStartEntry {
-                                            Category = Category,
-                                            Value = subValue.ToString(),
-                                            Path = $"{BasePath}\\{currentKey}",
-                                        });
+                using (RegistryKey baseRegistryKey = GetBaseRegistry()) {
+                    var subKeyPath = BasePath.Substring(BasePath.IndexOf('\\') + 1);
+                    using (RegistryKey rootKey = baseRegistryKey.OpenSubKey(subKeyPath)) {
+                        if (rootKey != null) {
+                            if (ValueNames != null) {
+                                foreach (var category in ValueNames) {
+                                    using (var subKey = rootKey.OpenSubKey(category)) {
+                                        if (subKey == null) {
+                                            continue;
+                                        }
+                                        var currentAutoStarts = GetCurrentAutoStarts(subKey, MonitorSubkeys);
+                                        ret.AddRange(currentAutoStarts);
                                     }
                                 }
                             } else {
-                                var valueAsString = value.ToString();
-                                if (valueAsString.Length > 0) {
-                                    ret.Add(new AutoStartEntry {
-                                        Category = Category,
-                                        Value = value.ToString(),
-                                        Path = $"{BasePath}\\{currentKey}",
-                                    });
-                                }
+                                var currentAutoStarts = GetCurrentAutoStarts(rootKey, MonitorSubkeys);
+                                ret.AddRange(currentAutoStarts);
                             }
-                        } catch (Exception ex) {
-                            var err = new Exception($"Failed to get category {currentKey}", ex);
-                            throw err;
                         }
                     }
                 }
-
                 Logger.Trace("Got current auto starts");
                 return ret;
             } catch (Exception ex) {
@@ -156,6 +188,22 @@ namespace AutoStartConfirm.Connectors {
                 Logger.Error(err);
                 throw err;
             }
+        }
+
+        private RegistryKey GetBaseRegistry(string basePath) {
+            RegistryKey registryKey;
+            if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+                registryKey = Registry.LocalMachine;
+            } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
+                registryKey = Registry.CurrentUser;
+            } else {
+                throw new ArgumentOutOfRangeException($"Unknown registry base path for {basePath}");
+            }
+            return registryKey;
+        }
+
+        private RegistryKey GetBaseRegistry() {
+            return GetBaseRegistry(BasePath);
         }
 
         /// <summary>
@@ -169,7 +217,11 @@ namespace AutoStartConfirm.Connectors {
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
-            lastAutostarts = GetCurrentAutoStarts();
+            var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
+            lastAutostarts = new List<RegistryAutoStartEntry>();
+            foreach (var currentAutoStart in currentAutoStarts) {
+                lastAutostarts.Add((RegistryAutoStartEntry)currentAutoStart);
+            }
             monitor = new RegistryChangeMonitor(BasePath);
             monitor.Changed += ChangeHandler;
             monitor.Error += ErrorHandler;
@@ -189,7 +241,10 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("AddAutoStart called for {Path}", autoStart.Path);
+            Logger.Trace("AddAutoStart called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            if (!(autoStart is RegistryAutoStartEntry)) {
+                throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
+            }
             var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
             var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
             var category = autoStart.Path.Substring(lastDelimiterPos + 1);
@@ -221,33 +276,69 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public void RemoveAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("RemoveAutoStart called for {Path}", autoStart.Path);
-            var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
-            var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
-            var category = autoStart.Path.Substring(lastDelimiterPos + 1);
+        public void RemoveAutoStart(AutoStartEntry autoStartEntry) {
+            Logger.Trace("RemoveAutoStart called for {Value} in {Path}", autoStartEntry.Value, autoStartEntry.Path);
+            if (!(autoStartEntry is RegistryAutoStartEntry)) {
+                throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
+            }
+            var registryAutoStartEntry = (RegistryAutoStartEntry)autoStartEntry;
+            var firstDelimiterPos = registryAutoStartEntry.Path.IndexOf('\\');
+            var lastDelimiterPos = registryAutoStartEntry.Path.LastIndexOf('\\');
+            var keyPath = registryAutoStartEntry.Path.Substring(0, lastDelimiterPos);
+            var subKeyPath = keyPath.Substring(firstDelimiterPos + 1);
+            var valueName = registryAutoStartEntry.Path.Substring(lastDelimiterPos + 1);
             try {
-                object value = Registry.GetValue(basePath, category, null);
-                var newValues = new List<string>();
-                if (value == null) {
-                    return;
-                } else if (value is IEnumerable<string>) {
-                    bool exists = false;
-                    foreach (var subValue in value as IEnumerable<string>) {
-                        if (string.Equals(subValue, autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
-                            exists = true;
-                        } else {
-                            newValues.Add(subValue);
-                        }
+                using (var registry = GetBaseRegistry())
+                using (var key = registry.OpenSubKey(subKeyPath, true)) {
+                    if (key == null) {
+                        Logger.Info("{Path} not found", registryAutoStartEntry.Path);
+                        return;
                     }
-                    if (exists) {
-                        Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
+                    switch (key.GetValueKind(valueName)) {
+                        case RegistryValueKind.String: {
+                                string value = (string)key.GetValue(valueName);
+                                if (value == registryAutoStartEntry.Value) {
+                                    key.DeleteValue(valueName);
+                                    Logger.Info("Removed called {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                } else {
+                                    Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                }
+                                break;
+                            }
+                        case RegistryValueKind.MultiString: {
+                                string[] value = (string[])key.GetValue(valueName);
+                                bool exists = false;
+                                var newValues = new Collection<string>();
+                                foreach (var subValue in value as IEnumerable<string>) {
+                                    if (string.Equals(subValue, registryAutoStartEntry.Value, StringComparison.OrdinalIgnoreCase)) {
+                                        exists = true;
+                                    } else {
+                                        newValues.Add(subValue);
+                                    }
+                                }
+                                if (exists) {
+                                    if (newValues.Count == 0) {
+                                        key.DeleteValue(valueName);
+                                    } else {
+                                        key.SetValue(valueName, newValues.ToArray(), RegistryValueKind.MultiString);
+                                    }
+                                    Logger.Info("Removed called {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                } else {
+                                    Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                }
+                                break;
+                            }
+                        case RegistryValueKind.DWord:
+                        case RegistryValueKind.ExpandString:
+                        case RegistryValueKind.QWord:
+                        case RegistryValueKind.Binary:
+                        case RegistryValueKind.Unknown:
+                        default:
+                            throw new Exception($"Don't know how to handle data type of key {registryAutoStartEntry.Path}");
                     }
-                } else {
-                    throw new Exception($"Don't know how to handle data type of key {autoStart.Path}");
                 }
             } catch (Exception ex) {
-                var err = new Exception($"Failed to remove auto start {autoStart.Value} from {autoStart.Path}", ex);
+                var err = new Exception($"Failed to remove auto start {registryAutoStartEntry.Value} from {registryAutoStartEntry.Path}", ex);
                 throw err;
             }
         }

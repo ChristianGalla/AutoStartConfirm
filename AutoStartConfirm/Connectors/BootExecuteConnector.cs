@@ -21,7 +21,7 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] SubKeys {
+        public override string[] ValueNames {
             get {
                 return subKeys;
             }

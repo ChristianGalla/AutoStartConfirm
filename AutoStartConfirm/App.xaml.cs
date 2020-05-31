@@ -181,11 +181,13 @@ namespace AutoStartConfirm {
         }
 
         public void ShowAdd(Guid id) {
+            // todo: jump to added
             Logger.Trace("ShowAdd called");
             ShowMainWindow();
         }
 
         public void ShowRemoved(Guid id) {
+            // todo: jump to removed
             Logger.Trace("ShowRemoved called");
             ShowMainWindow();
         }
@@ -194,8 +196,12 @@ namespace AutoStartConfirm {
             Logger.Info("Addition of {id} should be reverted", id);
             try {
                 if (AutoStartService.TryGetAddedAutoStart(id, out AutoStartEntry autoStart)) {
-                    StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    } else {
+                        AutoStartService.RevertAdd(autoStart);
+                    }
                 }
             } catch (Exception e) {
                 var err = new Exception("Failed to revert add", e);
@@ -237,8 +243,12 @@ namespace AutoStartConfirm {
             Logger.Info("Removal of {id} should be reverted", id);
             try {
                 if (AutoStartService.TryGetRemovedAutoStart(id, out AutoStartEntry autoStart)) {
-                    StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    } else {
+                        AutoStartService.RevertRemove(autoStart);
+                    }
                 }
             } catch (Exception e) {
                 var err = new Exception("Failed to revert remove", e);

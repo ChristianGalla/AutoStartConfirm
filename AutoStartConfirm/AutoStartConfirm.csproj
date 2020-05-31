@@ -130,6 +130,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoStarts\RegistryAutoStartEntry.cs" />
     <Compile Include="AutoStarts\AutoStartService.cs" />
     <Compile Include="Connectors\CurrentUserLoadConnector.cs" />
     <Compile Include="Connectors\CurrentUserLocalGroupPolicyScriptLogoffConnector.cs" />

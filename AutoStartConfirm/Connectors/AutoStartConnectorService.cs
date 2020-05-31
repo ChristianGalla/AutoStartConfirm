@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
-    public class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IAutoStartConnector, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
+    public class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -126,6 +126,10 @@ namespace AutoStartConfirm.Connectors {
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.Info("Removing auto start {@autoStart}", autoStart);
             Connectors[autoStart.Category].RemoveAutoStart(autoStart);
+        }
+
+        public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            return Connectors[autoStart.Category].IsAdminRequiredForChanges;
         }
 
         public void StartWatcher() {

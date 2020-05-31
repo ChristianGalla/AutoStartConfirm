@@ -14,9 +14,12 @@ namespace AutoStartConfirm.Connectors {
     public interface IAutoStartConnector : IDisposable {
         #region Fields
         Category Category { get; }
+
+        bool IsAdminRequiredForChanges { get; }
         #endregion
 
         #region Methods
+
         IList<AutoStartEntry> GetCurrentAutoStarts();
 
         void AddAutoStart(AutoStartEntry autoStart);
@@ -31,6 +34,7 @@ namespace AutoStartConfirm.Connectors {
         #region Events
         event AutoStartChangeHandler Add;
         event AutoStartChangeHandler Remove;
+
         #endregion
     }
 }

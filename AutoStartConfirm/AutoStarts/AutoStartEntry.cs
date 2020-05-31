@@ -5,7 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace AutoStartConfirm.AutoStarts
 {
     [Serializable]
-    public class AutoStartEntry
+    public abstract class AutoStartEntry
     {
         public Guid Id { get; set; }
 
