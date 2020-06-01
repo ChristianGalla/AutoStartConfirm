@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.AutoStarts;
+using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors {
     class ActiveSetup64Connector : RegistryConnector {
@@ -9,7 +10,13 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string[] subKeys = null;
 
-        private readonly bool monitorSubkeys = true; // todo: filter for StubPath
+        private readonly string[] valueNames = null;
+
+        protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+            return level == 1 && valueName == "StubPath";
+        }
+
+        private readonly bool monitorSubkeys = true;
 
         public override string BasePath {
             get {
@@ -17,9 +24,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

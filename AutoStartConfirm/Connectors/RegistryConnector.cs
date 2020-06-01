@@ -16,6 +16,8 @@ namespace AutoStartConfirm.Connectors {
 
         public abstract string BasePath { get; }
 
+        public abstract string[] SubKeyNames { get; }
+
         public abstract string[] ValueNames { get; }
 
         public abstract bool MonitorSubkeys { get; }
@@ -24,6 +26,10 @@ namespace AutoStartConfirm.Connectors {
             get {
                 return BasePath.StartsWith("HKEY_LOCAL_MACHINE");
             }
+        }
+
+        protected virtual bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+            return ValueNames == null || ValueNames.Contains(valueName);
         }
 
         protected RegistryChangeMonitor monitor = null;
@@ -88,7 +94,7 @@ namespace AutoStartConfirm.Connectors {
         /// <param name="currentKey"></param>
         /// <param name="recursive"></param>
         /// <returns></returns>
-        public IList<RegistryAutoStartEntry> GetCurrentAutoStarts(RegistryKey currentKey, bool recursive = false) {
+        public IList<RegistryAutoStartEntry> GetCurrentAutoStarts(RegistryKey currentKey, bool recursive = false, int level = 0) {
             var ret = new List<RegistryAutoStartEntry>();
             var valueNames = currentKey.GetValueNames();
             foreach (var valueName in valueNames) {
@@ -101,11 +107,11 @@ namespace AutoStartConfirm.Connectors {
                                 if (value == null) {
                                     continue;
                                 }
-                                if (value.Length > 0) {
+                                if (value.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
                                     ret.Add(new RegistryAutoStartEntry {
                                         Category = Category,
                                         Value = value.ToString(),
-                                        Path = currentKey.ToString(),
+                                        Path = $"{currentKey}\\{valueName}",
                                         RegistryValueKind = valueKind,
                                     });
                                 }
@@ -117,11 +123,11 @@ namespace AutoStartConfirm.Connectors {
                                     continue;
                                 }
                                 foreach (var subValue in value) {
-                                    if (subValue.Length > 0) {
+                                    if (subValue.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
                                         ret.Add(new RegistryAutoStartEntry {
                                             Category = Category,
                                             Value = subValue.ToString(),
-                                            Path = $"{BasePath}\\{valueName}",
+                                            Path = $"{currentKey}\\{valueName}",
                                             RegistryValueKind = valueKind,
                                         });
                                     }
@@ -134,7 +140,7 @@ namespace AutoStartConfirm.Connectors {
                         case RegistryValueKind.Unknown:
                         case RegistryValueKind.None:
                         default:
-                            Logger.Debug("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
+                            Logger.Trace("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
                             break;
                     }
                 } catch (Exception ex) {
@@ -147,7 +153,7 @@ namespace AutoStartConfirm.Connectors {
                 foreach (var subKeyName in subKeyNames) {
                     using (var subKey = currentKey.OpenSubKey(subKeyName)) {
                         if (subKey != null) {
-                            var subAutoStartEntries = GetCurrentAutoStarts(subKey, recursive);
+                            var subAutoStartEntries = GetCurrentAutoStarts(subKey, recursive, level + 1);
                             ret.AddRange(subAutoStartEntries);
                         }
                     }
@@ -164,9 +170,9 @@ namespace AutoStartConfirm.Connectors {
                     var subKeyPath = BasePath.Substring(BasePath.IndexOf('\\') + 1);
                     using (RegistryKey rootKey = baseRegistryKey.OpenSubKey(subKeyPath)) {
                         if (rootKey != null) {
-                            if (ValueNames != null) {
-                                foreach (var category in ValueNames) {
-                                    using (var subKey = rootKey.OpenSubKey(category)) {
+                            if (SubKeyNames != null) {
+                                foreach (var subKeyName in SubKeyNames) {
+                                    using (var subKey = rootKey.OpenSubKey(subKeyName)) {
                                         if (subKey == null) {
                                             continue;
                                         }
@@ -245,33 +251,65 @@ namespace AutoStartConfirm.Connectors {
             if (!(autoStart is RegistryAutoStartEntry)) {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
-            var lastDelimiterPos = autoStart.Path.LastIndexOf('\\');
-            var basePath = autoStart.Path.Substring(0, lastDelimiterPos);
-            var category = autoStart.Path.Substring(lastDelimiterPos + 1);
+            RegistryAutoStartEntry regAutoStart = (RegistryAutoStartEntry)autoStart;
+            var firstDelimiterPos = regAutoStart.Path.IndexOf('\\');
+            var lastDelimiterPos = regAutoStart.Path.LastIndexOf('\\');
+            var keyPath = regAutoStart.Path.Substring(0, lastDelimiterPos);
+            var subKeyPath = keyPath.Substring(firstDelimiterPos + 1);
+            var valueName = regAutoStart.Path.Substring(lastDelimiterPos + 1);
             try {
-                object value = Registry.GetValue(basePath, category, null);
-                var newValues = new List<string> {
-                    autoStart.Value
-                };
-                if (value == null) {
-                    Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
-                } else if (value is IEnumerable<string>) {
-                    bool exists = false;
-                    foreach (var subValue in value as IEnumerable<string>) {
-                        newValues.Add(subValue);
-                        if (string.Equals(subValue, autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
-                            exists = true;
-                            break;
+                using (var registry = GetBaseRegistry())
+                using (var key = registry.OpenSubKey(subKeyPath, true)) {
+                    object value = key.GetValue(valueName, null);
+                    if (value != null) {
+                        var currentValueKind = key.GetValueKind(valueName);
+                        if (currentValueKind != regAutoStart.RegistryValueKind) {
+                            throw new Exception($"Value {valueName} of key {keyPath} already exists with different type {currentValueKind}");
                         }
                     }
-                    if (!exists) {
-                        Registry.SetValue(basePath, category, newValues.ToArray(), RegistryValueKind.MultiString);
+                    switch (regAutoStart.RegistryValueKind) {
+                        case RegistryValueKind.String:
+                        case RegistryValueKind.ExpandString: {
+                                if (value != null && !(string.Equals((string)value, regAutoStart.Value, StringComparison.OrdinalIgnoreCase))) {
+                                    throw new Exception($"Value {valueName} of key {keyPath} already set to value {(string)value}");
+                                }
+                                Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
+                                Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
+                                break;
+                            }
+                        case RegistryValueKind.MultiString: {
+                                var newValues = new List<string> {
+                                    regAutoStart.Value
+                                };
+                                bool exists = false;
+                                if (value != null) {
+                                    foreach (var subValue in value as IEnumerable<string>) {
+                                        newValues.Add(subValue);
+                                        if (string.Equals(subValue, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                                            exists = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!exists) {
+                                    Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
+                                    Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
+                                } else {
+                                    Logger.Info("{Value} already exists at {Path}", regAutoStart.Value, regAutoStart.Path);
+                                }
+                                break;
+                            }
+                        case RegistryValueKind.Binary:
+                        case RegistryValueKind.DWord:
+                        case RegistryValueKind.QWord:
+                        case RegistryValueKind.Unknown:
+                        case RegistryValueKind.None:
+                        default:
+                            throw new Exception($"Don't know how to handle data type {regAutoStart.RegistryValueKind} of key {regAutoStart.Path}");
                     }
-                } else {
-                    throw new Exception($"Don't know how to handle data type of key {autoStart.Path}");
                 }
             } catch (Exception ex) {
-                var err = new Exception($"Failed to add auto start {autoStart.Value} to {autoStart.Path}", ex);
+                var err = new Exception($"Failed to add auto start {regAutoStart.Value} to {regAutoStart.Path}", ex);
                 throw err;
             }
         }
@@ -295,11 +333,12 @@ namespace AutoStartConfirm.Connectors {
                         return;
                     }
                     switch (key.GetValueKind(valueName)) {
-                        case RegistryValueKind.String: {
+                        case RegistryValueKind.String:
+                        case RegistryValueKind.ExpandString: {
                                 string value = (string)key.GetValue(valueName);
                                 if (value == registryAutoStartEntry.Value) {
                                     key.DeleteValue(valueName);
-                                    Logger.Info("Removed called {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                    Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 } else {
                                     Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 }
@@ -322,14 +361,13 @@ namespace AutoStartConfirm.Connectors {
                                     } else {
                                         key.SetValue(valueName, newValues.ToArray(), RegistryValueKind.MultiString);
                                     }
-                                    Logger.Info("Removed called {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                    Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 } else {
                                     Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 }
                                 break;
                             }
                         case RegistryValueKind.DWord:
-                        case RegistryValueKind.ExpandString:
                         case RegistryValueKind.QWord:
                         case RegistryValueKind.Binary:
                         case RegistryValueKind.Unknown:

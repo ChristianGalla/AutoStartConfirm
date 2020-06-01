@@ -6,8 +6,9 @@ namespace AutoStartConfirm.Connectors {
         private readonly Category category = Category.TerminalServerRunOnceEx;
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx";
-
         private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = null;
 
         private readonly bool monitorSubkeys = true;
 
@@ -17,9 +18,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

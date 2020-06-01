@@ -7,7 +7,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\AlternateShells";
 
-        private readonly string[] subKeys = new string[] { "AvailableShells" };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "AvailableShells" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -17,9 +19,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

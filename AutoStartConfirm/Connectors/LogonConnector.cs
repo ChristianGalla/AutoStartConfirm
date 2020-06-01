@@ -7,7 +7,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon";
 
-        private readonly string[] subKeys = new string[] { "VmApplet", "Userinit", "Shell", "TaskMan", "AppSetup" };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "VmApplet", "Userinit", "Shell", "TaskMan", "AppSetup" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -17,9 +19,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

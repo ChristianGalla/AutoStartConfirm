@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.AutoStarts;
+using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors {
     class GroupPolicyExtensionsConnector : RegistryConnector {
@@ -9,6 +10,12 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string[] subKeys = null;
 
+        private readonly string[] valueNames = null;
+
+        protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+            return level == 1 && valueName == "DllName";
+        }
+
         private readonly bool monitorSubkeys = true;
 
         public override string BasePath {
@@ -17,9 +24,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

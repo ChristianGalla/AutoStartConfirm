@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.AutoStarts;
+using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors {
     class AppInit64Connector : RegistryConnector {
@@ -7,7 +8,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows";
 
-        private readonly string[] subKeys = new string[] { "Appinit_Dlls" };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "Appinit_Dlls" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -17,9 +20,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

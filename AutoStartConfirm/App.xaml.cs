@@ -137,7 +137,7 @@ namespace AutoStartConfirm {
         }
 
         public static void ToggleMainWindow() {
-            Logger.Debug("Toggling main window");
+            Logger.Trace("Toggling main window");
             if (Window == null || Window.IsClosed) {
                 Logger.Trace("Creating new main window");
                 Window = new MainWindow();
@@ -152,7 +152,7 @@ namespace AutoStartConfirm {
         }
 
         public static void ShowMainWindow() {
-            Logger.Debug("Toggling main window");
+            Logger.Trace("Toggling main window");
             if (Window == null || Window.IsClosed) {
                 Logger.Trace("Creating new main window");
                 Window = new MainWindow();
@@ -204,8 +204,10 @@ namespace AutoStartConfirm {
                     }
                 }
             } catch (Exception e) {
-                var err = new Exception("Failed to revert add", e);
+                var message = "Failed to revert add";
+                var err = new Exception(message, e);
                 Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -251,8 +253,10 @@ namespace AutoStartConfirm {
                     }
                 }
             } catch (Exception e) {
-                var err = new Exception("Failed to revert remove", e);
+                var message = "Failed to revert remove";
+                var err = new Exception(message, e);
                 Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -262,8 +266,10 @@ namespace AutoStartConfirm {
                 var autoStartService = new AutoStartService();
                 autoStartService.RevertAdd(autoStart);
             } catch (Exception e) {
-                var err = new Exception("Failed to revert add", e);
+                var message = "Failed to revert add";
+                var err = new Exception(message, e);
                 Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -273,8 +279,10 @@ namespace AutoStartConfirm {
                 var autoStartService = new AutoStartService();
                 autoStartService.RevertRemove(autoStart);
             } catch (Exception e) {
-                var err = new Exception("Failed to revert remove", e);
+                var message = "Failed to revert remove";
+                var err = new Exception(message, e);
                 Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -283,14 +291,23 @@ namespace AutoStartConfirm {
                 Logger.Trace("ConfirmAdd called");
                 AutoStartService.ConfirmAdd(id);
             } catch (Exception e) {
-                var err = new Exception($"Failed to confirm add of {id}", e);
+                var message = $"Failed to confirm add of {id}";
+                var err = new Exception(message, e);
                 Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         public void ConfirmRemove(Guid id) {
-            Logger.Trace("ConfirmRemove called");
-            AutoStartService.ConfirmRemove(id);
+            try {
+                Logger.Trace("ConfirmRemove called");
+                AutoStartService.ConfirmRemove(id);
+            } catch (Exception e) {
+                var message = $"Failed to confirm remove of {id}";
+                var err = new Exception(message, e);
+                Logger.Error(err);
+                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
 

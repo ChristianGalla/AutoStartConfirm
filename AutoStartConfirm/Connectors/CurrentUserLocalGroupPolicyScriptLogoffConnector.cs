@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.AutoStarts;
+using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors {
     class CurrentUserLocalGroupPolicyScriptLogoffConnector : RegistryConnector {
@@ -7,8 +8,13 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Group Policy\Scripts\Logoff";
 
-        // todo: only monitor sub sub keys script
+        protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+            return level == 2 && valueName == "script";
+        }
+
         private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = null;
 
         private readonly bool monitorSubkeys = true;
 
@@ -18,9 +24,14 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

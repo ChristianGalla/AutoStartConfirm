@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.AutoStarts;
+using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors {
     class AlternateShellConnector : RegistryConnector {
@@ -7,7 +8,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot";
 
-        private readonly string[] subKeys = new string[] { "AlternateShell" };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "AlternateShell" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -17,9 +20,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

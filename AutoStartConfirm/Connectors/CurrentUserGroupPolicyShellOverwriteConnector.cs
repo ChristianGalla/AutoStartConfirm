@@ -7,7 +7,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System";
 
-        private readonly string[] subKeys = new string[] { "Shell" };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "Shell" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -17,9 +19,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 

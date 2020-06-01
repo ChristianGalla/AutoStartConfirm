@@ -7,11 +7,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager";
 
-        private readonly string[] subKeys = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand",
-#if DEBUG
-            "Test"
-#endif
-        };
+        private readonly string[] subKeys = null;
+
+        private readonly string[] valueNames = new string[] { "BootExecute", "SetupExecute", "Execute", "S0InitialCommand" };
 
         private readonly bool monitorSubkeys = false;
 
@@ -21,9 +19,15 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override string[] ValueNames {
+        public override string[] SubKeyNames {
             get {
                 return subKeys;
+            }
+        }
+
+        public override string[] ValueNames {
+            get {
+                return valueNames;
             }
         }
 
