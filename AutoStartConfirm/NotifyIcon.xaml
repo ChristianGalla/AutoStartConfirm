@@ -6,7 +6,7 @@
     <local:NotifyIconDoubleClickCommand x:Key="NotifyIconDoubleClickCommand"></local:NotifyIconDoubleClickCommand>
     <tb:TaskbarIcon x:Key="NotifyIcon"
                   IconSource="/Assets/Icon.ico"
-                  ToolTipText="AutoStartConfirm"
+                  ToolTipText="Auto Start Confirm"
                   DoubleClickCommand="{StaticResource NotifyIconDoubleClickCommand}">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>

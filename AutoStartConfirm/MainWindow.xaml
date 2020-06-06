@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AutoStartConfirm"
         xmlns:AutoStarts="clr-namespace:AutoStartConfirm.AutoStarts" xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters" x:Name="window" x:Class="AutoStartConfirm.MainWindow"
         mc:Ignorable="d"
-        Title="Auto start confirm" Height="408.667" Width="1181.667"
+        Title="Auto Start Confirm" Height="408.667" Width="1181.667"
         WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <Window.Resources>
         <myConverters:CanConfirmConverter x:Key="CanConfirmConverter" />
