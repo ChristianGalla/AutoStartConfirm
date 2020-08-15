@@ -1,5 +1,7 @@
 # Auto Start Confirm
 
+![Build](https://github.com/ChristianGalla/AutoStartConfirm/workflows/Build/badge.svg)
+
 More and more programs want to start automatically when Windows starts, or a user logs on.
 
 Many startup programs can slow down the boot process.
