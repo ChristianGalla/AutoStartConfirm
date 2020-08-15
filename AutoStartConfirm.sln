@@ -14,26 +14,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AutoStartConfirmSetup", "AutoStartConfirmSetup\AutoStartConfirmSetup.wixproj", "{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStartConfirmTests", "AutoStartConfirmTests\AutoStartConfirmTests.csproj", "{E4A7A8D8-29D8-430A-ACD2-EADA239EA260}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Debug|x64.ActiveCfg = Debug|x64
 		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Debug|x64.Build.0 = Debug|x64
-		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Debug|x86.ActiveCfg = Debug|x64
 		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Release|x64.ActiveCfg = Release|x64
 		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Release|x64.Build.0 = Release|x64
-		{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}.Release|x86.ActiveCfg = Release|x64
-		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Debug|x64.ActiveCfg = Debug|x86
-		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Debug|x86.ActiveCfg = Debug|x86
-		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Debug|x86.Build.0 = Debug|x86
+		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Debug|x64.ActiveCfg = Debug|x64
 		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Release|x64.ActiveCfg = Release|x64
-		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Release|x86.ActiveCfg = Release|x86
-		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Release|x86.Build.0 = Release|x86
+		{C044A8D0-32F9-48CD-B9C8-3D47E58E14DE}.Release|x64.Build.0 = Release|x64
+		{E4A7A8D8-29D8-430A-ACD2-EADA239EA260}.Debug|x64.ActiveCfg = Debug|x64
+		{E4A7A8D8-29D8-430A-ACD2-EADA239EA260}.Debug|x64.Build.0 = Debug|x64
+		{E4A7A8D8-29D8-430A-ACD2-EADA239EA260}.Release|x64.ActiveCfg = Release|x64
+		{E4A7A8D8-29D8-430A-ACD2-EADA239EA260}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
