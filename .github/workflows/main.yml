@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -32,4 +32,9 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
     
     - name: Build Solution
-      run: msbuild AutoStartConfirm.sln /target:AutoStartConfirm
+      run: msbuild AutoStartConfirm.sln /target:AutoStartConfirm -property:Configuration=Release
+    
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Build result
+        path: AutoStartConfirm\bin\x64\Release
