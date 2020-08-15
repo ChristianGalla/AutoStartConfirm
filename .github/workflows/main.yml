@@ -32,7 +32,7 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
     
     - name: Build solution
-      run: msbuild AutoStartConfirm.sln /target:AutoStartConfirmSetup -property:Configuration=Release
+      run: msbuild AutoStartConfirm.sln -property:Configuration=Release
     
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
