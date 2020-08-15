@@ -40,4 +40,4 @@ jobs:
         name: AutoStartConfirmSetup
         path: |
           AutoStartConfirmSetup\bin\x64\Release
-          !*.wixpdb
+          !**\*.wixpdb
