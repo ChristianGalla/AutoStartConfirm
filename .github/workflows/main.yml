@@ -37,5 +37,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
       with:
-        name: Build result
-        path: AutoStartConfirmSetup\bin\x64\Release
+        name: AutoStartConfirmSetup
+        path: |
+          AutoStartConfirmSetup\bin\x64\Release
+          !*.wixpdb
