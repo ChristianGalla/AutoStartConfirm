@@ -30,6 +30,8 @@ namespace AutoStartConfirm {
 
         public static TaskbarIcon Icon = null;
 
+        public bool HasOwnAutoStart = false;
+
         public readonly AutoStartService AutoStartService = new AutoStartService();
 
         private readonly NotificationService NotificationService = new NotificationService();
@@ -52,11 +54,70 @@ namespace AutoStartConfirm {
                 AutoStartService.LoadCurrentAutoStarts();
             } catch (Exception) {
             }
+
+            HasOwnAutoStart = false;
+            foreach (var autoStart in AutoStartService.CurrentAutoStarts) {
+                if (IsOwnAutoStart(autoStart.Value)) {
+                    HasOwnAutoStart = true;
+                    break;
+                }
+            }
+            if (HasOwnAutoStart) {
+                Logger.Info("Own auto start is enabled");
+            } else {
+                Logger.Info("Own auto start is disabled");
+            }
+
             if (isFirstRun) {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
             }
             AutoStartService.StartWatcher();
+        }
+
+        private static bool IsOwnAutoStart(AutoStartEntry autoStart) {
+            return autoStart.Category == Category.CurrentUserRun64 &&
+            autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
+            autoStart.Value == Assembly.GetEntryAssembly().Location;
+        }
+
+        public void ToggleOwnAutoStart() {
+            try {
+                Logger.Info("ToggleOwnAutoStart called");
+                var ownAutoStart = new RegistryAutoStartEntry() {
+                    Category = Category.CurrentUserRun64,
+                    Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
+                    Value = Assembly.GetEntryAssembly().Location,
+                    RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
+                    ConfirmStatus = ConfirmStatus.New,
+                };
+
+                if (HasOwnAutoStart) {
+                    Logger.Info("Shall remove own auto start");
+                    AutoStartService.RemoveAutoStart(ownAutoStart);
+                } else {
+                    Logger.Info("Shall add own auto start");
+                    AutoStartService.AddAutoStart(ownAutoStart);
+                }
+                Logger.Trace("Own auto start toggled");
+            } catch (Exception e) {
+                var message = $"Failed to change own auto start";
+                var err = new Exception(message, e);
+                Logger.Error(err);
+                ShowError(e, message);
+            }
+        }
+
+        private void ShowError(Exception exception, string message) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                // Message boxes can only be shown if a parent window exists
+                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
+                bool newWindow = EnsureMainWindow(true);
+                MessageBox.Show(Window, exception.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                if (newWindow) {
+                    Window.Close();
+                }
+            });
         }
 
         public static App GetInstance() {
@@ -81,7 +142,7 @@ namespace AutoStartConfirm {
                         var path = args[i + 1];
                         var autoStartEntry = LoadAutoStartFromFile(path);
                         var autoStartService = new AutoStartService();
-                        autoStartService.RevertAdd(autoStartEntry);
+                        autoStartService.RemoveAutoStart(autoStartEntry);
                         Logger.Info("Finished");
                         return 0;
                     } else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase)) {
@@ -92,7 +153,7 @@ namespace AutoStartConfirm {
                         var path = args[i + 1];
                         var autoStartEntry = LoadAutoStartFromFile(path);
                         var autoStartService = new AutoStartService();
-                        autoStartService.RevertRemove(autoStartEntry);
+                        autoStartService.AddAutoStart(autoStartEntry);
                         Logger.Info("Finished");
                         return 0;
                     }
@@ -151,16 +212,28 @@ namespace AutoStartConfirm {
             }
         }
 
-        public static void ShowMainWindow() {
-            Logger.Trace("Toggling main window");
+        /// <summary>
+        /// Ensures that the main window is open
+        /// </summary>
+        /// <param name="hidden">If true creates a new hidden window if it not already exists</param>
+        /// <returns>true if a new window has been created</returns>
+        public static bool EnsureMainWindow(bool hidden = false) {
+            Logger.Trace("Showing main window");
+            bool newCreated = false;
             if (Window == null || Window.IsClosed) {
                 Logger.Trace("Creating new main window");
                 Window = new MainWindow();
+                newCreated = true;
             }
-            if (!Window.IsVisible) {
+            if (newCreated && hidden) {
+                Window.WindowState = WindowState.Minimized;
+                Logger.Trace("Showing main window");
+                Window.Show();
+            } else if (!hidden && !Window.IsVisible) {
                 Logger.Trace("Showing main window");
                 Window.Show();
             }
+            return newCreated;
         }
 
         internal static void Close() {
@@ -183,13 +256,13 @@ namespace AutoStartConfirm {
         public void ShowAdd(Guid id) {
             // todo: jump to added
             Logger.Trace("ShowAdd called");
-            ShowMainWindow();
+            EnsureMainWindow();
         }
 
         public void ShowRemoved(Guid id) {
             // todo: jump to removed
             Logger.Trace("ShowRemoved called");
-            ShowMainWindow();
+            EnsureMainWindow();
         }
 
         public void RevertAdd(Guid id) {
@@ -200,14 +273,14 @@ namespace AutoStartConfirm {
                         StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                     } else {
-                        AutoStartService.RevertAdd(autoStart);
+                        AutoStartService.RemoveAutoStart(autoStart);
                     }
                 }
             } catch (Exception e) {
                 var message = "Failed to revert add";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
@@ -249,40 +322,40 @@ namespace AutoStartConfirm {
                         StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                     } else {
-                        AutoStartService.RevertRemove(autoStart);
+                        AutoStartService.AddAutoStart(autoStart);
                     }
                 }
             } catch (Exception e) {
                 var message = "Failed to revert remove";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
-        public static void RevertAdd(AutoStartEntry autoStart) {
+        public void RevertAdd(AutoStartEntry autoStart) {
             Logger.Trace("RevertAdd called");
             try {
                 var autoStartService = new AutoStartService();
-                autoStartService.RevertAdd(autoStart);
+                autoStartService.RemoveAutoStart(autoStart);
             } catch (Exception e) {
                 var message = "Failed to revert add";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
-        public static void RevertRemove(AutoStartEntry autoStart) {
+        public void RevertRemove(AutoStartEntry autoStart) {
             Logger.Trace("RevertRemove called");
             try { 
                 var autoStartService = new AutoStartService();
-                autoStartService.RevertRemove(autoStart);
+                autoStartService.AddAutoStart(autoStart);
             } catch (Exception e) {
                 var message = "Failed to revert remove";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
@@ -294,7 +367,7 @@ namespace AutoStartConfirm {
                 var message = $"Failed to confirm add of {id}";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
@@ -306,7 +379,7 @@ namespace AutoStartConfirm {
                 var message = $"Failed to confirm remove of {id}";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError(e, message);
             }
         }
 
@@ -314,11 +387,19 @@ namespace AutoStartConfirm {
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
             Logger.Trace("AddHandler called");
+            if (IsOwnAutoStart(addedAutostart)) {
+                Logger.Info("Own auto start added");
+                HasOwnAutoStart = true;
+            }
             NotificationService.ShowNewAutoStartEntryNotification(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
             Logger.Trace("RemoveHandler called");
+            if (IsOwnAutoStart(removedAutostart)) {
+                Logger.Info("Own auto start removed");
+                HasOwnAutoStart = false;
+            }
             NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
         }
         #endregion

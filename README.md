@@ -45,9 +45,9 @@ Therefore, changes will be detected, even if the program is not running all time
 
 Some useful programs require services to start automatically.
 When their auto start is blocked, they may not function properly.
-Also, a blocked update service may lead to insecure environments because of not patched security bugs in old program versions.
+Also, for example a blocked update service may lead to insecure environments because of not patched security bugs in old program versions.
 
-Therefore, usually auto starts should not be blocked.
+Therefore, auto starts should only be blocked if there is no negative impact on the affected programs.
 
 ## State of development
 

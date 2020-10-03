@@ -81,39 +81,39 @@ namespace AutoStartConfirm.AutoStarts {
             }
         }
 
-        public void RevertAdd(Guid Id) {
-            Logger.Trace("RevertAdd called");
+        public void RemoveAutoStart(Guid Id) {
+            Logger.Trace("RemoveAutoStart called");
             if (TryGetAddedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
                 Connectors.RemoveAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Reverted add of {@autoStart}", autoStart);
+                Logger.Info("Removed {@autoStart}", autoStart);
             }
         }
 
-        public void RevertAdd(AutoStartEntry autoStart) {
-            Logger.Trace("RevertAdd called");
+        public void RemoveAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("RemoveAutoStart called");
             if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
                 Connectors.RemoveAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Reverted add of {@autoStart}", autoStart);
+                Logger.Info("Removed {@autoStart}", autoStart);
             }
         }
 
-        public void RevertRemove(Guid Id) {
-            Logger.Trace("RevertRemove called");
+        public void AddAutoStart(Guid Id) {
+            Logger.Trace("AddAutoStart called");
             if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
                 Connectors.AddAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Reverted remove of {@autoStart}", autoStart);
+                Logger.Info("Added {@autoStart}", autoStart);
             }
         }
 
-        public void RevertRemove(AutoStartEntry autoStart) {
-            Logger.Trace("RevertRemove called");
+        public void AddAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("AddAutoStart called");
             if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
                 Connectors.AddAutoStart(autoStart);
                 autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Reverted remove of {@autoStart}", autoStart);
+                Logger.Info("Added {@autoStart}", autoStart);
             }
         }
 

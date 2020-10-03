@@ -9,7 +9,12 @@
                   ToolTipText="Auto Start Confirm"
                   DoubleClickCommand="{StaticResource NotifyIconDoubleClickCommand}">
         <tb:TaskbarIcon.ContextMenu>
-            <ContextMenu>
+            <ContextMenu Opened="Opened">
+                <MenuItem
+                    Name="OwnAutoStartTaskbarMenuItem"
+                    IsCheckable="True"
+                    Click="OwnAutoStartClicked"
+                    Header="Start 'Auto Start Confirm' on logon of current user" />
                 <MenuItem Header="Exit" Click="ExitClicked" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>
