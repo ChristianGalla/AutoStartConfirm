@@ -31,6 +31,12 @@ namespace AutoStartConfirm
             }
         }
 
+        private bool HasOwnAutoStart {
+            get {
+                return App.HasOwnAutoStart;
+            }
+        }
+
         public MainWindow()
         {
             Logger.Trace("Window opened");
@@ -105,5 +111,13 @@ namespace AutoStartConfirm
         }
 
         #endregion
+
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
+            window.Close();
+        }
+
+        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
+            App.GetInstance().ToggleOwnAutoStart();
+        }
     }
 }

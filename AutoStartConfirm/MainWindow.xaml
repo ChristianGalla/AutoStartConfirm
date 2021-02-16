@@ -4,16 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoStartConfirm"
-        xmlns:AutoStarts="clr-namespace:AutoStartConfirm.AutoStarts" xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters" x:Name="window" x:Class="AutoStartConfirm.MainWindow"
+        xmlns:AutoStarts="clr-namespace:AutoStartConfirm.AutoStarts"
+        xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters"
+        x:Name="window"
+        x:Class="AutoStartConfirm.MainWindow"
         mc:Ignorable="d"
-        Title="Auto Start Confirm" Height="408.667" Width="1181.667"
-        WindowStartupLocation="CenterScreen" WindowState="Maximized">
+        Title="Auto Start Confirm"
+        Height="408.667"
+        Width="1181.667"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
     <Window.Resources>
         <myConverters:CanConfirmConverter x:Key="CanConfirmConverter" />
         <myConverters:CanRevertConverter x:Key="CanRevertConverter" />
     </Window.Resources>
-    <Grid x:Name="grid">
-        <TabControl x:Name="tabControl" Padding="5" Margin="0">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Exit" Click="MenuItemExit_Click" />
+            </MenuItem>
+            <MenuItem Header="_Options">
+                <MenuItem
+                    Header="_Start 'Auto Start Confirm' on logon of current user"
+                    IsCheckable="True"
+                    Checked="MenuItemAutoStart_Click"
+                    IsChecked="{Binding ElementName=window, Path=HasOwnAutoStart, Mode=OneWay}" />
+            </MenuItem>
+        </Menu>
+        <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
             <TabItem Header="Current" VerticalAlignment="Top">
                 <DataGrid x:Name="CurrentAutoStartGrid" MinHeight="50" MinWidth="200" IsReadOnly="True" AutoGenerateColumns="False">
                     <DataGrid.Columns>
@@ -78,6 +96,5 @@
                 </DataGrid>
             </TabItem>
         </TabControl>
-
-    </Grid>
+    </DockPanel>
 </Window>
