@@ -31,7 +31,7 @@ namespace AutoStartConfirm
             }
         }
 
-        private bool HasOwnAutoStart {
+        public bool HasOwnAutoStart {
             get {
                 return App.HasOwnAutoStart;
             }
