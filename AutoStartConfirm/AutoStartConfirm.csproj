@@ -113,6 +113,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AutoStarts\FolderAutoStartEntry.cs" />
     <Compile Include="AutoStarts\RegistryAutoStartEntry.cs" />
     <Compile Include="AutoStarts\AutoStartService.cs" />
     <Compile Include="Connectors\CurrentUserLoadConnector.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Connectors\LocalGroupPolicyScriptLogoffConnector.cs" />
     <Compile Include="Connectors\LocalGroupPolicyScriptLogonConnector.cs" />
     <Compile Include="Connectors\LocalGroupPolicyScriptShutdownConnector.cs" />
+    <Compile Include="Connectors\FolderConnector.cs" />
     <Compile Include="Connectors\RunOnce64Connector.cs" />
     <Compile Include="Connectors\RunOnceEx64Connector.cs" />
     <Compile Include="Connectors\RunOnceEx32Connector.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="Connectors\BootExecuteConnector.cs" />
     <Compile Include="Connectors\IAutoStartConnector.cs" />
     <Compile Include="AutoStarts\AutoStartEntry.cs" />
+    <Compile Include="Helpers\FolderChangeMonitor.cs" />
     <Compile Include="Notifications\MyNotificationActivator.cs" />
     <Compile Include="AutoStarts\ConfirmStatus.cs" />
     <Compile Include="Helpers\RegistryChangeEventArgs.cs" />
