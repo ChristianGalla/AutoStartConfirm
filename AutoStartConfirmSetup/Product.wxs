@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="Auto Start Confirm" Language="1033" Version="0.1.0.0" Manufacturer="Christian Galla" UpgradeCode="9795b8c4-0f77-4094-a3e4-43a914b674c2">
+	<Product Id="*" Name="Auto Start Confirm" Language="1033" Version="!(bind.FileVersion.MainExecutable)" Manufacturer="Christian Galla" UpgradeCode="9795b8c4-0f77-4094-a3e4-43a914b674c2">
 		<Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Description="Auto Start Confirm Installer" Manufacturer="Christian Galla" Platform="x64" />
     
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
