@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AutoStartConfirm"
         mc:Ignorable="d"
         x:Name="window"
-        Title="About Auto Start Confirm" Height="319.473" Width="451.318" Topmost="True" WindowStartupLocation="CenterScreen">
+        Title="About Auto Start Confirm" Height="319.473" Width="451.318" WindowStartupLocation="CenterScreen">
     <Grid>
         <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
             Auto Start Confirm
