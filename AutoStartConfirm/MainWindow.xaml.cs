@@ -119,5 +119,10 @@ namespace AutoStartConfirm
         private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
             App.GetInstance().ToggleOwnAutoStart();
         }
+
+        private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Show();
+        }
     }
 }

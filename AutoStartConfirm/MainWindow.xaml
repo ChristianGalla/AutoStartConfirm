@@ -30,6 +30,9 @@
                     Checked="MenuItemAutoStart_Click"
                     IsChecked="{Binding ElementName=window, Path=HasOwnAutoStart, Mode=OneWay}" />
             </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="MenuItemAbout_Click" />
+            </MenuItem>
         </Menu>
         <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
             <TabItem Header="Current" VerticalAlignment="Top">
