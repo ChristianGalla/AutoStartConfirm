@@ -27,7 +27,7 @@
                 <MenuItem
                     Header="_Start 'Auto Start Confirm' on logon of current user"
                     IsCheckable="True"
-                    Checked="MenuItemAutoStart_Click"
+                    Click="MenuItemAutoStart_Click"
                     IsChecked="{Binding ElementName=window, Path=HasOwnAutoStart, Mode=OneWay}" />
             </MenuItem>
             <MenuItem Header="_Help">
