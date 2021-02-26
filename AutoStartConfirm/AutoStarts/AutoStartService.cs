@@ -24,11 +24,11 @@ namespace AutoStartConfirm.AutoStarts {
 
         private readonly string PathToRemovedAutoStarts;
 
-        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
 
-        public Dictionary<Guid, AutoStartEntry> AddedAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> AddedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
 
-        public Dictionary<Guid, AutoStartEntry> RemovedAutoStarts = null;
+        public Dictionary<Guid, AutoStartEntry> RemovedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
         #endregion
 
         #region Methods

@@ -54,5 +54,6 @@
         WindowsCEServicesAutoStartOnConnect64,
         WindowsCEServicesAutoStartOnDisconnect64,
         CurrentUserLoad,
+        StartMenuAutoStartFolder,
     }
 }
