@@ -41,7 +41,7 @@
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" />
+                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
@@ -62,7 +62,7 @@
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" />
+                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
@@ -83,7 +83,7 @@
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date removed" Binding="{Binding Path=RemoveDate,StringFormat=yyyy-MM-dd HH:mm:ss}" />
+                        <DataGridTextColumn Header="Date removed" Binding="{Binding Path=RemoveDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
