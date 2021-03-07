@@ -82,7 +82,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Trace("ErrorHandler called");
+            Logger.Error("Error on monitoring of {BasePath}");
         }
 
         #region IAutoStartConnector implementation

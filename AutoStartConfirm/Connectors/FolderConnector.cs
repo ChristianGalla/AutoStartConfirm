@@ -23,8 +23,8 @@ namespace AutoStartConfirm.Connectors {
 
         protected FolderChangeMonitor monitor = null;
 
-        protected List<FolderAutoStartEntry> lastAutostarts = null;
-
+        // todo: read target of links?
+        // read sub directories?
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
             var ret = new List<AutoStartEntry>();
             string[] filePaths = Directory.GetFiles(BasePath);
@@ -52,15 +52,22 @@ namespace AutoStartConfirm.Connectors {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
             var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
-            lastAutostarts = new List<FolderAutoStartEntry>();
-            foreach (var currentAutoStart in currentAutoStarts) {
-                lastAutostarts.Add((FolderAutoStartEntry)currentAutoStart);
-            }
-            //monitor = new FolderChangeMonitor(BasePath);
-            //monitor.Changed += ChangeHandler;
-            //monitor.Error += ErrorHandler;
-            //monitor.Start();
-            //Logger.Trace("Watcher started");
+            monitor = new FolderChangeMonitor() {
+                BasePath = BasePath,
+                Category = Category,
+            };
+            monitor.Add += AddHandler;
+            monitor.Remove += RemoveHandler;
+            monitor.Start();
+            Logger.Trace("Watcher started");
+        }
+
+        private void RemoveHandler(AutoStartEntry e) {
+            Remove?.Invoke(e);
+        }
+
+        private void AddHandler(AutoStartEntry e) {
+            Add?.Invoke(e);
         }
 
         public void StopWatcher() {
