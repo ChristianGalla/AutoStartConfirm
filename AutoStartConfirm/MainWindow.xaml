@@ -54,11 +54,6 @@
                     AutoGenerateColumns="False"
                     ItemsSource="{Binding Source={StaticResource currentAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
-                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -69,6 +64,11 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
+                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
@@ -89,11 +89,6 @@
                           AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource addedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
-                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -104,6 +99,11 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
+                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
@@ -125,11 +125,6 @@
                     AutoGenerateColumns="False"
                     ItemsSource="{Binding Source={StaticResource removedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
-                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        <DataGridTextColumn Header="Date removed" Binding="{Binding Path=RemoveDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -140,6 +135,11 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Date removed" Binding="{Binding Path=RemoveDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
