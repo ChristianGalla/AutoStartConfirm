@@ -74,6 +74,7 @@ namespace AutoStartConfirm.Connectors {
                 new CurrentUserTerminalServerRunOnceConnector(),
                 new CurrentUserTerminalServerRunOnceExConnector(),
                 new StartMenuAutoStartFolderConnector(),
+                new CurrentUserStartMenuAutoStartFolderConnector(),
             };
             foreach (var connector in connectors) {
                 try {

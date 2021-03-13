@@ -144,6 +144,7 @@
     <Compile Include="Connectors\RunOnceEx64Connector.cs" />
     <Compile Include="Connectors\RunOnceEx32Connector.cs" />
     <Compile Include="Connectors\RunOnce32Connector.cs" />
+    <Compile Include="Connectors\CurrentUserStartMenuAutoStartFolderConnector.cs" />
     <Compile Include="Connectors\StartMenuAutoStartFolderConnector.cs" />
     <Compile Include="Connectors\TerminalServerRunOnceExConnector.cs" />
     <Compile Include="Connectors\TerminalServerRunOnceConnector.cs" />
