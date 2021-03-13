@@ -14,13 +14,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AutoStartConfirm
-{
+namespace AutoStartConfirm {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
+    public partial class MainWindow : Window {
         public bool IsClosed { get; private set; }
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -28,6 +26,24 @@ namespace AutoStartConfirm
         private App App {
             get {
                 return App.GetInstance();
+            }
+        }
+
+        public Dictionary<Guid, AutoStartEntry>.ValueCollection CurrentAutoStarts {
+            get {
+                return App.AutoStartService.CurrentAutoStarts.Values;
+            }
+        }
+
+        public Dictionary<Guid, AutoStartEntry>.ValueCollection AddedAutoStarts {
+            get {
+                return App.AutoStartService.AddedAutoStarts.Values;
+            }
+        }
+
+        public Dictionary<Guid, AutoStartEntry>.ValueCollection RemovedAutoStarts {
+            get {
+                return App.AutoStartService.RemovedAutoStarts.Values;
             }
         }
 
@@ -44,9 +60,6 @@ namespace AutoStartConfirm
             App.AutoStartService.CurrentAutoStartChange += CurrentAutoStartChangeHandler;
             App.AutoStartService.AddAutoStartChange += AddAutoStartChangeHandler;
             App.AutoStartService.RemoveAutoStartChange += RemoveAutoStartChangeHandler;
-            CurrentAutoStartGrid.ItemsSource = App.AutoStartService.CurrentAutoStarts.Values;
-            AddedAutoStartGrid.ItemsSource = App.AutoStartService.AddedAutoStarts.Values;
-            RemovedAutoStartGrid.ItemsSource = App.AutoStartService.RemovedAutoStarts.Values;
         }
 
         protected override void OnClosed(EventArgs e)
@@ -96,17 +109,14 @@ namespace AutoStartConfirm
         #region Event handlers
 
         private void CurrentAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            CurrentAutoStartGrid.ItemsSource = App.AutoStartService.CurrentAutoStarts.Values;
             CurrentAutoStartGrid.Items.Refresh();
         }
 
         private void AddAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            AddedAutoStartGrid.ItemsSource = App.AutoStartService.AddedAutoStarts.Values;
             AddedAutoStartGrid.Items.Refresh();
         }
 
         private void RemoveAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            RemovedAutoStartGrid.ItemsSource = App.AutoStartService.RemovedAutoStarts.Values;
             RemovedAutoStartGrid.Items.Refresh();
         }
 

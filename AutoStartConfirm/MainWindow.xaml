@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:AutoStartConfirm"
         xmlns:AutoStarts="clr-namespace:AutoStartConfirm.AutoStarts"
         xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters"
-        x:Name="window"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    x:Name="window"
         x:Class="AutoStartConfirm.MainWindow"
         mc:Ignorable="d"
         Title="Auto Start Confirm"
@@ -36,7 +37,22 @@
         </Menu>
         <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
             <TabItem Header="Current" VerticalAlignment="Top">
-                <DataGrid x:Name="CurrentAutoStartGrid" MinHeight="50" MinWidth="200" IsReadOnly="True" AutoGenerateColumns="False">
+                <TabItem.Resources>
+                    <CollectionViewSource
+                        x:Key="currentAutoStartCollectionViewSource"
+                        Source="{Binding ElementName=window, Path=CurrentAutoStarts, Mode=OneWay}">
+                        <CollectionViewSource.SortDescriptions>
+                            <scm:SortDescription PropertyName="AddDate" Direction="Descending" />
+                        </CollectionViewSource.SortDescriptions>
+                    </CollectionViewSource>
+                </TabItem.Resources>
+                <DataGrid
+                    x:Name="CurrentAutoStartGrid"
+                    MinHeight="50"
+                    MinWidth="200"
+                    IsReadOnly="True"
+                    AutoGenerateColumns="False"
+                    ItemsSource="{Binding Source={StaticResource currentAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
@@ -57,7 +73,21 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="Add history" VerticalAlignment="Top">
-                <DataGrid x:Name="AddedAutoStartGrid" MinHeight="50" MinWidth="200" IsReadOnly="True" AutoGenerateColumns="False">
+                <TabItem.Resources>
+                    <CollectionViewSource
+                        x:Key="addedAutoStartCollectionViewSource"
+                        Source="{Binding ElementName=window, Path=AddedAutoStarts, Mode=OneWay}">
+                        <CollectionViewSource.SortDescriptions>
+                            <scm:SortDescription PropertyName="AddDate" Direction="Descending" />
+                        </CollectionViewSource.SortDescriptions>
+                    </CollectionViewSource>
+                </TabItem.Resources>
+                <DataGrid x:Name="AddedAutoStartGrid"
+                          MinHeight="50"
+                          MinWidth="200"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          ItemsSource="{Binding Source={StaticResource addedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
@@ -78,7 +108,22 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="Remove history" VerticalAlignment="Top">
-                <DataGrid x:Name="RemovedAutoStartGrid" MinHeight="50" MinWidth="200" IsReadOnly="True" AutoGenerateColumns="False">
+                <TabItem.Resources>
+                    <CollectionViewSource
+                        x:Key="removedAutoStartCollectionViewSource"
+                        Source="{Binding ElementName=window, Path=RemovedAutoStarts, Mode=OneWay}">
+                        <CollectionViewSource.SortDescriptions>
+                            <scm:SortDescription PropertyName="RemoveDate" Direction="Descending" />
+                        </CollectionViewSource.SortDescriptions>
+                    </CollectionViewSource>
+                </TabItem.Resources>
+                <DataGrid
+                    x:Name="RemovedAutoStartGrid"
+                    MinHeight="50"
+                    MinWidth="200"
+                    IsReadOnly="True"
+                    AutoGenerateColumns="False"
+                    ItemsSource="{Binding Source={StaticResource removedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
