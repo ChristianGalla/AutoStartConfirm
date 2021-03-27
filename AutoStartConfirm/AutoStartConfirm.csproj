@@ -172,7 +172,8 @@
     <Compile Include="Connectors\AppCertDllConnector.cs" />
     <Compile Include="Connectors\AppInit32Connector.cs" />
     <Compile Include="Connectors\AppInit64Connector.cs" />
-    <Compile Include="Converters\CanRevertConverter.cs" />
+    <Compile Include="Converters\CanBeAddedConverter.cs" />
+    <Compile Include="Converters\CanBeRemovedConverter.cs" />
     <Compile Include="Converters\CanConfirmConverter.cs" />
     <Compile Include="Connectors\AutoStartConnectorService.cs" />
     <Compile Include="AutoStarts\Category.cs" />

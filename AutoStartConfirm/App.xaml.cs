@@ -99,26 +99,32 @@ namespace AutoStartConfirm {
                     Logger.Info("Shall add own auto start");
                     AutoStartService.AddAutoStart(ownAutoStart);
                 }
+                ownAutoStart.ConfirmStatus = ConfirmStatus.New;
                 Logger.Trace("Own auto start toggled");
             } catch (Exception e) {
                 var message = $"Failed to change own auto start";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(e, message);
+                ShowError(message, e);
             }
         }
 
-        private void ShowError(Exception exception, string message) {
+        public void ShowError(string caption, Exception error) {
+            ShowError(caption, error.ToString());
+        }
+
+        public void ShowError(string caption, string message = "") {
             Application.Current.Dispatcher.Invoke(delegate {
                 // Message boxes can only be shown if a parent window exists
                 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
                 bool newWindow = EnsureMainWindow(true);
-                MessageBox.Show(Window, exception.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (newWindow) {
                     Window.Close();
                 }
             });
         }
+
 
         public static App GetInstance() {
             return AppInstance;
@@ -267,20 +273,29 @@ namespace AutoStartConfirm {
 
         public void RevertAdd(Guid id) {
             Logger.Info("Addition of {id} should be reverted", id);
+            if (AutoStartService.TryGetAddedAutoStart(id, out AutoStartEntry autoStart)) {
+                RevertAdd(autoStart);
+            } else {
+                var message = "Failed to get auto start to remove";
+                Logger.Error(message);
+                ShowError(message);
+            }
+        }
+
+        public void RevertAdd(AutoStartEntry autoStart) {
+            Logger.Info("Should add {@autoStart}", autoStart);
             try {
-                if (AutoStartService.TryGetAddedAutoStart(id, out AutoStartEntry autoStart)) {
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
-                        StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    } else {
-                        AutoStartService.RemoveAutoStart(autoStart);
-                    }
+                if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                } else {
+                    AutoStartService.RemoveAutoStart(autoStart);
                 }
             } catch (Exception e) {
                 var message = "Failed to revert add";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(e, message);
+                ShowError(message, e);
             }
         }
 
@@ -316,46 +331,29 @@ namespace AutoStartConfirm {
 
         public void RevertRemove(Guid id) {
             Logger.Info("Removal of {id} should be reverted", id);
+            if (AutoStartService.TryGetRemovedAutoStart(id, out AutoStartEntry autoStart)) {
+                RevertRemove(autoStart);
+            } else {
+                var message = "Failed to get auto start to add";
+                Logger.Error(message);
+                ShowError(message);
+            }
+        }
+
+        public void RevertRemove(AutoStartEntry autoStart) {
+            Logger.Info("Should remove {@autoStart}", autoStart);
             try {
-                if (AutoStartService.TryGetRemovedAutoStart(id, out AutoStartEntry autoStart)) {
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
-                        StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    } else {
-                        AutoStartService.AddAutoStart(autoStart);
-                    }
+                if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                } else {
+                    AutoStartService.AddAutoStart(autoStart);
                 }
             } catch (Exception e) {
                 var message = "Failed to revert remove";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(e, message);
-            }
-        }
-
-        public void RevertAdd(AutoStartEntry autoStart) {
-            Logger.Trace("RevertAdd called");
-            try {
-                var autoStartService = new AutoStartService();
-                autoStartService.RemoveAutoStart(autoStart);
-            } catch (Exception e) {
-                var message = "Failed to revert add";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(e, message);
-            }
-        }
-
-        public void RevertRemove(AutoStartEntry autoStart) {
-            Logger.Trace("RevertRemove called");
-            try { 
-                var autoStartService = new AutoStartService();
-                autoStartService.AddAutoStart(autoStart);
-            } catch (Exception e) {
-                var message = "Failed to revert remove";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(e, message);
+                ShowError(message, e);
             }
         }
 
@@ -367,7 +365,7 @@ namespace AutoStartConfirm {
                 var message = $"Failed to confirm add of {id}";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(e, message);
+                ShowError(message, e);
             }
         }
 
@@ -379,7 +377,7 @@ namespace AutoStartConfirm {
                 var message = $"Failed to confirm remove of {id}";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(e, message);
+                ShowError(message, e);
             }
         }
 

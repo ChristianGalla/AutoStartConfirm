@@ -7,7 +7,7 @@
         xmlns:AutoStarts="clr-namespace:AutoStartConfirm.AutoStarts"
         xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters"
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-    x:Name="window"
+        x:Name="window"
         x:Class="AutoStartConfirm.MainWindow"
         mc:Ignorable="d"
         Title="Auto Start Confirm"
@@ -17,7 +17,8 @@
         WindowState="Maximized">
     <Window.Resources>
         <myConverters:CanConfirmConverter x:Key="CanConfirmConverter" />
-        <myConverters:CanRevertConverter x:Key="CanRevertConverter" />
+        <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
+        <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -59,7 +60,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click">Remove</Button>
+                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Remove</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -94,7 +95,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Name="AddConfirmButton" Click="AddConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="AddRevertButton" Click="AddRevertButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanRevertConverter}}">Revert add</Button>
+                                        <Button Name="AddRevertButton" Click="AddRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Revert add</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -130,7 +131,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Name="RemoveConfirmButton" Click="RemoveConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="RemoveRevertButton" Click="RemoveRevertButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanRevertConverter}}">Revert remove</Button>
+                                        <Button Name="RemoveRevertButton" Click="RemoveRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeAddedConverter}}">Revert remove</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

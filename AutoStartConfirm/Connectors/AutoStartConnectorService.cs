@@ -120,6 +120,17 @@ namespace AutoStartConfirm.Connectors {
         #region IAutoStartConnector implementation
         public Category Category => throw new NotImplementedException();
 
+
+        public bool CanBeAdded(AutoStartEntry autoStart) {
+            Logger.Trace("Checking if auto start {@autoStart} can be added", autoStart);
+            return Connectors[autoStart.Category].CanBeAdded(autoStart);
+        }
+
+        public bool CanBeRemoved(AutoStartEntry autoStart) {
+            Logger.Trace("Checking if auto start {@autoStart} can be removed", autoStart);
+            return Connectors[autoStart.Category].CanBeRemoved(autoStart);
+        }
+
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Info("Adding auto start {@autoStart}", autoStart);
             Connectors[autoStart.Category].AddAutoStart(autoStart);
@@ -128,6 +139,26 @@ namespace AutoStartConfirm.Connectors {
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.Info("Removing auto start {@autoStart}", autoStart);
             Connectors[autoStart.Category].RemoveAutoStart(autoStart);
+        }
+
+        public bool CanBeEnabled(AutoStartEntry autoStart) {
+            Logger.Trace("Checking if auto start {@autoStart} can be enabled", autoStart);
+            return Connectors[autoStart.Category].CanBeEnabled(autoStart);
+        }
+
+        public bool CanBeDisabled(AutoStartEntry autoStart) {
+            Logger.Trace("Checking if auto start {@autoStart} can be disabled", autoStart);
+            return Connectors[autoStart.Category].CanBeDisabled(autoStart);
+        }
+
+        public void EnableAutoStart(AutoStartEntry autoStart) {
+            Logger.Info("Enabling auto start {@autoStart}", autoStart);
+            Connectors[autoStart.Category].EnableAutoStart(autoStart);
+        }
+
+        public void DisableAutoStart(AutoStartEntry autoStart) {
+            Logger.Info("Disabling auto start {@autoStart}", autoStart);
+            Connectors[autoStart.Category].DisableAutoStart(autoStart);
         }
 
         public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {

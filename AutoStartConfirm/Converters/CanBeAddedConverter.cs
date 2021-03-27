@@ -7,19 +7,14 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    class CanRevertConverter : IValueConverter {
+    class CanBeAddedConverter : IValueConverter {
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-			var status = (ConfirmStatus)value;
-			return status != ConfirmStatus.Reverted;
+			var autoStart = (AutoStartEntry)value;
+			return App.GetInstance().AutoStartService.CanAutoStartBeAdded(autoStart);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-			var canRevert = (bool)value;
-			if (canRevert) {
-				return ConfirmStatus.New;
-			} else {
-				return ConfirmStatus.Reverted;
-			}
+			throw new NotSupportedException();
 		}
 	}
 }

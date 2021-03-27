@@ -47,7 +47,6 @@ namespace AutoStartConfirm.Connectors {
         #region IAutoStartConnector implementation
         public abstract Category Category { get; }
 
-        // todo
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
@@ -81,21 +80,36 @@ namespace AutoStartConfirm.Connectors {
             monitor = null;
         }
 
-        // todo
-        public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("AddAutoStart called for {Value} in {Path}", autoStart.Value, autoStart.Path);
-            if (!(autoStart is FolderAutoStartEntry)) {
-                throw new ArgumentException("Parameter must be of type FolderAutoStartEntry");
-            }
-            FolderAutoStartEntry regAutoStart = (FolderAutoStartEntry)autoStart;
+        public bool CanBeAdded(AutoStartEntry autoStart) {
+            return false;
         }
 
-        // todo
+        public bool CanBeRemoved(AutoStartEntry autoStart) {
+            return false;
+        }
+
+        public void AddAutoStart(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
+        }
+
         public void RemoveAutoStart(AutoStartEntry autoStartEntry) {
-            Logger.Trace("RemoveAutoStart called for {Value} in {Path}", autoStartEntry.Value, autoStartEntry.Path);
-            if (!(autoStartEntry is FolderAutoStartEntry)) {
-                throw new ArgumentException("Parameter must be of type FolderAutoStartEntry");
-            }
+            throw new NotImplementedException();
+        }
+
+        public bool CanBeEnabled(AutoStartEntry autoStart) {
+            return false;
+        }
+
+        public bool CanBeDisabled(AutoStartEntry autoStart) {
+            return false;
+        }
+
+        public void EnableAutoStart(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
+        }
+
+        public void DisableAutoStart(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
         }
         #endregion
 

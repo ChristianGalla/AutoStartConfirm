@@ -22,8 +22,18 @@ namespace AutoStartConfirm.Connectors {
 
         IList<AutoStartEntry> GetCurrentAutoStarts();
 
+        bool CanBeAdded(AutoStartEntry autoStart);
+        bool CanBeRemoved(AutoStartEntry autoStart);
+
         void AddAutoStart(AutoStartEntry autoStart);
         void RemoveAutoStart(AutoStartEntry autoStart);
+
+
+        bool CanBeEnabled(AutoStartEntry autoStart);
+        bool CanBeDisabled(AutoStartEntry autoStart);
+
+        void EnableAutoStart(AutoStartEntry autoStart);
+        void DisableAutoStart(AutoStartEntry autoStart);
 
         #region Watcher
         void StartWatcher();

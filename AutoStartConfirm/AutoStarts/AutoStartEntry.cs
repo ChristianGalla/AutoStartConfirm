@@ -38,7 +38,7 @@ namespace AutoStartConfirm.AutoStarts
         }
 
         public override int GetHashCode() {
-            return Category.GetHashCode() ^ Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
+            return Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
         }
 
         public AutoStartEntry DeepCopy() {

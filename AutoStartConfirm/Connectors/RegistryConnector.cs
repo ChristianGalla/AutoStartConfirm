@@ -246,8 +246,36 @@ namespace AutoStartConfirm.Connectors {
             monitor = null;
         }
 
+        public bool CanBeAdded(AutoStartEntry autoStart) {
+            Logger.Trace("CanBeAdded called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            try {
+                AddAutoStart(autoStart, true);
+            } catch (Exception) {
+                return false;
+            }
+            return true;
+        }
+
+        public bool CanBeRemoved(AutoStartEntry autoStart) {
+            Logger.Trace("CanBeRemoved called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            try {
+                RemoveAutoStart(autoStart, true);
+            } catch (Exception) {
+                return false;
+            }
+            return true;
+        }
+
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("AddAutoStart called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            AddAutoStart(autoStart, false);
+        }
+
+        public void RemoveAutoStart(AutoStartEntry autoStart) {
+            RemoveAutoStart(autoStart, false);
+        }
+
+        protected void AddAutoStart(AutoStartEntry autoStart, bool dryRun) {
+            Logger.Trace("AddAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStart.Value, autoStart.Path, dryRun);
             if (!(autoStart is RegistryAutoStartEntry)) {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
@@ -259,7 +287,10 @@ namespace AutoStartConfirm.Connectors {
             var valueName = regAutoStart.Path.Substring(lastDelimiterPos + 1);
             try {
                 using (var registry = GetBaseRegistry())
-                using (var key = registry.OpenSubKey(subKeyPath, true)) {
+                using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
+                    if (key == null && dryRun) {
+                        return;
+                    }
                     object value = key.GetValue(valueName, null);
                     if (value != null) {
                         var currentValueKind = key.GetValueKind(valueName);
@@ -270,8 +301,15 @@ namespace AutoStartConfirm.Connectors {
                     switch (regAutoStart.RegistryValueKind) {
                         case RegistryValueKind.String:
                         case RegistryValueKind.ExpandString: {
-                                if (value != null && !(string.Equals((string)value, regAutoStart.Value, StringComparison.OrdinalIgnoreCase))) {
-                                    throw new Exception($"Value {valueName} of key {keyPath} already set to value {(string)value}");
+                                if (value != null) {
+                                    if (!string.Equals((string)value, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                                        throw new Exception($"Value {valueName} of key {keyPath} already set to value {(string)value}");
+                                    } else {
+                                        throw new Exception($"Value {valueName} of key {keyPath} already set");
+                                    }
+                                }
+                                if (dryRun) {
+                                    return;
                                 }
                                 Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
                                 Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
@@ -292,10 +330,13 @@ namespace AutoStartConfirm.Connectors {
                                     }
                                 }
                                 if (!exists) {
+                                    if (dryRun) {
+                                        return;
+                                    }
                                     Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
                                     Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
                                 } else {
-                                    Logger.Info("{Value} already exists at {Path}", regAutoStart.Value, regAutoStart.Path);
+                                    throw new Exception($"{regAutoStart.Value} already exists at {regAutoStart.Path}");
                                 }
                                 break;
                             }
@@ -314,8 +355,8 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public void RemoveAutoStart(AutoStartEntry autoStartEntry) {
-            Logger.Trace("RemoveAutoStart called for {Value} in {Path}", autoStartEntry.Value, autoStartEntry.Path);
+        protected void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun) {
+            Logger.Trace("RemoveAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStartEntry.Value, autoStartEntry.Path, dryRun);
             if (!(autoStartEntry is RegistryAutoStartEntry)) {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
@@ -327,20 +368,22 @@ namespace AutoStartConfirm.Connectors {
             var valueName = registryAutoStartEntry.Path.Substring(lastDelimiterPos + 1);
             try {
                 using (var registry = GetBaseRegistry())
-                using (var key = registry.OpenSubKey(subKeyPath, true)) {
+                using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
                     if (key == null) {
-                        Logger.Info("{Path} not found", registryAutoStartEntry.Path);
-                        return;
+                        throw new ArgumentException("Path not found");
                     }
                     switch (key.GetValueKind(valueName)) {
                         case RegistryValueKind.String:
                         case RegistryValueKind.ExpandString: {
                                 string value = (string)key.GetValue(valueName);
                                 if (value == registryAutoStartEntry.Value) {
+                                    if (dryRun) {
+                                        return;
+                                    }
                                     key.DeleteValue(valueName);
                                     Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 } else {
-                                    Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                    throw new ArgumentException("Value not found");
                                 }
                                 break;
                             }
@@ -356,6 +399,9 @@ namespace AutoStartConfirm.Connectors {
                                     }
                                 }
                                 if (exists) {
+                                    if (dryRun) {
+                                        return;
+                                    }
                                     if (newValues.Count == 0) {
                                         key.DeleteValue(valueName);
                                     } else {
@@ -363,7 +409,7 @@ namespace AutoStartConfirm.Connectors {
                                     }
                                     Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                                 } else {
-                                    Logger.Info("{Value} not found in {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                    throw new ArgumentException("Value not found");
                                 }
                                 break;
                             }
@@ -379,6 +425,26 @@ namespace AutoStartConfirm.Connectors {
                 var err = new Exception($"Failed to remove auto start {registryAutoStartEntry.Value} from {registryAutoStartEntry.Path}", ex);
                 throw err;
             }
+        }
+
+        // todo
+        public bool CanBeEnabled(AutoStartEntry autoStart) {
+            return false;
+        }
+
+        // todo
+        public bool CanBeDisabled(AutoStartEntry autoStart) {
+            return false;
+        }
+
+        // todo
+        public void EnableAutoStart(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
+        }
+
+        // todo
+        public void DisableAutoStart(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -398,6 +464,7 @@ namespace AutoStartConfirm.Connectors {
         public void Dispose() {
             Dispose(true);
         }
+
         #endregion
 
         #region Events

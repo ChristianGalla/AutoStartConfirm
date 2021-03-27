@@ -83,38 +83,48 @@ namespace AutoStartConfirm.AutoStarts {
 
         public void RemoveAutoStart(Guid Id) {
             Logger.Trace("RemoveAutoStart called");
-            if (TryGetAddedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
-                Connectors.RemoveAutoStart(autoStart);
-                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Removed {@autoStart}", autoStart);
+            if (TryGetAddedAutoStart(Id, out AutoStartEntry autoStart)) {
+                RemoveAutoStart(autoStart);
             }
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("RemoveAutoStart called");
-            if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+            if (Connectors.CanBeDisabled(autoStart)) {
+                Connectors.DisableAutoStart(autoStart);
+            } else {
                 Connectors.RemoveAutoStart(autoStart);
-                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Removed {@autoStart}", autoStart);
             }
+            autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+            Logger.Info("Removed {@autoStart}", autoStart);
         }
 
         public void AddAutoStart(Guid Id) {
             Logger.Trace("AddAutoStart called");
-            if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart) && autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
-                Connectors.AddAutoStart(autoStart);
-                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Added {@autoStart}", autoStart);
+            if (TryGetRemovedAutoStart(Id, out AutoStartEntry autoStart)) {
+                AddAutoStart(autoStart);
             }
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("AddAutoStart called");
-            if (autoStart.ConfirmStatus != ConfirmStatus.Reverted) {
+            if (Connectors.CanBeEnabled(autoStart)) {
+                Connectors.EnableAutoStart(autoStart);
+            } else {
                 Connectors.AddAutoStart(autoStart);
-                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                Logger.Info("Added {@autoStart}", autoStart);
             }
+            autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+            Logger.Info("Added {@autoStart}", autoStart);
+        }
+
+        public bool CanAutoStartBeAdded(AutoStartEntry autoStart) {
+            Logger.Trace("CanAutoStartBeAdded called");
+            return Connectors.CanBeEnabled(autoStart) || Connectors.CanBeAdded(autoStart);
+        }
+
+        public bool CanAutoStartBeRemoved(AutoStartEntry autoStart) {
+            Logger.Trace("CanAutoStartBeRemoved called");
+            return Connectors.CanBeDisabled(autoStart) || Connectors.CanBeRemoved(autoStart);
         }
 
         public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
