@@ -24,8 +24,7 @@
 
     <Property Id="INSTALLSHORTCUT" Value="0" />
 
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Auto Start Confirm" />
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
+    <Property Id="START_AFTER_INSTALL" Value="1"/>
     
 	  <Directory Id="TARGETDIR" Name="SourceDir">
 		  <Directory Id="ProgramFiles64Folder">
@@ -148,7 +147,7 @@
       <Publish Dialog="ExitDialog"
             Control="Finish"
             Event="DoAction"
-            Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+            Value="LaunchApplication">START_AFTER_INSTALL = 1 and NOT Installed</Publish>
 
       <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
       <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
@@ -160,14 +159,14 @@
       <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
       <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
       <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="DesktopShortcutDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="AdditionalSettingsDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
       <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
       <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
 
-      <Publish Dialog="DesktopShortcutDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
-      <Publish Dialog="DesktopShortcutDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="AdditionalSettingsDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+      <Publish Dialog="AdditionalSettingsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
       
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="DesktopShortcutDlg" Order="1">NOT Installed</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="AdditionalSettingsDlg" Order="1">NOT Installed</Publish>
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
 
@@ -181,18 +180,22 @@
     </UI>
     
     <UI>
-      <Dialog Id="DesktopShortcutDlg" Width="370" Height="270" Title="[ProductName] Setup">
+      <Dialog Id="AdditionalSettingsDlg" Width="370" Height="270" Title="[ProductName] Setup">
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configure if a desktop shourtcut should be created." />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configure additional settings." />
         <Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Additional settings" />
         
         <Control Id="InstallShortcutCheckbox" Type="CheckBox"
-                 X="20" Y="140" Width="200" Height="17"
+                 X="20" Y="65" Width="300" Height="17"
                  Property="INSTALLSHORTCUT" CheckBoxValue="1"
                  Text="Create desktop shortcut for all users" />
+        <Control Id="StartAfterInstallCheckbox" Type="CheckBox"
+                 X="20" Y="85" Width="300" Height="17"
+                 Property="START_AFTER_INSTALL" CheckBoxValue="1"
+                 Text="Start Auto Start Confirm after installation (to System Tray)" />
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
