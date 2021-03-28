@@ -125,6 +125,31 @@ namespace AutoStartConfirm {
             });
         }
 
+        public bool ShowConfirm(string caption, string message = "") {
+            return Application.Current.Dispatcher.Invoke(delegate {
+                // Message boxes can only be shown if a parent window exists
+                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
+                bool newWindow = EnsureMainWindow(true);
+                var ret = MessageBox.Show(Window, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (newWindow) {
+                    Window.Close();
+                }
+                return ret == MessageBoxResult.Yes;
+            });
+        }
+
+        public void ShowSuccess(string caption, string message = "") {
+            Application.Current.Dispatcher.Invoke(delegate {
+                // Message boxes can only be shown if a parent window exists
+                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
+                bool newWindow = EnsureMainWindow(true);
+                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
+                if (newWindow) {
+                    Window.Close();
+                }
+            });
+        }
+
 
         public static App GetInstance() {
             return AppInstance;
@@ -285,12 +310,16 @@ namespace AutoStartConfirm {
         public void RevertAdd(AutoStartEntry autoStart) {
             Logger.Info("Should add {@autoStart}", autoStart);
             try {
+                if (!ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
+                    return;
+                }
                 if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
                     StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
                     autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 } else {
                     AutoStartService.RemoveAutoStart(autoStart);
                 }
+                ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
             } catch (Exception e) {
                 var message = "Failed to revert add";
                 var err = new Exception(message, e);
@@ -343,12 +372,16 @@ namespace AutoStartConfirm {
         public void RevertRemove(AutoStartEntry autoStart) {
             Logger.Info("Should remove {@autoStart}", autoStart);
             try {
+                if (!ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
+                    return;
+                }
                 if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
                     StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
                     autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 } else {
                     AutoStartService.AddAutoStart(autoStart);
                 }
+                ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
             } catch (Exception e) {
                 var message = "Failed to revert remove";
                 var err = new Exception(message, e);
