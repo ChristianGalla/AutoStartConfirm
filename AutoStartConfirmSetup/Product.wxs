@@ -22,7 +22,7 @@
     
     <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
 
-    <Property Id="INSTALLSHORTCUT" Value="0" />
+    <Property Id="INSTALLSHORTCUT" Secure="yes" />
 
     <Property Id="START_AFTER_INSTALL" Value="1"/>
     
