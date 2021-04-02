@@ -173,8 +173,10 @@
     <Compile Include="Connectors\AppInit32Connector.cs" />
     <Compile Include="Connectors\AppInit64Connector.cs" />
     <Compile Include="Converters\CanBeAddedConverter.cs" />
+    <Compile Include="Converters\CanBeEnabledConverter.cs" />
+    <Compile Include="Converters\CanBeDisabledConverter.cs" />
     <Compile Include="Converters\CanBeRemovedConverter.cs" />
-    <Compile Include="Converters\CanConfirmConverter.cs" />
+    <Compile Include="Converters\CanBeConfirmedConverter.cs" />
     <Compile Include="Connectors\AutoStartConnectorService.cs" />
     <Compile Include="AutoStarts\Category.cs" />
     <Compile Include="Connectors\RegistryConnector.cs" />

@@ -111,6 +111,11 @@ namespace AutoStartConfirm.Connectors {
         public void DisableAutoStart(AutoStartEntry autoStart) {
             throw new NotImplementedException();
         }
+
+        // todo
+        public bool IsEnabled(AutoStartEntry autoStart) {
+            return true;
+        }
         #endregion
 
         #region IDisposable Support
@@ -129,11 +134,14 @@ namespace AutoStartConfirm.Connectors {
         public void Dispose() {
             Dispose(true);
         }
+
         #endregion
 
         #region Events
         public event AutoStartChangeHandler Add;
         public event AutoStartChangeHandler Remove;
+        public event AutoStartChangeHandler Enable;
+        public event AutoStartChangeHandler Disable;
         #endregion
     }
 }

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,6 +21,12 @@ namespace AutoStartConfirm {
     /// </summary>
     public partial class MainWindow : Window {
         public bool IsClosed { get; private set; }
+
+        private bool CurrentAutoStartGridNeedsRefresh { get; set; } = false;
+
+        private bool AddAutoStartGridNeedsRefresh { get; set; } = false;
+
+        private bool RemovedAutoStartGridNeedsRefresh { get; set; } = false;
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -53,6 +60,8 @@ namespace AutoStartConfirm {
             }
         }
 
+        private Timer RefreshTimer;
+
         public MainWindow()
         {
             Logger.Trace("Window opened");
@@ -60,6 +69,28 @@ namespace AutoStartConfirm {
             App.AutoStartService.CurrentAutoStartChange += CurrentAutoStartChangeHandler;
             App.AutoStartService.AddAutoStartChange += AddAutoStartChangeHandler;
             App.AutoStartService.RemoveAutoStartChange += RemoveAutoStartChangeHandler;
+
+            RefreshTimer = new Timer(1000);
+            RefreshTimer.Elapsed += OnTimedEvent;
+            RefreshTimer.AutoReset = true;
+            RefreshTimer.Enabled = true;
+        }
+
+        private void OnTimedEvent(Object source, ElapsedEventArgs e) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                if (CurrentAutoStartGridNeedsRefresh) {
+                    CurrentAutoStartGrid.Items.Refresh();
+                    CurrentAutoStartGridNeedsRefresh = false;
+                }
+                if (AddAutoStartGridNeedsRefresh) {
+                    AddedAutoStartGrid.Items.Refresh();
+                    AddAutoStartGridNeedsRefresh = false;
+                }
+                if (RemovedAutoStartGridNeedsRefresh) {
+                    RemovedAutoStartGrid.Items.Refresh();
+                    RemovedAutoStartGridNeedsRefresh = false;
+                }
+            });
         }
 
         protected override void OnClosed(EventArgs e)
@@ -77,6 +108,18 @@ namespace AutoStartConfirm {
 
         private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
             AddRevertButton_Click(sender, e);
+        }
+
+        private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
+            var button = (System.Windows.Controls.Button)sender;
+            var autoStartEntry = (AutoStartEntry)button.DataContext;
+            App.Enable(autoStartEntry.Id);
+        }
+
+        private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
+            var button = (System.Windows.Controls.Button)sender;
+            var autoStartEntry = (AutoStartEntry)button.DataContext;
+            App.Disable(autoStartEntry.Id);
         }
 
         private void AddConfirmButton_Click(object sender, RoutedEventArgs e) {
@@ -109,15 +152,15 @@ namespace AutoStartConfirm {
         #region Event handlers
 
         private void CurrentAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            CurrentAutoStartGrid.Items.Refresh();
+            CurrentAutoStartGridNeedsRefresh = true;
         }
 
         private void AddAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            AddedAutoStartGrid.Items.Refresh();
+            AddAutoStartGridNeedsRefresh = true;
         }
 
         private void RemoveAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            RemovedAutoStartGrid.Items.Refresh();
+            RemovedAutoStartGridNeedsRefresh = true;
         }
 
         #endregion

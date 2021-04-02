@@ -43,6 +43,18 @@ namespace AutoStartConfirm.Notifications {
                     case "confirmAdd":
                         app.ConfirmAdd(Guid.Parse(args["id"]));
                         break;
+                    case "confirmEnable":
+                        app.ConfirmAdd(Guid.Parse(args["id"]));
+                        break;
+                    case "confirmDisable":
+                        app.ConfirmAdd(Guid.Parse(args["id"]));
+                        break;
+                    case "enable":
+                        app.Enable(Guid.Parse(args["id"]));
+                        break;
+                    case "disable":
+                        app.Disable(Guid.Parse(args["id"]));
+                        break;
                     default:
                         break;
                 }

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    class CanBeRemovedConverter : IValueConverter {
+    class CanBeEnabledConverter : IValueConverter {
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
 			var autoStart = (AutoStartEntry)value;
-			if (autoStart.CanBeRemoved.HasValue) {
-				return autoStart.CanBeRemoved.Value;
+			if (autoStart.CanBeEnabled.HasValue) {
+				return autoStart.CanBeEnabled.Value;
 			}
 			Task.Run(() => {
-				App.GetInstance().AutoStartService.LoadCanBeRemoved(autoStart);
+				App.GetInstance().AutoStartService.LoadCanBeEnabled(autoStart);
 			});
 			return false;
 		}

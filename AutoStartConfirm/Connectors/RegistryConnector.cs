@@ -36,6 +36,7 @@ namespace AutoStartConfirm.Connectors {
 
         protected List<RegistryAutoStartEntry> lastAutostarts = null;
 
+        // todo: Add Change handler for enable / disable keys
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
             Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
@@ -108,12 +109,13 @@ namespace AutoStartConfirm.Connectors {
                                     continue;
                                 }
                                 if (value.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
-                                    ret.Add(new RegistryAutoStartEntry {
+                                    var newAutoStart = new RegistryAutoStartEntry {
                                         Category = Category,
                                         Value = value.ToString(),
                                         Path = $"{currentKey}\\{valueName}",
                                         RegistryValueKind = valueKind,
-                                    });
+                                    };
+                                    ret.Add(newAutoStart);
                                 }
                                 break;
                             }
@@ -124,12 +126,13 @@ namespace AutoStartConfirm.Connectors {
                                 }
                                 foreach (var subValue in value) {
                                     if (subValue.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
-                                        ret.Add(new RegistryAutoStartEntry {
+                                        var newAutoStart = new RegistryAutoStartEntry {
                                             Category = Category,
                                             Value = subValue.ToString(),
                                             Path = $"{currentKey}\\{valueName}",
                                             RegistryValueKind = valueKind,
-                                        });
+                                        };
+                                        ret.Add(newAutoStart);
                                     }
                                 }
                                 break;
@@ -446,6 +449,11 @@ namespace AutoStartConfirm.Connectors {
         public void DisableAutoStart(AutoStartEntry autoStart) {
             throw new NotImplementedException();
         }
+
+        // todo
+        public bool IsEnabled(AutoStartEntry autoStart) {
+            return true;
+        }
         #endregion
 
         #region IDisposable Support
@@ -470,6 +478,8 @@ namespace AutoStartConfirm.Connectors {
         #region Events
         public event AutoStartChangeHandler Add;
         public event AutoStartChangeHandler Remove;
+        public event AutoStartChangeHandler Enable;
+        public event AutoStartChangeHandler Disable;
         #endregion
     }
 }

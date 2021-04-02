@@ -16,9 +16,11 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
     <Window.Resources>
-        <myConverters:CanConfirmConverter x:Key="CanConfirmConverter" />
+        <myConverters:CanBeConfirmedConverter x:Key="CanConfirmConverter" />
         <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
         <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
+        <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
+        <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -60,6 +62,8 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
+                                        <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}">Enable</Button>
+                                        <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}">Disable</Button>
                                         <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Remove</Button>
                                     </StackPanel>
                                 </DataTemplate>

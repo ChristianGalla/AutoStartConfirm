@@ -86,6 +86,8 @@ namespace AutoStartConfirm.Connectors {
             foreach (var connector in Connectors.Values) {
                 connector.Add += AddHandler;
                 connector.Remove += RemoveHandler;
+                connector.Enable += EnableHandler;
+                connector.Disable += DisableHandler;
             }
         }
 
@@ -103,6 +105,10 @@ namespace AutoStartConfirm.Connectors {
         public event AutoStartChangeHandler Add;
 
         public event AutoStartChangeHandler Remove;
+
+        public event AutoStartChangeHandler Enable;
+
+        public event AutoStartChangeHandler Disable;
         #endregion
 
         #region Event handlers
@@ -114,6 +120,16 @@ namespace AutoStartConfirm.Connectors {
         private void RemoveHandler(AutoStartEntry removedAutostart) {
             Logger.Trace("RemoveHandler called");
             Remove?.Invoke(removedAutostart);
+        }
+
+        private void EnableHandler(AutoStartEntry enabledAutostart) {
+            Logger.Trace("EnableHandler called");
+            Add?.Invoke(enabledAutostart);
+        }
+
+        private void DisableHandler(AutoStartEntry disabledAutostart) {
+            Logger.Trace("DisableHandler called");
+            Remove?.Invoke(disabledAutostart);
         }
         #endregion
 

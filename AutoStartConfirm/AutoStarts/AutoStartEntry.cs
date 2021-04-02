@@ -21,6 +21,18 @@ namespace AutoStartConfirm.AutoStarts
 
         public ConfirmStatus ConfirmStatus { get; set; }
 
+        [field: NonSerialized]
+        public bool? CanBeEnabled { get; set; }
+
+        [field: NonSerialized]
+        public bool? CanBeDisabled { get; set; }
+
+        [field: NonSerialized]
+        public bool? CanBeAdded { get; set; }
+
+        [field: NonSerialized]
+        public bool? CanBeRemoved { get; set; }
+
         public AutoStartEntry() {
             Id = Guid.NewGuid();
             ConfirmStatus = ConfirmStatus.New;

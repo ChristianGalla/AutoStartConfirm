@@ -42,12 +42,18 @@ namespace AutoStartConfirm {
 
         private static readonly string RevertRemoveParameterName = "--revertRemove";
 
+        private static readonly string EnableParameterName = "--enable";
+
+        private static readonly string DisableParameterName = "--disable";
+
         private App() {
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
             bool isFirstRun = AutoStartService.GetAutoStartFileExists();
             if (!isFirstRun) {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
             }
 
             try {
@@ -71,6 +77,8 @@ namespace AutoStartConfirm {
             if (isFirstRun) {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
             }
             AutoStartService.StartWatcher();
         }
@@ -163,31 +171,8 @@ namespace AutoStartConfirm {
             try {
                 Logger.Info("Starting");
                 Logger.Info("Parameters: {args}", args);
-                for (int i = 0; i < args.Length; i++) {
-                    var arg = args[i];
-                    if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase)) {
-                        Logger.Info("Adding should be reverted");
-                        if (i + 1 >= args.Length) {
-                            throw new ArgumentException("Missing path to file");
-                        }
-                        var path = args[i + 1];
-                        var autoStartEntry = LoadAutoStartFromFile(path);
-                        var autoStartService = new AutoStartService();
-                        autoStartService.RemoveAutoStart(autoStartEntry);
-                        Logger.Info("Finished");
-                        return 0;
-                    } else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase)) {
-                        Logger.Info("Removing should be reverted");
-                        if (i + 1 >= args.Length) {
-                            throw new ArgumentException("Missing path to file");
-                        }
-                        var path = args[i + 1];
-                        var autoStartEntry = LoadAutoStartFromFile(path);
-                        var autoStartService = new AutoStartService();
-                        autoStartService.AddAutoStart(autoStartEntry);
-                        Logger.Info("Finished");
-                        return 0;
-                    }
+                if (HandleCommandLineParameters(args)) {
+                    return 0;
                 }
                 Logger.Info("Normal start");
                 using (App app = new App()) {
@@ -207,6 +192,56 @@ namespace AutoStartConfirm {
                 Logger.Error(err);
                 return 1;
             }
+        }
+
+        /// <summary>
+        /// Handles auto starts if command line parameters are set
+        /// </summary>
+        /// <param name="args">Command line parameters</param>
+        /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
+        private static bool HandleCommandLineParameters(string[] args) {
+            for (int i = 0; i < args.Length; i++) {
+                var arg = args[i];
+                if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase)) {
+                    Logger.Info("Adding should be reverted");
+                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                    var autoStartService = new AutoStartService();
+                    autoStartService.RemoveAutoStart(autoStartEntry);
+                    Logger.Info("Finished");
+                    return true;
+                } else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase)) {
+                    Logger.Info("Removing should be reverted");
+                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                    var autoStartService = new AutoStartService();
+                    autoStartService.AddAutoStart(autoStartEntry);
+                    Logger.Info("Finished");
+                    return true;
+                } else if (string.Equals(arg, EnableParameterName, StringComparison.OrdinalIgnoreCase)) {
+                    Logger.Info("Auto start should be enabled");
+                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                    var autoStartService = new AutoStartService();
+                    autoStartService.EnableAutoStart(autoStartEntry);
+                    Logger.Info("Finished");
+                    return true;
+                } else if (string.Equals(arg, DisableParameterName, StringComparison.OrdinalIgnoreCase)) {
+                    Logger.Info("Auto start should be disabled");
+                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                    var autoStartService = new AutoStartService();
+                    autoStartService.DisableAutoStart(autoStartEntry);
+                    Logger.Info("Finished");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static AutoStartEntry LoadAutoStartFromParameter(string[] args, int i) {
+            if (i + 1 >= args.Length) {
+                throw new ArgumentException("Missing path to file");
+            }
+            var path = args[i + 1];
+            var autoStartEntry = LoadAutoStartFromFile(path);
+            return autoStartEntry;
         }
 
         private static AutoStartEntry LoadAutoStartFromFile(string path) {
@@ -308,24 +343,26 @@ namespace AutoStartConfirm {
         }
 
         public void RevertAdd(AutoStartEntry autoStart) {
-            Logger.Info("Should add {@autoStart}", autoStart);
-            try {
-                if (!ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
-                    return;
+            Task.Run(() => {
+                Logger.Info("Should add {@autoStart}", autoStart);
+                try {
+                    if (!ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
+                        return;
+                    }
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    } else {
+                        AutoStartService.RemoveAutoStart(autoStart);
+                    }
+                    ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
+                } catch (Exception e) {
+                    var message = "Failed to revert add";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
                 }
-                if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
-                    StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                } else {
-                    AutoStartService.RemoveAutoStart(autoStart);
-                }
-                ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
-            } catch (Exception e) {
-                var message = "Failed to revert add";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(message, e);
-            }
+            });
         }
 
         private static void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName) {
@@ -370,24 +407,94 @@ namespace AutoStartConfirm {
         }
 
         public void RevertRemove(AutoStartEntry autoStart) {
-            Logger.Info("Should remove {@autoStart}", autoStart);
-            try {
-                if (!ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
-                    return;
+            Task.Run(() => {
+                Logger.Info("Should remove {@autoStart}", autoStart);
+                try {
+                    if (!ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
+                        return;
+                    }
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                    } else {
+                        AutoStartService.AddAutoStart(autoStart);
+                    }
+                    ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
+                } catch (Exception e) {
+                    var message = "Failed to revert remove";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
                 }
-                if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
-                    StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                } else {
-                    AutoStartService.AddAutoStart(autoStart);
-                }
-                ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
-            } catch (Exception e) {
-                var message = "Failed to revert remove";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(message, e);
+            });
+        }
+
+        public void Enable(Guid id) {
+            Logger.Info("{id} should be enabled", id);
+            if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                Enable(autoStart);
+            } else {
+                var message = "Failed to get auto start to enable";
+                Logger.Error(message);
+                ShowError(message);
             }
+        }
+
+        public void Enable(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                Logger.Info("Should enable {@autoStart}", autoStart);
+                try {
+                    if (!ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
+                        return;
+                    }
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, EnableParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Enabled;
+                    } else {
+                        AutoStartService.EnableAutoStart(autoStart);
+                    }
+                    ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
+                } catch (Exception e) {
+                    var message = "Failed to enable";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
+                }
+            });
+        }
+
+        public void Disable(Guid id) {
+            Logger.Info("{id} should be disabled", id);
+            if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                Disable(autoStart);
+            } else {
+                var message = "Failed to get auto start to disable";
+                Logger.Error(message);
+                ShowError(message);
+            }
+        }
+
+        public void Disable(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                Logger.Info("Should disable {@autoStart}", autoStart);
+                try {
+                    if (!ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
+                        return;
+                    }
+                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                        StartSubProcessAsAdmin(autoStart, DisableParameterName);
+                        autoStart.ConfirmStatus = ConfirmStatus.Disabled;
+                    } else {
+                        AutoStartService.DisableAutoStart(autoStart);
+                    }
+                    ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
+                } catch (Exception e) {
+                    var message = "Failed to disable";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
+                }
+            });
         }
 
         public void ConfirmAdd(Guid id) {
@@ -403,17 +510,18 @@ namespace AutoStartConfirm {
         }
 
         public void ConfirmRemove(Guid id) {
-            try {
-                Logger.Trace("ConfirmRemove called");
-                AutoStartService.ConfirmRemove(id);
-            } catch (Exception e) {
-                var message = $"Failed to confirm remove of {id}";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(message, e);
-            }
+            Task.Run(() => {
+                try {
+                    Logger.Trace("ConfirmRemove called");
+                    AutoStartService.ConfirmRemove(id);
+                } catch (Exception e) {
+                    var message = $"Failed to confirm remove of {id}";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
+                }
+            });
         }
-
 
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
@@ -432,6 +540,16 @@ namespace AutoStartConfirm {
                 HasOwnAutoStart = false;
             }
             NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
+        }
+
+        private void EnableHandler(AutoStartEntry enabledAutostart) {
+            Logger.Trace("EnableHandler called");
+            NotificationService.ShowEnabledAutoStartEntryNotification(enabledAutostart);
+        }
+
+        private void DisableHandler(AutoStartEntry disabledAutostart) {
+            Logger.Trace("DisableHandler called");
+            NotificationService.ShowDisabledAutoStartEntryNotification(disabledAutostart);
         }
         #endregion
 

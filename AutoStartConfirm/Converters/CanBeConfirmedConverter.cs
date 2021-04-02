@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    class CanConfirmConverter : IValueConverter {
+    class CanBeConfirmedConverter : IValueConverter {
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
 			var status = (ConfirmStatus)value;
 			return status == ConfirmStatus.New;

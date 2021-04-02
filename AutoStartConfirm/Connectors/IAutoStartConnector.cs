@@ -35,6 +35,8 @@ namespace AutoStartConfirm.Connectors {
         void EnableAutoStart(AutoStartEntry autoStart);
         void DisableAutoStart(AutoStartEntry autoStart);
 
+        bool IsEnabled(AutoStartEntry autoStart);
+
         #region Watcher
         void StartWatcher();
         void StopWatcher();
@@ -44,6 +46,8 @@ namespace AutoStartConfirm.Connectors {
         #region Events
         event AutoStartChangeHandler Add;
         event AutoStartChangeHandler Remove;
+        event AutoStartChangeHandler Enable;
+        event AutoStartChangeHandler Disable;
 
         #endregion
     }

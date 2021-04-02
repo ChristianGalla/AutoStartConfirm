@@ -41,6 +41,8 @@ namespace AutoStartConfirm.AutoStarts {
             PathToRemovedAutoStarts = $"{basePath}RemovedAutoStarts.bin";
             Connectors.Add += AddHandler;
             Connectors.Remove += RemoveHandler;
+            Connectors.Enable += EnableHandler;
+            Connectors.Disable += DisableHandler;
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
@@ -90,13 +92,27 @@ namespace AutoStartConfirm.AutoStarts {
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("RemoveAutoStart called");
-            if (Connectors.CanBeDisabled(autoStart)) {
-                Connectors.DisableAutoStart(autoStart);
-            } else {
-                Connectors.RemoveAutoStart(autoStart);
+            if (Connectors.CanBeEnabled(autoStart)) {
+                // remove disabled status to allow new entries for example at the same registry key in the future
+                Connectors.EnableAutoStart(autoStart);
             }
+            Connectors.RemoveAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.Info("Removed {@autoStart}", autoStart);
+        }
+
+        public void DisableAutoStart(Guid Id) {
+            Logger.Trace("DisableAutoStart called");
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
+                DisableAutoStart(autoStart);
+            }
+        }
+
+        public void DisableAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("DisableAutoStart called");
+            Connectors.DisableAutoStart(autoStart);
+            autoStart.ConfirmStatus = ConfirmStatus.Disabled;
+            Logger.Info("Disabled {@autoStart}", autoStart);
         }
 
         public void AddAutoStart(Guid Id) {
@@ -117,14 +133,99 @@ namespace AutoStartConfirm.AutoStarts {
             Logger.Info("Added {@autoStart}", autoStart);
         }
 
+        public void EnableAutoStart(Guid Id) {
+            Logger.Trace("EnableAutoStart called");
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
+                EnableAutoStart(autoStart);
+            }
+        }
+
+        public void EnableAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("EnableAutoStart called");
+            Connectors.EnableAutoStart(autoStart);
+            autoStart.ConfirmStatus = ConfirmStatus.Enabled;
+            Logger.Info("Enabled {@autoStart}", autoStart);
+        }
+
+        public bool CanAutoStartBeEnabled(AutoStartEntry autoStart) {
+            Logger.Trace("CanAutoStartBeEnabled called");
+            return Connectors.CanBeEnabled(autoStart);
+        }
+
+        public bool CanAutoStartBeDisabled(AutoStartEntry autoStart) {
+            Logger.Trace("CanAutoStartBeDisabled called");
+            return Connectors.CanBeDisabled(autoStart);
+        }
+
         public bool CanAutoStartBeAdded(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeAdded called");
-            return Connectors.CanBeEnabled(autoStart) || Connectors.CanBeAdded(autoStart);
+            return Connectors.CanBeAdded(autoStart);
         }
 
         public bool CanAutoStartBeRemoved(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeRemoved called");
-            return Connectors.CanBeDisabled(autoStart) || Connectors.CanBeRemoved(autoStart);
+            return Connectors.CanBeRemoved(autoStart);
+        }
+
+        public void LoadCanBeAdded(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                autoStart.CanBeAdded = CanAutoStartBeAdded(autoStart);
+                CurrentAutoStartChange?.Invoke(autoStart);
+                RemoveAutoStartChange?.Invoke(autoStart);
+            });
+        }
+
+        public void LoadCanBeRemoved(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                autoStart.CanBeRemoved = CanAutoStartBeRemoved(autoStart);
+                CurrentAutoStartChange?.Invoke(autoStart);
+                AddAutoStartChange?.Invoke(autoStart);
+            });
+        }
+
+        public void LoadCanBeEnabled(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                autoStart.CanBeEnabled = CanAutoStartBeEnabled(autoStart);
+                CurrentAutoStartChange?.Invoke(autoStart);
+            });
+        }
+
+        public void LoadCanBeDisabled(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                autoStart.CanBeDisabled = CanAutoStartBeDisabled(autoStart);
+                CurrentAutoStartChange?.Invoke(autoStart);
+            });
+        }
+
+        public void ResetEditablePropertiesOfCurrentAutoStarts() {
+            foreach(var autoStart in CurrentAutoStarts) {
+                var autoStartValue = autoStart.Value;
+                ResetAllDynamicFields(autoStartValue);
+                CurrentAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        public void ResetEditablePropertiesOfAddedAutoStarts() {
+            foreach (var autoStart in AddedAutoStarts) {
+                var autoStartValue = autoStart.Value;
+                ResetAllDynamicFields(autoStartValue);
+                AddAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        public void ResetEditablePropertiesOfRemoved() {
+            foreach (var autoStart in RemovedAutoStarts) {
+                var autoStartValue = autoStart.Value;
+                ResetAllDynamicFields(autoStartValue);
+                RemoveAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        private static void ResetAllDynamicFields(AutoStartEntry autoStartValue) {
+            autoStartValue.CanBeAdded = null;
+            autoStartValue.CanBeRemoved = null;
+            autoStartValue.CanBeEnabled = null;
+            autoStartValue.CanBeDisabled = null;
         }
 
         public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
@@ -275,6 +376,15 @@ namespace AutoStartConfirm.AutoStarts {
                 }
                 foreach (var addedAutoStart in autoStartsToAdd) {
                     AddHandler(addedAutoStart);
+                    // todo: separate list for disabled auto starts?
+                    //if (addedAutoStart.Enabled.HasValue) {
+                    //    if (addedAutoStart.Enabled.Value) {
+                    //        // ignore default
+                    //        // EnableHandler(addedAutoStart);
+                    //    } else {
+                    //        DisableHandler(addedAutoStart);
+                    //    }
+                    //}
                 }
                 Logger.Trace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {
@@ -299,6 +409,10 @@ namespace AutoStartConfirm.AutoStarts {
         public event AutoStartChangeHandler Add;
 
         public event AutoStartChangeHandler Remove;
+
+        public event AutoStartChangeHandler Enable;
+
+        public event AutoStartChangeHandler Disable;
 
         public event AutoStartChangeHandler Confirm;
 
@@ -326,6 +440,8 @@ namespace AutoStartConfirm.AutoStarts {
                 } else {
                     AddedAutoStarts.Add(addedAutostart.Id, addedAutostart);
                 }
+                // todo: ResetAllDynamicFields of auto starts at same location
+                ResetAllDynamicFields(addedAutostart);
                 Add?.Invoke(addedAutostart);
                 CurrentAutoStartChange?.Invoke(addedAutostart);
                 AddAutoStartChange?.Invoke(addedAutostart); // todo: only fire on revert
@@ -333,6 +449,42 @@ namespace AutoStartConfirm.AutoStarts {
                 Logger.Trace("AddHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Add handler failed", e);
+                Logger.Error(err);
+            }
+        }
+
+        private void EnableHandler(AutoStartEntry enabledAutostart) {
+            try {
+                Logger.Info("Auto start enabled: {@value}", enabledAutostart);
+                if (CurrentAutoStarts.ContainsKey(enabledAutostart.Id)) {
+                    CurrentAutoStarts[enabledAutostart.Id] = enabledAutostart;
+                } else {
+                    CurrentAutoStarts.Add(enabledAutostart.Id, enabledAutostart);
+                }
+                ResetAllDynamicFields(enabledAutostart);
+                Enable?.Invoke(enabledAutostart);
+                CurrentAutoStartChange?.Invoke(enabledAutostart);
+                Logger.Trace("EnableHandler finished");
+            } catch (Exception e) {
+                var err = new Exception("Enable handler failed", e);
+                Logger.Error(err);
+            }
+        }
+
+        private void DisableHandler(AutoStartEntry disabledAutostart) {
+            try {
+                Logger.Info("Auto start disabled: {@value}", disabledAutostart);
+                if (CurrentAutoStarts.ContainsKey(disabledAutostart.Id)) {
+                    CurrentAutoStarts[disabledAutostart.Id] = disabledAutostart;
+                } else {
+                    CurrentAutoStarts.Add(disabledAutostart.Id, disabledAutostart);
+                }
+                ResetAllDynamicFields(disabledAutostart);
+                Disable?.Invoke(disabledAutostart);
+                CurrentAutoStartChange?.Invoke(disabledAutostart);
+                Logger.Trace("DisableHandler finished");
+            } catch (Exception e) {
+                var err = new Exception("Disable handler failed", e);
                 Logger.Error(err);
             }
         }
@@ -358,6 +510,8 @@ namespace AutoStartConfirm.AutoStarts {
                 } else {
                     RemovedAutoStarts.Add(removedAutostart.Id, removedAutostartCopy);
                 }
+                // todo: ResetAllDynamicFields of auto starts at same location
+                ResetAllDynamicFields(removedAutostartCopy);
                 Remove?.Invoke(removedAutostartCopy);
                 CurrentAutoStartChange?.Invoke(removedAutostart);
                 AddAutoStartChange?.Invoke(removedAutostart); // todo: only fire on revert

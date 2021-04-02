@@ -9,5 +9,7 @@ namespace AutoStartConfirm.AutoStarts {
         New,
         Confirmed,
         Reverted,
+        Enabled,
+        Disabled,
     }
 }
