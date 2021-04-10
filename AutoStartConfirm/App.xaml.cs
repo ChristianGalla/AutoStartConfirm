@@ -90,35 +90,37 @@ namespace AutoStartConfirm {
         }
 
         public void ToggleOwnAutoStart() {
-            try {
-                Logger.Info("ToggleOwnAutoStart called");
-                var ownAutoStart = new RegistryAutoStartEntry() {
-                    Category = Category.CurrentUserRun64,
-                    Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
-                    Value = Assembly.GetEntryAssembly().Location,
-                    RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
-                    ConfirmStatus = ConfirmStatus.New,
-                };
+            Task.Run(() => {
+                try {
+                    Logger.Info("ToggleOwnAutoStart called");
+                    var ownAutoStart = new RegistryAutoStartEntry() {
+                        Category = Category.CurrentUserRun64,
+                        Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
+                        Value = Assembly.GetEntryAssembly().Location,
+                        RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
+                        ConfirmStatus = ConfirmStatus.New,
+                    };
 
-                if (HasOwnAutoStart) {
-                    Logger.Info("Shall remove own auto start");
-                    AutoStartService.RemoveAutoStart(ownAutoStart);
-                } else {
-                    Logger.Info("Shall add own auto start");
-                    AutoStartService.AddAutoStart(ownAutoStart);
+                    if (HasOwnAutoStart) {
+                        Logger.Info("Shall remove own auto start");
+                        AutoStartService.RemoveAutoStart(ownAutoStart);
+                    } else {
+                        Logger.Info("Shall add own auto start");
+                        AutoStartService.AddAutoStart(ownAutoStart);
+                    }
+                    ownAutoStart.ConfirmStatus = ConfirmStatus.New;
+                    Logger.Trace("Own auto start toggled");
+                } catch (Exception e) {
+                    var message = "Failed to change own auto start";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    ShowError(message, e);
                 }
-                ownAutoStart.ConfirmStatus = ConfirmStatus.New;
-                Logger.Trace("Own auto start toggled");
-            } catch (Exception e) {
-                var message = $"Failed to change own auto start";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                ShowError(message, e);
-            }
+            });
         }
 
         public void ShowError(string caption, Exception error) {
-            ShowError(caption, error.ToString());
+            ShowError(caption, error.Message);
         }
 
         public void ShowError(string caption, string message = "") {

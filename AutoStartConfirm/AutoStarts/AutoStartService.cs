@@ -197,7 +197,20 @@ namespace AutoStartConfirm.AutoStarts {
             });
         }
 
-        public void ResetEditablePropertiesOfCurrentAutoStarts() {
+        /// <summary>
+        /// Resets all dynamic properties of all known auto starts at the same path as the given one.
+        /// </summary>
+        /// <param name="autoStart"></param>
+        public void ResetEditablePropertiesOfAutoStarts(AutoStartEntry autoStart) {
+            ResetEditablePropertiesOfCurrentAutoStarts(autoStart);
+            ResetEditablePropertiesOfAddedAutoStarts(autoStart);
+            ResetEditablePropertiesOfRemovedAutoStarts(autoStart);
+        }
+
+        /// <summary>
+        /// Resets all dynamic properties of all current auto starts.
+        /// </summary>
+        public void ResetEditablePropertiesOfAllCurrentAutoStarts() {
             foreach(var autoStart in CurrentAutoStarts) {
                 var autoStartValue = autoStart.Value;
                 ResetAllDynamicFields(autoStartValue);
@@ -205,7 +218,25 @@ namespace AutoStartConfirm.AutoStarts {
             }
         }
 
-        public void ResetEditablePropertiesOfAddedAutoStarts() {
+        /// <summary>
+        /// Resets all dynamic properties of all current auto starts at the same path as the given one.
+        /// </summary>
+        /// <param name="autoStart"></param>
+        public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart) {
+            foreach (var currentAutoStart in CurrentAutoStarts) {
+                var autoStartValue = currentAutoStart.Value;
+                if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+                ResetAllDynamicFields(autoStartValue);
+                CurrentAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        /// <summary>
+        /// Resets all dynamic properties of all added auto starts.
+        /// </summary>
+        public void ResetEditablePropertiesOfAllAddedAutoStarts() {
             foreach (var autoStart in AddedAutoStarts) {
                 var autoStartValue = autoStart.Value;
                 ResetAllDynamicFields(autoStartValue);
@@ -213,9 +244,42 @@ namespace AutoStartConfirm.AutoStarts {
             }
         }
 
-        public void ResetEditablePropertiesOfRemoved() {
+        /// <summary>
+        /// Resets all dynamic properties of all added auto starts at the same path as the given one.
+        /// </summary>
+        /// <param name="autoStart"></param>
+        public void ResetEditablePropertiesOfAddedAutoStarts(AutoStartEntry autoStart) {
+            foreach (var addedAutoStart in AddedAutoStarts) {
+                var autoStartValue = addedAutoStart.Value;
+                if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+                ResetAllDynamicFields(autoStartValue);
+                AddAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        /// <summary>
+        /// Resets all dynamic properties of all removed auto starts.
+        /// </summary>
+        public void ResetEditablePropertiesOfAllRemovedAutoStarts() {
             foreach (var autoStart in RemovedAutoStarts) {
                 var autoStartValue = autoStart.Value;
+                ResetAllDynamicFields(autoStartValue);
+                RemoveAutoStartChange?.Invoke(autoStartValue);
+            }
+        }
+
+        /// <summary>
+        /// Resets all dynamic properties of all added auto starts at the same path as the given one.
+        /// </summary>
+        /// <param name="autoStart"></param>
+        public void ResetEditablePropertiesOfRemovedAutoStarts(AutoStartEntry autoStart) {
+            foreach (var removedAutoStart in RemovedAutoStarts) {
+                var autoStartValue = removedAutoStart.Value;
+                if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
                 ResetAllDynamicFields(autoStartValue);
                 RemoveAutoStartChange?.Invoke(autoStartValue);
             }
@@ -253,10 +317,10 @@ namespace AutoStartConfirm.AutoStarts {
                     IFormatter formatter = new BinaryFormatter();
                     try {
                         var ret = (Dictionary<Guid, AutoStartEntry>)formatter.Deserialize(stream);
-                        Logger.Trace("Loaded last saved auto starts from file {path}", path);
+                        Logger.Trace($"Loaded last saved auto starts from file \"{path}\"");
                         return ret;
                     } catch (Exception ex) {
-                        var err = new Exception($"Failed to deserialize from file {path}", ex);
+                        var err = new Exception($"Failed to deserialize from file \"{path}\"", ex);
                         throw err;
                     }
                 }
@@ -291,7 +355,7 @@ namespace AutoStartConfirm.AutoStarts {
                     var folderPath = PathToLastAutoStarts.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
                     Directory.CreateDirectory(folderPath);
                 } catch (Exception ex) {
-                    var err = new Exception($"Failed to create folder for file {path}", ex);
+                    var err = new Exception($"Failed to create folder for file \"{path}\"", ex);
                     throw err;
                 }
                 try {
@@ -300,12 +364,12 @@ namespace AutoStartConfirm.AutoStarts {
                         formatter.Serialize(stream, dictionary);
                     }
                 } catch (Exception ex) {
-                    var err = new Exception($"Failed to write file {path}", ex);
+                    var err = new Exception($"Failed to write file \"{path}\"", ex);
                     throw err;
                 }
-                Logger.Trace("Saved auto starts to file {path}", path);
+                Logger.Trace($"Saved auto starts to file \"{path}\"");
             } catch (Exception ex) {
-                var err = new Exception($"Failed to save auto starts to file {path}", ex);
+                var err = new Exception($"Failed to save auto starts to file \"{path}\"", ex);
                 Logger.Error(err);
                 throw err;
             }
@@ -440,12 +504,11 @@ namespace AutoStartConfirm.AutoStarts {
                 } else {
                     AddedAutoStarts.Add(addedAutostart.Id, addedAutostart);
                 }
-                // todo: ResetAllDynamicFields of auto starts at same location
                 ResetAllDynamicFields(addedAutostart);
+                ResetEditablePropertiesOfAutoStarts(addedAutostart);
                 Add?.Invoke(addedAutostart);
                 CurrentAutoStartChange?.Invoke(addedAutostart);
-                AddAutoStartChange?.Invoke(addedAutostart); // todo: only fire on revert
-                RemoveAutoStartChange?.Invoke(addedAutostart);
+                AddAutoStartChange?.Invoke(addedAutostart);
                 Logger.Trace("AddHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Add handler failed", e);
@@ -510,11 +573,10 @@ namespace AutoStartConfirm.AutoStarts {
                 } else {
                     RemovedAutoStarts.Add(removedAutostart.Id, removedAutostartCopy);
                 }
-                // todo: ResetAllDynamicFields of auto starts at same location
                 ResetAllDynamicFields(removedAutostartCopy);
+                ResetEditablePropertiesOfAutoStarts(removedAutostartCopy);
                 Remove?.Invoke(removedAutostartCopy);
                 CurrentAutoStartChange?.Invoke(removedAutostart);
-                AddAutoStartChange?.Invoke(removedAutostart); // todo: only fire on revert
                 RemoveAutoStartChange?.Invoke(removedAutostartCopy);
                 Logger.Trace("RemoveHandler finished");
             } catch (Exception e) {

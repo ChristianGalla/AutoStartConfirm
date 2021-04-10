@@ -183,6 +183,8 @@
     <Compile Include="Connectors\BootExecuteConnector.cs" />
     <Compile Include="Connectors\IAutoStartConnector.cs" />
     <Compile Include="AutoStarts\AutoStartEntry.cs" />
+    <Compile Include="Exceptions\AlreadySetByOtherException.cs" />
+    <Compile Include="Exceptions\AlreadySetException.cs" />
     <Compile Include="Helpers\FolderChangeMonitor.cs" />
     <Compile Include="Notifications\MyNotificationActivator.cs" />
     <Compile Include="AutoStarts\ConfirmStatus.cs" />

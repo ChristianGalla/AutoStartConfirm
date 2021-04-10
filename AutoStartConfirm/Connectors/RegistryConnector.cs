@@ -8,6 +8,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using AutoStartConfirm.Exceptions;
 
 namespace AutoStartConfirm.Connectors {
     abstract class RegistryConnector : IAutoStartConnector, IDisposable {
@@ -147,7 +148,7 @@ namespace AutoStartConfirm.Connectors {
                             break;
                     }
                 } catch (Exception ex) {
-                    var err = new Exception($"Failed to get {valueName} from {currentKey}", ex);
+                    var err = new Exception($"Failed to get \"{valueName}\" from \"{currentKey}\"", ex);
                     throw err;
                 }
             }
@@ -206,7 +207,7 @@ namespace AutoStartConfirm.Connectors {
             } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
                 registryKey = Registry.CurrentUser;
             } else {
-                throw new ArgumentOutOfRangeException($"Unknown registry base path for {basePath}");
+                throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
             }
             return registryKey;
         }
@@ -288,73 +289,68 @@ namespace AutoStartConfirm.Connectors {
             var keyPath = regAutoStart.Path.Substring(0, lastDelimiterPos);
             var subKeyPath = keyPath.Substring(firstDelimiterPos + 1);
             var valueName = regAutoStart.Path.Substring(lastDelimiterPos + 1);
-            try {
-                using (var registry = GetBaseRegistry())
-                using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
-                    if (key == null && dryRun) {
-                        return;
+            using (var registry = GetBaseRegistry())
+            using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
+                if (key == null && dryRun) {
+                    return;
+                }
+                object value = key.GetValue(valueName, null);
+                if (value != null) {
+                    var currentValueKind = key.GetValueKind(valueName);
+                    if (currentValueKind != regAutoStart.RegistryValueKind) {
+                        throw new ArgumentException($"Value \"{valueName}\" of key \"{keyPath}\" already exists with different type \"{currentValueKind}\"");
                     }
-                    object value = key.GetValue(valueName, null);
-                    if (value != null) {
-                        var currentValueKind = key.GetValueKind(valueName);
-                        if (currentValueKind != regAutoStart.RegistryValueKind) {
-                            throw new Exception($"Value {valueName} of key {keyPath} already exists with different type {currentValueKind}");
+                }
+                switch (regAutoStart.RegistryValueKind) {
+                    case RegistryValueKind.String:
+                    case RegistryValueKind.ExpandString: {
+                            if (value != null) {
+                                if (!string.Equals((string)value, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                                    throw new AlreadySetByOtherException($"Value \"{valueName}\" of key \"{keyPath}\" already set to value \"{(string)value}\"");
+                                } else {
+                                    throw new AlreadySetException($"Value \"{valueName}\" of key \"{keyPath}\" already set");
+                                }
+                            }
+                            if (dryRun) {
+                                return;
+                            }
+                            Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
+                            Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
+                            break;
                         }
-                    }
-                    switch (regAutoStart.RegistryValueKind) {
-                        case RegistryValueKind.String:
-                        case RegistryValueKind.ExpandString: {
-                                if (value != null) {
-                                    if (!string.Equals((string)value, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
-                                        throw new Exception($"Value {valueName} of key {keyPath} already set to value {(string)value}");
-                                    } else {
-                                        throw new Exception($"Value {valueName} of key {keyPath} already set");
+                    case RegistryValueKind.MultiString: {
+                            var newValues = new List<string> {
+                                regAutoStart.Value
+                            };
+                            bool exists = false;
+                            if (value != null) {
+                                foreach (var subValue in value as IEnumerable<string>) {
+                                    newValues.Add(subValue);
+                                    if (string.Equals(subValue, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                                        exists = true;
+                                        break;
                                     }
                                 }
+                            }
+                            if (!exists) {
                                 if (dryRun) {
                                     return;
                                 }
-                                Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
+                                Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
                                 Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
-                                break;
+                            } else {
+                                throw new AlreadySetException($"\"{regAutoStart.Value}\" already exists at \"{regAutoStart.Path}\"");
                             }
-                        case RegistryValueKind.MultiString: {
-                                var newValues = new List<string> {
-                                    regAutoStart.Value
-                                };
-                                bool exists = false;
-                                if (value != null) {
-                                    foreach (var subValue in value as IEnumerable<string>) {
-                                        newValues.Add(subValue);
-                                        if (string.Equals(subValue, regAutoStart.Value, StringComparison.OrdinalIgnoreCase)) {
-                                            exists = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (!exists) {
-                                    if (dryRun) {
-                                        return;
-                                    }
-                                    Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
-                                    Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
-                                } else {
-                                    throw new Exception($"{regAutoStart.Value} already exists at {regAutoStart.Path}");
-                                }
-                                break;
-                            }
-                        case RegistryValueKind.Binary:
-                        case RegistryValueKind.DWord:
-                        case RegistryValueKind.QWord:
-                        case RegistryValueKind.Unknown:
-                        case RegistryValueKind.None:
-                        default:
-                            throw new Exception($"Don't know how to handle data type {regAutoStart.RegistryValueKind} of key {regAutoStart.Path}");
-                    }
+                            break;
+                        }
+                    case RegistryValueKind.Binary:
+                    case RegistryValueKind.DWord:
+                    case RegistryValueKind.QWord:
+                    case RegistryValueKind.Unknown:
+                    case RegistryValueKind.None:
+                    default:
+                        throw new ArgumentException($"Don't know how to handle data type \"{regAutoStart.RegistryValueKind}\" of key \"{regAutoStart.Path}\"");
                 }
-            } catch (Exception ex) {
-                var err = new Exception($"Failed to add auto start {regAutoStart.Value} to {regAutoStart.Path}", ex);
-                throw err;
             }
         }
 
@@ -369,64 +365,59 @@ namespace AutoStartConfirm.Connectors {
             var keyPath = registryAutoStartEntry.Path.Substring(0, lastDelimiterPos);
             var subKeyPath = keyPath.Substring(firstDelimiterPos + 1);
             var valueName = registryAutoStartEntry.Path.Substring(lastDelimiterPos + 1);
-            try {
-                using (var registry = GetBaseRegistry())
-                using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
-                    if (key == null) {
-                        throw new ArgumentException("Path not found");
-                    }
-                    switch (key.GetValueKind(valueName)) {
-                        case RegistryValueKind.String:
-                        case RegistryValueKind.ExpandString: {
-                                string value = (string)key.GetValue(valueName);
-                                if (value == registryAutoStartEntry.Value) {
-                                    if (dryRun) {
-                                        return;
-                                    }
-                                    key.DeleteValue(valueName);
-                                    Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
-                                } else {
-                                    throw new ArgumentException("Value not found");
-                                }
-                                break;
-                            }
-                        case RegistryValueKind.MultiString: {
-                                string[] value = (string[])key.GetValue(valueName);
-                                bool exists = false;
-                                var newValues = new Collection<string>();
-                                foreach (var subValue in value as IEnumerable<string>) {
-                                    if (string.Equals(subValue, registryAutoStartEntry.Value, StringComparison.OrdinalIgnoreCase)) {
-                                        exists = true;
-                                    } else {
-                                        newValues.Add(subValue);
-                                    }
-                                }
-                                if (exists) {
-                                    if (dryRun) {
-                                        return;
-                                    }
-                                    if (newValues.Count == 0) {
-                                        key.DeleteValue(valueName);
-                                    } else {
-                                        key.SetValue(valueName, newValues.ToArray(), RegistryValueKind.MultiString);
-                                    }
-                                    Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
-                                } else {
-                                    throw new ArgumentException("Value not found");
-                                }
-                                break;
-                            }
-                        case RegistryValueKind.DWord:
-                        case RegistryValueKind.QWord:
-                        case RegistryValueKind.Binary:
-                        case RegistryValueKind.Unknown:
-                        default:
-                            throw new Exception($"Don't know how to handle data type of key {registryAutoStartEntry.Path}");
-                    }
+            using (var registry = GetBaseRegistry())
+            using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
+                if (key == null) {
+                    throw new ArgumentException("Path not found");
                 }
-            } catch (Exception ex) {
-                var err = new Exception($"Failed to remove auto start {registryAutoStartEntry.Value} from {registryAutoStartEntry.Path}", ex);
-                throw err;
+                switch (key.GetValueKind(valueName)) {
+                    case RegistryValueKind.String:
+                    case RegistryValueKind.ExpandString: {
+                            string value = (string)key.GetValue(valueName);
+                            if (value == registryAutoStartEntry.Value) {
+                                if (dryRun) {
+                                    return;
+                                }
+                                key.DeleteValue(valueName);
+                                Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                            } else {
+                                throw new ArgumentException("Value not found");
+                            }
+                            break;
+                        }
+                    case RegistryValueKind.MultiString: {
+                            string[] value = (string[])key.GetValue(valueName);
+                            bool exists = false;
+                            var newValues = new Collection<string>();
+                            foreach (var subValue in value as IEnumerable<string>) {
+                                if (string.Equals(subValue, registryAutoStartEntry.Value, StringComparison.OrdinalIgnoreCase)) {
+                                    exists = true;
+                                } else {
+                                    newValues.Add(subValue);
+                                }
+                            }
+                            if (exists) {
+                                if (dryRun) {
+                                    return;
+                                }
+                                if (newValues.Count == 0) {
+                                    key.DeleteValue(valueName);
+                                } else {
+                                    key.SetValue(valueName, newValues.ToArray(), RegistryValueKind.MultiString);
+                                }
+                                Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                            } else {
+                                throw new ArgumentException("Value not found");
+                            }
+                            break;
+                        }
+                    case RegistryValueKind.DWord:
+                    case RegistryValueKind.QWord:
+                    case RegistryValueKind.Binary:
+                    case RegistryValueKind.Unknown:
+                    default:
+                        throw new InvalidOperationException($"Don't know how to handle data type of key \"{registryAutoStartEntry.Path}\"");
+                }
             }
         }
 

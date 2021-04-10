@@ -19,7 +19,7 @@ namespace AutoStartConfirm {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window, IDisposable {
         public bool IsClosed { get; private set; }
 
         private bool CurrentAutoStartGridNeedsRefresh { get; set; } = false;
@@ -70,27 +70,30 @@ namespace AutoStartConfirm {
             App.AutoStartService.AddAutoStartChange += AddAutoStartChangeHandler;
             App.AutoStartService.RemoveAutoStartChange += RemoveAutoStartChangeHandler;
 
-            RefreshTimer = new Timer(1000);
+            RefreshTimer = new Timer(2000);
             RefreshTimer.Elapsed += OnTimedEvent;
             RefreshTimer.AutoReset = true;
             RefreshTimer.Enabled = true;
         }
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(delegate {
-                if (CurrentAutoStartGridNeedsRefresh) {
-                    CurrentAutoStartGrid.Items.Refresh();
-                    CurrentAutoStartGridNeedsRefresh = false;
-                }
-                if (AddAutoStartGridNeedsRefresh) {
-                    AddedAutoStartGrid.Items.Refresh();
-                    AddAutoStartGridNeedsRefresh = false;
-                }
-                if (RemovedAutoStartGridNeedsRefresh) {
-                    RemovedAutoStartGrid.Items.Refresh();
-                    RemovedAutoStartGridNeedsRefresh = false;
-                }
-            });
+            try {
+                Application.Current?.Dispatcher.Invoke(delegate {
+                    if (CurrentAutoStartGridNeedsRefresh) {
+                        CurrentAutoStartGrid.Items.Refresh();
+                        CurrentAutoStartGridNeedsRefresh = false;
+                    }
+                    if (AddAutoStartGridNeedsRefresh) {
+                        AddedAutoStartGrid.Items.Refresh();
+                        AddAutoStartGridNeedsRefresh = false;
+                    }
+                    if (RemovedAutoStartGridNeedsRefresh) {
+                        RemovedAutoStartGrid.Items.Refresh();
+                        RemovedAutoStartGridNeedsRefresh = false;
+                    }
+                });
+            } catch (Exception) {
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -100,7 +103,7 @@ namespace AutoStartConfirm {
             IsClosed = true;
         }
 
-        #region click handlers
+        #region Click handlers
 
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
             AddConfirmButton_Click(sender, e);
@@ -146,6 +149,19 @@ namespace AutoStartConfirm {
             App.RevertRemove(autoStartEntry.Id);
         }
 
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
+            window.Close();
+        }
+
+        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
+            App.GetInstance().ToggleOwnAutoStart();
+        }
+
+        private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Show();
+        }
+
         #endregion
 
 
@@ -165,17 +181,24 @@ namespace AutoStartConfirm {
 
         #endregion
 
-        private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
-            window.Close();
+        #region IDisposable Support
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
+                    RefreshTimer.Stop();
+                }
+
+                disposedValue = true;
+            }
         }
 
-        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
-            App.GetInstance().ToggleOwnAutoStart();
+        public void Dispose() {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
-
-        private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Show();
-        }
+        #endregion
     }
 }

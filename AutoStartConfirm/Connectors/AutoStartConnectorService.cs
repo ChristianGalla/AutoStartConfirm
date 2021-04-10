@@ -77,11 +77,7 @@ namespace AutoStartConfirm.Connectors {
                 new CurrentUserStartMenuAutoStartFolderConnector(),
             };
             foreach (var connector in connectors) {
-                try {
-                    Connectors.Add(connector.Category, connector);
-                } catch (Exception ex) {
-                    throw new Exception($"Failed to add {connector.GetType()}", ex);
-                }
+                Connectors.Add(connector.Category, connector);
             }
             foreach (var connector in Connectors.Values) {
                 connector.Add += AddHandler;
