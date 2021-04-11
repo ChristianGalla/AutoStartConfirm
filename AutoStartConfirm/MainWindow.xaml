@@ -55,6 +55,7 @@
                     MinWidth="200"
                     IsReadOnly="True"
                     AutoGenerateColumns="False"
+                    SelectionUnit="CellOrRowHeader"
                     ItemsSource="{Binding Source={StaticResource currentAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Actions">
@@ -92,6 +93,7 @@
                           MinWidth="200"
                           IsReadOnly="True"
                           AutoGenerateColumns="False"
+                          SelectionUnit="CellOrRowHeader"
                           ItemsSource="{Binding Source={StaticResource addedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Actions">
@@ -128,6 +130,7 @@
                     MinWidth="200"
                     IsReadOnly="True"
                     AutoGenerateColumns="False"
+                    SelectionUnit="CellOrRowHeader"
                     ItemsSource="{Binding Source={StaticResource removedAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Actions">
