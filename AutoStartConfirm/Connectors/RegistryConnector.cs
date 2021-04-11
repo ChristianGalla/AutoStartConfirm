@@ -84,7 +84,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
-            Logger.Error("Error on monitoring of {BasePath}");
+            Logger.Error("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
         }
 
         #region IAutoStartConnector implementation

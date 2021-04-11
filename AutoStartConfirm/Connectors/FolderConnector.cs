@@ -108,7 +108,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun = false) {
-            Logger.Trace("RemoveAutoStart called for {autoStartEntry}", autoStartEntry);
+            Logger.Trace("RemoveAutoStart called for {autoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
             if (autoStartEntry == null) {
                 throw new ArgumentNullException("autoStartEntry is required");
             }

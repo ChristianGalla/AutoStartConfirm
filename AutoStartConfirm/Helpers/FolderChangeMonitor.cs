@@ -136,14 +136,12 @@ namespace AutoStartConfirm.Helpers {
             });
         }
 
-        private static void OnError(object sender, ErrorEventArgs e) {
-            Logger.Error("ErrorHandler called");
+        private void OnError(object sender, ErrorEventArgs e) {
+            Logger.Error("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
         }
-
 
         #endregion
 
-        // @todo
         #region Events
         public event AutoStartChangeHandler Add;
         public event AutoStartChangeHandler Remove;
