@@ -26,6 +26,7 @@ namespace AutoStartConfirm.Connectors {
         // todo: read target of links?
         // read sub directories?
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
+            Logger.Trace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
             string[] filePaths = Directory.GetFiles(BasePath);
             foreach (var filePath in filePaths) {
@@ -62,10 +63,12 @@ namespace AutoStartConfirm.Connectors {
         }
 
         private void RemoveHandler(AutoStartEntry e) {
+            Logger.Trace("RemoveHandler called");
             Remove?.Invoke(e);
         }
 
         private void AddHandler(AutoStartEntry e) {
+            Logger.Trace("AddHandler called");
             Add?.Invoke(e);
         }
 
@@ -81,19 +84,48 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
+            Logger.Trace("CanBeAdded called for {autoStart}", autoStart);
             return false;
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart) {
-            return false;
+            Logger.Trace("CanBeRemoved called for {autoStart}", autoStart);
+            try {
+                RemoveAutoStart(autoStart, true);
+                return true;
+            } catch (Exception) {
+                return false;
+            }
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
+            Logger.Trace("AddAutoStart called for {autoStart}", autoStart);
             throw new NotImplementedException();
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStartEntry) {
-            throw new NotImplementedException();
+            RemoveAutoStart(autoStartEntry, false);
+        }
+
+        public void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun = false) {
+            Logger.Trace("RemoveAutoStart called for {autoStartEntry}", autoStartEntry);
+            if (autoStartEntry == null) {
+                throw new ArgumentNullException("autoStartEntry is required");
+            }
+            if (autoStartEntry is FolderAutoStartEntry folderAutoStartEntry) {
+                string fullPath = $"{folderAutoStartEntry.Path}{Path.DirectorySeparatorChar}{folderAutoStartEntry.Value}";
+                if (File.Exists(fullPath)) {
+                    if (dryRun) {
+                        return;
+                    }
+                    File.Delete(fullPath);
+                    Logger.Info("Removed {Value} from {Path}", folderAutoStartEntry.Value, folderAutoStartEntry.Path);
+                } else {
+                    throw new FileNotFoundException($"File \"{fullPath}\" not found");
+                }
+            } else {
+                throw new ArgumentException("autoStartEntry is not of type folderAutoStartEntry");
+            }
         }
 
         public bool CanBeEnabled(AutoStartEntry autoStart) {
