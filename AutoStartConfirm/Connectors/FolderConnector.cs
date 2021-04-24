@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using System.IO;
+using AutoStartConfirm.Exceptions;
 
 namespace AutoStartConfirm.Connectors {
     abstract class FolderConnector : IAutoStartConnector, IDisposable {
@@ -16,6 +17,8 @@ namespace AutoStartConfirm.Connectors {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         public abstract string BasePath { get; }
+
+        public abstract string EnableBasePath { get; }
 
         public abstract bool IsAdminRequiredForChanges {
             get;
@@ -35,7 +38,7 @@ namespace AutoStartConfirm.Connectors {
                     continue;
                 }
                 var entry = new FolderAutoStartEntry() {
-                    Category = Category.StartMenuAutoStartFolder,
+                    Category = Category,
                     Path = BasePath,
                     Value = fileName,
                 };
@@ -129,19 +132,97 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public bool CanBeEnabled(AutoStartEntry autoStart) {
-            return false;
+            try {
+                EnableAutoStart(autoStart, true);
+                return true;
+            } catch (Exception) {
+                return false;
+            }
         }
 
         public bool CanBeDisabled(AutoStartEntry autoStart) {
-            return false;
+            try {
+                DisableAutoStart(autoStart, true);
+                return true;
+            } catch (Exception) {
+                return false;
+            }
         }
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
-            throw new NotImplementedException();
+            EnableAutoStart(autoStart, false);
+        }
+
+        public void EnableAutoStart(AutoStartEntry autoStart, bool dryRun) {
+            ToggleAutoStartEnable(autoStart, true, dryRun);
         }
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
-            throw new NotImplementedException();
+            DisableAutoStart(autoStart, false);
+        }
+
+        public void DisableAutoStart(AutoStartEntry autoStart, bool dryRun) {
+            ToggleAutoStartEnable(autoStart, false, dryRun);
+        }
+
+        private RegistryKey GetBaseRegistry(string basePath) {
+            RegistryKey registryKey;
+            if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+                registryKey = Registry.LocalMachine;
+            } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
+                registryKey = Registry.CurrentUser;
+            } else {
+                throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
+            }
+            return registryKey;
+        }
+
+        protected static readonly byte[] enabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        protected static readonly byte[] disabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
+
+        public void ToggleAutoStartEnable(AutoStartEntry autoStart, bool enable, bool dryRun) {
+            Logger.Trace("ToggleAutoStartEnable called for {Value} in {Path} (enable: {Enable}, dryRun: {DryRun})", autoStart.Value, autoStart.Path, enable, dryRun);
+            if (!(autoStart is FolderAutoStartEntry)) {
+                throw new ArgumentException("Parameter must be of type FolderAutoStartEntry");
+            }
+            var firstDelimiterPos = EnableBasePath.IndexOf('\\');
+            var subKeyPath = EnableBasePath.Substring(firstDelimiterPos + 1);
+            var valueName = autoStart.Value;
+            using (var registry = GetBaseRegistry(EnableBasePath))
+            using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
+                if (key == null && dryRun) {
+                    return;
+                }
+                object currentValue = key.GetValue(valueName, null);
+                if (currentValue != null) {
+                    var currentValueKind = key.GetValueKind(valueName);
+                    if (currentValueKind != RegistryValueKind.Binary) {
+                        throw new ArgumentException($"Registry value has the wrong type \"{currentValueKind}\"");
+                    }
+                    var currentValueByteArray = (byte[])currentValue;
+                    if (enable) {
+                        var isEnabled = currentValueByteArray[0] == enabledByteArray[0] && currentValueByteArray[11] == enabledByteArray[11];
+                        if (isEnabled) {
+                            throw new AlreadySetException($"Auto start already enabled");
+                        }
+                    } else {
+                        var isDisabled = currentValueByteArray[0] == disabledByteArray[0] && currentValueByteArray[11] == disabledByteArray[11];
+                        if (isDisabled) {
+                            throw new AlreadySetException($"Auto start already disabled");
+                        }
+                    }
+                } else if (enable) {
+                    throw new AlreadySetException($"Auto start already enabled");
+                }
+                if (dryRun) {
+                    return;
+                }
+                if (enable) {
+                    Registry.SetValue(EnableBasePath, valueName, enabledByteArray, RegistryValueKind.Binary);
+                } else {
+                    Registry.SetValue(EnableBasePath, valueName, disabledByteArray, RegistryValueKind.Binary);
+                }
+            }
         }
 
         // todo

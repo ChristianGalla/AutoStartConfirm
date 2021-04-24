@@ -14,6 +14,8 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly static string basePath = $"{programmDataPath}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
 
+        private readonly static string enableBasePath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
+
         public override bool IsAdminRequiredForChanges {
             get {
                 return true;
@@ -29,6 +31,12 @@ namespace AutoStartConfirm.Connectors {
         public override string BasePath {
             get {
                 return basePath;
+            }
+        }
+
+        public override string EnableBasePath {
+            get {
+                return enableBasePath;
             }
         }
     }
