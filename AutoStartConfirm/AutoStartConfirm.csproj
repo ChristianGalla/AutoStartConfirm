@@ -140,6 +140,7 @@
     <Compile Include="Connectors\LocalGroupPolicyScriptLogonConnector.cs" />
     <Compile Include="Connectors\LocalGroupPolicyScriptShutdownConnector.cs" />
     <Compile Include="Connectors\FolderConnector.cs" />
+    <Compile Include="Connectors\RegistryDisableService.cs" />
     <Compile Include="Connectors\RunOnce64Connector.cs" />
     <Compile Include="Connectors\RunOnceEx64Connector.cs" />
     <Compile Include="Connectors\RunOnceEx32Connector.cs" />

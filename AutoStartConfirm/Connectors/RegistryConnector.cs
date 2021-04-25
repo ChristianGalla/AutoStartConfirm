@@ -441,10 +441,6 @@ namespace AutoStartConfirm.Connectors {
             throw new NotImplementedException();
         }
 
-        // todo
-        public bool IsEnabled(AutoStartEntry autoStart) {
-            return true;
-        }
         #endregion
 
         #region IDisposable Support
