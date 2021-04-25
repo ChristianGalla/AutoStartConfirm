@@ -21,6 +21,8 @@ namespace AutoStartConfirm.AutoStarts
 
         public ConfirmStatus ConfirmStatus { get; set; }
 
+        public bool? IsEnabled { get; set; }
+
         [field: NonSerialized]
         public bool? CanBeEnabled { get; set; }
 

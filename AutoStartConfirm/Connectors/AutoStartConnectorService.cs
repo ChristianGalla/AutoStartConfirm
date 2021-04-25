@@ -120,12 +120,12 @@ namespace AutoStartConfirm.Connectors {
 
         private void EnableHandler(AutoStartEntry enabledAutostart) {
             Logger.Trace("EnableHandler called");
-            Add?.Invoke(enabledAutostart);
+            Enable?.Invoke(enabledAutostart);
         }
 
         private void DisableHandler(AutoStartEntry disabledAutostart) {
             Logger.Trace("DisableHandler called");
-            Remove?.Invoke(disabledAutostart);
+            Disable?.Invoke(disabledAutostart);
         }
         #endregion
 
@@ -161,6 +161,10 @@ namespace AutoStartConfirm.Connectors {
         public bool CanBeDisabled(AutoStartEntry autoStart) {
             Logger.Trace("Checking if auto start {@autoStart} can be disabled", autoStart);
             return Connectors[autoStart.Category].CanBeDisabled(autoStart);
+        }
+
+        public bool IsEnabled(AutoStartEntry autoStart) {
+            return Connectors[autoStart.Category].IsEnabled(autoStart);
         }
 
         public void EnableAutoStart(AutoStartEntry autoStart) {

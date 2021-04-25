@@ -441,6 +441,10 @@ namespace AutoStartConfirm.Connectors {
             throw new NotImplementedException();
         }
 
+        public bool IsEnabled(AutoStartEntry autoStart) {
+            return CanBeDisabled(autoStart);
+        }
+
         #endregion
 
         #region IDisposable Support

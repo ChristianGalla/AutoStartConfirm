@@ -28,6 +28,7 @@ namespace AutoStartConfirm.Connectors {
         void AddAutoStart(AutoStartEntry autoStart);
         void RemoveAutoStart(AutoStartEntry autoStart);
 
+        bool IsEnabled(AutoStartEntry autoStart);
 
         bool CanBeEnabled(AutoStartEntry autoStart);
         bool CanBeDisabled(AutoStartEntry autoStart);

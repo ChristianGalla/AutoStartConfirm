@@ -22,6 +22,8 @@ namespace AutoStartConfirm.Connectors {
             get {
                 if (registryDisableService == null) {
                     registryDisableService = new RegistryDisableService(DisableBasePath);
+                    registryDisableService.Enable += EnableHandler;
+                    registryDisableService.Disable += DisableHandler;
                 }
                 return registryDisableService;
             }
@@ -66,7 +68,6 @@ namespace AutoStartConfirm.Connectors {
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
-            var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
             monitor = new FolderChangeMonitor() {
                 BasePath = BasePath,
                 Category = Category,
@@ -74,6 +75,7 @@ namespace AutoStartConfirm.Connectors {
             monitor.Add += AddHandler;
             monitor.Remove += RemoveHandler;
             monitor.Start();
+            RegistryDisableService.StartWatcher();
             Logger.Trace("Watcher started");
         }
 
@@ -85,6 +87,26 @@ namespace AutoStartConfirm.Connectors {
         private void AddHandler(AutoStartEntry e) {
             Logger.Trace("AddHandler called");
             Add?.Invoke(e);
+        }
+
+        private void EnableHandler(string name) {
+            Logger.Trace("EnableHandler called");
+            var currentAutoStarts = GetCurrentAutoStarts();
+            foreach(var currentAutoStart in currentAutoStarts) {
+                if (currentAutoStart.Value == name) {
+                    Enable?.Invoke(currentAutoStart);
+                }
+            }
+        }
+
+        private void DisableHandler(string name) {
+            Logger.Trace("DisableHandler called");
+            var currentAutoStarts = GetCurrentAutoStarts();
+            foreach (var currentAutoStart in currentAutoStarts) {
+                if (currentAutoStart.Value == name) {
+                    Disable?.Invoke(currentAutoStart);
+                }
+            }
         }
 
         public void StopWatcher() {
@@ -159,7 +181,11 @@ namespace AutoStartConfirm.Connectors {
             RegistryDisableService.DisableAutoStart(autoStart);
         }
 
-        
+        public bool IsEnabled(AutoStartEntry autoStart) {
+            return RegistryDisableService.CanBeDisabled(autoStart);
+        }
+
+
         #endregion
 
         #region IDisposable Support

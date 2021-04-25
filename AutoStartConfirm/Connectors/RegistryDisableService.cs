@@ -1,5 +1,6 @@
 ﻿using AutoStartConfirm.AutoStarts;
 using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.Helpers;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
-    class RegistryDisableService: IDisposable {
+    #region Delegates
+    public delegate void EnableChangeHandler(string name);
+    #endregion
+
+    class RegistryDisableService : IDisposable {
 
         public string DisableBasePath { get; }
 
@@ -17,8 +22,8 @@ namespace AutoStartConfirm.Connectors {
         protected static readonly byte[] enabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         protected static readonly byte[] disabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
-
-        private bool disposedValue;
+        private Dictionary<string, bool> lastEnableStatus;
+        protected RegistryChangeMonitor monitor;
 
         public RegistryDisableService(string DisableBasePath) {
             this.DisableBasePath = DisableBasePath;
@@ -115,29 +120,128 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
+        private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
+            Logger.Trace("ChangeHandler called for {DisableBasePath}", DisableBasePath);
+            var newEnableStatus = GetCurrentEnableStatus();
+            foreach (var newStatus in newEnableStatus) {
+                var name = newStatus.Key;
+                var nowEnabled = newStatus.Value;
+                var wasEnabled = true;
+                if (lastEnableStatus.ContainsKey(name)) {
+                    wasEnabled = lastEnableStatus[name];
+                }
+                if (wasEnabled != nowEnabled) {
+                    if (nowEnabled) {
+                        Enable?.Invoke(name);
+                    } else {
+                        Disable?.Invoke(name);
+                    }
+                }
+            }
+            foreach (var lastStatus in lastEnableStatus) {
+                var name = lastStatus.Key;
+                var wasEnabled = lastStatus.Value;
+                if (newEnableStatus.ContainsKey(name)) {
+                    continue;
+                }
+                if (!wasEnabled) {
+                    Enable?.Invoke(name);
+                }
+            }
+            lastEnableStatus = newEnableStatus;
+        }
+
+        public Dictionary<string, bool> GetCurrentEnableStatus() {
+            Logger.Trace("GetCurrentEnableStatus called");
+            var firstDelimiterPos = DisableBasePath.IndexOf('\\');
+            var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
+            var ret = new Dictionary<string, bool>();
+            using (var registry = GetBaseRegistry(DisableBasePath))
+            using (var key = registry.OpenSubKey(subKeyPath, false)) {
+                if (key == null) {
+                    return ret;
+                }
+                var valueNames = key.GetValueNames();
+                foreach (var valueName in valueNames) {
+                    object currentValue = key.GetValue(valueName, null);
+                    if (currentValue == null) {
+                        continue;
+                    }
+                    var currentValueKind = key.GetValueKind(valueName);
+                    if (currentValueKind != RegistryValueKind.Binary) {
+                        continue;
+                    }
+                    var currentValueByteArray = (byte[])currentValue;
+                    var isEnabled = currentValueByteArray[0] == enabledByteArray[0] && currentValueByteArray[11] == enabledByteArray[11];
+                    if (isEnabled) {
+                        ret.Add(valueName, true);
+                    } else {
+                        var isDisabled = currentValueByteArray[0] == disabledByteArray[0] && currentValueByteArray[11] == disabledByteArray[11];
+                        if (isDisabled) {
+                            ret.Add(valueName, false);
+                        }
+                    }
+                }
+            }
+            return ret;
+        }
+
+        private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
+            Logger.Error("Error on monitoring of {DisableBasePath}: {@Exception}", DisableBasePath, e);
+        }
+
+        /// <summary>
+        /// Watches the assigned registry keys
+        /// </summary>
+        /// <remarks>
+        /// Because of API limitations no all changes are monitored.
+        /// See https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regnotifychangekeyvalue
+        /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
+        /// </remarks>
+        public void StartWatcher() {
+            Logger.Trace("StartWatcher called for {DisableBasePath}", DisableBasePath);
+            StopWatcher();
+            lastEnableStatus = GetCurrentEnableStatus();
+            monitor = new RegistryChangeMonitor(DisableBasePath);
+            monitor.Changed += ChangeHandler;
+            monitor.Error += ErrorHandler;
+            monitor.Start();
+            Logger.Trace("Watcher started");
+        }
+
+        public void StopWatcher() {
+            Logger.Trace("StopWatcher called for {DisableBasePath}", DisableBasePath);
+            if (monitor == null) {
+                Logger.Trace("No watcher running");
+                return;
+            }
+            Logger.Trace("Stopping watcher");
+            monitor.Dispose();
+            monitor = null;
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    // TODO: dispose managed state (managed objects)
+                    StopWatcher();
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~RegistryDisableService()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
         public void Dispose() {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            Dispose(true);
         }
+
+        #endregion
+
+        #region Events
+        public event EnableChangeHandler Enable;
+        public event EnableChangeHandler Disable;
+        #endregion
     }
 }

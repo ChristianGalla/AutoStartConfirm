@@ -426,14 +426,22 @@ namespace AutoStartConfirm.AutoStarts {
                     }
                 }
                 var autoStartsToAdd = new List<AutoStartEntry>();
-                foreach (var newAutostart in currentAutoStarts) {
-                    if (!lastSavedAutoStarts.ContainsKey(newAutostart.Id)) {
-                        autoStartsToAdd.Add(newAutostart);
-                    }
-                }
                 CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 foreach (var currentAutoStart in currentAutoStarts) {
+                    if (!lastSavedAutoStarts.ContainsKey(currentAutoStart.Id)) {
+                        autoStartsToAdd.Add(currentAutoStart);
+                    }
                     CurrentAutoStarts.Add(currentAutoStart.Id, currentAutoStart);
+                }
+                foreach (var currentAutoStart in CurrentAutoStarts.Values) {
+                    var wasEnabled = lastSavedAutoStarts[currentAutoStart.Id].IsEnabled.GetValueOrDefault(true);
+                    var nowEnabled = Connectors.IsEnabled(currentAutoStart);
+                    currentAutoStart.IsEnabled = nowEnabled;
+                    if (nowEnabled && !wasEnabled) {
+                        EnableHandler(currentAutoStart);
+                    } else if (!nowEnabled && wasEnabled) {
+                        DisableHandler(currentAutoStart);
+                    }
                 }
                 foreach (var removedAutoStart in autoStartsToRemove) {
                     RemoveHandler(removedAutoStart);
@@ -519,14 +527,14 @@ namespace AutoStartConfirm.AutoStarts {
         private void EnableHandler(AutoStartEntry enabledAutostart) {
             try {
                 Logger.Info("Auto start enabled: {@value}", enabledAutostart);
-                if (CurrentAutoStarts.ContainsKey(enabledAutostart.Id)) {
-                    CurrentAutoStarts[enabledAutostart.Id] = enabledAutostart;
-                } else {
-                    CurrentAutoStarts.Add(enabledAutostart.Id, enabledAutostart);
+                foreach (var currentAutoStart in CurrentAutoStarts.Values) {
+                    if (currentAutoStart.Equals(enabledAutostart)) {
+                        ResetAllDynamicFields(currentAutoStart);
+                        Enable?.Invoke(currentAutoStart);
+                        CurrentAutoStartChange?.Invoke(currentAutoStart);
+                        break;
+                    }
                 }
-                ResetAllDynamicFields(enabledAutostart);
-                Enable?.Invoke(enabledAutostart);
-                CurrentAutoStartChange?.Invoke(enabledAutostart);
                 Logger.Trace("EnableHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Enable handler failed", e);
@@ -537,14 +545,14 @@ namespace AutoStartConfirm.AutoStarts {
         private void DisableHandler(AutoStartEntry disabledAutostart) {
             try {
                 Logger.Info("Auto start disabled: {@value}", disabledAutostart);
-                if (CurrentAutoStarts.ContainsKey(disabledAutostart.Id)) {
-                    CurrentAutoStarts[disabledAutostart.Id] = disabledAutostart;
-                } else {
-                    CurrentAutoStarts.Add(disabledAutostart.Id, disabledAutostart);
+                foreach (var currentAutoStart in CurrentAutoStarts.Values) {
+                    if (currentAutoStart.Equals(disabledAutostart)) {
+                        ResetAllDynamicFields(currentAutoStart);
+                        Disable?.Invoke(currentAutoStart);
+                        CurrentAutoStartChange?.Invoke(currentAutoStart);
+                        break;
+                    }
                 }
-                ResetAllDynamicFields(disabledAutostart);
-                Disable?.Invoke(disabledAutostart);
-                CurrentAutoStartChange?.Invoke(disabledAutostart);
                 Logger.Trace("DisableHandler finished");
             } catch (Exception e) {
                 var err = new Exception("Disable handler failed", e);
