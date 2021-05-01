@@ -12,6 +12,12 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string[] valueNames = null;
 
+        public override string DisableBasePath {
+            get {
+                return null;
+            }
+        }
+
         protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
             return level == 1 && valueName == "StubPath";
         }

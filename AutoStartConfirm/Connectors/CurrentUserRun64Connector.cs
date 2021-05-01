@@ -7,11 +7,19 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string basePath = @"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
 
+        private readonly static string disableBasePath = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+
         private readonly string[] subKeys = null;
 
         private readonly string[] valueNames = null;
 
         private readonly bool monitorSubkeys = true;
+
+        public override string DisableBasePath {
+            get {
+                return disableBasePath;
+            }
+        }
 
         public override string BasePath {
             get {

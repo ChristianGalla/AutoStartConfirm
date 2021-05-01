@@ -52,6 +52,7 @@ namespace AutoStartConfirm.Connectors {
                     continue;
                 }
                 var entry = new FolderAutoStartEntry() {
+                    AddDate = DateTime.Now,
                     Category = Category,
                     Path = BasePath,
                     Value = fileName,
@@ -111,6 +112,7 @@ namespace AutoStartConfirm.Connectors {
 
         public void StopWatcher() {
             Logger.Trace("StopWatcher called for {BasePath}", BasePath);
+            RegistryDisableService.StopWatcher();
             if (monitor == null) {
                 Logger.Trace("No watcher running");
                 return;

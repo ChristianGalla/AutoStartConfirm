@@ -19,9 +19,9 @@ namespace AutoStartConfirm.Connectors {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        protected static readonly byte[] enabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        protected static readonly byte[] defaultEnabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-        protected static readonly byte[] disabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        protected static readonly byte[] defaultDisabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
         private Dictionary<string, bool> lastEnableStatus;
         protected RegistryChangeMonitor monitor;
 
@@ -77,45 +77,48 @@ namespace AutoStartConfirm.Connectors {
 
         public void ToggleAutoStartEnable(AutoStartEntry autoStart, bool enable, bool dryRun) {
             Logger.Trace("ToggleAutoStartEnable called for {Value} in {Path} (enable: {Enable}, dryRun: {DryRun})", autoStart.Value, autoStart.Path, enable, dryRun);
-            if (!(autoStart is FolderAutoStartEntry)) {
-                throw new ArgumentException("Parameter must be of type FolderAutoStartEntry");
-            }
             var firstDelimiterPos = DisableBasePath.IndexOf('\\');
             var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
-            var valueName = autoStart.Value;
+            string valueName;
+            if (autoStart is FolderAutoStartEntry) {
+                valueName = autoStart.Value;
+            } else if (autoStart is RegistryAutoStartEntry) {
+                valueName = autoStart.Path.Substring(autoStart.Path.LastIndexOf('\\')+1);
+            } else {
+                throw new NotImplementedException();
+            }
             using (var registry = GetBaseRegistry(DisableBasePath))
             using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
                 if (key == null && dryRun) {
                     return;
                 }
                 object currentValue = key.GetValue(valueName, null);
-                if (currentValue != null) {
+                byte[] currentValueByteArray = null;
+                if (currentValue == null) {
+                    if (enable) {
+                        throw new AlreadySetException($"Auto start already enabled");
+                    }
+                    currentValueByteArray = defaultEnabledByteArray;
+                } else if (currentValue != null) {
                     var currentValueKind = key.GetValueKind(valueName);
                     if (currentValueKind != RegistryValueKind.Binary) {
                         throw new ArgumentException($"Registry value has the wrong type \"{currentValueKind}\"");
                     }
-                    var currentValueByteArray = (byte[])currentValue;
-                    if (enable) {
-                        var isEnabled = currentValueByteArray[0] == enabledByteArray[0] && currentValueByteArray[11] == enabledByteArray[11];
-                        if (isEnabled) {
-                            throw new AlreadySetException($"Auto start already enabled");
-                        }
-                    } else {
-                        var isDisabled = currentValueByteArray[0] == disabledByteArray[0] && currentValueByteArray[11] == disabledByteArray[11];
-                        if (isDisabled) {
-                            throw new AlreadySetException($"Auto start already disabled");
-                        }
+                    currentValueByteArray = (byte[])currentValue;
+                    var isEnabled = GetIsEnabled(currentValueByteArray);
+                    if (enable && isEnabled) {
+                        throw new AlreadySetException($"Auto start already enabled");
+                    } else if (!enable && !isEnabled) {
+                        throw new AlreadySetException($"Auto start already disabled");
                     }
-                } else if (enable) {
-                    throw new AlreadySetException($"Auto start already enabled");
                 }
                 if (dryRun) {
                     return;
                 }
                 if (enable) {
-                    Registry.SetValue(DisableBasePath, valueName, enabledByteArray, RegistryValueKind.Binary);
+                    Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
                 } else {
-                    Registry.SetValue(DisableBasePath, valueName, disabledByteArray, RegistryValueKind.Binary);
+                    Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
                 }
             }
         }
@@ -172,18 +175,39 @@ namespace AutoStartConfirm.Connectors {
                         continue;
                     }
                     var currentValueByteArray = (byte[])currentValue;
-                    var isEnabled = currentValueByteArray[0] == enabledByteArray[0] && currentValueByteArray[11] == enabledByteArray[11];
+                    var isEnabled = GetIsEnabled(currentValueByteArray);
                     if (isEnabled) {
                         ret.Add(valueName, true);
                     } else {
-                        var isDisabled = currentValueByteArray[0] == disabledByteArray[0] && currentValueByteArray[11] == disabledByteArray[11];
-                        if (isDisabled) {
-                            ret.Add(valueName, false);
-                        }
+                        ret.Add(valueName, false);
                     }
                 }
             }
             return ret;
+        }
+
+        private static bool GetIsEnabled(byte[] currentValueByteArray) {
+            // enabled if most and least significant bytes are even
+            return (currentValueByteArray[0] & 0b1) == 0 && (currentValueByteArray[11] & 0b1) == 0;
+        }
+
+        private static byte[] GetEnabledValue(byte[] currentValueByteArray) {
+            // enabled if most and least significant bytes are not even
+            // also all other bytes should be 0
+            var firstByteAsInt = currentValueByteArray[0] & 0b_1111_1110;
+            currentValueByteArray[0] = (byte)firstByteAsInt;
+            for (int i = 1; i< currentValueByteArray.Length; i++) {
+                currentValueByteArray[i] = 0b0;
+            }
+            return currentValueByteArray;
+        }
+
+        private static byte[] GetDisabledValue(byte[] currentValueByteArray) {
+            // disabled if most and least significant bytes are not even
+            // other bytes are maybe a timestamp when disabled via task manager, but this is not relevant to disable the auto start
+            currentValueByteArray[0] |= 0b1;
+            currentValueByteArray[11] |= 0b1;
+            return currentValueByteArray;
         }
 
         private void ErrorHandler(object sender, RegistryChangeEventArgs e) {

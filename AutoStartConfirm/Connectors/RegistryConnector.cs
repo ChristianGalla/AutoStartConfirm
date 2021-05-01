@@ -37,7 +37,24 @@ namespace AutoStartConfirm.Connectors {
 
         protected List<RegistryAutoStartEntry> lastAutostarts = null;
 
-        // todo: Add Change handler for enable / disable keys
+        private RegistryDisableService registryDisableService = null;
+
+        public abstract string DisableBasePath { get; }
+
+        private RegistryDisableService RegistryDisableService {
+            get {
+                if (DisableBasePath == null) {
+                    return null;
+                }
+                if (registryDisableService == null) {
+                    registryDisableService = new RegistryDisableService(DisableBasePath);
+                    registryDisableService.Enable += EnableHandler;
+                    registryDisableService.Disable += DisableHandler;
+                }
+                return registryDisableService;
+            }
+        }
+
         private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
             Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
@@ -115,6 +132,7 @@ namespace AutoStartConfirm.Connectors {
                                         Value = value.ToString(),
                                         Path = $"{currentKey}\\{valueName}",
                                         RegistryValueKind = valueKind,
+                                        AddDate = DateTime.Now,
                                     };
                                     ret.Add(newAutoStart);
                                 }
@@ -132,6 +150,7 @@ namespace AutoStartConfirm.Connectors {
                                             Value = subValue.ToString(),
                                             Path = $"{currentKey}\\{valueName}",
                                             RegistryValueKind = valueKind,
+                                            AddDate = DateTime.Now,
                                         };
                                         ret.Add(newAutoStart);
                                     }
@@ -236,11 +255,13 @@ namespace AutoStartConfirm.Connectors {
             monitor.Changed += ChangeHandler;
             monitor.Error += ErrorHandler;
             monitor.Start();
+            RegistryDisableService?.StartWatcher();
             Logger.Trace("Watcher started");
         }
 
         public void StopWatcher() {
             Logger.Trace("StopWatcher called for {BasePath}", BasePath);
+            RegistryDisableService?.StopWatcher();
             if (monitor == null) {
                 Logger.Trace("No watcher running");
                 return;
@@ -421,28 +442,61 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        // todo
         public bool CanBeEnabled(AutoStartEntry autoStart) {
-            return false;
+            if (RegistryDisableService == null) {
+                return false;
+            }
+            return RegistryDisableService.CanBeEnabled(autoStart);
         }
 
-        // todo
         public bool CanBeDisabled(AutoStartEntry autoStart) {
-            return false;
+            if (RegistryDisableService == null) {
+                return false;
+            }
+            return RegistryDisableService.CanBeDisabled(autoStart);
         }
 
-        // todo
         public void EnableAutoStart(AutoStartEntry autoStart) {
-            throw new NotImplementedException();
+            if (RegistryDisableService == null) {
+                throw new NotImplementedException();
+            }
+            RegistryDisableService.EnableAutoStart(autoStart);
         }
 
-        // todo
         public void DisableAutoStart(AutoStartEntry autoStart) {
-            throw new NotImplementedException();
+            if (RegistryDisableService == null) {
+                throw new NotImplementedException();
+            }
+            RegistryDisableService.DisableAutoStart(autoStart);
         }
 
         public bool IsEnabled(AutoStartEntry autoStart) {
-            return CanBeDisabled(autoStart);
+            if (RegistryDisableService == null) {
+                return true;
+            }
+            return RegistryDisableService.CanBeDisabled(autoStart);
+        }
+
+        private void EnableHandler(string name) {
+            Logger.Trace("EnableHandler called");
+            var currentAutoStarts = GetCurrentAutoStarts();
+            foreach (var currentAutoStart in currentAutoStarts) {
+                var currentDisableName = currentAutoStart.Path.Substring(currentAutoStart.Path.LastIndexOf('\\') + 1);
+                if (currentDisableName == name) {
+                    Enable?.Invoke(currentAutoStart);
+                }
+            }
+        }
+
+        private void DisableHandler(string name) {
+            Logger.Trace("DisableHandler called");
+            var currentAutoStarts = GetCurrentAutoStarts();
+            foreach (var currentAutoStart in currentAutoStarts) {
+                var currentDisableName = currentAutoStart.Path.Substring(currentAutoStart.Path.LastIndexOf('\\') + 1);
+                if (currentDisableName == name) {
+                    Disable?.Invoke(currentAutoStart);
+                }
+            }
         }
 
         #endregion

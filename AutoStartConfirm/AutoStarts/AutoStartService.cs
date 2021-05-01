@@ -413,6 +413,9 @@ namespace AutoStartConfirm.AutoStarts {
                 var autoStartsToRemove = new List<AutoStartEntry>();
                 foreach (var lastAutostart in lastSavedAutoStarts.Values) {
                     var found = false;
+                    if (lastAutostart.AddDate == null) {
+                        lastAutostart.AddDate = DateTime.Now;
+                    }
                     for (int i = 0; i< currentAutoStarts.Count(); i++) {
                         var newAutostart = currentAutoStarts[i];
                         if (newAutostart.Equals(lastAutostart)) {
@@ -448,15 +451,6 @@ namespace AutoStartConfirm.AutoStarts {
                 }
                 foreach (var addedAutoStart in autoStartsToAdd) {
                     AddHandler(addedAutoStart);
-                    // todo: separate list for disabled auto starts?
-                    //if (addedAutoStart.Enabled.HasValue) {
-                    //    if (addedAutoStart.Enabled.Value) {
-                    //        // ignore default
-                    //        // EnableHandler(addedAutoStart);
-                    //    } else {
-                    //        DisableHandler(addedAutoStart);
-                    //    }
-                    //}
                 }
                 Logger.Trace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {

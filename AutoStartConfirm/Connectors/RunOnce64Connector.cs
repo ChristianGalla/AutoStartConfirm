@@ -13,6 +13,12 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly bool monitorSubkeys = true;
 
+        public override string DisableBasePath {
+            get {
+                return null;
+            }
+        }
+
         public override string BasePath {
             get {
                 return basePath;
