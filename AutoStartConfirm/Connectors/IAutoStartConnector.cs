@@ -14,13 +14,13 @@ namespace AutoStartConfirm.Connectors {
     public interface IAutoStartConnector : IDisposable {
         #region Fields
         Category Category { get; }
-
-        bool IsAdminRequiredForChanges { get; }
         #endregion
 
         #region Methods
 
         IList<AutoStartEntry> GetCurrentAutoStarts();
+
+        bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
         bool CanBeAdded(AutoStartEntry autoStart);
         bool CanBeRemoved(AutoStartEntry autoStart);
@@ -35,6 +35,12 @@ namespace AutoStartConfirm.Connectors {
 
         void EnableAutoStart(AutoStartEntry autoStart);
         void DisableAutoStart(AutoStartEntry autoStart);
+
+        /// <summary>
+        /// Opens 
+        /// </summary>
+        /// <param name="autoStart"></param>
+        void Open(AutoStartEntry autoStart);
 
         #region Watcher
         void StartWatcher();

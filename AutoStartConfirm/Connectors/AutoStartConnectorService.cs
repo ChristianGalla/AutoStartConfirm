@@ -177,8 +177,8 @@ namespace AutoStartConfirm.Connectors {
             Connectors[autoStart.Category].DisableAutoStart(autoStart);
         }
 
-        public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
-            return Connectors[autoStart.Category].IsAdminRequiredForChanges;
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            return Connectors[autoStart.Category].IsAdminRequiredForChanges(autoStart);
         }
 
         public void StartWatcher() {

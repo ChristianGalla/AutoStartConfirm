@@ -351,7 +351,7 @@ namespace AutoStartConfirm {
                     if (!ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
                         return;
                     }
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
                         StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                     } else {
@@ -415,7 +415,7 @@ namespace AutoStartConfirm {
                     if (!ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
                         return;
                     }
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
                         StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                     } else {
@@ -449,7 +449,7 @@ namespace AutoStartConfirm {
                     if (!ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
                         StartSubProcessAsAdmin(autoStart, EnableParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Enabled;
                     } else {
@@ -483,7 +483,7 @@ namespace AutoStartConfirm {
                     if (!ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
-                    if (AutoStartService.GetIsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
                         StartSubProcessAsAdmin(autoStart, DisableParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Disabled;
                     } else {

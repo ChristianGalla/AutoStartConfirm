@@ -292,9 +292,9 @@ namespace AutoStartConfirm.AutoStarts {
             autoStartValue.CanBeDisabled = null;
         }
 
-        public bool GetIsAdminRequiredForChanges(AutoStartEntry autoStart) {
-            Logger.Trace("GetIsAdminRequiredForChanges called");
-            return Connectors.GetIsAdminRequiredForChanges(autoStart);
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            Logger.Trace("IsAdminRequiredForChanges called");
+            return Connectors.IsAdminRequiredForChanges(autoStart);
         }
 
         public IList<AutoStartEntry> GetCurrentAutoStarts() {

@@ -23,10 +23,8 @@ namespace AutoStartConfirm.Connectors {
 
         public abstract bool MonitorSubkeys { get; }
 
-        public bool IsAdminRequiredForChanges {
-            get {
-                return BasePath.StartsWith("HKEY_LOCAL_MACHINE");
-            }
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            return BasePath.StartsWith("HKEY_LOCAL_MACHINE");
         }
 
         protected virtual bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
@@ -516,6 +514,10 @@ namespace AutoStartConfirm.Connectors {
 
         public void Dispose() {
             Dispose(true);
+        }
+
+        public void Open(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
         }
 
         #endregion

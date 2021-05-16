@@ -33,9 +33,7 @@ namespace AutoStartConfirm.Connectors {
 
         public abstract string DisableBasePath { get; }
 
-        public abstract bool IsAdminRequiredForChanges {
-            get;
-        }
+        public abstract bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
         protected FolderChangeMonitor monitor = null;
 
@@ -205,6 +203,10 @@ namespace AutoStartConfirm.Connectors {
 
         public void Dispose() {
             Dispose(true);
+        }
+
+        public void Open(AutoStartEntry autoStart) {
+            throw new NotImplementedException();
         }
 
         #endregion

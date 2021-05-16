@@ -16,10 +16,8 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly static string disableBasePath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
 
-        public override bool IsAdminRequiredForChanges {
-            get {
-                return true;
-            }
+        public override bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            return true;
         }
 
         public override Category Category {

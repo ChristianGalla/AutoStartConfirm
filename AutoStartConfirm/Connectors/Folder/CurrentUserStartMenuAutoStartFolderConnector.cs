@@ -22,10 +22,8 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        public override bool IsAdminRequiredForChanges {
-            get {
-                return false;
-            }
+        public override bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+            return false;
         }
 
         public override Category Category {
