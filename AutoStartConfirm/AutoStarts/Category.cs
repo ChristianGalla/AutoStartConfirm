@@ -56,5 +56,6 @@
         CurrentUserLoad,
         StartMenuAutoStartFolder,
         CurrentUserStartMenuAutoStartFolder,
+        ScheduledTask,
     }
 }

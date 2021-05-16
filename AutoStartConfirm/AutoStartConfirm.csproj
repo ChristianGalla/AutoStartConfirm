@@ -66,6 +66,9 @@
     <Reference Include="Microsoft.Toolkit.Uwp.Notifications, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Toolkit.Uwp.Notifications.6.0.0\lib\net461\Microsoft.Toolkit.Uwp.Notifications.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Win32.TaskScheduler, Version=2.9.1.0, Culture=neutral, PublicKeyToken=e25603a88b3aa7da, processorArchitecture=MSIL">
+      <HintPath>..\packages\TaskScheduler.2.9.1\lib\net452\Microsoft.Win32.TaskScheduler.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.6.6\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -75,6 +78,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
@@ -113,6 +117,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AutoStarts\ScheduledTaskAutoStartEntry.cs" />
     <Compile Include="AutoStarts\FolderAutoStartEntry.cs" />
     <Compile Include="AutoStarts\RegistryAutoStartEntry.cs" />
     <Compile Include="AutoStarts\AutoStartService.cs" />
@@ -173,6 +178,7 @@
     <Compile Include="Connectors\Registry\AppCertDllConnector.cs" />
     <Compile Include="Connectors\Registry\AppInit32Connector.cs" />
     <Compile Include="Connectors\Registry\AppInit64Connector.cs" />
+    <Compile Include="Connectors\ScheduledTask\ScheduledTaskConnector.cs" />
     <Compile Include="Converters\CanBeAddedConverter.cs" />
     <Compile Include="Converters\CanBeEnabledConverter.cs" />
     <Compile Include="Converters\CanBeDisabledConverter.cs" />
