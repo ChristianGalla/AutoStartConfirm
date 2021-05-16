@@ -15,7 +15,6 @@ namespace AutoStartConfirm.Connectors {
 
         public AutoStartConnectorService() {
             // todo: filter for specifiy sub sub keys if needed
-            // todo: start menu links (\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup)
             // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
             // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)
             var connectors = new List<IAutoStartConnector> {
