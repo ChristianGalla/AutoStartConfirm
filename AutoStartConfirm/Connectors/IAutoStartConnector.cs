@@ -37,7 +37,7 @@ namespace AutoStartConfirm.Connectors {
         void DisableAutoStart(AutoStartEntry autoStart);
 
         /// <summary>
-        /// Opens 
+        /// Opens the auto start in the native program (for example explorer.exe at the auto start folder paht)
         /// </summary>
         /// <param name="autoStart"></param>
         void Open(AutoStartEntry autoStart);

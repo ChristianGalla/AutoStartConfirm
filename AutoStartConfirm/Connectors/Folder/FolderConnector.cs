@@ -121,12 +121,12 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
-            Logger.Trace("CanBeAdded called for {autoStart}", autoStart);
+            Logger.Trace("CanBeAdded called for {AutoStartEntry}", autoStart);
             return false;
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart) {
-            Logger.Trace("CanBeRemoved called for {autoStart}", autoStart);
+            Logger.Trace("CanBeRemoved called for {AutoStartEntry}", autoStart);
             try {
                 RemoveAutoStart(autoStart, true);
                 return true;
@@ -136,7 +136,7 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Trace("AddAutoStart called for {autoStart}", autoStart);
+            Logger.Trace("AddAutoStart called for {AutoStartEntry}", autoStart);
             throw new NotImplementedException();
         }
 
@@ -145,9 +145,9 @@ namespace AutoStartConfirm.Connectors {
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun = false) {
-            Logger.Trace("RemoveAutoStart called for {autoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
+            Logger.Trace("RemoveAutoStart called for {AutoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
             if (autoStartEntry == null) {
-                throw new ArgumentNullException("autoStartEntry is required");
+                throw new ArgumentNullException("AutoStartEntry is required");
             }
             if (autoStartEntry is FolderAutoStartEntry folderAutoStartEntry) {
                 string fullPath = $"{folderAutoStartEntry.Path}{Path.DirectorySeparatorChar}{folderAutoStartEntry.Value}";
@@ -161,7 +161,7 @@ namespace AutoStartConfirm.Connectors {
                     throw new FileNotFoundException($"File \"{fullPath}\" not found");
                 }
             } else {
-                throw new ArgumentException("autoStartEntry is not of type folderAutoStartEntry");
+                throw new ArgumentException("AutoStartEntry is not of type folderAutoStartEntry");
             }
         }
 

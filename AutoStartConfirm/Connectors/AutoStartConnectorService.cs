@@ -75,6 +75,8 @@ namespace AutoStartConfirm.Connectors {
                 new StartMenuAutoStartFolderConnector(),
                 new CurrentUserStartMenuAutoStartFolderConnector(),
                 new ScheduledTaskConnector(),
+                new DeviceServiceConnector(),
+                new OtherServiceConnector(),
             };
             foreach (var connector in connectors) {
                 Connectors.Add(connector.Category, connector);
@@ -184,14 +186,20 @@ namespace AutoStartConfirm.Connectors {
         public void StartWatcher() {
             Logger.Info("Starting watchers");
             foreach (var connector in Connectors.Values) {
-                connector.StartWatcher();
+                try {
+                    connector.StartWatcher();
+                } catch (NotImplementedException) {
+                }
             }
         }
 
         public void StopWatcher() {
             Logger.Info("Stopping watchers");
             foreach (var connector in Connectors.Values) {
-                connector.StopWatcher();
+                try {
+                    connector.StopWatcher();
+                } catch (NotImplementedException) {
+                }
             }
         }
         #endregion

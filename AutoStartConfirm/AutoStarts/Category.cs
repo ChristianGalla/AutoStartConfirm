@@ -57,5 +57,7 @@
         StartMenuAutoStartFolder,
         CurrentUserStartMenuAutoStartFolder,
         ScheduledTask,
+        DeviceService,
+        Service,
     }
 }
