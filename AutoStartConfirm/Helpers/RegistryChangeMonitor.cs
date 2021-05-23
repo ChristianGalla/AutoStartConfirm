@@ -79,7 +79,9 @@ namespace AutoStartConfirm.Helpers
                 if (this._monitorThread == null)
                 {
                     ThreadStart ts = new ThreadStart(this.MonitorThread);
-                    this._monitorThread = new Thread(ts);
+                    this._monitorThread = new Thread(ts) {
+                        Priority = ThreadPriority.Lowest
+                    };
                     this._monitorThread.IsBackground = true;
                 }
 

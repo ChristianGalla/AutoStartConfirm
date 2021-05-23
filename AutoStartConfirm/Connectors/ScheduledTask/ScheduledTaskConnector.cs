@@ -12,6 +12,7 @@ using AutoStartConfirm.Exceptions;
 using Microsoft.Win32.TaskScheduler;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 namespace AutoStartConfirm.Connectors {
@@ -21,12 +22,10 @@ namespace AutoStartConfirm.Connectors {
         public int WatcherIntervalInMs = 1000 * 60;
 
         public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
-            return false; // todo
+            return true;
         }
 
-        protected CancellationTokenSource MonitorCancellationTokenSource;
-        
-        protected System.Threading.Tasks.Task MonitorTask;
+        protected Thread watcherThread = null;
 
         private ConcurrentDictionary<string, AutoStartEntry> lastAutoStartEntries;
 
@@ -86,21 +85,20 @@ namespace AutoStartConfirm.Connectors {
         public void StartWatcher() {
             Logger.Trace("StartWatcher called");
             StopWatcher();
-            MonitorCancellationTokenSource = new CancellationTokenSource();
-            MonitorTask = System.Threading.Tasks.Task.Run(() => {
-                MonitorChanges(MonitorCancellationTokenSource.Token);
-            });
-            Logger.Trace("Watcher started");
-        }
 
-        protected void MonitorChanges(CancellationToken token) {            
-            while (!token.IsCancellationRequested) {
-                var cancelled = token.WaitHandle.WaitOne(WatcherIntervalInMs);
-                if (cancelled) {
-                    break;
+            // Thread is created manually because
+            // thread pool should not be used for long running tasks
+            // https://docs.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool#when-not-to-use-thread-pool-threads
+            watcherThread = new Thread(new ThreadStart(() => {
+                while (true) {
+                    Thread.Sleep(WatcherIntervalInMs);
+                    CheckChanges();
                 }
-                CheckChanges();
-            }
+            })) {
+                Priority = ThreadPriority.Lowest
+            };
+            watcherThread.Start();
+            Logger.Trace("Watcher started");
         }
 
         private void CheckChanges() {
@@ -175,17 +173,14 @@ namespace AutoStartConfirm.Connectors {
 
         public void StopWatcher() {
             Logger.Trace("StopWatcher called");
-            if (MonitorCancellationTokenSource == null) {
+            if (watcherThread == null) {
                 Logger.Trace("No watcher running");
                 return;
             }
             Logger.Trace("Stopping watcher");
-            MonitorCancellationTokenSource.Cancel();
-            MonitorTask.Wait();
-            MonitorTask.Dispose();
-            MonitorTask = null;
-            MonitorCancellationTokenSource.Dispose();
-            MonitorCancellationTokenSource = null;
+            watcherThread.Abort();
+            watcherThread.Join();
+            watcherThread = null;
             Logger.Trace("Stopped watcher");
         }
 
