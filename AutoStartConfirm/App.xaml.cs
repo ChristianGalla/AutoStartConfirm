@@ -41,16 +41,22 @@ namespace AutoStartConfirm {
                 }
                 return autoStartService;
             }
+            set {
+                autoStartService = value;
+            }
         }
 
         private INotificationService notificationService;
 
-        protected INotificationService NotificationService {
+        public INotificationService NotificationService {
             get {
                 if (notificationService == null) {
                     notificationService = new NotificationService();
                 }
                 return notificationService;
+            }
+            set {
+                notificationService = value;
             }
         }
 
@@ -68,7 +74,7 @@ namespace AutoStartConfirm {
             AppInstance = this;
         }
 
-        public void Start() {
+        public void Start(bool skipInitializing = false) {
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
             bool isFirstRun = AutoStartService.GetAutoStartFileExists();
             if (!isFirstRun) {
@@ -104,8 +110,9 @@ namespace AutoStartConfirm {
             }
             AutoStartService.StartWatcher();
 
-            InitializeComponent();
-            Run(); // blocks until program is closing
+            if (!skipInitializing) {
+                InitializeComponent();
+            }
         }
 
         private static bool IsOwnAutoStart(AutoStartEntry autoStart) {
@@ -205,6 +212,7 @@ namespace AutoStartConfirm {
                     }
                     Logger.Info("Normal start");
                     app.Start();
+                    app.Run(); // blocks until program is closing
                     Logger.Info("Finished");
                 }
                 AppInstance = null;
@@ -277,7 +285,7 @@ namespace AutoStartConfirm {
         }
 
         void App_Startup(object sender, StartupEventArgs e) {
-            Logger.Trace("App_Startup called");
+            Logger.Trace("App_Startup called"); 
             Icon = (TaskbarIcon)FindResource("NotifyIcon");
         }
 
