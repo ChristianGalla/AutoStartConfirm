@@ -12,11 +12,23 @@ namespace AutoStartConfirm.AutoStarts {
 
     public delegate void AutoStartsChangeHandler(AutoStartEntry e);
 
-    public class AutoStartService : IDisposable {
+    public class AutoStartService : IDisposable, IAutoStartService {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly AutoStartConnectorService Connectors = new AutoStartConnectorService();
+        private IAutoStartConnectorService connectors;
+        protected IAutoStartConnectorService Connectors {
+            get {
+                if (connectors == null) {
+                    connectors = new AutoStartConnectorService();
+                    connectors.Add += AddHandler;
+                    connectors.Remove += RemoveHandler;
+                    connectors.Enable += EnableHandler;
+                    connectors.Disable += DisableHandler;
+                }
+                return connectors;
+            }
+        }
 
         private readonly string PathToLastAutoStarts;
 
@@ -24,11 +36,15 @@ namespace AutoStartConfirm.AutoStarts {
 
         private readonly string PathToRemovedAutoStarts;
 
-        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        private Dictionary<Guid, AutoStartEntry> currentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
 
-        public Dictionary<Guid, AutoStartEntry> AddedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts => currentAutoStarts;
 
-        public Dictionary<Guid, AutoStartEntry> RemovedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        private Dictionary<Guid, AutoStartEntry> addedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        public Dictionary<Guid, AutoStartEntry> AddedAutoStarts => addedAutoStarts;
+
+        private Dictionary<Guid, AutoStartEntry> removedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        public Dictionary<Guid, AutoStartEntry> RemovedAutoStarts => removedAutoStarts;
         #endregion
 
         #region Methods
@@ -39,10 +55,6 @@ namespace AutoStartConfirm.AutoStarts {
             PathToLastAutoStarts = $"{basePath}LastAutoStarts.bin";
             PathToAddedAutoStarts = $"{basePath}AddedAutoStarts.bin";
             PathToRemovedAutoStarts = $"{basePath}RemovedAutoStarts.bin";
-            Connectors.Add += AddHandler;
-            Connectors.Remove += RemoveHandler;
-            Connectors.Enable += EnableHandler;
-            Connectors.Disable += DisableHandler;
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
@@ -211,7 +223,7 @@ namespace AutoStartConfirm.AutoStarts {
         /// Resets all dynamic properties of all current auto starts.
         /// </summary>
         public void ResetEditablePropertiesOfAllCurrentAutoStarts() {
-            foreach(var autoStart in CurrentAutoStarts) {
+            foreach (var autoStart in CurrentAutoStarts) {
                 var autoStartValue = autoStart.Value;
                 ResetAllDynamicFields(autoStartValue);
                 CurrentAutoStartChange?.Invoke(autoStartValue);
@@ -390,18 +402,18 @@ namespace AutoStartConfirm.AutoStarts {
                     lastSavedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 }
                 try {
-                    AddedAutoStarts = GetSavedAutoStarts(PathToAddedAutoStarts);
+                    addedAutoStarts = GetSavedAutoStarts(PathToAddedAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load added auto starts", ex);
                     Logger.Error(err);
-                    AddedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                    addedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 }
                 try {
-                    RemovedAutoStarts = GetSavedAutoStarts(PathToRemovedAutoStarts);
+                    removedAutoStarts = GetSavedAutoStarts(PathToRemovedAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load removed auto starts", ex);
                     Logger.Error(err);
-                    RemovedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                    removedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 }
                 IList<AutoStartEntry> currentAutoStarts;
                 try {
@@ -416,7 +428,7 @@ namespace AutoStartConfirm.AutoStarts {
                     if (lastAutostart.AddDate == null) {
                         lastAutostart.AddDate = DateTime.Now;
                     }
-                    for (int i = 0; i< currentAutoStarts.Count(); i++) {
+                    for (int i = 0; i < currentAutoStarts.Count(); i++) {
                         var newAutostart = currentAutoStarts[i];
                         if (newAutostart.Equals(lastAutostart)) {
                             found = true;
@@ -429,7 +441,7 @@ namespace AutoStartConfirm.AutoStarts {
                     }
                 }
                 var autoStartsToAdd = new List<AutoStartEntry>();
-                CurrentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                this.currentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
                 foreach (var currentAutoStart in currentAutoStarts) {
                     if (!lastSavedAutoStarts.ContainsKey(currentAutoStart.Id)) {
                         autoStartsToAdd.Add(currentAutoStart);
@@ -437,7 +449,10 @@ namespace AutoStartConfirm.AutoStarts {
                     CurrentAutoStarts.Add(currentAutoStart.Id, currentAutoStart);
                 }
                 foreach (var currentAutoStart in CurrentAutoStarts.Values) {
-                    var wasEnabled = lastSavedAutoStarts[currentAutoStart.Id].IsEnabled.GetValueOrDefault(true);
+                    bool wasEnabled = true;
+                    if (lastSavedAutoStarts.TryGetValue(currentAutoStart.Id, out AutoStartEntry oldAutoStart)) {
+                        wasEnabled = oldAutoStart.IsEnabled.GetValueOrDefault(true);
+                    }
                     var nowEnabled = Connectors.IsEnabled(currentAutoStart);
                     currentAutoStart.IsEnabled = nowEnabled;
                     if (nowEnabled && !wasEnabled) {
@@ -594,7 +609,9 @@ namespace AutoStartConfirm.AutoStarts {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    Connectors.Dispose();
+                    if (connectors != null) {
+                        connectors.Dispose();
+                    }
                 }
                 disposedValue = true;
             }

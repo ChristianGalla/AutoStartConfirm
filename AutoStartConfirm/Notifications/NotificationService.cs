@@ -11,7 +11,7 @@ using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
 namespace AutoStartConfirm.Notifications {
-    public class NotificationService {
+    public class NotificationService : INotificationService {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         public NotificationService() {

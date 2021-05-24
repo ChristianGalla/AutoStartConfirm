@@ -32,9 +32,27 @@ namespace AutoStartConfirm {
 
         public bool HasOwnAutoStart = false;
 
-        public readonly AutoStartService AutoStartService = new AutoStartService();
+        private IAutoStartService autoStartService;
 
-        private readonly NotificationService NotificationService = new NotificationService();
+        public IAutoStartService AutoStartService {
+            get {
+                if (autoStartService == null) {
+                    autoStartService = new AutoStartService();
+                }
+                return autoStartService;
+            }
+        }
+
+        private INotificationService notificationService;
+
+        protected INotificationService NotificationService {
+            get {
+                if (notificationService == null) {
+                    notificationService = new NotificationService();
+                }
+                return notificationService;
+            }
+        }
 
         private static App AppInstance;
 
@@ -46,7 +64,11 @@ namespace AutoStartConfirm {
 
         private static readonly string DisableParameterName = "--disable";
 
-        private App() {
+        public App() {
+            AppInstance = this;
+        }
+
+        public void Start() {
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
             bool isFirstRun = AutoStartService.GetAutoStartFileExists();
             if (!isFirstRun) {
@@ -81,6 +103,9 @@ namespace AutoStartConfirm {
                 AutoStartService.Disable += DisableHandler;
             }
             AutoStartService.StartWatcher();
+
+            InitializeComponent();
+            Run(); // blocks until program is closing
         }
 
         private static bool IsOwnAutoStart(AutoStartEntry autoStart) {
@@ -108,6 +133,7 @@ namespace AutoStartConfirm {
                         Logger.Info("Shall add own auto start");
                         AutoStartService.AddAutoStart(ownAutoStart);
                     }
+                    HasOwnAutoStart = !HasOwnAutoStart;
                     ownAutoStart.ConfirmStatus = ConfirmStatus.New;
                     Logger.Trace("Own auto start toggled");
                 } catch (Exception e) {
@@ -172,19 +198,13 @@ namespace AutoStartConfirm {
         public static int Main(string[] args) {
             try {
                 Logger.Info("Starting");
-                Logger.Info("Parameters: {args}", args);
-                if (HandleCommandLineParameters(args)) {
-                    return 0;
-                }
-                Logger.Info("Normal start");
                 using (App app = new App()) {
-                    AppInstance = app;
-                    app.InitializeComponent();
-                    try {
-                        app.Run(); // blocks until program is closing
-                    } catch (Exception e) {
-                        Logger.Error(new Exception("Failed to run", e));
+                    Logger.Info("Parameters: {args}", args);
+                    if (app.HandleCommandLineParameters(args)) {
+                        return 0;
                     }
+                    Logger.Info("Normal start");
+                    app.Start();
                     Logger.Info("Finished");
                 }
                 AppInstance = null;
@@ -201,35 +221,31 @@ namespace AutoStartConfirm {
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
-        private static bool HandleCommandLineParameters(string[] args) {
+        private bool HandleCommandLineParameters(string[] args) {
             for (int i = 0; i < args.Length; i++) {
                 var arg = args[i];
                 if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase)) {
                     Logger.Info("Adding should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    var autoStartService = new AutoStartService();
-                    autoStartService.RemoveAutoStart(autoStartEntry);
+                    AutoStartService.RemoveAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
                 } else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase)) {
                     Logger.Info("Removing should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    var autoStartService = new AutoStartService();
-                    autoStartService.AddAutoStart(autoStartEntry);
+                    AutoStartService.AddAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
                 } else if (string.Equals(arg, EnableParameterName, StringComparison.OrdinalIgnoreCase)) {
                     Logger.Info("Auto start should be enabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    var autoStartService = new AutoStartService();
-                    autoStartService.EnableAutoStart(autoStartEntry);
+                    AutoStartService.EnableAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
                 } else if (string.Equals(arg, DisableParameterName, StringComparison.OrdinalIgnoreCase)) {
                     Logger.Info("Auto start should be disabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    var autoStartService = new AutoStartService();
-                    autoStartService.DisableAutoStart(autoStartEntry);
+                    AutoStartService.DisableAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
                 }
@@ -561,7 +577,9 @@ namespace AutoStartConfirm {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    AutoStartService.Dispose();
+                    if (AutoStartService != null) {
+                        AutoStartService.Dispose();
+                    }
                 }
                 disposedValue = true;
             }

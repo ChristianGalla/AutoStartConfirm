@@ -16,9 +16,9 @@ namespace AutoStartConfirm.Connectors {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private RegistryDisableService registryDisableService = null;
+        private IRegistryDisableService registryDisableService = null;
 
-        private RegistryDisableService RegistryDisableService {
+        private IRegistryDisableService RegistryDisableService {
             get {
                 if (registryDisableService == null) {
                     registryDisableService = new RegistryDisableService(DisableBasePath);
@@ -35,7 +35,20 @@ namespace AutoStartConfirm.Connectors {
 
         public abstract bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
-        protected FolderChangeMonitor monitor = null;
+        private IFolderChangeMonitor monitor;
+        protected IFolderChangeMonitor Monitor {
+            get {
+                if (monitor == null) {
+                    monitor = new FolderChangeMonitor() {
+                        BasePath = BasePath,
+                        Category = Category,
+                    };
+                    monitor.Add += AddHandler;
+                    monitor.Remove += RemoveHandler;
+                }
+                return monitor;
+            }
+        }
 
 
         // todo: read target of links?
@@ -67,13 +80,7 @@ namespace AutoStartConfirm.Connectors {
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
             StopWatcher();
-            monitor = new FolderChangeMonitor() {
-                BasePath = BasePath,
-                Category = Category,
-            };
-            monitor.Add += AddHandler;
-            monitor.Remove += RemoveHandler;
-            monitor.Start();
+            Monitor.Start();
             RegistryDisableService.StartWatcher();
             Logger.Trace("Watcher started");
         }
@@ -111,13 +118,8 @@ namespace AutoStartConfirm.Connectors {
         public void StopWatcher() {
             Logger.Trace("StopWatcher called for {BasePath}", BasePath);
             RegistryDisableService.StopWatcher();
-            if (monitor == null) {
-                Logger.Trace("No watcher running");
-                return;
-            }
-            Logger.Trace("Stopping watcher");
-            monitor.Dispose();
-            monitor = null;
+            Monitor.Stop();
+            Logger.Trace("Watcher stopped");
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart) {

@@ -49,7 +49,6 @@ namespace AutoStartConfirm.Connectors {
         }
 
         protected ServiceAutoStartEntry GetAutoStartEntry(ServiceController sc) {
-            Logger.Trace("GetAutoStartEntry called for service controller {ServiceController}", sc);
             var newAutoStart = new ServiceAutoStartEntry() {
                 AddDate = DateTime.Now,
                 Category = Category,
@@ -65,14 +64,12 @@ namespace AutoStartConfirm.Connectors {
         }
 
         protected bool IsEnabled(ServiceController sc) {
-            Logger.Trace("IsEnabled called for ServiceController {ServiceController}", sc);
             return sc.StartType == ServiceStartMode.Automatic ||
                 sc.StartType == ServiceStartMode.Boot ||
                 sc.StartType == ServiceStartMode.System;
         }
 
         public bool IsEnabled(AutoStartEntry autoStart) {
-            Logger.Trace("IsEnabled called for AutoStartEntry {AutoStartEntry}", autoStart);
             if (!(autoStart is ServiceAutoStartEntry)) {
                 throw new ArgumentException("AutoStartEntry has invalid type");
             }
@@ -87,7 +84,6 @@ namespace AutoStartConfirm.Connectors {
         protected abstract ServiceController[] GetServiceControllers();
 
         protected ServiceController GetServiceController(AutoStartEntry autoStart) {
-            Logger.Trace("GetServiceController called for AutoStartEntry {AutoStartEntry}", autoStart);
             var serviceControllers = GetServiceControllers();
             foreach (var sc in serviceControllers) {
                 if (autoStart.Path == sc.ServiceName) {

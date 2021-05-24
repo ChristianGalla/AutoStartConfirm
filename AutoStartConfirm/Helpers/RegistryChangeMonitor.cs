@@ -16,9 +16,9 @@ namespace AutoStartConfirm.Helpers
     public delegate void RegistryChangeHandler(object sender, RegistryChangeEventArgs e);
     #endregion
 
-    public class RegistryChangeMonitor : IDisposable
-    {
+    public class RegistryChangeMonitor : IDisposable, IRegistryChangeMonitor {
         #region Fields
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         private string _registryPath;
         private REG_NOTIFY_CHANGE _filter;
         private Thread _monitorThread;
@@ -38,8 +38,7 @@ namespace AutoStartConfirm.Helpers
 
         #region Enumerations
         [Flags]
-        public enum REG_NOTIFY_CHANGE : uint
-        {
+        public enum REG_NOTIFY_CHANGE : uint {
             NAME = 0x1,
             ATTRIBUTES = 0x2,
             LAST_SET = 0x4,
@@ -49,35 +48,29 @@ namespace AutoStartConfirm.Helpers
 
         #region Constructors
         public RegistryChangeMonitor(string registryPath) : this(registryPath, REG_NOTIFY_CHANGE.LAST_SET) {; }
-        public RegistryChangeMonitor(string registryPath, REG_NOTIFY_CHANGE filter)
-        {
+        public RegistryChangeMonitor(string registryPath, REG_NOTIFY_CHANGE filter) {
             this._registryPath = registryPath.ToUpper();
             this._filter = filter;
         }
-        ~RegistryChangeMonitor()
-        {
+        ~RegistryChangeMonitor() {
             this.Dispose(false);
         }
         #endregion
 
         #region Methods
-        private void Dispose(bool disposing)
-        {
+        private void Dispose(bool disposing) {
             if (disposing)
                 GC.SuppressFinalize(this);
 
             this.Stop();
         }
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
-        public void Start()
-        {
-            lock (this)
-            {
-                if (this._monitorThread == null)
-                {
+        public void Start() {
+            Logger.Trace("Starting monitoring of {Path}", _registryPath);
+            lock (this) {
+                if (this._monitorThread == null) {
                     ThreadStart ts = new ThreadStart(this.MonitorThread);
                     this._monitorThread = new Thread(ts) {
                         Priority = ThreadPriority.Lowest
@@ -85,42 +78,37 @@ namespace AutoStartConfirm.Helpers
                     this._monitorThread.IsBackground = true;
                 }
 
-                if (!this._monitorThread.IsAlive)
-                {
+                if (!this._monitorThread.IsAlive) {
                     this._monitorThread.Start();
                 }
             }
         }
 
-        public void Stop()
-        {
-            lock (this)
-            {
-                this.Changed = null;
-                this.Error = null;
-
-                if (this._monitorThread != null)
-                {
+        public void Stop() {
+            Logger.Trace("Stopping monitoring of {Path}", _registryPath);
+            lock (this) {
+                var monitorThread = this._monitorThread;
+                if (this._monitorThread != null) {
                     this._monitorThread = null;
                 }
 
                 // The "Close()" will trigger RegNotifyChangeKeyValue if it is still listening
-                if (this._monitorKey != null)
-                {
+                if (this._monitorKey != null) {
                     this._monitorKey.Close();
                     this._monitorKey = null;
+                }
+                if (monitorThread != null) {
+                    monitorThread.Join();
+                    monitorThread = null;
                 }
             }
         }
 
-        private void MonitorThread()
-        {
-            try
-            {
+        private void MonitorThread() {
+            try {
                 IntPtr ptr = IntPtr.Zero;
 
-                lock (this)
-                {
+                lock (this) {
                     if (this._registryPath.StartsWith("HKEY_CLASSES_ROOT"))
                         this._monitorKey = Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(18));
                     else if (this._registryPath.StartsWith("HKCR"))
@@ -143,8 +131,7 @@ namespace AutoStartConfirm.Helpers
                         this._monitorKey = Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(5));
 
                     // Fetch the native handle
-                    if (this._monitorKey != null)
-                    {
+                    if (this._monitorKey != null) {
                         object hkey = typeof(RegistryKey).InvokeMember(
                            "hkey",
                            BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic,
@@ -162,34 +149,31 @@ namespace AutoStartConfirm.Helpers
                     }
                 }
 
-                if (ptr != IntPtr.Zero)
-                {
-                    while (true)
-                    {
+                if (ptr != IntPtr.Zero) {
+                    while (true) {
                         // If this._monitorThread is null that probably means Dispose is being called. Don't monitor anymore.
                         if ((this._monitorThread == null) || (this._monitorKey == null))
                             break;
 
+                        Logger.Trace("Monitoring of {Path}", _registryPath);
                         // RegNotifyChangeKeyValue blocks until a change occurs.
                         int result = RegNotifyChangeKeyValue(ptr, true, this._filter, IntPtr.Zero, false);
+                        Logger.Trace("Handling monitoring event of {Path}", _registryPath);
 
                         if ((this._monitorThread == null) || (this._monitorKey == null))
                             break;
 
-                        if (result == 0)
-                        {
-                            if (this.Changed != null)
-                            {
+                        if (result == 0) {
+                            Logger.Trace("Change detected on {Path}", _registryPath);
+                            if (this.Changed != null) {
                                 RegistryChangeEventArgs e = new RegistryChangeEventArgs(this);
                                 this.Changed(this, e);
 
                                 if (e.Stop) break;
                             }
-                        }
-                        else
-                        {
-                            if (this.Error != null)
-                            {
+                        } else {
+                            Logger.Trace("Error on monitoring of {Path}", _registryPath);
+                            if (this.Error != null) {
                                 Win32Exception ex = new Win32Exception();
 
                                 // Unless the exception is thrown, nobody is nice enough to set a good stacktrace for us. Set it ourselves.
@@ -210,19 +194,12 @@ namespace AutoStartConfirm.Helpers
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                if (this.Error != null)
-                {
+            } catch (Exception ex) {
+                if (this.Error != null) {
                     RegistryChangeEventArgs e = new RegistryChangeEventArgs(this);
                     e.Exception = ex;
                     this.Error(this, e);
                 }
-            }
-            finally
-            {
-                this.Stop();
             }
         }
         #endregion
@@ -233,10 +210,8 @@ namespace AutoStartConfirm.Helpers
         #endregion
 
         #region Properties
-        public bool Monitoring
-        {
-            get
-            {
+        public bool Monitoring {
+            get {
                 if (this._monitorThread != null)
                     return this._monitorThread.IsAlive;
 

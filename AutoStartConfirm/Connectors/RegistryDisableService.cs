@@ -13,7 +13,7 @@ namespace AutoStartConfirm.Connectors {
     public delegate void EnableChangeHandler(string name);
     #endregion
 
-    class RegistryDisableService : IDisposable {
+    class RegistryDisableService : IDisposable, IRegistryDisableService {
 
         public string DisableBasePath { get; }
 
@@ -23,7 +23,7 @@ namespace AutoStartConfirm.Connectors {
 
         protected static readonly byte[] defaultDisabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
         private Dictionary<string, bool> lastEnableStatus;
-        protected RegistryChangeMonitor monitor;
+        protected IRegistryChangeMonitor monitor;
 
         public RegistryDisableService(string DisableBasePath) {
             this.DisableBasePath = DisableBasePath;
@@ -83,7 +83,7 @@ namespace AutoStartConfirm.Connectors {
             if (autoStart is FolderAutoStartEntry) {
                 valueName = autoStart.Value;
             } else if (autoStart is RegistryAutoStartEntry) {
-                valueName = autoStart.Path.Substring(autoStart.Path.LastIndexOf('\\')+1);
+                valueName = autoStart.Path.Substring(autoStart.Path.LastIndexOf('\\') + 1);
             } else {
                 throw new NotImplementedException();
             }
@@ -196,7 +196,7 @@ namespace AutoStartConfirm.Connectors {
             // also all other bytes should be 0
             var firstByteAsInt = currentValueByteArray[0] & 0b_1111_1110;
             currentValueByteArray[0] = (byte)firstByteAsInt;
-            for (int i = 1; i< currentValueByteArray.Length; i++) {
+            for (int i = 1; i < currentValueByteArray.Length; i++) {
                 currentValueByteArray[i] = 0b0;
             }
             return currentValueByteArray;

@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows;
 
 namespace AutoStartConfirm.Helpers {
-    public class FolderChangeMonitor : IDisposable {
+    public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -109,7 +109,7 @@ namespace AutoStartConfirm.Helpers {
                 };
                 Remove?.Invoke(removedAutostart);
             });
-        }        
+        }
 
         private void OnRenamed(object sender, RenamedEventArgs e) {
             if (e.Name.ToLower() == "desktop.ini") {
@@ -164,7 +164,7 @@ namespace AutoStartConfirm.Helpers {
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~FolderChangeMonitor()
+        // ~IFolderChangeMonitor()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);

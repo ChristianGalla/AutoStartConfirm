@@ -7,13 +7,26 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
-    public class AutoStartConnectorService: IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector> {
+    public class AutoStartConnectorService : IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector>, IAutoStartConnectorService {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        protected Dictionary<Category, IAutoStartConnector> Connectors = new Dictionary<Category, IAutoStartConnector>();
+        private Dictionary<Category, IAutoStartConnector> connectors;
+
+        public Dictionary<Category, IAutoStartConnector> Connectors {
+            get {
+                if (connectors == null) {
+                    connectors = new Dictionary<Category, IAutoStartConnector>();
+                    CreateConnectors();
+                }
+                return connectors;
+            }
+        }
 
         public AutoStartConnectorService() {
+        }
+
+        private void CreateConnectors() {
             // todo: filter for specifiy sub sub keys if needed
             // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
             // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)
@@ -92,7 +105,7 @@ namespace AutoStartConfirm.Connectors {
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
-            foreach(var connector in Connectors.Values) {
+            foreach (var connector in Connectors.Values) {
                 var connectorAutoStarts = connector.GetCurrentAutoStarts();
                 ret.AddRange(connectorAutoStarts);
             }

@@ -10,18 +10,18 @@ namespace AutoStartConfirm.Helpers
         #region Fields
         private bool _stop;
         private Exception _exception;
-        private RegistryChangeMonitor _monitor;
+        private IRegistryChangeMonitor _monitor;
         #endregion
 
         #region Constructor
-        public RegistryChangeEventArgs(RegistryChangeMonitor monitor)
+        public RegistryChangeEventArgs(IRegistryChangeMonitor monitor)
         {
             this._monitor = monitor;
         }
         #endregion
 
         #region Properties
-        public RegistryChangeMonitor Monitor
+        public IRegistryChangeMonitor Monitor
         {
             get { return this._monitor; }
         }

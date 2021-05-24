@@ -12,7 +12,6 @@ using AutoStartConfirm.Exceptions;
 using Microsoft.Win32.TaskScheduler;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 namespace AutoStartConfirm.Connectors {
