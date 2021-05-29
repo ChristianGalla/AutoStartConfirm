@@ -14,68 +14,26 @@ namespace AutoStartConfirm.Notifications {
     public class NotificationService : INotificationService {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly string assetDirectoryPath = $"{AppContext.BaseDirectory}Assets/";
+
         public NotificationService() {
-            DesktopNotificationManagerCompat.RegisterAumidAndComServer<MyNotificationActivator>("ChristianGalla.AutoStartConfirm");
-            DesktopNotificationManagerCompat.RegisterActivator<MyNotificationActivator>();
         }
 
-        public void ShowNewAutoStartEntryNotification(AutoStartEntry addedAutostart) {
+        public void ShowNewAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowNewAutoStartEntryNotification called for {@addedAutostart}", addedAutostart);
-                ToastContent toastContent = new ToastContent() {
-                    // Arguments when the user taps body of toast
-                    Launch = $"action=viewAdd&id={addedAutostart.Id}",
+                Logger.Trace("ShowNewAutoStartEntryNotification called for {@autostart}", autostart);
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewAdd")
+                    .AddArgument("id", autostart.Id.ToString())
+                    .AddAppLogoOverride(new Uri($"{assetDirectoryPath}AddIcon.png"), ToastGenericAppLogoCrop.None)
+                    .AddText("Autostart added", AdaptiveTextStyle.Title)
+                    .AddText(autostart.Value)
+                    .AddAttributionText($"Via {autostart.Category}")
+                    .AddButton("Ok", ToastActivationType.Background, new ToastArguments().Add("action", "confirmAdd").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Disable", ToastActivationType.Background, new ToastArguments().Add("action", "disable").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Revert", ToastActivationType.Background, new ToastArguments().Add("action", "revertAdd").Add("id", autostart.Id.ToString()).ToString())
+                    .Show();
 
-                    Visual = new ToastVisual() {
-                        BindingGeneric = new ToastBindingGeneric() {
-                            AppLogoOverride = new ToastGenericAppLogo() {
-                                Source = $"{Directory.GetCurrentDirectory()}/Assets/AddIcon.png",
-                                HintCrop = ToastGenericAppLogoCrop.None
-                            },
-                            Children = {
-                            new AdaptiveText()
-                            {
-                                Text = $"Autostart added",
-                                HintStyle = AdaptiveTextStyle.Title
-                            },
-                            new AdaptiveText()
-                            {
-                                Text = addedAutostart.Value
-                            },
-                        },
-                            Attribution = new ToastGenericAttributionText() {
-                                Text = $"Via {addedAutostart.Category}",
-                            },
-                        }
-                    },
-                    Actions = new ToastActionsCustom() {
-                        Buttons =
-                        {
-                            new ToastButton("Ok", $"action=confirmAdd&id={addedAutostart.Id}")
-                            {
-                                ActivationType = ToastActivationType.Background
-                            },
-                            new ToastButton("Disable", $"action=disable&id={addedAutostart.Id}")
-                            {
-                                ActivationType = ToastActivationType.Background
-                            },
-                            new ToastButton("Revert", $"action=revertAdd&id={addedAutostart.Id}")
-                            {
-                                ActivationType = ToastActivationType.Background
-                            },
-                        }
-                    }
-                };
-
-                // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
-                var doc = new XmlDocument();
-                doc.LoadXml(toastContent.GetContent());
-
-                // And create the toast notification
-                var toast = new ToastNotification(doc);
-
-                // And then show it
-                DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
                 Logger.Trace("ShowNewAutoStartEntryNotification finished");
             } catch (Exception e) {
                 var err = new Exception("Failed to show new auto start notification", e);
@@ -86,60 +44,18 @@ namespace AutoStartConfirm.Notifications {
         public void ShowEnabledAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
                 Logger.Trace("ShowEnabledAutoStartEntryNotification called for {@autostart}", autostart);
-                ToastContent toastContent = new ToastContent() {
-                    // Arguments when the user taps body of toast
-                    Launch = $"action=viewAdd&id={autostart.Id}",
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewAdd")
+                    .AddArgument("id", autostart.Id.ToString())
+                    .AddAppLogoOverride(new Uri($"{assetDirectoryPath}AddIcon.png"), ToastGenericAppLogoCrop.None)
+                    .AddText("Autostart enabled", AdaptiveTextStyle.Title)
+                    .AddText(autostart.Value)
+                    .AddAttributionText($"Via {autostart.Category}")
+                    .AddButton("Ok", ToastActivationType.Background, new ToastArguments().Add("action", "confirmEnable").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Disable", ToastActivationType.Background, new ToastArguments().Add("action", "disable").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Remove", ToastActivationType.Background, new ToastArguments().Add("action", "revertAdd").Add("id", autostart.Id.ToString()).ToString())
+                    .Show();
 
-                    Visual = new ToastVisual() {
-                        BindingGeneric = new ToastBindingGeneric() {
-                            AppLogoOverride = new ToastGenericAppLogo() {
-                                Source = $"{Directory.GetCurrentDirectory()}/Assets/AddIcon.png",
-                                HintCrop = ToastGenericAppLogoCrop.None
-                            },
-                            Children = {
-                            new AdaptiveText()
-                            {
-                                Text = $"Autostart enabled",
-                                HintStyle = AdaptiveTextStyle.Title
-                            },
-                            new AdaptiveText()
-                            {
-                                Text = autostart.Value
-                            },
-                        },
-                            Attribution = new ToastGenericAttributionText() {
-                                Text = $"Via {autostart.Category}",
-                            },
-                        }
-                    },
-                    Actions = new ToastActionsCustom() {
-                        Buttons =
-                            {
-                                new ToastButton("Ok", $"action=confirmEnable&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                                new ToastButton("Disable", $"action=disable&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                                new ToastButton("Remove", $"action=revertAdd&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                            }
-                    }
-                };
-
-                // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
-                var doc = new XmlDocument();
-                doc.LoadXml(toastContent.GetContent());
-
-                // And create the toast notification
-                var toast = new ToastNotification(doc);
-
-                // And then show it
-                DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
                 Logger.Trace("ShowEnabledAutoStartEntryNotification finished");
             } catch (Exception e) {
                 var err = new Exception("Failed to show enabled auto start notification", e);
@@ -147,59 +63,20 @@ namespace AutoStartConfirm.Notifications {
             }
         }
 
-        public void ShowRemovedAutoStartEntryNotification(AutoStartEntry removedAutostart) {
+        public void ShowRemovedAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowRemovedAutoStartEntryNotification called for {@removedAutostart}", removedAutostart);
-                ToastContent toastContent = new ToastContent() {
-                    // Arguments when the user taps body of toast
-                    Launch = $"action=viewRemove&id={removedAutostart.Id}",
+                Logger.Trace("ShowRemovedAutoStartEntryNotification called for {@autostart}", autostart);
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewRemove")
+                    .AddArgument("id", autostart.Id.ToString())
+                    .AddAppLogoOverride(new Uri($"{assetDirectoryPath}RemoveIcon.png"), ToastGenericAppLogoCrop.None)
+                    .AddText("Autostart removed", AdaptiveTextStyle.Title)
+                    .AddText(autostart.Value)
+                    .AddAttributionText($"Via {autostart.Category}")
+                    .AddButton("Ok", ToastActivationType.Background, new ToastArguments().Add("action", "confirmRemove").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Revert", ToastActivationType.Background, new ToastArguments().Add("action", "revertRemove").Add("id", autostart.Id.ToString()).ToString())
+                    .Show();
 
-                    Visual = new ToastVisual() {
-                        BindingGeneric = new ToastBindingGeneric() {
-                            AppLogoOverride = new ToastGenericAppLogo() {
-                                Source = $"{Directory.GetCurrentDirectory()}/Assets/RemoveIcon.png",
-                                HintCrop = ToastGenericAppLogoCrop.None
-                            },
-                            Children = {
-                                new AdaptiveText()
-                                {
-                                    Text = $"Autostart removed",
-                                    HintStyle = AdaptiveTextStyle.Title
-                                },
-                                new AdaptiveText()
-                                {
-                                    Text = $"{removedAutostart.Value}"
-                                }
-                            },
-                            Attribution = new ToastGenericAttributionText() {
-                                Text = $"Via {removedAutostart.Category}",
-                            }
-                        }
-                    },
-                    Actions = new ToastActionsCustom() {
-                        Buttons =
-                            {
-                                new ToastButton("Ok", $"action=confirmRemove&id={removedAutostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                                new ToastButton("Revert", $"action=revertRemove&id={removedAutostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                            }
-                    }
-                };
-
-                // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
-                var doc = new XmlDocument();
-                doc.LoadXml(toastContent.GetContent());
-
-                // And create the toast notification
-                var toast = new ToastNotification(doc);
-
-                // And then show it
-                DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
                 Logger.Trace("ShowRemovedAutoStartEntryNotification finished");
             } catch (Exception e) {
                 var err = new Exception("Failed to show removed auto start notification", e);
@@ -210,60 +87,17 @@ namespace AutoStartConfirm.Notifications {
         public void ShowDisabledAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
                 Logger.Trace("ShowDisabledAutoStartEntryNotification called for {@autostart}", autostart);
-                ToastContent toastContent = new ToastContent() {
-                    // Arguments when the user taps body of toast
-                    Launch = $"action=viewAdd&id={autostart.Id}",
-
-                    Visual = new ToastVisual() {
-                        BindingGeneric = new ToastBindingGeneric() {
-                            AppLogoOverride = new ToastGenericAppLogo() {
-                                Source = $"{Directory.GetCurrentDirectory()}/Assets/RemoveIcon.png",
-                                HintCrop = ToastGenericAppLogoCrop.None
-                            },
-                            Children = {
-                                new AdaptiveText()
-                                {
-                                    Text = $"Autostart disabled",
-                                    HintStyle = AdaptiveTextStyle.Title
-                                },
-                                new AdaptiveText()
-                                {
-                                    Text = $"{autostart.Value}"
-                                }
-                            },
-                            Attribution = new ToastGenericAttributionText() {
-                                Text = $"Via {autostart.Category}",
-                            }
-                        }
-                    },
-                    Actions = new ToastActionsCustom() {
-                        Buttons =
-                            {
-                                new ToastButton("Ok", $"action=confirmDisable&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                                new ToastButton("Enable", $"action=enable&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                                new ToastButton("Remove", $"action=revertRemove&id={autostart.Id}")
-                                {
-                                    ActivationType = ToastActivationType.Background
-                                },
-                            }
-                    }
-                };
-
-                // Create the XML document (BE SURE TO REFERENCE WINDOWS.DATA.XML.DOM)
-                var doc = new XmlDocument();
-                doc.LoadXml(toastContent.GetContent());
-
-                // And create the toast notification
-                var toast = new ToastNotification(doc);
-
-                // And then show it
-                DesktopNotificationManagerCompat.CreateToastNotifier().Show(toast);
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewAdd")
+                    .AddArgument("id", autostart.Id.ToString())
+                    .AddAppLogoOverride(new Uri($"{assetDirectoryPath}RemoveIcon.png"), ToastGenericAppLogoCrop.None)
+                    .AddText("Autostart disabled", AdaptiveTextStyle.Title)
+                    .AddText(autostart.Value)
+                    .AddAttributionText($"Via {autostart.Category}")
+                    .AddButton("Ok", ToastActivationType.Background, new ToastArguments().Add("action", "confirmDisable").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Enable", ToastActivationType.Background, new ToastArguments().Add("action", "enable").Add("id", autostart.Id.ToString()).ToString())
+                    .AddButton("Remove", ToastActivationType.Background, new ToastArguments().Add("action", "revertRemove").Add("id", autostart.Id.ToString()).ToString())
+                    .Show();
                 Logger.Trace("ShowDisabledAutoStartEntryNotification finished");
             } catch (Exception e) {
                 var err = new Exception("Failed to show disabled auto start notification", e);

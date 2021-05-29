@@ -18,6 +18,7 @@ using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 using System.Diagnostics;
 using System.Reflection;
+using Windows.Foundation.Collections;
 
 namespace AutoStartConfirm {
     /// <summary>
@@ -550,6 +551,59 @@ namespace AutoStartConfirm {
         }
 
         #region Event handlers
+        protected override void OnStartup(StartupEventArgs e) {
+            // Listen to notification activation
+            ToastNotificationManagerCompat.OnActivated += toastArgs => {
+                Logger.Trace("Toast activated {Arguments}", toastArgs.Argument);
+                // Obtain the arguments from the notification
+                ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
+
+                // Obtain any user input (text boxes, menu selections) from the notification
+                ValueSet userInput = toastArgs.UserInput;
+
+                // Need to dispatch to UI thread if performing UI operations
+                Application.Current.Dispatcher.Invoke(delegate {
+                    Logger.Trace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
+                    switch (args["action"]) {
+                        case "viewRemove":
+                            ShowRemoved(Guid.Parse(args["id"]));
+                            break;
+                        case "revertRemove":
+                            RevertRemove(Guid.Parse(args["id"]));
+                            break;
+                        case "confirmRemove":
+                            ConfirmRemove(Guid.Parse(args["id"]));
+                            break;
+                        case "viewAdd":
+                            ShowAdd(Guid.Parse(args["id"]));
+                            break;
+                        case "revertAdd":
+                            RevertAdd(Guid.Parse(args["id"]));
+                            break;
+                        case "confirmAdd":
+                            ConfirmAdd(Guid.Parse(args["id"]));
+                            break;
+                        case "confirmEnable":
+                            ConfirmAdd(Guid.Parse(args["id"]));
+                            break;
+                        case "confirmDisable":
+                            ConfirmAdd(Guid.Parse(args["id"]));
+                            break;
+                        case "enable":
+                            Enable(Guid.Parse(args["id"]));
+                            break;
+                        case "disable":
+                            Disable(Guid.Parse(args["id"]));
+                            break;
+                        default:
+                            Logger.Trace("Unknown action {Action}", args["action"]);
+                            break;
+                    }
+                });
+            };
+            base.OnStartup(e);
+        }
+
         private void AddHandler(AutoStartEntry addedAutostart) {
             Logger.Trace("AddHandler called");
             if (IsOwnAutoStart(addedAutostart)) {

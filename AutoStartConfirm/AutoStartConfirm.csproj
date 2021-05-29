@@ -187,7 +187,6 @@
     <Compile Include="Helpers\IFolderChangeMonitor.cs" />
     <Compile Include="Helpers\IRegistryChangeMonitor.cs" />
     <Compile Include="Notifications\INotificationService.cs" />
-    <Compile Include="Notifications\MyNotificationActivator.cs" />
     <Compile Include="AutoStarts\ConfirmStatus.cs" />
     <Compile Include="Helpers\RegistryChangeEventArgs.cs" />
     <Compile Include="Helpers\RegistryChangeMonitor.cs" />

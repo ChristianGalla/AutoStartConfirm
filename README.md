@@ -108,5 +108,3 @@ This program was created using Visual Studio 2019.
 There are some NuGet dependencies that must be installed before it can be compiled.
 
 The installer is build using [WiX Toolset build tools](https://wixtoolset.org/releases/) and the WiX Toolset Visual Studio 2019 Extension.
-
-For Toast Notifications to appear it is required to have a Start menu shortcut which can be created using the installer.
