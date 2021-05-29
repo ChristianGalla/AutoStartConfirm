@@ -58,8 +58,8 @@
       <Component Id="Config" Guid="{6AEBE607-EC78-4086-A432-A2D31C03A4D6}">
         <File Source="$(var.AutoStartConfirm.TargetPath).config" />
       </Component>
-      <Component Id="Hardcodet.Wpf.TaskbarNotification.dll" Guid="{DF6C6C9C-F371-4230-A9D5-CC0645BA7643}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Hardcodet.Wpf.TaskbarNotification.dll" />
+      <Component Id="Hardcodet.NotifyIcon.Wpf.dll" Guid="{75BECCF7-A8D0-407B-A50E-96242B5AF87A}">
+        <File Source="$(var.AutoStartConfirm.TargetDir)Hardcodet.NotifyIcon.Wpf.dll" />
       </Component>
       <Component Id="Nlog.config" Guid="{4095BCD0-581B-43C6-80AC-7EFCB2E62788}">
         <File Source="$(var.AutoStartConfirm.TargetDir)Nlog.sample.config" Name="Nlog.config" />
