@@ -1,6 +1,7 @@
 ﻿using AutoStartConfirm.AutoStarts;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -24,9 +25,7 @@ namespace AutoStartConfirm {
 
         private bool CurrentAutoStartGridNeedsRefresh { get; set; } = false;
 
-        private bool AddAutoStartGridNeedsRefresh { get; set; } = false;
-
-        private bool RemovedAutoStartGridNeedsRefresh { get; set; } = false;
+        private bool HistoryAutoStartGridNeedsRefresh { get; set; } = false;
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -42,15 +41,9 @@ namespace AutoStartConfirm {
             }
         }
 
-        public Dictionary<Guid, AutoStartEntry>.ValueCollection AddedAutoStarts {
+        public ObservableCollection<AutoStartEntry> HistoryAutoStarts {
             get {
-                return App.AutoStartService.AddedAutoStarts.Values;
-            }
-        }
-
-        public Dictionary<Guid, AutoStartEntry>.ValueCollection RemovedAutoStarts {
-            get {
-                return App.AutoStartService.RemovedAutoStarts.Values;
+                return App.AutoStartService.HistoryAutoStarts;
             }
         }
 
@@ -67,8 +60,7 @@ namespace AutoStartConfirm {
             Logger.Trace("Window opened");
             InitializeComponent();
             App.AutoStartService.CurrentAutoStartChange += CurrentAutoStartChangeHandler;
-            App.AutoStartService.AddAutoStartChange += AddAutoStartChangeHandler;
-            App.AutoStartService.RemoveAutoStartChange += RemoveAutoStartChangeHandler;
+            App.AutoStartService.HistoryAutoStartChange += HistoryAutoStartChangeHandler;
 
             RefreshTimer = new Timer(2000);
             RefreshTimer.Elapsed += OnTimedEvent;
@@ -83,13 +75,9 @@ namespace AutoStartConfirm {
                         CurrentAutoStartGrid.Items.Refresh();
                         CurrentAutoStartGridNeedsRefresh = false;
                     }
-                    if (AddAutoStartGridNeedsRefresh) {
-                        AddedAutoStartGrid.Items.Refresh();
-                        AddAutoStartGridNeedsRefresh = false;
-                    }
-                    if (RemovedAutoStartGridNeedsRefresh) {
-                        RemovedAutoStartGrid.Items.Refresh();
-                        RemovedAutoStartGridNeedsRefresh = false;
+                    if (HistoryAutoStartGridNeedsRefresh) {
+                        HistoryAutoStartGrid.Items.Refresh();
+                        HistoryAutoStartGridNeedsRefresh = false;
                     }
                 });
             } catch (Exception) {
@@ -106,47 +94,47 @@ namespace AutoStartConfirm {
         #region Click handlers
 
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
-            AddConfirmButton_Click(sender, e);
+            var button = (Button)sender;
+            var autoStartEntry = (AutoStartEntry)button.DataContext;
+            App.ConfirmAdd(autoStartEntry.Id);
         }
 
         private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
-            AddRevertButton_Click(sender, e);
+            var button = (Button)sender;
+            var autoStartEntry = (AutoStartEntry)button.DataContext;
+            App.RevertAdd(autoStartEntry.Id);
         }
 
         private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
+            var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             App.Enable(autoStartEntry.Id);
         }
 
         private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
+            var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             App.Disable(autoStartEntry.Id);
         }
 
-        private void AddConfirmButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
+        private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e) {
+            var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.ConfirmAdd(autoStartEntry.Id);
+            if (autoStartEntry.Change == Change.Added) {
+                App.ConfirmAdd(autoStartEntry.Id);
+            } else if (autoStartEntry.Change == Change.Removed) {
+                App.ConfirmRemove(autoStartEntry.Id);
+            }
         }
 
-        private void AddRevertButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
+        private void HistoryRevertButton_Click(object sender, RoutedEventArgs e) {
+            var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.RevertAdd(autoStartEntry.Id);
-        }
-
-        private void RemoveConfirmButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.ConfirmRemove(autoStartEntry.Id);
-        }
-
-        private void RemoveRevertButton_Click(object sender, RoutedEventArgs e) {
-            var button = (System.Windows.Controls.Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.RevertRemove(autoStartEntry.Id);
+            if (autoStartEntry.Change == Change.Added) {
+                App.RevertAdd(autoStartEntry.Id);
+            } else if (autoStartEntry.Change == Change.Removed) {
+                App.RevertRemove(autoStartEntry.Id);
+            }
         }
 
         private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
@@ -167,16 +155,12 @@ namespace AutoStartConfirm {
 
         #region Event handlers
 
-        private void CurrentAutoStartChangeHandler(AutoStartEntry addedAutostart) {
+        private void CurrentAutoStartChangeHandler(AutoStartEntry autostart) {
             CurrentAutoStartGridNeedsRefresh = true;
         }
 
-        private void AddAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            AddAutoStartGridNeedsRefresh = true;
-        }
-
-        private void RemoveAutoStartChangeHandler(AutoStartEntry addedAutostart) {
-            RemovedAutoStartGridNeedsRefresh = true;
+        private void HistoryAutoStartChangeHandler(AutoStartEntry autostart) {
+            HistoryAutoStartGridNeedsRefresh = true;
         }
 
         #endregion

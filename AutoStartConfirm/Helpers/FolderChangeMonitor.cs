@@ -64,14 +64,14 @@ namespace AutoStartConfirm.Helpers {
                     Category = Category,
                     Value = e.Name,
                     Path = parentDirectory,
-                    RemoveDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Remove?.Invoke(removedAutostart);
                 var addedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.Name,
                     Path = parentDirectory,
-                    AddDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Add?.Invoke(addedAutostart);
             });
@@ -88,7 +88,7 @@ namespace AutoStartConfirm.Helpers {
                     Category = Category,
                     Value = e.Name,
                     Path = parentDirectory,
-                    AddDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Add?.Invoke(addedAutostart);
             });
@@ -105,7 +105,7 @@ namespace AutoStartConfirm.Helpers {
                     Category = Category,
                     Value = e.Name,
                     Path = parentDirectory,
-                    RemoveDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Remove?.Invoke(removedAutostart);
             });
@@ -122,7 +122,7 @@ namespace AutoStartConfirm.Helpers {
                     Category = Category,
                     Value = e.OldName,
                     Path = oldParentDirectory,
-                    RemoveDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Remove?.Invoke(removedAutostart);
                 var newParentDirectory = e.FullPath.Substring(0, e.FullPath.LastIndexOf("\\"));
@@ -130,7 +130,7 @@ namespace AutoStartConfirm.Helpers {
                     Category = Category,
                     Value = e.Name,
                     Path = newParentDirectory,
-                    AddDate = DateTime.Now,
+                    Date = DateTime.Now,
                 };
                 Add?.Invoke(addedAutostart);
             });

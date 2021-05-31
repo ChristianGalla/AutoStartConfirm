@@ -1,27 +1,87 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AutoStartConfirm.AutoStarts
 {
     [Serializable]
-    public abstract class AutoStartEntry
-    {
-        public Guid Id { get; set; }
+    public abstract class AutoStartEntry : INotifyPropertyChanged {
+        private Guid id;
+        private string value;
+        private string path;
+        private Category category;
+        private DateTime? date;
+        private Change? change;
+        private ConfirmStatus confirmStatus;
+        private bool? isEnabled;
 
-        public string Value { get; set; }
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Path { get; set; }
+        public Guid Id {
+            get => id;
+            set {
+                id = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public Category Category { get; set; }
+        public string Value {
+            get => value;
+            set {
+                this.value = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public DateTime? AddDate { get; set; }
+        public string Path {
+            get => path;
+            set {
+                path = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public DateTime? RemoveDate { get; set; }
+        public Category Category {
+            get => category;
+            set {
+                category = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public ConfirmStatus ConfirmStatus { get; set; }
+        public DateTime? Date {
+            get => date;
+            set {
+                date = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public bool? IsEnabled { get; set; }
+        public Change? Change {
+            get => change;
+            set {
+                change = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public ConfirmStatus ConfirmStatus {
+            get => confirmStatus;
+            set {
+                confirmStatus = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool? IsEnabled {
+            get => isEnabled;
+            set {
+                isEnabled = value;
+            }
+        }
 
         [field: NonSerialized]
         public bool? CanBeEnabled { get; set; }
@@ -63,6 +123,13 @@ namespace AutoStartConfirm.AutoStarts
 
                 return (AutoStartEntry)formatter.Deserialize(ms);
             }
+        }
+
+        // This method is called by the Set accessor of each property.  
+        // The CallerMemberName attribute that is applied to the optional propertyName  
+        // parameter causes the property name of the caller to be substituted as an argument.  
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -63,7 +63,7 @@ namespace AutoStartConfirm.Connectors {
                     continue;
                 }
                 var entry = new FolderAutoStartEntry() {
-                    AddDate = DateTime.Now,
+                    Date = DateTime.Now,
                     Category = Category,
                     Path = BasePath,
                     Value = fileName,

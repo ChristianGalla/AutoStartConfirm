@@ -45,7 +45,7 @@
                         x:Key="currentAutoStartCollectionViewSource"
                         Source="{Binding ElementName=window, Path=CurrentAutoStarts, Mode=OneWay}">
                         <CollectionViewSource.SortDescriptions>
-                            <scm:SortDescription PropertyName="AddDate" Direction="Descending" />
+                            <scm:SortDescription PropertyName="Date" Direction="Descending" />
                         </CollectionViewSource.SortDescriptions>
                     </CollectionViewSource>
                 </TabItem.Resources>
@@ -71,80 +71,44 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
-            <TabItem Header="Add history" VerticalAlignment="Top">
+            <TabItem Header="History" VerticalAlignment="Top">
                 <TabItem.Resources>
                     <CollectionViewSource
-                        x:Key="addedAutoStartCollectionViewSource"
-                        Source="{Binding ElementName=window, Path=AddedAutoStarts, Mode=OneWay}">
+                        x:Key="historyAutoStartCollectionViewSource"
+                        Source="{Binding ElementName=window, Path=HistoryAutoStarts, Mode=OneWay}">
                         <CollectionViewSource.SortDescriptions>
-                            <scm:SortDescription PropertyName="AddDate" Direction="Descending" />
+                            <scm:SortDescription PropertyName="Date" Direction="Descending" />
                         </CollectionViewSource.SortDescriptions>
                     </CollectionViewSource>
                 </TabItem.Resources>
-                <DataGrid x:Name="AddedAutoStartGrid"
+                <DataGrid x:Name="HistoryAutoStartGrid"
                           MinHeight="50"
                           MinWidth="200"
                           IsReadOnly="True"
                           AutoGenerateColumns="False"
                           SelectionUnit="CellOrRowHeader"
-                          ItemsSource="{Binding Source={StaticResource addedAutoStartCollectionViewSource}}">
+                          ItemsSource="{Binding Source={StaticResource historyAutoStartCollectionViewSource}}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Actions">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="AddConfirmButton" Click="AddConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="AddRevertButton" Click="AddRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Revert add</Button>
+                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
+                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Revert</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
-                        <DataGridTextColumn Header="Date added" Binding="{Binding Path=AddDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
-                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </TabItem>
-            <TabItem Header="Remove history" VerticalAlignment="Top">
-                <TabItem.Resources>
-                    <CollectionViewSource
-                        x:Key="removedAutoStartCollectionViewSource"
-                        Source="{Binding ElementName=window, Path=RemovedAutoStarts, Mode=OneWay}">
-                        <CollectionViewSource.SortDescriptions>
-                            <scm:SortDescription PropertyName="RemoveDate" Direction="Descending" />
-                        </CollectionViewSource.SortDescriptions>
-                    </CollectionViewSource>
-                </TabItem.Resources>
-                <DataGrid
-                    x:Name="RemovedAutoStartGrid"
-                    MinHeight="50"
-                    MinWidth="200"
-                    IsReadOnly="True"
-                    AutoGenerateColumns="False"
-                    SelectionUnit="CellOrRowHeader"
-                    ItemsSource="{Binding Source={StaticResource removedAutoStartCollectionViewSource}}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Actions">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Name="RemoveConfirmButton" Click="RemoveConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="RemoveRevertButton" Click="RemoveRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeAddedConverter}}">Revert remove</Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Date removed" Binding="{Binding Path=RemoveDate,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
+                        <DataGridTextColumn Header="Date" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Change" Binding="{Binding Path=Change}" />
                         <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />

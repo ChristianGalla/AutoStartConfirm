@@ -65,7 +65,7 @@ namespace AutoStartConfirm.Connectors {
 
         private ScheduledTaskAutoStartEntry GetAutoStartEntry(Microsoft.Win32.TaskScheduler.Task task) {
             return new ScheduledTaskAutoStartEntry() {
-                AddDate = DateTime.Now,
+                Date = DateTime.Now,
                 Category = Category,
                 Path = task.Path,
                 Value = task.Definition.Actions.ToString(),

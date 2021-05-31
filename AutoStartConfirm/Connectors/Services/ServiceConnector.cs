@@ -50,7 +50,7 @@ namespace AutoStartConfirm.Connectors {
 
         protected ServiceAutoStartEntry GetAutoStartEntry(ServiceController sc) {
             var newAutoStart = new ServiceAutoStartEntry() {
-                AddDate = DateTime.Now,
+                Date = DateTime.Now,
                 Category = Category,
                 Value = sc.DisplayName,
                 Path = sc.ServiceName,

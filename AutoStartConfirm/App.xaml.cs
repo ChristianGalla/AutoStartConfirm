@@ -360,7 +360,7 @@ namespace AutoStartConfirm {
 
         public void RevertAdd(Guid id) {
             Logger.Info("Addition of {id} should be reverted", id);
-            if (AutoStartService.TryGetAddedAutoStart(id, out AutoStartEntry autoStart)) {
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart)) {
                 RevertAdd(autoStart);
             } else {
                 var message = "Failed to get auto start to remove";
@@ -424,7 +424,7 @@ namespace AutoStartConfirm {
 
         public void RevertRemove(Guid id) {
             Logger.Info("Removal of {id} should be reverted", id);
-            if (AutoStartService.TryGetRemovedAutoStart(id, out AutoStartEntry autoStart)) {
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart)) {
                 RevertRemove(autoStart);
             } else {
                 var message = "Failed to get auto start to add";

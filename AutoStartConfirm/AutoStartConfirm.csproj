@@ -32,6 +32,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
@@ -101,6 +102,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AutoStarts\Change.cs" />
     <Compile Include="AutoStarts\IAutoStartService.cs" />
     <Compile Include="AutoStarts\ServiceAutoStartEntry.cs" />
     <Compile Include="AutoStarts\ScheduledTaskAutoStartEntry.cs" />

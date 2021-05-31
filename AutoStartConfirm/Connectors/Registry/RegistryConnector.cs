@@ -140,7 +140,7 @@ namespace AutoStartConfirm.Connectors {
                                         Value = value.ToString(),
                                         Path = $"{currentKey}\\{valueName}",
                                         RegistryValueKind = valueKind,
-                                        AddDate = DateTime.Now,
+                                        Date = DateTime.Now,
                                     };
                                     ret.Add(newAutoStart);
                                 }
@@ -158,7 +158,7 @@ namespace AutoStartConfirm.Connectors {
                                             Value = subValue.ToString(),
                                             Path = $"{currentKey}\\{valueName}",
                                             RegistryValueKind = valueKind,
-                                            AddDate = DateTime.Now,
+                                            Date = DateTime.Now,
                                         };
                                         ret.Add(newAutoStart);
                                     }
