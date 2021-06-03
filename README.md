@@ -60,12 +60,9 @@ Currently only the following locations are monitored by Auto Start Confirm.
 
 - [x] Boot execute
 - [x] Appinit DLLs
-- [x] Logon (except Auto Start folders)
-
-### Implementation planned
-
-- [ ] Scheduled Tasks
-- [ ] Services and drivers
+- [x] Logon
+- [x] Scheduled Tasks
+- [x] Services and drivers
 
 ### Implementation currently not planned
 
