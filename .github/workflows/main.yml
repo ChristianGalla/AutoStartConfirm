@@ -39,7 +39,7 @@ jobs:
       
     - name: Test solution
       working-directory: .\AutoStartConfirmSetup\bin\x64\Release
-      run: vstest.console.exe /Platform:x64 .\AutoStartConfirmTests.dll
+      run: vstest.console.exe /Platform:x64 AutoStartConfirmTests.dll
     
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
