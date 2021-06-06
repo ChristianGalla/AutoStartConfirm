@@ -38,7 +38,7 @@ jobs:
       run: msbuild AutoStartConfirm.sln -property:Configuration=Release
       
     - name: Test solution
-      uses: tonyhallett/vstest-solution-action@v1
+      uses: tonyhallett/vstest-solution-action@v1.0.0
     
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
