@@ -38,7 +38,7 @@ jobs:
       run: msbuild AutoStartConfirm.sln -property:Configuration=Release
       
     - name: Test solution
-      working-directory: .\AutoStartConfirmSetup\bin\x64\Release
+      working-directory: .\AutoStartConfirmTests\bin\x64\Release
       run: vstest.console.exe /Platform:x64 AutoStartConfirmTests.dll
     
     - uses: actions/upload-artifact@v2
