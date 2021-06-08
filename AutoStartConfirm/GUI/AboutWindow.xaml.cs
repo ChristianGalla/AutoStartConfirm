@@ -14,8 +14,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AutoStartConfirm;
 
-namespace AutoStartConfirm {
+namespace AutoStartConfirm.GUI {
     /// <summary>
     /// Interaction logic for AboutWindow.xaml
     /// </summary>

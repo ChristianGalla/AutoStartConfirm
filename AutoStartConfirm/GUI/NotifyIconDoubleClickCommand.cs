@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace AutoStartConfirm
+namespace AutoStartConfirm.GUI
 {
     /// <summary>
     /// Show main window on double click in nofifyicon

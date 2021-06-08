@@ -99,16 +99,16 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutWindow.xaml.cs">
+    <Compile Include="GUI\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AutoStarts\Change.cs" />
-    <Compile Include="AutoStarts\IAutoStartService.cs" />
-    <Compile Include="AutoStarts\ServiceAutoStartEntry.cs" />
-    <Compile Include="AutoStarts\ScheduledTaskAutoStartEntry.cs" />
-    <Compile Include="AutoStarts\FolderAutoStartEntry.cs" />
-    <Compile Include="AutoStarts\RegistryAutoStartEntry.cs" />
-    <Compile Include="AutoStarts\AutoStartService.cs" />
+    <Compile Include="Models\Change.cs" />
+    <Compile Include="Connectors\IAutoStartService.cs" />
+    <Compile Include="Models\ServiceAutoStartEntry.cs" />
+    <Compile Include="Models\ScheduledTaskAutoStartEntry.cs" />
+    <Compile Include="Models\FolderAutoStartEntry.cs" />
+    <Compile Include="Models\RegistryAutoStartEntry.cs" />
+    <Compile Include="Connectors\AutoStartService.cs" />
     <Compile Include="Connectors\IAutoStartConnectorService.cs" />
     <Compile Include="Connectors\IRegistryDisableService.cs" />
     <Compile Include="Connectors\Registry\CurrentUserLoadConnector.cs" />
@@ -178,24 +178,24 @@
     <Compile Include="Converters\CanBeRemovedConverter.cs" />
     <Compile Include="Converters\CanBeConfirmedConverter.cs" />
     <Compile Include="Connectors\AutoStartConnectorService.cs" />
-    <Compile Include="AutoStarts\Category.cs" />
+    <Compile Include="Models\Category.cs" />
     <Compile Include="Connectors\Registry\RegistryConnector.cs" />
     <Compile Include="Connectors\Registry\BootExecuteConnector.cs" />
     <Compile Include="Connectors\IAutoStartConnector.cs" />
-    <Compile Include="AutoStarts\AutoStartEntry.cs" />
+    <Compile Include="Models\AutoStartEntry.cs" />
     <Compile Include="Exceptions\AlreadySetByOtherException.cs" />
     <Compile Include="Exceptions\AlreadySetException.cs" />
-    <Compile Include="Helpers\FolderChangeMonitor.cs" />
-    <Compile Include="Helpers\IFolderChangeMonitor.cs" />
-    <Compile Include="Helpers\IRegistryChangeMonitor.cs" />
+    <Compile Include="Connectors\FolderChangeMonitor.cs" />
+    <Compile Include="Connectors\IFolderChangeMonitor.cs" />
+    <Compile Include="Connectors\IRegistryChangeMonitor.cs" />
     <Compile Include="Notifications\INotificationService.cs" />
-    <Compile Include="AutoStarts\ConfirmStatus.cs" />
-    <Compile Include="Helpers\RegistryChangeEventArgs.cs" />
-    <Compile Include="Helpers\RegistryChangeMonitor.cs" />
+    <Compile Include="Models\ConfirmStatus.cs" />
+    <Compile Include="Connectors\RegistryChangeEventArgs.cs" />
+    <Compile Include="Connectors\RegistryChangeMonitor.cs" />
     <Compile Include="Notifications\NotificationService.cs" />
-    <Compile Include="NotifyIcon.cs" />
-    <Compile Include="NotifyIconDoubleClickCommand.cs" />
-    <Page Include="AboutWindow.xaml">
+    <Compile Include="GUI\NotifyIcon.cs" />
+    <Compile Include="GUI\NotifyIconDoubleClickCommand.cs" />
+    <Page Include="GUI\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,11 +203,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="NotifyIcon.xaml">
+    <Page Include="GUI\NotifyIcon.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="GUI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -215,7 +215,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="GUI\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

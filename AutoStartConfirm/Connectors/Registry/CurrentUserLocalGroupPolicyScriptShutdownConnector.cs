@@ -1,7 +1,7 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Win32;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors.Registry {
     class CurrentUserLocalGroupPolicyScriptShutdownConnector : RegistryConnector {
 
         private readonly Category category = Category.CurrentUserLocalGroupPolicyScriptShutdown;

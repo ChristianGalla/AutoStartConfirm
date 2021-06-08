@@ -1,7 +1,7 @@
-﻿using AutoStartConfirm.Helpers;
+﻿using AutoStartConfirm.Connectors;
 using System;
 
-namespace AutoStartConfirm.Helpers
+namespace AutoStartConfirm.Connectors
 {
     // source: https://www.pinvoke.net/default.aspx/advapi32.regnotifychangekeyvalue
 

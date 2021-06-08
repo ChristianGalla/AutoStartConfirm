@@ -1,6 +1,6 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Models;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors.Registry {
     class RunOnce32Connector : RegistryConnector {
 
         private readonly Category category = Category.RunOnce32;

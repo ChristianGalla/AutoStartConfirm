@@ -1,4 +1,4 @@
-﻿namespace AutoStartConfirm.Helpers {
+﻿namespace AutoStartConfirm.Connectors {
     public interface IRegistryChangeMonitor {
         bool Monitoring { get; }
 

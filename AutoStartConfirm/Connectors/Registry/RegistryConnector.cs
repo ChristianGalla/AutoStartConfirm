@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.AutoStarts;
+using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Models;
 using Microsoft.Win32;
 using System.Windows;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Windows.Input;
 using AutoStartConfirm.Exceptions;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors.Registry {
     abstract class RegistryConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -230,9 +230,9 @@ namespace AutoStartConfirm.Connectors {
         private RegistryKey GetBaseRegistry(string basePath) {
             RegistryKey registryKey;
             if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
-                registryKey = Registry.LocalMachine;
+                registryKey = Microsoft.Win32.Registry.LocalMachine;
             } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
-                registryKey = Registry.CurrentUser;
+                registryKey = Microsoft.Win32.Registry.CurrentUser;
             } else {
                 throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
             }
@@ -335,7 +335,7 @@ namespace AutoStartConfirm.Connectors {
                             if (dryRun) {
                                 return;
                             }
-                            Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
+                            Microsoft.Win32.Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
                             Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
                             break;
                         }
@@ -357,7 +357,7 @@ namespace AutoStartConfirm.Connectors {
                                 if (dryRun) {
                                     return;
                                 }
-                                Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
+                                Microsoft.Win32.Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
                                 Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
                             } else {
                                 throw new AlreadySetException($"\"{regAutoStart.Value}\" already exists at \"{regAutoStart.Path}\"");

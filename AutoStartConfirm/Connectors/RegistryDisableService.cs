@@ -1,6 +1,6 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Models;
 using AutoStartConfirm.Exceptions;
-using AutoStartConfirm.Helpers;
+using AutoStartConfirm.Connectors;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -32,9 +32,9 @@ namespace AutoStartConfirm.Connectors {
         private RegistryKey GetBaseRegistry(string basePath) {
             RegistryKey registryKey;
             if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
-                registryKey = Registry.LocalMachine;
+                registryKey = Microsoft.Win32.Registry.LocalMachine;
             } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
-                registryKey = Registry.CurrentUser;
+                registryKey = Microsoft.Win32.Registry.CurrentUser;
             } else {
                 throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
             }
@@ -116,9 +116,9 @@ namespace AutoStartConfirm.Connectors {
                     return;
                 }
                 if (enable) {
-                    Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
+                    Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
                 } else {
-                    Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
+                    Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
                 }
             }
         }

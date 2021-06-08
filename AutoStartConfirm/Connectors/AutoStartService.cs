@@ -1,4 +1,4 @@
-﻿using AutoStartConfirm.Connectors;
+﻿using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace AutoStartConfirm.AutoStarts {
+namespace AutoStartConfirm.Connectors {
 
     public delegate void AutoStartsChangeHandler(AutoStartEntry e);
 

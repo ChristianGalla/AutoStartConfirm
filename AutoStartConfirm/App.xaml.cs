@@ -1,6 +1,6 @@
 ﻿using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Notifications;
-using AutoStartConfirm.AutoStarts;
+using AutoStartConfirm.Models;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
@@ -19,6 +19,7 @@ using Windows.UI.Notifications;
 using System.Diagnostics;
 using System.Reflection;
 using Windows.Foundation.Collections;
+using AutoStartConfirm.GUI;
 
 namespace AutoStartConfirm {
     /// <summary>
@@ -122,8 +123,8 @@ namespace AutoStartConfirm {
             autoStart.Value == Assembly.GetEntryAssembly().Location;
         }
 
-        public void ToggleOwnAutoStart() {
-            Task.Run(() => {
+        public Task ToggleOwnAutoStart() {
+            return Task.Run(() => {
                 try {
                     Logger.Info("ToggleOwnAutoStart called");
                     var ownAutoStart = new RegistryAutoStartEntry() {

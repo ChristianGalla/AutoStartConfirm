@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.AutoStarts {
+namespace AutoStartConfirm.Models {
     public enum ConfirmStatus {
         New,
         Confirmed,

@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.ServiceProcess;
 
-namespace AutoStartConfirm.AutoStarts
+namespace AutoStartConfirm.Models
 {
     [Serializable]
     public class ServiceAutoStartEntry: AutoStartEntry {

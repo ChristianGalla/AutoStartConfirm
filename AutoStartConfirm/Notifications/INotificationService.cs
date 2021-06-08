@@ -1,4 +1,4 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Notifications {
     public interface INotificationService {

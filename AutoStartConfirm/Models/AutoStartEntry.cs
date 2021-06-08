@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace AutoStartConfirm.AutoStarts
+namespace AutoStartConfirm.Models
 {
     [Serializable]
     public abstract class AutoStartEntry : INotifyPropertyChanged {

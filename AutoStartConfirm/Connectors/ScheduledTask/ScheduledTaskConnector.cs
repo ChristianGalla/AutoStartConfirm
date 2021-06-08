@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.AutoStarts;
+using AutoStartConfirm.Models;
 using Microsoft.Win32;
 using System.Windows;
 using System.Collections.ObjectModel;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Concurrent;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors.ScheduledTask {
     class ScheduledTaskConnector : IAutoStartConnector, IDisposable {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 

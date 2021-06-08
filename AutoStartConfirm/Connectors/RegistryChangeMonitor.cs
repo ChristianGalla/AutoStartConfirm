@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Win32;
 
-namespace AutoStartConfirm.Helpers
+namespace AutoStartConfirm.Connectors
 {
     // source: https://www.pinvoke.net/default.aspx/advapi32.regnotifychangekeyvalue
 
@@ -110,25 +110,25 @@ namespace AutoStartConfirm.Helpers
 
                 lock (this) {
                     if (this._registryPath.StartsWith("HKEY_CLASSES_ROOT"))
-                        this._monitorKey = Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(18));
+                        this._monitorKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(18));
                     else if (this._registryPath.StartsWith("HKCR"))
-                        this._monitorKey = Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(5));
+                        this._monitorKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(5));
                     else if (this._registryPath.StartsWith("HKEY_CURRENT_USER"))
-                        this._monitorKey = Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(18));
+                        this._monitorKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(18));
                     else if (this._registryPath.StartsWith("HKCU"))
-                        this._monitorKey = Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(5));
+                        this._monitorKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(5));
                     else if (this._registryPath.StartsWith("HKEY_LOCAL_MACHINE"))
-                        this._monitorKey = Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(19));
+                        this._monitorKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(19));
                     else if (this._registryPath.StartsWith("HKLM"))
-                        this._monitorKey = Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(5));
+                        this._monitorKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(5));
                     else if (this._registryPath.StartsWith("HKEY_USERS"))
-                        this._monitorKey = Registry.Users.OpenSubKey(this._registryPath.Substring(11));
+                        this._monitorKey = Microsoft.Win32.Registry.Users.OpenSubKey(this._registryPath.Substring(11));
                     else if (this._registryPath.StartsWith("HKU"))
-                        this._monitorKey = Registry.Users.OpenSubKey(this._registryPath.Substring(4));
+                        this._monitorKey = Microsoft.Win32.Registry.Users.OpenSubKey(this._registryPath.Substring(4));
                     else if (this._registryPath.StartsWith("HKEY_CURRENT_CONFIG"))
-                        this._monitorKey = Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(20));
+                        this._monitorKey = Microsoft.Win32.Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(20));
                     else if (this._registryPath.StartsWith("HKCC"))
-                        this._monitorKey = Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(5));
+                        this._monitorKey = Microsoft.Win32.Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(5));
 
                     // Fetch the native handle
                     if (this._monitorKey != null) {

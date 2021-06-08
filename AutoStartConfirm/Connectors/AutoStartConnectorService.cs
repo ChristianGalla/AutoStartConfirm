@@ -1,4 +1,8 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Connectors.Folder;
+using AutoStartConfirm.Connectors.Registry;
+using AutoStartConfirm.Connectors.ScheduledTask;
+using AutoStartConfirm.Connectors.Services;
+using AutoStartConfirm.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;

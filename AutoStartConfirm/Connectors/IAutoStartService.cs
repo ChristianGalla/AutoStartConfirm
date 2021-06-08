@@ -1,9 +1,9 @@
-﻿using AutoStartConfirm.Connectors;
+﻿using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace AutoStartConfirm.AutoStarts {
+namespace AutoStartConfirm.Connectors {
     public interface IAutoStartService {
         Dictionary<Guid, AutoStartEntry> CurrentAutoStarts { get; }
         ObservableCollection<AutoStartEntry> HistoryAutoStarts { get; }

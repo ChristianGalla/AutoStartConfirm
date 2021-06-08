@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace AutoStartConfirm
+namespace AutoStartConfirm.GUI
 {
     public partial class NotifyIcon
     {

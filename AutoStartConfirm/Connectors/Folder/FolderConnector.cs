@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.AutoStarts;
+using AutoStartConfirm.Models;
 using Microsoft.Win32;
 using System.Windows;
 using System.Collections.ObjectModel;
@@ -11,7 +10,7 @@ using System.Windows.Input;
 using System.IO;
 using AutoStartConfirm.Exceptions;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors.Folder {
     abstract class FolderConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -98,7 +97,7 @@ namespace AutoStartConfirm.Connectors {
         private void EnableHandler(string name) {
             Logger.Trace("EnableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
-            foreach(var currentAutoStart in currentAutoStarts) {
+            foreach (var currentAutoStart in currentAutoStarts) {
                 if (currentAutoStart.Value == name) {
                     Enable?.Invoke(currentAutoStart);
                 }

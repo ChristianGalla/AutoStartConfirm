@@ -1,4 +1,4 @@
-﻿using AutoStartConfirm.AutoStarts;
+﻿using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AutoStartConfirm {
+namespace AutoStartConfirm.GUI {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
