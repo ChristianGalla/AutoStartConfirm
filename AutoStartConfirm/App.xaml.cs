@@ -62,6 +62,36 @@ namespace AutoStartConfirm {
             }
         }
 
+        private IMessageService messageService;
+
+        public IMessageService MessageService {
+            get {
+                if (messageService == null) {
+                    messageService = new MessageService();
+                }
+                return messageService;
+            }
+            set {
+                messageService = value;
+            }
+        }
+
+        private string currentExePath;
+
+        public string CurrentExePath {
+            get {
+                if (currentExePath == null) {
+                    currentExePath = Assembly.GetEntryAssembly().Location;
+                }
+                return currentExePath;
+            }
+            set {
+                currentExePath = value;
+            }
+        }
+
+
+
         private static App AppInstance;
 
         private static readonly string RevertAddParameterName = "--revertAdd";
@@ -117,10 +147,10 @@ namespace AutoStartConfirm {
             }
         }
 
-        private static bool IsOwnAutoStart(AutoStartEntry autoStart) {
+        private bool IsOwnAutoStart(AutoStartEntry autoStart) {
             return autoStart.Category == Category.CurrentUserRun64 &&
             autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
-            autoStart.Value == Assembly.GetEntryAssembly().Location;
+            autoStart.Value == CurrentExePath;
         }
 
         public Task ToggleOwnAutoStart() {
@@ -130,7 +160,7 @@ namespace AutoStartConfirm {
                     var ownAutoStart = new RegistryAutoStartEntry() {
                         Category = Category.CurrentUserRun64,
                         Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
-                        Value = Assembly.GetEntryAssembly().Location,
+                        Value = CurrentExePath,
                         RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
                         ConfirmStatus = ConfirmStatus.New,
                     };
@@ -149,52 +179,10 @@ namespace AutoStartConfirm {
                     var message = "Failed to change own auto start";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
-
-        public void ShowError(string caption, Exception error) {
-            ShowError(caption, error.Message);
-        }
-
-        public void ShowError(string caption, string message = "") {
-            Application.Current.Dispatcher.Invoke(delegate {
-                // Message boxes can only be shown if a parent window exists
-                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
-                bool newWindow = EnsureMainWindow(true);
-                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
-                if (newWindow) {
-                    Window.Close();
-                }
-            });
-        }
-
-        public bool ShowConfirm(string caption, string message = "") {
-            return Application.Current.Dispatcher.Invoke(delegate {
-                // Message boxes can only be shown if a parent window exists
-                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
-                bool newWindow = EnsureMainWindow(true);
-                var ret = MessageBox.Show(Window, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (newWindow) {
-                    Window.Close();
-                }
-                return ret == MessageBoxResult.Yes;
-            });
-        }
-
-        public void ShowSuccess(string caption, string message = "") {
-            Application.Current.Dispatcher.Invoke(delegate {
-                // Message boxes can only be shown if a parent window exists
-                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
-                bool newWindow = EnsureMainWindow(true);
-                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
-                if (newWindow) {
-                    Window.Close();
-                }
-            });
-        }
-
 
         public static App GetInstance() {
             return AppInstance;
@@ -366,7 +354,7 @@ namespace AutoStartConfirm {
             } else {
                 var message = "Failed to get auto start to remove";
                 Logger.Error(message);
-                ShowError(message);
+                MessageService.ShowError(message);
             }
         }
 
@@ -374,7 +362,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should add {@autoStart}", autoStart);
                 try {
-                    if (!ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
+                    if (!MessageService.ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
                         return;
                     }
                     if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
@@ -383,17 +371,17 @@ namespace AutoStartConfirm {
                     } else {
                         AutoStartService.RemoveAutoStart(autoStart);
                     }
-                    ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
+                    MessageService.ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
                 } catch (Exception e) {
                     var message = "Failed to revert add";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
 
-        private static void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName) {
+        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName) {
             Logger.Trace("StartSubProcessAsAdmin called");
             string path = Path.GetTempFileName();
             try {
@@ -403,7 +391,7 @@ namespace AutoStartConfirm {
                 }
 
                 var info = new ProcessStartInfo(
-                    Assembly.GetEntryAssembly().Location,
+                    CurrentExePath,
                     $"{parameterName} {path}") {
                     Verb = "runas", // indicates to elevate privileges
                 };
@@ -430,7 +418,7 @@ namespace AutoStartConfirm {
             } else {
                 var message = "Failed to get auto start to add";
                 Logger.Error(message);
-                ShowError(message);
+                MessageService.ShowError(message);
             }
         }
 
@@ -438,7 +426,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should remove {@autoStart}", autoStart);
                 try {
-                    if (!ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
+                    if (!MessageService.ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
                         return;
                     }
                     if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
@@ -447,12 +435,12 @@ namespace AutoStartConfirm {
                     } else {
                         AutoStartService.AddAutoStart(autoStart);
                     }
-                    ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
+                    MessageService.ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
                 } catch (Exception e) {
                     var message = "Failed to revert remove";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
@@ -464,7 +452,7 @@ namespace AutoStartConfirm {
             } else {
                 var message = "Failed to get auto start to enable";
                 Logger.Error(message);
-                ShowError(message);
+                MessageService.ShowError(message);
             }
         }
 
@@ -472,7 +460,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should enable {@autoStart}", autoStart);
                 try {
-                    if (!ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
+                    if (!MessageService.ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
                     if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
@@ -481,12 +469,12 @@ namespace AutoStartConfirm {
                     } else {
                         AutoStartService.EnableAutoStart(autoStart);
                     }
-                    ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
+                    MessageService.ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
                 } catch (Exception e) {
                     var message = "Failed to enable";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
@@ -498,7 +486,7 @@ namespace AutoStartConfirm {
             } else {
                 var message = "Failed to get auto start to disable";
                 Logger.Error(message);
-                ShowError(message);
+                MessageService.ShowError(message);
             }
         }
 
@@ -506,7 +494,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should disable {@autoStart}", autoStart);
                 try {
-                    if (!ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
+                    if (!MessageService.ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
                     if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
@@ -515,12 +503,12 @@ namespace AutoStartConfirm {
                     } else {
                         AutoStartService.DisableAutoStart(autoStart);
                     }
-                    ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
+                    MessageService.ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
                 } catch (Exception e) {
                     var message = "Failed to disable";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
@@ -533,7 +521,7 @@ namespace AutoStartConfirm {
                 var message = $"Failed to confirm add of {id}";
                 var err = new Exception(message, e);
                 Logger.Error(err);
-                ShowError(message, e);
+                MessageService.ShowError(message, e);
             }
         }
 
@@ -546,7 +534,7 @@ namespace AutoStartConfirm {
                     var message = $"Failed to confirm remove of {id}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
-                    ShowError(message, e);
+                    MessageService.ShowError(message, e);
                 }
             });
         }
