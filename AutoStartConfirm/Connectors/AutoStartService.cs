@@ -36,9 +36,9 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string PathToHistoryAutoStarts;
 
-        private Dictionary<Guid, AutoStartEntry> currentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+        private ObservableCollection<AutoStartEntry> currentAutoStarts = new ObservableCollection<AutoStartEntry>();
 
-        public Dictionary<Guid, AutoStartEntry> CurrentAutoStarts => currentAutoStarts;
+        public ObservableCollection<AutoStartEntry> CurrentAutoStarts => currentAutoStarts;
 
         private ObservableCollection<AutoStartEntry> historyAutoStarts = new ObservableCollection<AutoStartEntry>();
 
@@ -56,7 +56,14 @@ namespace AutoStartConfirm.Connectors {
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
             Logger.Trace("TryGetCurrentAutoStart called");
-            return CurrentAutoStarts.TryGetValue(Id, out value);
+            value = null;
+            foreach (var autoStart in CurrentAutoStarts) {
+                if (autoStart.Id == Id) {
+                    value = autoStart;
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value) {
@@ -223,7 +230,7 @@ namespace AutoStartConfirm.Connectors {
         /// </summary>
         public void ResetEditablePropertiesOfAllCurrentAutoStarts() {
             foreach (var autoStart in CurrentAutoStarts) {
-                var autoStartValue = autoStart.Value;
+                var autoStartValue = autoStart;
                 ResetAllDynamicFields(autoStartValue);
                 CurrentAutoStartChange?.Invoke(autoStartValue);
             }
@@ -235,7 +242,7 @@ namespace AutoStartConfirm.Connectors {
         /// <param name="autoStart"></param>
         public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart) {
             foreach (var currentAutoStart in CurrentAutoStarts) {
-                var autoStartValue = currentAutoStart.Value;
+                var autoStartValue = currentAutoStart;
                 if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
@@ -285,21 +292,29 @@ namespace AutoStartConfirm.Connectors {
             return Connectors.GetCurrentAutoStarts();
         }
 
-        public bool GetAutoStartFileExists() {
+        public bool GetValidAutoStartFileExists() {
             Logger.Trace("GetAutoStartFileExists called");
-            return !File.Exists(PathToLastAutoStarts);
+            if (!File.Exists(PathToLastAutoStarts)) {
+                return false;
+            }
+            try {
+                GetSavedCurrentAutoStarts(PathToLastAutoStarts);
+            } catch (Exception) {
+                return false;
+            }
+            return true;
         }
 
-        public Dictionary<Guid, AutoStartEntry> GetSavedCurrentAutoStarts(string path) {
+        public ObservableCollection<AutoStartEntry> GetSavedCurrentAutoStarts(string path) {
             try {
                 Logger.Trace("Loading auto starts from file {path}", path);
                 if (!File.Exists(path)) {
-                    return new Dictionary<Guid, AutoStartEntry>();
+                    return new ObservableCollection<AutoStartEntry>();
                 }
                 using (Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)) {
                     IFormatter formatter = new BinaryFormatter();
                     try {
-                        var ret = (Dictionary<Guid, AutoStartEntry>)formatter.Deserialize(stream);
+                        var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
                         Logger.Trace($"Loaded last saved auto starts from file \"{path}\"");
                         return ret;
                     } catch (Exception ex) {
@@ -386,14 +401,25 @@ namespace AutoStartConfirm.Connectors {
         public void LoadCurrentAutoStarts() {
             try {
                 Logger.Info("Comparing current auto starts to last saved");
-                Dictionary<Guid, AutoStartEntry> lastSavedAutoStarts;
+
+                // get last saved auto starts
+                ObservableCollection<AutoStartEntry> lastSavedAutoStarts;
                 try {
                     lastSavedAutoStarts = GetSavedCurrentAutoStarts(PathToLastAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load last saved auto starts", ex);
                     Logger.Error(err);
-                    lastSavedAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                    lastSavedAutoStarts = new ObservableCollection<AutoStartEntry>();
                 }
+                var lastSavedAutoStartsDictionary = new Dictionary<Guid, AutoStartEntry>();
+                foreach(var lastSavedAutoStart in lastSavedAutoStarts) {
+                    if (lastSavedAutoStart.Date == null) {
+                        lastSavedAutoStart.Date = DateTime.Now;
+                    }
+                    lastSavedAutoStartsDictionary.Add(lastSavedAutoStart.Id, lastSavedAutoStart);
+                }
+
+                // get history auto starts
                 try {
                     historyAutoStarts = GetSavedHistoryAutoStarts(PathToHistoryAutoStarts);
                 } catch (Exception ex) {
@@ -401,6 +427,8 @@ namespace AutoStartConfirm.Connectors {
                     Logger.Error(err);
                     historyAutoStarts = new ObservableCollection<AutoStartEntry>();
                 }
+
+                // get current auto starts
                 IList<AutoStartEntry> currentAutoStarts;
                 try {
                     currentAutoStarts = GetCurrentAutoStarts();
@@ -408,35 +436,51 @@ namespace AutoStartConfirm.Connectors {
                     var err = new Exception("Failed to get current auto starts", ex);
                     throw err;
                 }
-                var autoStartsToRemove = new List<AutoStartEntry>();
-                foreach (var lastAutostart in lastSavedAutoStarts.Values) {
-                    var found = false;
-                    if (lastAutostart.Date == null) {
-                        lastAutostart.Date = DateTime.Now;
-                    }
-                    for (int i = 0; i < currentAutoStarts.Count(); i++) {
-                        var newAutostart = currentAutoStarts[i];
-                        if (newAutostart.Equals(lastAutostart)) {
-                            found = true;
-                            currentAutoStarts[i] = lastAutostart;
+                var currentAutoStartDictionary = new Dictionary<Guid, AutoStartEntry>();
+                foreach (var currentAutoStart in currentAutoStarts) {
+                    foreach (var lastAutoStart in lastSavedAutoStarts) {
+                        if (currentAutoStart.Equals(lastAutoStart)) {
+                            currentAutoStart.Id = lastAutoStart.Id;
                             break;
                         }
                     }
-                    if (!found) {
+                    currentAutoStartDictionary.Add(currentAutoStart.Id, currentAutoStart);
+                }
+
+                // get auto starts to remove
+                var autoStartsToRemove = new List<AutoStartEntry>();
+                foreach (var lastAutostart in lastSavedAutoStarts) {
+                    if (!currentAutoStartDictionary.ContainsKey(lastAutostart.Id)) {
                         autoStartsToRemove.Add(lastAutostart);
                     }
                 }
+
+                // get auto starts to add
                 var autoStartsToAdd = new List<AutoStartEntry>();
-                this.currentAutoStarts = new Dictionary<Guid, AutoStartEntry>();
+                CurrentAutoStarts.Clear();
                 foreach (var currentAutoStart in currentAutoStarts) {
-                    if (!lastSavedAutoStarts.ContainsKey(currentAutoStart.Id)) {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry lastAutoStartEntry)) {
+                        CurrentAutoStarts.Add(lastAutoStartEntry);
+                    } else {
+                        // add handler will add auto start later to CurrentAutoStarts collection
                         autoStartsToAdd.Add(currentAutoStart);
                     }
-                    CurrentAutoStarts.Add(currentAutoStart.Id, currentAutoStart);
                 }
-                foreach (var currentAutoStart in CurrentAutoStarts.Values) {
+
+                // call remove handlers
+                foreach (var removedAutoStart in autoStartsToRemove) {
+                    RemoveHandler(removedAutoStart);
+                }
+
+                // call add handlers
+                foreach (var addedAutoStart in autoStartsToAdd) {
+                    AddHandler(addedAutoStart);
+                }
+
+                // call enable / disable handlers
+                foreach (var currentAutoStart in currentAutoStarts) {
                     bool wasEnabled = true;
-                    if (lastSavedAutoStarts.TryGetValue(currentAutoStart.Id, out AutoStartEntry oldAutoStart)) {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry oldAutoStart)) {
                         wasEnabled = oldAutoStart.IsEnabled.GetValueOrDefault(true);
                     }
                     var nowEnabled = Connectors.IsEnabled(currentAutoStart);
@@ -446,12 +490,6 @@ namespace AutoStartConfirm.Connectors {
                     } else if (!nowEnabled && wasEnabled) {
                         DisableHandler(currentAutoStart);
                     }
-                }
-                foreach (var removedAutoStart in autoStartsToRemove) {
-                    RemoveHandler(removedAutoStart);
-                }
-                foreach (var addedAutoStart in autoStartsToAdd) {
-                    AddHandler(addedAutoStart);
                 }
                 Logger.Trace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {
@@ -496,7 +534,7 @@ namespace AutoStartConfirm.Connectors {
                     autostart.Date = DateTime.Now;
                     autostart.Change = Change.Added;
                     ResetEditablePropertiesOfAutoStarts(autostart);
-                    CurrentAutoStarts.Add(autostart.Id, autostart);
+                    CurrentAutoStarts.Add(autostart);
                     HistoryAutoStarts.Add(autostart);
                     Add?.Invoke(autostart);
                     CurrentAutoStartChange?.Invoke(autostart);
@@ -517,7 +555,8 @@ namespace AutoStartConfirm.Connectors {
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Enabled;
-                    CurrentAutoStarts[autostart.Id] = autostartCopy;
+                    CurrentAutoStarts.Remove(autostart);
+                    CurrentAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
                     Enable?.Invoke(autostartCopy);
                     CurrentAutoStartChange?.Invoke(autostartCopy);
@@ -538,7 +577,8 @@ namespace AutoStartConfirm.Connectors {
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Disabled;
-                    CurrentAutoStarts[autostart.Id] = autostartCopy;
+                    CurrentAutoStarts.Remove(autostart);
+                    CurrentAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
                     Disable?.Invoke(autostartCopy);
                     CurrentAutoStartChange?.Invoke(autostartCopy);
@@ -555,13 +595,7 @@ namespace AutoStartConfirm.Connectors {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     Logger.Info("Auto start removed: {@value}", autostart);
-                    // Don't directly use Dictionary.Remove() because removed auto start has different id
-                    foreach (var currentAutoStart in CurrentAutoStarts.Values) {
-                        if (currentAutoStart.Equals(autostart)) {
-                            CurrentAutoStarts.Remove(currentAutoStart.Id);
-                            break;
-                        }
-                    }
+                    CurrentAutoStarts.Remove(autostart);
                     ResetAllDynamicFields(autostart);
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;

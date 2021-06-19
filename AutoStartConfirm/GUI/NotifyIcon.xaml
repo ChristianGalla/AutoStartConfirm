@@ -14,7 +14,8 @@
                     Name="OwnAutoStartTaskbarMenuItem"
                     IsCheckable="True"
                     Click="OwnAutoStartClicked"
-                    Header="Start 'Auto Start Confirm' on logon of current user" />
+                    Header="Start 'Auto Start Confirm' on logon of current user"
+                    IsChecked="{Binding ElementName=window, Path=HasOwnAutoStart, Mode=OneWay}" />
                 <MenuItem Header="Exit" Click="ExitClicked" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>

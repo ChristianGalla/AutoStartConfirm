@@ -1,4 +1,5 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,21 +30,43 @@ namespace AutoStartConfirm.GUI {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private App App {
+        private App app;
+
+        private IAutoStartService autoStartService;
+
+        public App App {
             get {
-                return App.GetInstance();
+                if (app == null) {
+                    app = (App)Application.Current;
+                }
+                return app;
+            }
+            set {
+                app = value;
             }
         }
 
-        public Dictionary<Guid, AutoStartEntry>.ValueCollection CurrentAutoStarts {
+        public IAutoStartService AutoStartService {
             get {
-                return App.AutoStartService.CurrentAutoStarts.Values;
+                if (autoStartService == null) {
+                    autoStartService = App.AutoStartService;
+                }
+                return autoStartService;
+            }
+            set {
+                autoStartService = value;
+            }
+        }
+
+        public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
+            get {
+                return AutoStartService.CurrentAutoStarts;
             }
         }
 
         public ObservableCollection<AutoStartEntry> HistoryAutoStarts {
             get {
-                return App.AutoStartService.HistoryAutoStarts;
+                return AutoStartService.HistoryAutoStarts;
             }
         }
 
@@ -142,7 +165,7 @@ namespace AutoStartConfirm.GUI {
         }
 
         private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
-            App.GetInstance().ToggleOwnAutoStart();
+            App.ToggleOwnAutoStart();
         }
 
         private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {

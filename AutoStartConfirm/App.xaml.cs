@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Windows.Foundation.Collections;
 using AutoStartConfirm.GUI;
+using System.Collections.ObjectModel;
 
 namespace AutoStartConfirm {
     /// <summary>
@@ -32,7 +33,16 @@ namespace AutoStartConfirm {
 
         public static TaskbarIcon Icon = null;
 
-        public bool HasOwnAutoStart = false;
+        public bool HasOwnAutoStart {
+            get {
+                foreach (var autoStart in AutoStartService.CurrentAutoStarts) {
+                    if (IsOwnAutoStart(autoStart)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
 
         private IAutoStartService autoStartService;
 
@@ -108,7 +118,7 @@ namespace AutoStartConfirm {
 
         public void Start(bool skipInitializing = false) {
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            bool isFirstRun = AutoStartService.GetAutoStartFileExists();
+            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
             if (!isFirstRun) {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
@@ -119,19 +129,6 @@ namespace AutoStartConfirm {
             try {
                 AutoStartService.LoadCurrentAutoStarts();
             } catch (Exception) {
-            }
-
-            HasOwnAutoStart = false;
-            foreach (var autoStart in AutoStartService.CurrentAutoStarts) {
-                if (IsOwnAutoStart(autoStart.Value)) {
-                    HasOwnAutoStart = true;
-                    break;
-                }
-            }
-            if (HasOwnAutoStart) {
-                Logger.Info("Own auto start is enabled");
-            } else {
-                Logger.Info("Own auto start is disabled");
             }
 
             if (isFirstRun) {
@@ -172,7 +169,6 @@ namespace AutoStartConfirm {
                         Logger.Info("Shall add own auto start");
                         AutoStartService.AddAutoStart(ownAutoStart);
                     }
-                    HasOwnAutoStart = !HasOwnAutoStart;
                     ownAutoStart.ConfirmStatus = ConfirmStatus.New;
                     Logger.Trace("Own auto start toggled");
                 } catch (Exception e) {
@@ -182,10 +178,6 @@ namespace AutoStartConfirm {
                     MessageService.ShowError(message, e);
                 }
             });
-        }
-
-        public static App GetInstance() {
-            return AppInstance;
         }
 
         /// <summary>
@@ -597,7 +589,6 @@ namespace AutoStartConfirm {
             Logger.Trace("AddHandler called");
             if (IsOwnAutoStart(addedAutostart)) {
                 Logger.Info("Own auto start added");
-                HasOwnAutoStart = true;
             }
             NotificationService.ShowNewAutoStartEntryNotification(addedAutostart);
         }
@@ -606,7 +597,6 @@ namespace AutoStartConfirm {
             Logger.Trace("RemoveHandler called");
             if (IsOwnAutoStart(removedAutostart)) {
                 Logger.Info("Own auto start removed");
-                HasOwnAutoStart = false;
             }
             NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
         }

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace AutoStartConfirm.Connectors {
     public interface IAutoStartService {
-        Dictionary<Guid, AutoStartEntry> CurrentAutoStarts { get; }
+        ObservableCollection<AutoStartEntry> CurrentAutoStarts { get; }
         ObservableCollection<AutoStartEntry> HistoryAutoStarts { get; }
 
         event AutoStartChangeHandler Add;
@@ -29,9 +29,14 @@ namespace AutoStartConfirm.Connectors {
         void Dispose();
         void EnableAutoStart(AutoStartEntry autoStart);
         void EnableAutoStart(Guid Id);
-        bool GetAutoStartFileExists();
+
+        /// <summary>
+        /// Checks if a valid file containing auto starts of a previous run exists.
+        /// </summary>
+        /// <returns></returns>
+        bool GetValidAutoStartFileExists();
         IList<AutoStartEntry> GetCurrentAutoStarts();
-        Dictionary<Guid, AutoStartEntry> GetSavedCurrentAutoStarts(string path);
+        ObservableCollection<AutoStartEntry> GetSavedCurrentAutoStarts(string path);
         bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
         void LoadCanBeAdded(AutoStartEntry autoStart);
         void LoadCanBeDisabled(AutoStartEntry autoStart);
