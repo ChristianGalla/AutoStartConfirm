@@ -19,7 +19,7 @@ namespace AutoStartConfirm.Connectors {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         private IAutoStartConnectorService connectors;
-        protected IAutoStartConnectorService Connectors {
+        public IAutoStartConnectorService Connectors {
             get {
                 if (connectors == null) {
                     connectors = new AutoStartConnectorService();
@@ -29,6 +29,9 @@ namespace AutoStartConfirm.Connectors {
                     connectors.Disable += DisableHandler;
                 }
                 return connectors;
+            }
+            set {
+                connectors = value;
             }
         }
 

@@ -7,6 +7,7 @@ namespace AutoStartConfirm.Connectors {
     public interface IAutoStartService {
         ObservableCollection<AutoStartEntry> CurrentAutoStarts { get; }
         ObservableCollection<AutoStartEntry> HistoryAutoStarts { get; }
+        IAutoStartConnectorService Connectors { get; set; }
 
         event AutoStartChangeHandler Add;
         event AutoStartChangeHandler HistoryAutoStartChange;
