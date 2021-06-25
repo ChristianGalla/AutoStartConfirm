@@ -107,7 +107,7 @@ namespace AutoStartConfirm.Connectors {
 
         public void RemoveAutoStart(Guid Id) {
             Logger.Trace("RemoveAutoStart called");
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
                 RemoveAutoStart(autoStart);
             }
         }
@@ -146,11 +146,8 @@ namespace AutoStartConfirm.Connectors {
 
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("AddAutoStart called");
-            if (Connectors.CanBeEnabled(autoStart)) {
-                Connectors.EnableAutoStart(autoStart);
-            } else {
-                Connectors.AddAutoStart(autoStart);
-            }
+            Connectors.AddAutoStart(autoStart);
+            Connectors.EnableAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.Info("Added {@autoStart}", autoStart);
         }
