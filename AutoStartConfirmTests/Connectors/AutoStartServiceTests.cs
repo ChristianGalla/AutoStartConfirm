@@ -247,5 +247,73 @@ namespace AutoStartConfirm.Connectors.Tests {
             Assert.AreEqual(canBeRemoved, ret);
             A.CallTo(() => connectorService.CanBeRemoved(autoStartEntry)).MustHaveHappenedOnceExactly();
         }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task LoadCanBeAdded_UpdatesAutoStartEntryAndRaisesEvents(bool canBeAdded) {
+            A.CallTo(() => connectorService.CanBeAdded(autoStartEntry)).Returns(canBeAdded);
+            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
+            service.CurrentAutoStartChange += changeEventHandler;
+            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
+            service.HistoryAutoStartChange += historyAutoStartChange;
+
+            await service.LoadCanBeAdded(autoStartEntry);
+
+            Assert.AreEqual(canBeAdded, autoStartEntry.CanBeAdded.Value);
+            A.CallTo(() => changeEventHandler.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => historyAutoStartChange.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task LoadCanBeRemoved_UpdatesAutoStartEntryAndRaisesEvents(bool canBeRemoved) {
+            A.CallTo(() => connectorService.CanBeRemoved(autoStartEntry)).Returns(canBeRemoved);
+            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
+            service.CurrentAutoStartChange += changeEventHandler;
+            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
+            service.HistoryAutoStartChange += historyAutoStartChange;
+
+            await service.LoadCanBeRemoved(autoStartEntry);
+
+            Assert.AreEqual(canBeRemoved, autoStartEntry.CanBeRemoved.Value);
+            A.CallTo(() => changeEventHandler.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => historyAutoStartChange.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task LoadCanBeEnabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeEnabled) {
+            A.CallTo(() => connectorService.CanBeEnabled(autoStartEntry)).Returns(canBeEnabled);
+            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
+            service.CurrentAutoStartChange += changeEventHandler;
+            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
+            service.HistoryAutoStartChange += historyAutoStartChange;
+
+            await service.LoadCanBeEnabled(autoStartEntry);
+
+            Assert.AreEqual(canBeEnabled, autoStartEntry.CanBeEnabled.Value);
+            A.CallTo(() => changeEventHandler.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => historyAutoStartChange.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task LoadCanBeDisabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeDisabled) {
+            A.CallTo(() => connectorService.CanBeDisabled(autoStartEntry)).Returns(canBeDisabled);
+            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
+            service.CurrentAutoStartChange += changeEventHandler;
+            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
+            service.HistoryAutoStartChange += historyAutoStartChange;
+
+            await service.LoadCanBeDisabled(autoStartEntry);
+
+            Assert.AreEqual(canBeDisabled, autoStartEntry.CanBeDisabled.Value);
+            A.CallTo(() => changeEventHandler.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => historyAutoStartChange.Invoke(autoStartEntry)).MustHaveHappenedOnceExactly();
+        }
     }
 }

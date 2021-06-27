@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
     public interface IAutoStartService {
@@ -39,10 +40,10 @@ namespace AutoStartConfirm.Connectors {
         IList<AutoStartEntry> GetCurrentAutoStarts();
         ObservableCollection<AutoStartEntry> GetSavedCurrentAutoStarts(string path);
         bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
-        void LoadCanBeAdded(AutoStartEntry autoStart);
-        void LoadCanBeDisabled(AutoStartEntry autoStart);
-        void LoadCanBeEnabled(AutoStartEntry autoStart);
-        void LoadCanBeRemoved(AutoStartEntry autoStart);
+        Task LoadCanBeAdded(AutoStartEntry autoStart);
+        Task LoadCanBeDisabled(AutoStartEntry autoStart);
+        Task LoadCanBeEnabled(AutoStartEntry autoStart);
+        Task LoadCanBeRemoved(AutoStartEntry autoStart);
         void LoadCurrentAutoStarts();
         void RemoveAutoStart(AutoStartEntry autoStart);
         void RemoveAutoStart(Guid Id);

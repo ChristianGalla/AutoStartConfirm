@@ -186,33 +186,35 @@ namespace AutoStartConfirm.Connectors {
             return Connectors.CanBeRemoved(autoStart);
         }
 
-        public void LoadCanBeAdded(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public async Task LoadCanBeAdded(AutoStartEntry autoStart) {
+            await Task.Run(() => {
                 autoStart.CanBeAdded = CanAutoStartBeAdded(autoStart);
                 CurrentAutoStartChange?.Invoke(autoStart);
                 HistoryAutoStartChange?.Invoke(autoStart);
             });
         }
 
-        public void LoadCanBeRemoved(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public async Task LoadCanBeRemoved(AutoStartEntry autoStart) {
+            await Task.Run(() => {
                 autoStart.CanBeRemoved = CanAutoStartBeRemoved(autoStart);
                 CurrentAutoStartChange?.Invoke(autoStart);
                 HistoryAutoStartChange?.Invoke(autoStart);
             });
         }
 
-        public void LoadCanBeEnabled(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public async Task LoadCanBeEnabled(AutoStartEntry autoStart) {
+            await Task.Run(() => {
                 autoStart.CanBeEnabled = CanAutoStartBeEnabled(autoStart);
                 CurrentAutoStartChange?.Invoke(autoStart);
+                HistoryAutoStartChange?.Invoke(autoStart);
             });
         }
 
-        public void LoadCanBeDisabled(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public async Task LoadCanBeDisabled(AutoStartEntry autoStart) {
+            await Task.Run(() => {
                 autoStart.CanBeDisabled = CanAutoStartBeDisabled(autoStart);
                 CurrentAutoStartChange?.Invoke(autoStart);
+                HistoryAutoStartChange?.Invoke(autoStart);
             });
         }
 
