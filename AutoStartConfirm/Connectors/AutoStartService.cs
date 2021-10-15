@@ -1,4 +1,5 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -147,7 +148,11 @@ namespace AutoStartConfirm.Connectors {
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("AddAutoStart called");
             Connectors.AddAutoStart(autoStart);
-            Connectors.EnableAutoStart(autoStart);
+            try {
+                Connectors.EnableAutoStart(autoStart);
+            } catch (AlreadySetException) {
+
+            }
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.Info("Added {@autoStart}", autoStart);
         }

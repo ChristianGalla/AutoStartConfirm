@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FakeItEasy;
 using AutoStartConfirm.Models;
+using AutoStartConfirm.Exceptions;
 
 namespace AutoStartConfirm.Connectors.Tests {
     [TestClass()]
@@ -177,6 +178,23 @@ namespace AutoStartConfirm.Connectors.Tests {
         [DataRow(false)]
         [DataRow(true)]
         public void AddAutoStart_AddsAndEnablesAutoStart(bool useGuid) {
+            if (useGuid) {
+                service.HistoryAutoStarts.Add(autoStartEntry);
+                service.AddAutoStart(guid);
+            } else {
+                service.AddAutoStart(autoStartEntry);
+            }
+
+            Assert.AreEqual(ConfirmStatus.Reverted, autoStartEntry.ConfirmStatus);
+            A.CallTo(() => connectorService.EnableAutoStart(autoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => connectorService.AddAutoStart(autoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void AddAutoStart_CatchesAlreadyExistExceptions(bool useGuid) {
+            A.CallTo(() => connectorService.EnableAutoStart(autoStartEntry)).Throws(new AlreadySetException());
             if (useGuid) {
                 service.HistoryAutoStarts.Add(autoStartEntry);
                 service.AddAutoStart(guid);

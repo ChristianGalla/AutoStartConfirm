@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Exceptions {
-    class AlreadySetException : InvalidOperationException {
+    public class AlreadySetException : InvalidOperationException {
         public AlreadySetException() {
         }
 
