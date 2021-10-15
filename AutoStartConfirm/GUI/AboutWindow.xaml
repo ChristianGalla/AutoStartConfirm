@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Name="window"
-        Title="About Auto Start Confirm" Height="99.473" Width="305.718" WindowStartupLocation="CenterScreen">
+        Title="About Auto Start Confirm" Height="99.473" Width="330" WindowStartupLocation="CenterScreen">
     <Grid>
         <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
             Auto Start Confirm
