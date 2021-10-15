@@ -30,6 +30,14 @@ jobs:
       
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1
+      
+    - uses: actions/cache@v2
+      name: Restore NuGet cache
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
  
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
