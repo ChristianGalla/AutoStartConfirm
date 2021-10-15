@@ -1,6 +1,6 @@
 # Auto Start Confirm
 
-![Build](https://github.com/ChristianGalla/AutoStartConfirm/workflows/Build/badge.svg)
+[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml)
 
 More and more programs want to start automatically when Windows starts, or a user logs on.
 
