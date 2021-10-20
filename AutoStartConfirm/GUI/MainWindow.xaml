@@ -62,10 +62,10 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}">Enable</Button>
-                                        <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}">Disable</Button>
-                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Remove</Button>
+                                        <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}" ToolTip="Confirm" Foreground="Green">✔</Button>
+                                        <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}" ToolTip="Enable" Foreground="Yellow">💡</Button>
+                                        <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}" ToolTip="Disable" Foreground="Gray">💡</Button>
+                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}" ToolTip="Remove" Foreground="Black">🗑</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -100,8 +100,8 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}">Confirm</Button>
-                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">Revert</Button>
+                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}" ToolTip="Confirm" Foreground="Green">✔</Button>
+                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}" ToolTip="Revert" Foreground="Black">↪</Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
