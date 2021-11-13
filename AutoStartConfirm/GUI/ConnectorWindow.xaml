@@ -22,7 +22,13 @@
     </Window.Resources>
     <DataGrid x:Name="ConnectorGrid" IsReadOnly="False" CanUserAddRows="False" CanUserDeleteRows="False" ItemsSource="{Binding Source={StaticResource connectorViewSource}}" AutoGenerateColumns="False">
         <DataGrid.Columns>
-            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Path=Enabled, Mode=TwoWay}" IsReadOnly="False" />
+            <DataGridTemplateColumn Header="Enabled" SortMemberPath="Enabled">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Enabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
             <DataGridTextColumn Header="Connector" Binding="{Binding Path=CategoryName, Mode=OneWay }" IsReadOnly="True" />
         </DataGrid.Columns>
     </DataGrid>

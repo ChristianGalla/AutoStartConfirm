@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Models {
@@ -20,6 +21,25 @@ namespace AutoStartConfirm.Models {
                 NotifyPropertyChanged();
             }
         }
+
+        protected int runningActionCount = 0;
+
+        public int RunningActionCount {
+            get {
+                return runningActionCount;
+            }
+        }
+
+        public void IncrementRunningActionCount() {
+            Interlocked.Increment(ref runningActionCount);
+            NotifyPropertyChanged("RunningActionCount");
+        }
+
+        public void DecrementRunningActionCount() {
+            Interlocked.Decrement(ref runningActionCount);
+            NotifyPropertyChanged("RunningActionCount");
+        }
+
 
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;

@@ -152,12 +152,15 @@ namespace AutoStartConfirm {
         public Task ToggleOwnAutoStart() {
             return Task.Run(() => {
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     AutoStartService.ToggleOwnAutoStart();
                 } catch (Exception e) {
                     var message = "Failed to change own auto start";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
@@ -340,6 +343,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should add {@autoStart}", autoStart);
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     if (!MessageService.ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
                         return;
                     }
@@ -355,6 +359,8 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
@@ -404,6 +410,7 @@ namespace AutoStartConfirm {
             Task.Run(() => {
                 Logger.Info("Should remove {@autoStart}", autoStart);
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     if (!MessageService.ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
                         return;
                     }
@@ -419,25 +426,30 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
         public void Enable(Guid id) {
-            Logger.Info("{id} should be enabled", id);
-            if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
-                Enable(autoStart);
-            } else {
-                var message = "Failed to get auto start to enable";
-                Logger.Error(message);
-                MessageService.ShowError(message);
-            }
+            Task.Run(() => {
+                Logger.Info("{id} should be enabled", id);
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                    Enable(autoStart);
+                } else {
+                    var message = "Failed to get auto start to enable";
+                    Logger.Error(message);
+                    MessageService.ShowError(message);
+                }
+            });
         }
 
         public void Enable(AutoStartEntry autoStart) {
             Task.Run(() => {
                 Logger.Info("Should enable {@autoStart}", autoStart);
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     if (!MessageService.ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
@@ -453,25 +465,30 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
         public void Disable(Guid id) {
-            Logger.Info("{id} should be disabled", id);
-            if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
-                Disable(autoStart);
-            } else {
-                var message = "Failed to get auto start to disable";
-                Logger.Error(message);
-                MessageService.ShowError(message);
-            }
+            Task.Run(() => {
+                Logger.Info("{id} should be disabled", id);
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                    Disable(autoStart);
+                } else {
+                    var message = "Failed to get auto start to disable";
+                    Logger.Error(message);
+                    MessageService.ShowError(message);
+                }
+            });
         }
 
         public void Disable(AutoStartEntry autoStart) {
             Task.Run(() => {
                 Logger.Info("Should disable {@autoStart}", autoStart);
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     if (!MessageService.ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
                         return;
                     }
@@ -487,37 +504,50 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
         public void ConfirmAdd(Guid id) {
-            try {
-                Logger.Trace("ConfirmAdd called");
-                AutoStartService.ConfirmAdd(id);
-            } catch (Exception e) {
-                var message = $"Failed to confirm add of {id}";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                MessageService.ShowError(message, e);
-            }
+            Task.Run(() => {
+                try {
+                    AppStatus.IncrementRunningActionCount();
+                    Logger.Trace("ConfirmAdd called");
+                    AutoStartService.ConfirmAdd(id);
+                } catch (Exception e) {
+                    var message = $"Failed to confirm add of {id}";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
+                }
+            });
         }
 
         public void ConfirmAdd(AutoStartEntry autoStart) {
-            try {
-                Logger.Trace("ConfirmAdd called");
-                AutoStartService.ConfirmAdd(autoStart);
-            } catch (Exception e) {
-                var message = $"Failed to confirm add of {autoStart}";
-                var err = new Exception(message, e);
-                Logger.Error(err);
-                MessageService.ShowError(message, e);
-            }
+            Task.Run(() => {
+                try {
+                    AppStatus.IncrementRunningActionCount();
+                    Logger.Trace("ConfirmAdd called");
+                    AutoStartService.ConfirmAdd(autoStart);
+                } catch (Exception e) {
+                    var message = $"Failed to confirm add of {autoStart}";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
+                }
+            });
         }
 
         public void ConfirmRemove(Guid id) {
             Task.Run(() => {
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmRemove called");
                     AutoStartService.ConfirmRemove(id);
                 } catch (Exception e) {
@@ -525,6 +555,8 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }
@@ -532,6 +564,7 @@ namespace AutoStartConfirm {
         public void ConfirmRemove(AutoStartEntry autoStart) {
             Task.Run(() => {
                 try {
+                    AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmRemove called");
                     AutoStartService.ConfirmRemove(autoStart);
                 } catch (Exception e) {
@@ -539,6 +572,8 @@ namespace AutoStartConfirm {
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
+                } finally {
+                    AppStatus.DecrementRunningActionCount();
                 }
             });
         }

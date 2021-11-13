@@ -42,6 +42,10 @@ namespace AutoStartConfirm.GUI {
             }
         }
 
+        public AppStatus AppStatus {
+            get => App.AppStatus;
+        }
+
         public IAutoStartService AutoStartService {
             get {
                 if (autoStartService == null) {
@@ -64,9 +68,6 @@ namespace AutoStartConfirm.GUI {
             get {
                 return AutoStartService.HistoryAutoStarts;
             }
-        }
-        public AppStatus AppStatus {
-            get => App.AppStatus;
         }
 
         public MainWindow()

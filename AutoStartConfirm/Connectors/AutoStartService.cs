@@ -153,18 +153,20 @@ namespace AutoStartConfirm.Connectors {
         }
 
         private void HandleSettingChanges() {
-            CurrentAutoStarts.Clear();
-            foreach (var autoStart in AllCurrentAutoStarts) {
-                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
-                    CurrentAutoStarts.Add(autoStart);
+            Application.Current.Dispatcher.Invoke(delegate {
+                CurrentAutoStarts.Clear();
+                foreach (var autoStart in AllCurrentAutoStarts) {
+                    if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
+                        CurrentAutoStarts.Add(autoStart);
+                    }
                 }
-            }
-            HistoryAutoStarts.Clear();
-            foreach (var autoStart in AllHistoryAutoStarts) {
-                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
-                    HistoryAutoStarts.Add(autoStart);
+                HistoryAutoStarts.Clear();
+                foreach (var autoStart in AllHistoryAutoStarts) {
+                    if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
+                        HistoryAutoStarts.Add(autoStart);
+                    }
                 }
-            }
+            });
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {

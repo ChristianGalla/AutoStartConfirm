@@ -22,7 +22,12 @@
         <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
         <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
         <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
+        <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
+        <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
     </Window.Resources>
+    <Window.Cursor>
+        <Binding Path="AppStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
+    </Window.Cursor>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -40,6 +45,13 @@
                 <MenuItem Header="_About" Click="MenuItemAbout_Click" />
             </MenuItem>
         </Menu>
+        <StatusBar DockPanel.Dock="Bottom" >
+            <StatusBarItem HorizontalAlignment="Right">
+                <ProgressBar Minimum="0" Maximum="100" Name="pbStatus" IsIndeterminate="True" Height="15" Width="100"
+                             Visibility="{Binding ElementName=window, Path=AppStatus.RunningActionCount, Mode=OneWay, Converter={StaticResource ProgressBarVisibilityConverter}}">
+                </ProgressBar>
+            </StatusBarItem>
+        </StatusBar>
         <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
             <TabItem Header="Current" VerticalAlignment="Top">
                 <TabItem.Resources>

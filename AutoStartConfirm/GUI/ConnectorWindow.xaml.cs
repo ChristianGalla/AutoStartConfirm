@@ -72,6 +72,7 @@ namespace AutoStartConfirm.GUI {
         public ConnectorWindow() {
             InitializeComponent();
         }
+
         private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
             if (e.Action == NotifyCollectionChangedAction.Add) {
                 foreach (ConnectorEnableRow newItem in e.NewItems) {
@@ -81,19 +82,26 @@ namespace AutoStartConfirm.GUI {
         }
 
         private void PropertyChangedHandler(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            if (e.PropertyName != "Enabled") {
-                return;
-            }
-            var changedItem = (ConnectorEnableRow)sender;
-            var categoryString = changedItem.Category.ToString();
-            if (changedItem.Enabled) {
-                while (SettingsService.DisabledConnectors.Contains(categoryString)) {
-                    SettingsService.DisabledConnectors.Remove(categoryString);
+            Task.Run(() => {
+                try {
+                    App.AppStatus.IncrementRunningActionCount();
+                    if (e.PropertyName != "Enabled") {
+                        return;
+                    }
+                    var changedItem = (ConnectorEnableRow)sender;
+                    var categoryString = changedItem.Category.ToString();
+                    if (changedItem.Enabled) {
+                        while (SettingsService.DisabledConnectors.Contains(categoryString)) {
+                            SettingsService.DisabledConnectors.Remove(categoryString);
+                        }
+                    } else {
+                        SettingsService.DisabledConnectors.Add(categoryString);
+                    }
+                    SettingsService.Save();
+                } finally {
+                    App.AppStatus.DecrementRunningActionCount();
                 }
-            } else {
-                SettingsService.DisabledConnectors.Add(categoryString);
-            }
-            SettingsService.Save();
+            });
         }
 
         protected virtual void Dispose(bool disposing) {
