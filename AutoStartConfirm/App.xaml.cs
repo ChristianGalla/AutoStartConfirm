@@ -21,6 +21,9 @@ using System.Reflection;
 using Windows.Foundation.Collections;
 using AutoStartConfirm.GUI;
 using System.Collections.ObjectModel;
+using AutoStartConfirm.Properties;
+using System.Collections.Specialized;
+using AutoStartConfirm.Connectors.Registry;
 
 namespace AutoStartConfirm {
     /// <summary>
@@ -33,14 +36,14 @@ namespace AutoStartConfirm {
 
         public static TaskbarIcon Icon = null;
 
-        public bool HasOwnAutoStart {
+        private AppStatus appStatus = null;
+
+        public AppStatus AppStatus { 
             get {
-                foreach (var autoStart in AutoStartService.CurrentAutoStarts) {
-                    if (IsOwnAutoStart(autoStart)) {
-                        return true;
-                    }
+                if (appStatus == null) {
+                    appStatus = new AppStatus();
                 }
-                return false;
+                return appStatus;
             }
         }
 
@@ -86,20 +89,20 @@ namespace AutoStartConfirm {
             }
         }
 
-        private string currentExePath;
 
-        public string CurrentExePath {
+        private ISettingsService settingsService;
+
+        public ISettingsService SettingsService {
             get {
-                if (currentExePath == null) {
-                    currentExePath = Assembly.GetEntryAssembly().Location;
+                if (settingsService == null) {
+                    settingsService = new SettingsService();
                 }
-                return currentExePath;
+                return settingsService;
             }
             set {
-                currentExePath = value;
+                settingsService = value;
             }
         }
-
 
 
         private static App AppInstance;
@@ -113,6 +116,7 @@ namespace AutoStartConfirm {
         private static readonly string DisableParameterName = "--disable";
 
         public App() {
+            SettingsService.EnsureConfiguration();
             AppInstance = this;
         }
 
@@ -128,6 +132,7 @@ namespace AutoStartConfirm {
 
             try {
                 AutoStartService.LoadCurrentAutoStarts();
+                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
             } catch (Exception) {
             }
 
@@ -144,33 +149,10 @@ namespace AutoStartConfirm {
             }
         }
 
-        private bool IsOwnAutoStart(AutoStartEntry autoStart) {
-            return autoStart.Category == Category.CurrentUserRun64 &&
-            autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
-            autoStart.Value == CurrentExePath;
-        }
-
         public Task ToggleOwnAutoStart() {
             return Task.Run(() => {
                 try {
-                    Logger.Info("ToggleOwnAutoStart called");
-                    var ownAutoStart = new RegistryAutoStartEntry() {
-                        Category = Category.CurrentUserRun64,
-                        Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
-                        Value = CurrentExePath,
-                        RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
-                        ConfirmStatus = ConfirmStatus.New,
-                    };
-
-                    if (HasOwnAutoStart) {
-                        Logger.Info("Shall remove own auto start");
-                        AutoStartService.RemoveAutoStart(ownAutoStart);
-                    } else {
-                        Logger.Info("Shall add own auto start");
-                        AutoStartService.AddAutoStart(ownAutoStart);
-                    }
-                    ownAutoStart.ConfirmStatus = ConfirmStatus.New;
-                    Logger.Trace("Own auto start toggled");
+                    AutoStartService.ToggleOwnAutoStart();
                 } catch (Exception e) {
                     var message = "Failed to change own auto start";
                     var err = new Exception(message, e);
@@ -323,6 +305,10 @@ namespace AutoStartConfirm {
             try {
                 AutoStartService.SaveAutoStarts();
             } finally {
+                try {
+                    Icon.Dispose();
+                } catch (Exception) {
+                }
                 base.OnExit(e);
             }
         }
@@ -383,7 +369,7 @@ namespace AutoStartConfirm {
                 }
 
                 var info = new ProcessStartInfo(
-                    CurrentExePath,
+                    AutoStartService.CurrentExePath,
                     $"{parameterName} {path}") {
                     Verb = "runas", // indicates to elevate privileges
                 };
@@ -517,6 +503,18 @@ namespace AutoStartConfirm {
             }
         }
 
+        public void ConfirmAdd(AutoStartEntry autoStart) {
+            try {
+                Logger.Trace("ConfirmAdd called");
+                AutoStartService.ConfirmAdd(autoStart);
+            } catch (Exception e) {
+                var message = $"Failed to confirm add of {autoStart}";
+                var err = new Exception(message, e);
+                Logger.Error(err);
+                MessageService.ShowError(message, e);
+            }
+        }
+
         public void ConfirmRemove(Guid id) {
             Task.Run(() => {
                 try {
@@ -524,6 +522,20 @@ namespace AutoStartConfirm {
                     AutoStartService.ConfirmRemove(id);
                 } catch (Exception e) {
                     var message = $"Failed to confirm remove of {id}";
+                    var err = new Exception(message, e);
+                    Logger.Error(err);
+                    MessageService.ShowError(message, e);
+                }
+            });
+        }
+
+        public void ConfirmRemove(AutoStartEntry autoStart) {
+            Task.Run(() => {
+                try {
+                    Logger.Trace("ConfirmRemove called");
+                    AutoStartService.ConfirmRemove(autoStart);
+                } catch (Exception e) {
+                    var message = $"Failed to confirm remove of {autoStart}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
@@ -587,16 +599,18 @@ namespace AutoStartConfirm {
 
         private void AddHandler(AutoStartEntry addedAutostart) {
             Logger.Trace("AddHandler called");
-            if (IsOwnAutoStart(addedAutostart)) {
+            if (AutoStartService.IsOwnAutoStart(addedAutostart)) {
                 Logger.Info("Own auto start added");
+                AppStatus.HasOwnAutoStart = true;
             }
             NotificationService.ShowNewAutoStartEntryNotification(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
             Logger.Trace("RemoveHandler called");
-            if (IsOwnAutoStart(removedAutostart)) {
+            if (AutoStartService.IsOwnAutoStart(removedAutostart)) {
                 Logger.Info("Own auto start removed");
+                AppStatus.HasOwnAutoStart = false;
             }
             NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
         }

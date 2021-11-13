@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Services {
-    abstract class ServiceConnector : IAutoStartConnector, IDisposable {
+    public abstract class ServiceConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -20,7 +20,7 @@ namespace AutoStartConfirm.Connectors.Services {
             return true;
         }
 
-        protected Thread watcherThread = null;
+        protected Thread watcher = null;
 
         private ConcurrentDictionary<string, AutoStartEntry> lastAutoStartEntries;
 
@@ -156,12 +156,16 @@ namespace AutoStartConfirm.Connectors.Services {
 
         public void StartWatcher() {
             Logger.Trace("StartWatcher called");
-            StopWatcher();
+
+            if (watcher != null) {
+                Logger.Trace("Watcher already running");
+                return;
+            }
 
             // Thread is created manually because
             // thread pool should not be used for long running tasks
             // https://docs.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool#when-not-to-use-thread-pool-threads
-            watcherThread = new Thread(new ThreadStart(() => {
+            watcher = new Thread(new ThreadStart(() => {
                 while (true) {
                     Thread.Sleep(WatcherIntervalInMs);
                     CheckChanges();
@@ -170,7 +174,7 @@ namespace AutoStartConfirm.Connectors.Services {
                 Priority = ThreadPriority.Lowest,
                 IsBackground = true,
             };
-            watcherThread.Start();
+            watcher.Start();
             Logger.Trace("Watcher started");
         }
 
@@ -246,14 +250,14 @@ namespace AutoStartConfirm.Connectors.Services {
 
         public void StopWatcher() {
             Logger.Trace("StopWatcher called");
-            if (watcherThread == null) {
+            if (watcher == null) {
                 Logger.Trace("No watcher running");
                 return;
             }
             Logger.Trace("Stopping watcher");
-            watcherThread.Abort();
-            watcherThread.Join();
-            watcherThread = null;
+            watcher.Abort();
+            watcher.Join();
+            watcher = null;
             Logger.Trace("Stopped watcher");
         }
 

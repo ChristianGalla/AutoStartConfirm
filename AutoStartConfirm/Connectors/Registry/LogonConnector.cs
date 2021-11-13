@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class LogonConnector : RegistryConnector {
+    public class LogonConnector : RegistryConnector {
 
         private readonly Category category = Category.Winlogon;
 

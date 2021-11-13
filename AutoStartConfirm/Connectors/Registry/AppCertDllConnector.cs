@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class AppCertDllConnector : RegistryConnector {
+    public class AppCertDllConnector : RegistryConnector {
 
         private readonly Category category = Category.AppCertDll;
 

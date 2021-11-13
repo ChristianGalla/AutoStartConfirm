@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class TerminalServerInitialProgramConnector : RegistryConnector {
+    public class TerminalServerInitialProgramConnector : RegistryConnector {
 
         private readonly Category category = Category.TerminalServerInitialProgram;
 

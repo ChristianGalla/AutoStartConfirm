@@ -7,7 +7,7 @@ namespace AutoStartConfirm.Connectors {
         IAutoStartConnector this[int index] { get; }
 
         Category Category { get; }
-        Dictionary<Category, IAutoStartConnector> Connectors { get; }
+        Dictionary<Category, IAutoStartConnector> EnabledConnectors { get; }
         int Count { get; }
 
         event AutoStartChangeHandler Add;

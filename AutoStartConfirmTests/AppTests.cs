@@ -11,6 +11,7 @@ using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.GUI;
 using System.Collections.ObjectModel;
+using AutoStartConfirm.Properties;
 
 namespace AutoStartConfirm.Tests {
     [TestClass()]
@@ -18,15 +19,9 @@ namespace AutoStartConfirm.Tests {
         private IAutoStartService AutoStartService = A.Fake<IAutoStartService>();
         private INotificationService NotificationServicee = A.Fake<INotificationService>();
         private IMessageService MessageService = A.Fake<IMessageService>();
-        private static string currentExePath = "C:\\test.exe";
+        private ISettingsService SettingsService = A.Fake<ISettingsService>();
 
-        private AutoStartEntry ownAutoStartEntry = new RegistryAutoStartEntry() {
-            Category = Category.CurrentUserRun64,
-            Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
-            Value = currentExePath
-        };
-
-        static private App app;
+        private static App app;
 
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext context) {
@@ -42,7 +37,6 @@ namespace AutoStartConfirm.Tests {
             app.AutoStartService = AutoStartService;
             app.NotificationService = NotificationServicee;
             app.MessageService = MessageService;
-            app.CurrentExePath = currentExePath;
         }
 
         [TestCleanup]
@@ -69,36 +63,17 @@ namespace AutoStartConfirm.Tests {
         }
 
         [TestMethod()]
-        public void ToggleOwnAutoStart_AddsOwnAutoStart_If_NotSet() {
-            app.ToggleOwnAutoStart().Wait();
-            A.CallTo(() => AutoStartService.AddAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
-                (AutoStartEntry autoStart) =>
-                    autoStart.Category == Category.CurrentUserRun64 &&
-                    autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
-                    autoStart.Value == currentExePath
-            ).MustHaveHappened();
-        }
-
-        [TestMethod()]
-        public void ToggleOwnAutoStart_RemovesOwnAutoStart_If_Set() {
-            var collection = new ObservableCollection<AutoStartEntry>() {
-                ownAutoStartEntry
-            };
-            A.CallTo(() => AutoStartService.CurrentAutoStarts).Returns(collection);
-            app.ToggleOwnAutoStart().Wait();
-            A.CallTo(() => AutoStartService.RemoveAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
-                (AutoStartEntry autoStart) =>
-                    autoStart.Category == Category.CurrentUserRun64 &&
-                    autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
-                    autoStart.Value == currentExePath
-            ).MustHaveHappened();
-        }
-
-        [TestMethod()]
         public void ToggleOwnAutoStart_ShowsErrorMessageOnError() {
-            A.CallTo(() => AutoStartService.AddAutoStart(A<AutoStartEntry>.Ignored)).Throws(new Exception());
+            A.CallTo(() => AutoStartService.ToggleOwnAutoStart()).Throws(new Exception());
             app.ToggleOwnAutoStart().Wait();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
+            Fake.ClearRecordedCalls(MessageService);
+        }
+
+        [TestMethod()]
+        public void ToggleOwnAutoStart_ShowsNoErrorMessageIfNoError() {
+            app.ToggleOwnAutoStart().Wait();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
             Fake.ClearRecordedCalls(MessageService);
         }
     }

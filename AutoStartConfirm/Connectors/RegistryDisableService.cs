@@ -13,7 +13,7 @@ namespace AutoStartConfirm.Connectors {
     public delegate void EnableChangeHandler(string name);
     #endregion
 
-    class RegistryDisableService : IDisposable, IRegistryDisableService {
+    public class RegistryDisableService : IDisposable, IRegistryDisableService {
 
         public string DisableBasePath { get; }
 
@@ -224,7 +224,10 @@ namespace AutoStartConfirm.Connectors {
         /// </remarks>
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {DisableBasePath}", DisableBasePath);
-            StopWatcher();
+            if (monitor != null) {
+                Logger.Trace("Watcher already running");
+                return;
+            }
             lastEnableStatus = GetCurrentEnableStatus();
             monitor = new RegistryChangeMonitor(DisableBasePath);
             monitor.Changed += ChangeHandler;
@@ -239,9 +242,12 @@ namespace AutoStartConfirm.Connectors {
                 Logger.Trace("No watcher running");
                 return;
             }
-            Logger.Trace("Stopping watcher");
+            monitor.Changed -= ChangeHandler;
+            monitor.Error -= ErrorHandler;
+            monitor.Stop();
             monitor.Dispose();
             monitor = null;
+            Logger.Trace("Watcher stopped");
         }
 
         #region IDisposable Support

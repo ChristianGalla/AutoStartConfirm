@@ -2,7 +2,7 @@
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class DomainGroupPolicyScriptLogonConnector : RegistryConnector {
+    public class DomainGroupPolicyScriptLogonConnector : RegistryConnector {
 
         private readonly Category category = Category.DomainGroupPolicyScriptLogon;
 

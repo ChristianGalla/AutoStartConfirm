@@ -6,9 +6,29 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
     public interface IAutoStartService {
+        /// <summary>
+        /// All current auto starts of all enabled connectors
+        /// </summary>
         ObservableCollection<AutoStartEntry> CurrentAutoStarts { get; }
+
+        /// <summary>
+        /// All current auto starts of all connectors
+        /// </summary>
+        ObservableCollection<AutoStartEntry> AllCurrentAutoStarts { get; }
+
+        /// <summary>
+        /// All history auto starts of all enabled connectors
+        /// </summary>
         ObservableCollection<AutoStartEntry> HistoryAutoStarts { get; }
-        IAutoStartConnectorService Connectors { get; set; }
+
+        /// <summary>
+        /// All history auto starts of all connectors
+        /// </summary>
+        ObservableCollection<AutoStartEntry> AllHistoryAutoStarts { get; }
+
+        IAutoStartConnectorService ConnectorService { get; set; }
+        bool HasOwnAutoStart { get; }
+        string CurrentExePath { get; set; }
 
         event AutoStartChangeHandler Add;
         event AutoStartChangeHandler HistoryAutoStartChange;
@@ -24,7 +44,9 @@ namespace AutoStartConfirm.Connectors {
         bool CanAutoStartBeDisabled(AutoStartEntry autoStart);
         bool CanAutoStartBeEnabled(AutoStartEntry autoStart);
         bool CanAutoStartBeRemoved(AutoStartEntry autoStart);
+        void ConfirmAdd(AutoStartEntry autoStart);
         void ConfirmAdd(Guid Id);
+        void ConfirmRemove(AutoStartEntry autoStart);
         void ConfirmRemove(Guid Id);
         void DisableAutoStart(AutoStartEntry autoStart);
         void DisableAutoStart(Guid Id);
@@ -57,5 +79,7 @@ namespace AutoStartConfirm.Connectors {
         void StopWatcher();
         bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value);
         bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value);
+        bool IsOwnAutoStart(AutoStartEntry autoStart);
+        void ToggleOwnAutoStart();
     }
 }

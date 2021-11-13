@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class BootExecuteConnector : RegistryConnector {
+    public class BootExecuteConnector : RegistryConnector {
 
         private readonly Category category = Category.BootExecute;
 

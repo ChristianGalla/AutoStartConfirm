@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class CurrentUserRunOnceEx64Connector : RegistryConnector {
+    public class CurrentUserRunOnceEx64Connector : RegistryConnector {
 
         private readonly Category category = Category.CurrentUserRunOnceEx64;
 

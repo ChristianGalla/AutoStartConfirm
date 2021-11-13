@@ -46,6 +46,10 @@ namespace AutoStartConfirm.Connectors {
         public void Stop() {
             if (watcher != null) {
                 Logger.Trace($"Stopping monitoring of {BasePath}");
+                watcher.Created -= OnCreated;
+                watcher.Deleted -= OnDeleted;
+                watcher.Renamed -= OnRenamed;
+                watcher.Error -= OnError;
                 watcher.Dispose();
                 watcher = null;
             }

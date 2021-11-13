@@ -2,7 +2,7 @@
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class AppInit64Connector : RegistryConnector {
+    public class AppInit64Connector : RegistryConnector {
 
         private readonly Category category = Category.AppInit64;
 

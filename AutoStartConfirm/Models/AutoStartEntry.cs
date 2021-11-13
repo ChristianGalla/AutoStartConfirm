@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows;
 
 namespace AutoStartConfirm.Models
 {
@@ -16,6 +17,18 @@ namespace AutoStartConfirm.Models
         private Change? change;
         private ConfirmStatus confirmStatus;
         private bool? isEnabled;
+
+        [field: NonSerialized]
+        private bool? canBeEnabled;
+
+        [field: NonSerialized]
+        private bool? canBeDisabled;
+
+        [field: NonSerialized]
+        private bool? canBeAdded;
+
+        [field: NonSerialized]
+        private bool? canBeRemoved;
 
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -80,20 +93,48 @@ namespace AutoStartConfirm.Models
             get => isEnabled;
             set {
                 isEnabled = value;
+                NotifyPropertyChanged();
             }
         }
 
-        [field: NonSerialized]
-        public bool? CanBeEnabled { get; set; }
+        public bool? CanBeEnabled {
+            get => canBeEnabled;
+            set {
+                canBeEnabled = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        [field: NonSerialized]
-        public bool? CanBeDisabled { get; set; }
+        public bool? CanBeDisabled {
+            get => canBeDisabled;
+            set {
+                canBeDisabled = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        [field: NonSerialized]
-        public bool? CanBeAdded { get; set; }
+        public bool? CanBeAdded {
+            get => canBeAdded;
+            set {
+                canBeAdded = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        [field: NonSerialized]
-        public bool? CanBeRemoved { get; set; }
+
+        public bool? CanBeRemoved {
+            get => canBeRemoved;
+            set {
+                canBeRemoved = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public string CategoryAsString {
+            get {
+                return Category.ToString();
+            }
+        }
 
         public AutoStartEntry() {
             Id = Guid.NewGuid();
@@ -128,7 +169,7 @@ namespace AutoStartConfirm.Models
         // This method is called by the Set accessor of each property.  
         // The CallerMemberName attribute that is applied to the optional propertyName  
         // parameter causes the property name of the caller to be substituted as an argument.  
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

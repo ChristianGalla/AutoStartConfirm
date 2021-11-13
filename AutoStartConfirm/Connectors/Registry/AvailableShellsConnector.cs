@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class AvailableShellsConnector : RegistryConnector {
+    public class AvailableShellsConnector : RegistryConnector {
 
         private readonly Category category = Category.AvailableShells;
 

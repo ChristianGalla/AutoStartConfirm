@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors.Folder {
-    class CurrentUserStartMenuAutoStartFolderConnector : FolderConnector {
+    public class CurrentUserStartMenuAutoStartFolderConnector : FolderConnector {
 
         private readonly Category category = Category.CurrentUserStartMenuAutoStartFolder;
 

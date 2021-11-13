@@ -1,10 +1,16 @@
-﻿using AutoStartConfirm.Exceptions;
+﻿using AutoStartConfirm.Connectors.Registry;
+using AutoStartConfirm.Exceptions;
 using AutoStartConfirm.Models;
+using AutoStartConfirm.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -19,20 +25,34 @@ namespace AutoStartConfirm.Connectors {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private IAutoStartConnectorService connectors;
-        public IAutoStartConnectorService Connectors {
+        private IAutoStartConnectorService connectorServce;
+        public IAutoStartConnectorService ConnectorService {
             get {
-                if (connectors == null) {
-                    connectors = new AutoStartConnectorService();
-                    connectors.Add += AddHandler;
-                    connectors.Remove += RemoveHandler;
-                    connectors.Enable += EnableHandler;
-                    connectors.Disable += DisableHandler;
+                if (connectorServce == null) {
+                    connectorServce = new AutoStartConnectorService();
+                    connectorServce.Add += AddHandler;
+                    connectorServce.Remove += RemoveHandler;
+                    connectorServce.Enable += EnableHandler;
+                    connectorServce.Disable += DisableHandler;
                 }
-                return connectors;
+                return connectorServce;
             }
             set {
-                connectors = value;
+                connectorServce = value;
+            }
+        }
+
+        private string currentExePath;
+
+        public string CurrentExePath {
+            get {
+                if (currentExePath == null) {
+                    currentExePath = Assembly.GetEntryAssembly().Location;
+                }
+                return currentExePath;
+            }
+            set {
+                currentExePath = value;
             }
         }
 
@@ -40,13 +60,77 @@ namespace AutoStartConfirm.Connectors {
 
         private readonly string PathToHistoryAutoStarts;
 
+
         private ObservableCollection<AutoStartEntry> currentAutoStarts = new ObservableCollection<AutoStartEntry>();
 
+
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts => currentAutoStarts;
+
+        private ObservableCollection<AutoStartEntry> allCurrentAutoStarts = new ObservableCollection<AutoStartEntry>();
+
+        public ObservableCollection<AutoStartEntry> AllCurrentAutoStarts => allCurrentAutoStarts;
+
 
         private ObservableCollection<AutoStartEntry> historyAutoStarts = new ObservableCollection<AutoStartEntry>();
 
         public ObservableCollection<AutoStartEntry> HistoryAutoStarts => historyAutoStarts;
+
+
+        private ObservableCollection<AutoStartEntry> allHistoryAutoStarts = new ObservableCollection<AutoStartEntry>();
+
+        public ObservableCollection<AutoStartEntry> AllHistoryAutoStarts => allHistoryAutoStarts;
+
+        private App app;
+
+        public App App {
+            get {
+                if (app == null) {
+                    app = (App)Application.Current;
+                }
+                return app;
+            }
+            set {
+                app = value;
+            }
+        }
+
+
+        private ISettingsService settingsService;
+
+        public ISettingsService SettingsService {
+            get {
+                if (settingsService == null) {
+                    settingsService = App.SettingsService;
+                }
+                return settingsService;
+            }
+            set => settingsService = value;
+        }
+
+
+        private CurrentUserRun64Connector currentUserRun64Connector;
+
+        public CurrentUserRun64Connector CurrentUserRun64Connector {
+            get {
+                if (currentUserRun64Connector == null) {
+                    currentUserRun64Connector = new CurrentUserRun64Connector();
+                }
+                return currentUserRun64Connector;
+            }
+            set => currentUserRun64Connector = value;
+        }
+
+        public bool HasOwnAutoStart {
+            get {
+                var currentAutoStarts = CurrentUserRun64Connector.GetCurrentAutoStarts();
+                foreach (var autoStart in currentAutoStarts) {
+                    if (IsOwnAutoStart(autoStart)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
         #endregion
 
         #region Methods
@@ -56,12 +140,37 @@ namespace AutoStartConfirm.Connectors {
             var basePath = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}";
             PathToLastAutoStarts = $"{basePath}LastAutoStarts.bin";
             PathToHistoryAutoStarts = $"{basePath}HistoryAutoStarts.bin";
+            SettingsService.SettingsSaving += SettingsSavingHandler;
+            SettingsService.SettingsLoaded += SettingsLoadedHandler;
+        }
+
+        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
+            HandleSettingChanges();
+        }
+
+        private void SettingsSavingHandler(object sender, CancelEventArgs e) {
+            HandleSettingChanges();
+        }
+
+        private void HandleSettingChanges() {
+            CurrentAutoStarts.Clear();
+            foreach (var autoStart in AllCurrentAutoStarts) {
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
+                    CurrentAutoStarts.Add(autoStart);
+                }
+            }
+            HistoryAutoStarts.Clear();
+            foreach (var autoStart in AllHistoryAutoStarts) {
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
+                    HistoryAutoStarts.Add(autoStart);
+                }
+            }
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
             Logger.Trace("TryGetCurrentAutoStart called");
             value = null;
-            foreach (var autoStart in CurrentAutoStarts) {
+            foreach (var autoStart in AllCurrentAutoStarts) {
                 if (autoStart.Id == Id) {
                     value = autoStart;
                     return true;
@@ -73,7 +182,7 @@ namespace AutoStartConfirm.Connectors {
         public bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value) {
             Logger.Trace("TryGetHistoryAutoStart called");
             value = null;
-            foreach (var autoStart in HistoryAutoStarts) {
+            foreach (var autoStart in AllHistoryAutoStarts) {
                 if (autoStart.Id == Id) {
                     value = autoStart;
                     return true;
@@ -106,6 +215,16 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
+        public void ConfirmAdd(AutoStartEntry autoStart) {
+            autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+            ConfirmAdd(autoStart.Id);
+        }
+
+        public void ConfirmRemove(AutoStartEntry autoStart) {
+            autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+            ConfirmRemove(autoStart.Id);
+        }
+
         public void RemoveAutoStart(Guid Id) {
             Logger.Trace("RemoveAutoStart called");
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
@@ -115,11 +234,11 @@ namespace AutoStartConfirm.Connectors {
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("RemoveAutoStart called");
-            if (Connectors.CanBeEnabled(autoStart)) {
+            if (ConnectorService.CanBeEnabled(autoStart)) {
                 // remove disabled status to allow new entries for example at the same registry key in the future
-                Connectors.EnableAutoStart(autoStart);
+                ConnectorService.EnableAutoStart(autoStart);
             }
-            Connectors.RemoveAutoStart(autoStart);
+            ConnectorService.RemoveAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.Info("Removed {@autoStart}", autoStart);
         }
@@ -133,7 +252,7 @@ namespace AutoStartConfirm.Connectors {
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("DisableAutoStart called");
-            Connectors.DisableAutoStart(autoStart);
+            ConnectorService.DisableAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Disabled;
             Logger.Info("Disabled {@autoStart}", autoStart);
         }
@@ -147,9 +266,9 @@ namespace AutoStartConfirm.Connectors {
 
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("AddAutoStart called");
-            Connectors.AddAutoStart(autoStart);
+            ConnectorService.AddAutoStart(autoStart);
             try {
-                Connectors.EnableAutoStart(autoStart);
+                ConnectorService.EnableAutoStart(autoStart);
             } catch (AlreadySetException) {
 
             }
@@ -166,29 +285,29 @@ namespace AutoStartConfirm.Connectors {
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
             Logger.Trace("EnableAutoStart called");
-            Connectors.EnableAutoStart(autoStart);
+            ConnectorService.EnableAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Enabled;
             Logger.Info("Enabled {@autoStart}", autoStart);
         }
 
         public bool CanAutoStartBeEnabled(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeEnabled called");
-            return Connectors.CanBeEnabled(autoStart);
+            return ConnectorService.CanBeEnabled(autoStart);
         }
 
         public bool CanAutoStartBeDisabled(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeDisabled called");
-            return Connectors.CanBeDisabled(autoStart);
+            return ConnectorService.CanBeDisabled(autoStart);
         }
 
         public bool CanAutoStartBeAdded(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeAdded called");
-            return Connectors.CanBeAdded(autoStart);
+            return ConnectorService.CanBeAdded(autoStart);
         }
 
         public bool CanAutoStartBeRemoved(AutoStartEntry autoStart) {
             Logger.Trace("CanAutoStartBeRemoved called");
-            return Connectors.CanBeRemoved(autoStart);
+            return ConnectorService.CanBeRemoved(autoStart);
         }
 
         public async Task LoadCanBeAdded(AutoStartEntry autoStart) {
@@ -248,7 +367,7 @@ namespace AutoStartConfirm.Connectors {
         /// </summary>
         /// <param name="autoStart"></param>
         public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart) {
-            foreach (var currentAutoStart in CurrentAutoStarts) {
+            foreach (var currentAutoStart in AllCurrentAutoStarts) {
                 var autoStartValue = currentAutoStart;
                 if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
                     continue;
@@ -262,7 +381,7 @@ namespace AutoStartConfirm.Connectors {
         /// Resets all dynamic properties of all history auto starts.
         /// </summary>
         public void ResetEditablePropertiesOfAllHistoryAutoStarts() {
-            foreach (var autoStart in HistoryAutoStarts) {
+            foreach (var autoStart in AllHistoryAutoStarts) {
                 ResetAllDynamicFields(autoStart);
                 HistoryAutoStartChange?.Invoke(autoStart);
             }
@@ -273,7 +392,7 @@ namespace AutoStartConfirm.Connectors {
         /// </summary>
         /// <param name="autoStart"></param>
         public void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart) {
-            foreach (var historyAutoStart in HistoryAutoStarts) {
+            foreach (var historyAutoStart in AllHistoryAutoStarts) {
                 if (!historyAutoStart.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
@@ -291,12 +410,12 @@ namespace AutoStartConfirm.Connectors {
 
         public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
             Logger.Trace("IsAdminRequiredForChanges called");
-            return Connectors.IsAdminRequiredForChanges(autoStart);
+            return ConnectorService.IsAdminRequiredForChanges(autoStart);
         }
 
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called");
-            return Connectors.GetCurrentAutoStarts();
+            return ConnectorService.GetCurrentAutoStarts();
         }
 
         public bool GetValidAutoStartFileExists() {
@@ -322,6 +441,7 @@ namespace AutoStartConfirm.Connectors {
                     IFormatter formatter = new BinaryFormatter();
                     try {
                         var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
+                        var autoStartsToRemove = new List<AutoStartEntry>();
                         Logger.Trace($"Loaded last saved auto starts from file \"{path}\"");
                         return ret;
                     } catch (Exception ex) {
@@ -364,9 +484,9 @@ namespace AutoStartConfirm.Connectors {
             try {
                 Logger.Info("Saving current known auto starts");
                 Logger.Trace("Saving current auto starts to file {path}", PathToLastAutoStarts);
-                SaveAutoStarts(PathToLastAutoStarts, CurrentAutoStarts);
+                SaveAutoStarts(PathToLastAutoStarts, AllCurrentAutoStarts);
                 Logger.Trace("Saving history auto starts to file {path}", PathToHistoryAutoStarts);
-                SaveAutoStarts(PathToHistoryAutoStarts, HistoryAutoStarts);
+                SaveAutoStarts(PathToHistoryAutoStarts, AllHistoryAutoStarts);
                 Logger.Info("Saved all auto starts");
             } catch (Exception ex) {
                 var err = new Exception("Failed to save current auto starts", ex);
@@ -418,21 +538,31 @@ namespace AutoStartConfirm.Connectors {
                     Logger.Error(err);
                     lastSavedAutoStarts = new ObservableCollection<AutoStartEntry>();
                 }
+                AllCurrentAutoStarts.Clear();
                 var lastSavedAutoStartsDictionary = new Dictionary<Guid, AutoStartEntry>();
                 foreach(var lastSavedAutoStart in lastSavedAutoStarts) {
                     if (lastSavedAutoStart.Date == null) {
                         lastSavedAutoStart.Date = DateTime.Now;
                     }
                     lastSavedAutoStartsDictionary.Add(lastSavedAutoStart.Id, lastSavedAutoStart);
+                    if (SettingsService.DisabledConnectors.Contains(lastSavedAutoStart.Category.ToString())) {
+                        AllCurrentAutoStarts.Add(lastSavedAutoStart);
+                    }
                 }
 
                 // get history auto starts
                 try {
-                    historyAutoStarts = GetSavedHistoryAutoStarts(PathToHistoryAutoStarts);
+                    allHistoryAutoStarts = GetSavedHistoryAutoStarts(PathToHistoryAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load removed auto starts", ex);
                     Logger.Error(err);
-                    historyAutoStarts = new ObservableCollection<AutoStartEntry>();
+                    allHistoryAutoStarts = new ObservableCollection<AutoStartEntry>();
+                }
+                HistoryAutoStarts.Clear();
+                foreach (var lastAutostart in allHistoryAutoStarts) {
+                    if (!SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString())) {
+                        HistoryAutoStarts.Add(lastAutostart);
+                    }
                 }
 
                 // get current auto starts
@@ -457,7 +587,8 @@ namespace AutoStartConfirm.Connectors {
                 // get auto starts to remove
                 var autoStartsToRemove = new List<AutoStartEntry>();
                 foreach (var lastAutostart in lastSavedAutoStarts) {
-                    if (!currentAutoStartDictionary.ContainsKey(lastAutostart.Id)) {
+                    if (!currentAutoStartDictionary.ContainsKey(lastAutostart.Id) &&
+                        !SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString())) {
                         autoStartsToRemove.Add(lastAutostart);
                     }
                 }
@@ -468,6 +599,7 @@ namespace AutoStartConfirm.Connectors {
                 foreach (var currentAutoStart in currentAutoStarts) {
                     if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry lastAutoStartEntry)) {
                         CurrentAutoStarts.Add(lastAutoStartEntry);
+                        AllCurrentAutoStarts.Add(lastAutoStartEntry);
                     } else {
                         // add handler will add auto start later to CurrentAutoStarts collection
                         autoStartsToAdd.Add(currentAutoStart);
@@ -490,7 +622,7 @@ namespace AutoStartConfirm.Connectors {
                     if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry oldAutoStart)) {
                         wasEnabled = oldAutoStart.IsEnabled.GetValueOrDefault(true);
                     }
-                    var nowEnabled = Connectors.IsEnabled(currentAutoStart);
+                    var nowEnabled = ConnectorService.IsEnabled(currentAutoStart);
                     currentAutoStart.IsEnabled = nowEnabled;
                     if (nowEnabled && !wasEnabled) {
                         EnableHandler(currentAutoStart);
@@ -508,12 +640,46 @@ namespace AutoStartConfirm.Connectors {
 
         public void StartWatcher() {
             Logger.Trace("Starting watchers");
-            Connectors.StartWatcher();
+            ConnectorService.StartWatcher();
         }
 
         public void StopWatcher() {
             Logger.Trace("Stopping watchers");
-            Connectors.StopWatcher();
+            ConnectorService.StopWatcher();
+        }
+
+        public bool IsOwnAutoStart(AutoStartEntry autoStart) {
+            return autoStart.Category == Category.CurrentUserRun64 &&
+            autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
+            autoStart.Value == CurrentExePath;
+        }
+
+
+        public void ToggleOwnAutoStart() {
+            try {
+                Logger.Info("ToggleOwnAutoStart called");
+                var ownAutoStart = new RegistryAutoStartEntry() {
+                    Category = Category.CurrentUserRun64,
+                    Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
+                    Value = CurrentExePath,
+                    RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
+                    ConfirmStatus = ConfirmStatus.New,
+                };
+
+                if (HasOwnAutoStart) {
+                    Logger.Info("Shall remove own auto start");
+                    RemoveAutoStart(ownAutoStart);
+                } else {
+                    Logger.Info("Shall add own auto start");
+                    AddAutoStart(ownAutoStart);
+                }
+                ownAutoStart.ConfirmStatus = ConfirmStatus.New;
+                Logger.Trace("Own auto start toggled");
+            } catch (Exception e) {
+                var message = "Failed to toggle own auto start";
+                var err = new Exception(message, e);
+                Logger.Error(err);
+            }
         }
         #endregion
 
@@ -542,7 +708,9 @@ namespace AutoStartConfirm.Connectors {
                     autostart.Change = Change.Added;
                     ResetEditablePropertiesOfAutoStarts(autostart);
                     CurrentAutoStarts.Add(autostart);
+                    AllCurrentAutoStarts.Add(autostart);
                     HistoryAutoStarts.Add(autostart);
+                    AllHistoryAutoStarts.Add(autostart);
                     Add?.Invoke(autostart);
                     CurrentAutoStartChange?.Invoke(autostart);
                     HistoryAutoStartChange?.Invoke(autostart);
@@ -603,11 +771,13 @@ namespace AutoStartConfirm.Connectors {
                 try {
                     Logger.Info("Auto start removed: {@value}", autostart);
                     CurrentAutoStarts.Remove(autostart);
+                    AllCurrentAutoStarts.Remove(autostart);
                     ResetAllDynamicFields(autostart);
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Removed;
                     HistoryAutoStarts.Add(autostartCopy);
+                    AllHistoryAutoStarts.Add(autostartCopy);
                     Remove?.Invoke(autostart);
                     CurrentAutoStartChange?.Invoke(autostart);
                     HistoryAutoStartChange?.Invoke(autostartCopy);
@@ -626,8 +796,14 @@ namespace AutoStartConfirm.Connectors {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    if (connectors != null) {
-                        connectors.Dispose();
+                    if (connectorServce != null) {
+                        connectorServce.Add -= AddHandler;
+                        connectorServce.Remove -= RemoveHandler;
+                        connectorServce.Enable -= EnableHandler;
+                        connectorServce.Disable -= DisableHandler;
+                        connectorServce.Dispose();
+                        SettingsService.SettingsSaving -= SettingsSavingHandler;
+                        SettingsService.SettingsLoaded -= SettingsLoadedHandler;
                     }
                 }
                 disposedValue = true;

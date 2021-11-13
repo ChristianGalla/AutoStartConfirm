@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class IconServiceLibConnector : RegistryConnector {
+    public class IconServiceLibConnector : RegistryConnector {
 
         private readonly Category category = Category.IconServiceLib;
 

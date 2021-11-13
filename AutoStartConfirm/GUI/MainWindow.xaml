@@ -16,11 +16,12 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
     <Window.Resources>
-        <myConverters:CanBeConfirmedConverter x:Key="CanConfirmConverter" />
+        <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
         <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
         <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
         <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
         <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
+        <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -28,11 +29,12 @@
                 <MenuItem Header="_Exit" Click="MenuItemExit_Click" />
             </MenuItem>
             <MenuItem Header="_Options">
+                <MenuItem Header="_Connectors" Click="MenuItemConnectors_Click" />
                 <MenuItem
                     Header="_Start 'Auto Start Confirm' on logon of current user"
                     IsCheckable="True"
                     Click="MenuItemAutoStart_Click"
-                    IsChecked="{Binding ElementName=window, Path=HasOwnAutoStart, Mode=OneWay}" />
+                    IsChecked="{Binding ElementName=window, Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Click="MenuItemAbout_Click" />
@@ -62,17 +64,51 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}" ToolTip="Confirm" Foreground="Green">✔</Button>
-                                        <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}" ToolTip="Enable" Foreground="Yellow">💡</Button>
-                                        <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}" ToolTip="Disable" Foreground="Gray">💡</Button>
-                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}" ToolTip="Remove" Foreground="Black">🗑</Button>
+                                        <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
+                                            <Button.Content>✔</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="ConfirmStatus" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                        <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" ToolTip="Enable" Foreground="Orange">
+                                            <Button.Content>💡</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeEnabledConverter}">
+                                                    <Binding />
+                                                    <Binding Path="CanBeEnabled" />
+                                                    <Binding Path="CanBeDisabled" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                        <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" ToolTip="Disable" Foreground="Gray">
+                                            <Button.Content>💡</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeDisabledConverter}">
+                                                    <Binding />
+                                                    <Binding Path="CanBeDisabled" />
+                                                    <Binding Path="CanBeEnabled" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                        <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" ToolTip="Remove" Foreground="Black">
+                                            <Button.Content>🗑</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeRemovedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="CanBeRemoved" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTextColumn Header="Date added" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>
@@ -100,8 +136,27 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" IsEnabled="{Binding Path=ConfirmStatus, Converter={StaticResource CanConfirmConverter}}" ToolTip="Confirm" Foreground="Green">✔</Button>
-                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}" ToolTip="Revert" Foreground="Black">↪</Button>
+                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
+                                            <Button.Content>✔</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="ConfirmStatus" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>                                            
+                                        </Button>
+                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" ToolTip="Revert" Foreground="Black">
+                                            <Button.Content>↪</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeRevertedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="CanBeAdded" />
+                                                    <Binding Path="CanBeRemoved" />
+                                                    <Binding Path="CanBeEnabled" />
+                                                    <Binding Path="CanBeDisabled" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -109,7 +164,7 @@
                         <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
                         <DataGridTextColumn Header="Date" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
                         <DataGridTextColumn Header="Change" Binding="{Binding Path=Change}" />
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=Category}" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
                         <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
                     </DataGrid.Columns>

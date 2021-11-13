@@ -2,7 +2,7 @@
 using System.Windows;
 
 namespace AutoStartConfirm.Converters {
-    internal class ConverterBase {
+    public class ConverterBase {
         private App app;
 
         private IAutoStartService autoStartService;

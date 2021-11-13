@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class UserInitMprLogonScriptConnector : RegistryConnector {
+    public class UserInitMprLogonScriptConnector : RegistryConnector {
 
         private readonly Category category = Category.UserInitMprLogonScript;
 

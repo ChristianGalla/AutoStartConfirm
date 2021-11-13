@@ -87,14 +87,21 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\CanBeRevertedConverter.cs" />
     <Compile Include="Converters\ConverterBase.cs" />
     <Compile Include="GUI\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AppStatus.cs" />
+    <Compile Include="Models\ConnectorEnableRow.cs" />
+    <Compile Include="GUI\ConnectorWindow.xaml.cs">
+      <DependentUpon>ConnectorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\IMessageService.cs" />
     <Compile Include="GUI\MessageService.cs" />
     <Compile Include="Models\Change.cs" />
     <Compile Include="Connectors\IAutoStartService.cs" />
+    <Compile Include="Models\NotifyIconViewModel.cs" />
     <Compile Include="Models\ServiceAutoStartEntry.cs" />
     <Compile Include="Models\ScheduledTaskAutoStartEntry.cs" />
     <Compile Include="Models\FolderAutoStartEntry.cs" />
@@ -186,6 +193,9 @@
     <Compile Include="Notifications\NotificationService.cs" />
     <Compile Include="GUI\NotifyIcon.cs" />
     <Compile Include="GUI\NotifyIconDoubleClickCommand.cs" />
+    <Compile Include="Properties\ISettingsService.cs" />
+    <Compile Include="Properties\Settings.cs" />
+    <Compile Include="Properties\SettingsService.cs" />
     <Page Include="GUI\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -193,6 +203,10 @@
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="GUI\ConnectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\NotifyIcon.xaml">
       <SubType>Designer</SubType>

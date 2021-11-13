@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors.Services {
-    class OtherServiceConnector : ServiceConnector {
+    public class OtherServiceConnector : ServiceConnector {
 
         public override Category Category {
             get {

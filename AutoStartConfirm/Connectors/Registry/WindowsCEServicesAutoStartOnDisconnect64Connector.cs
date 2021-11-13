@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class WindowsCEServicesAutoStartOnDisconnect64Connector : RegistryConnector {
+    public class WindowsCEServicesAutoStartOnDisconnect64Connector : RegistryConnector {
 
         private readonly Category category = Category.WindowsCEServicesAutoStartOnDisconnect64;
 

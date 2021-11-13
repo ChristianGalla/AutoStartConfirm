@@ -1,0 +1,30 @@
+﻿<Window x:Class="AutoStartConfirm.GUI.ConnectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AutoStartConfirm.GUI"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        mc:Ignorable="d"
+        x:Name="window"
+        Title="Enabled Connectors"
+        Height="700"
+        Width="400"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <CollectionViewSource
+                        x:Key="connectorViewSource"
+                        Source="{Binding ElementName=window, Path=Connectors}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="CategoryName" Direction="Ascending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+    <DataGrid x:Name="ConnectorGrid" IsReadOnly="False" CanUserAddRows="False" CanUserDeleteRows="False" ItemsSource="{Binding Source={StaticResource connectorViewSource}}" AutoGenerateColumns="False">
+        <DataGrid.Columns>
+            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Path=Enabled, Mode=TwoWay}" IsReadOnly="False" />
+            <DataGridTextColumn Header="Connector" Binding="{Binding Path=CategoryName, Mode=OneWay }" IsReadOnly="True" />
+        </DataGrid.Columns>
+    </DataGrid>
+
+</Window>

@@ -11,7 +11,7 @@ using System.IO;
 using AutoStartConfirm.Exceptions;
 
 namespace AutoStartConfirm.Connectors.Folder {
-    abstract class FolderConnector : IAutoStartConnector, IDisposable {
+    public abstract class FolderConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -35,20 +35,6 @@ namespace AutoStartConfirm.Connectors.Folder {
         public abstract bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
         private IFolderChangeMonitor monitor;
-        protected IFolderChangeMonitor Monitor {
-            get {
-                if (monitor == null) {
-                    monitor = new FolderChangeMonitor() {
-                        BasePath = BasePath,
-                        Category = Category,
-                    };
-                    monitor.Add += AddHandler;
-                    monitor.Remove += RemoveHandler;
-                }
-                return monitor;
-            }
-        }
-
 
         // todo: read target of links?
         // read sub directories?
@@ -78,9 +64,17 @@ namespace AutoStartConfirm.Connectors.Folder {
 
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
-            StopWatcher();
-            Monitor.Start();
             RegistryDisableService.StartWatcher();
+            if (monitor != null) {
+                Logger.Trace("Watcher already started");
+                return;
+            }
+            monitor = new FolderChangeMonitor() {
+                BasePath = BasePath,
+                Category = Category,
+            };
+            monitor.Add += AddHandler;
+            monitor.Remove += RemoveHandler;
             Logger.Trace("Watcher started");
         }
 
@@ -117,7 +111,15 @@ namespace AutoStartConfirm.Connectors.Folder {
         public void StopWatcher() {
             Logger.Trace("StopWatcher called for {BasePath}", BasePath);
             RegistryDisableService.StopWatcher();
-            Monitor.Stop();
+            if (monitor == null) {
+                Logger.Trace("No watcher running");
+                return;
+            }
+            monitor.Add -= AddHandler;
+            monitor.Remove -= RemoveHandler;
+            monitor.Stop();
+            monitor.Dispose();
+            monitor = null;
             Logger.Trace("Watcher stopped");
         }
 
@@ -196,6 +198,10 @@ namespace AutoStartConfirm.Connectors.Folder {
             if (!disposedValue) {
                 if (disposing) {
                     StopWatcher();
+                    if (registryDisableService != null) {
+                        registryDisableService.Enable -= EnableHandler;
+                        registryDisableService.Disable -= DisableHandler;
+                    }
                 }
 
                 disposedValue = true;

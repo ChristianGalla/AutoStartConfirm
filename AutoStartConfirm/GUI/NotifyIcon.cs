@@ -1,6 +1,9 @@
-﻿using System;
+﻿using AutoStartConfirm.Models;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,10 +27,6 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public bool HasOwnAutoStart() {
-            return App.HasOwnAutoStart;
-        }
-
         private void ExitClicked(object sender, RoutedEventArgs e)
         {
             App.Close();
@@ -36,12 +35,7 @@ namespace AutoStartConfirm.GUI
         private void OwnAutoStartClicked(object sender, RoutedEventArgs e) {
             Application.Current.Dispatcher.Invoke(delegate {
                 App.ToggleOwnAutoStart();
-                OwnAutoStartTaskbarMenuItem.IsChecked = HasOwnAutoStart();
             });
-        }
-
-        private void Opened(object sender, RoutedEventArgs e) {
-            OwnAutoStartTaskbarMenuItem.IsChecked = HasOwnAutoStart();
         }
     }
 }

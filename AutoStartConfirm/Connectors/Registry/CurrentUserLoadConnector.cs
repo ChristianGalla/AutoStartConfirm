@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class CurrentUserLoadConnector : RegistryConnector {
+    public class CurrentUserLoadConnector : RegistryConnector {
 
         private readonly Category category = Category.CurrentUserLoad;
 

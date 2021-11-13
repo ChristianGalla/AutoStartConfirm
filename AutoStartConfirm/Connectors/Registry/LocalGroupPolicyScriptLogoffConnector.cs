@@ -2,7 +2,7 @@
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class LocalGroupPolicyScriptLogoffConnector : RegistryConnector {
+    public class LocalGroupPolicyScriptLogoffConnector : RegistryConnector {
 
         private readonly Category category = Category.LocalGroupPolicyScriptLogoff;
 

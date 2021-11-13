@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class CurrentUserTerminalServerRunOnceExConnector : RegistryConnector {
+    public class CurrentUserTerminalServerRunOnceExConnector : RegistryConnector {
 
         private readonly Category category = Category.CurrentUserTerminalServerRunOnceEx;
 

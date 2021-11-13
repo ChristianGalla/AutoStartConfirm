@@ -11,7 +11,7 @@ using System.Windows.Input;
 using AutoStartConfirm.Exceptions;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    abstract class RegistryConnector : IAutoStartConnector, IDisposable {
+    abstract public class RegistryConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -104,16 +104,6 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         #region IAutoStartConnector implementation
         public abstract Category Category { get; }
-        protected IRegistryChangeMonitor Monitor {
-            get {
-                if (monitor == null) {
-                    monitor = new RegistryChangeMonitor(BasePath);
-                    monitor.Changed += ChangeHandler;
-                    monitor.Error += ErrorHandler;
-                }
-                return monitor;
-            }
-        }
 
         /// <summary>
         /// Gets all values inside the key as RegistryAutoStartEntry
@@ -193,7 +183,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             return ret;
         }
 
-        public IList<AutoStartEntry> GetCurrentAutoStarts() {
+        public virtual IList<AutoStartEntry> GetCurrentAutoStarts() {
             Logger.Trace("GetCurrentAutoStarts called for {BasePath}", BasePath);
             try {
                 var ret = new List<AutoStartEntry>();
@@ -253,21 +243,35 @@ namespace AutoStartConfirm.Connectors.Registry {
         /// </remarks>
         public void StartWatcher() {
             Logger.Trace("StartWatcher called for {BasePath}", BasePath);
-            StopWatcher();
+            RegistryDisableService?.StartWatcher();
+            if (monitor != null) {
+                Logger.Trace("Watcher already started");
+                return;
+            }
             var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
             lastAutostarts = new List<RegistryAutoStartEntry>();
             foreach (var currentAutoStart in currentAutoStarts) {
                 lastAutostarts.Add((RegistryAutoStartEntry)currentAutoStart);
             }
-            Monitor.Start();
-            RegistryDisableService?.StartWatcher();
+            monitor = new RegistryChangeMonitor(BasePath);
+            monitor.Changed += ChangeHandler;
+            monitor.Error += ErrorHandler;
+            monitor.Start();
             Logger.Trace("Watcher started");
         }
 
         public void StopWatcher() {
             Logger.Trace("StopWatcher called for {BasePath}", BasePath);
             RegistryDisableService?.StopWatcher();
-            Monitor.Stop();
+            if (monitor == null) {
+                Logger.Trace("No watcher running");
+                return;
+            }
+            monitor.Changed -= ChangeHandler;
+            monitor.Error -= ErrorHandler;
+            monitor.Stop();
+            monitor.Dispose();
+            monitor = null;
             Logger.Trace("Stopped watcher");
         }
 
@@ -508,6 +512,10 @@ namespace AutoStartConfirm.Connectors.Registry {
             if (!disposedValue) {
                 if (disposing) {
                     StopWatcher();
+                    if (registryDisableService != null) {
+                        registryDisableService.Enable -= EnableHandler;
+                        registryDisableService.Disable -= DisableHandler;
+                    }
                 }
 
                 disposedValue = true;

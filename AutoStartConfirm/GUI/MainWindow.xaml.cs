@@ -21,12 +21,8 @@ namespace AutoStartConfirm.GUI {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IDisposable {
+    public partial class MainWindow : Window {
         public bool IsClosed { get; private set; }
-
-        private bool CurrentAutoStartGridNeedsRefresh { get; set; } = false;
-
-        private bool HistoryAutoStartGridNeedsRefresh { get; set; } = false;
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -69,44 +65,15 @@ namespace AutoStartConfirm.GUI {
                 return AutoStartService.HistoryAutoStarts;
             }
         }
-
-        public bool HasOwnAutoStart {
-            get {
-                return App.HasOwnAutoStart;
-            }
+        public AppStatus AppStatus {
+            get => App.AppStatus;
         }
-
-        private Timer RefreshTimer;
 
         public MainWindow()
         {
             Logger.Trace("Window opened");
             InitializeComponent();
-            App.AutoStartService.CurrentAutoStartChange += CurrentAutoStartChangeHandler;
-            App.AutoStartService.HistoryAutoStartChange += HistoryAutoStartChangeHandler;
-
-            RefreshTimer = new Timer(2000);
-            RefreshTimer.Elapsed += OnTimedEvent;
-            RefreshTimer.AutoReset = true;
-            RefreshTimer.Enabled = true;
         }
-
-        private void OnTimedEvent(Object source, ElapsedEventArgs e) {
-            try {
-                Application.Current?.Dispatcher.Invoke(delegate {
-                    if (CurrentAutoStartGridNeedsRefresh) {
-                        CurrentAutoStartGrid.Items.Refresh();
-                        CurrentAutoStartGridNeedsRefresh = false;
-                    }
-                    if (HistoryAutoStartGridNeedsRefresh) {
-                        HistoryAutoStartGrid.Items.Refresh();
-                        HistoryAutoStartGridNeedsRefresh = false;
-                    }
-                });
-            } catch (Exception) {
-            }
-        }
-
         protected override void OnClosed(EventArgs e)
         {
             Logger.Trace("Window closed");
@@ -119,34 +86,34 @@ namespace AutoStartConfirm.GUI {
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.ConfirmAdd(autoStartEntry.Id);
+            App.ConfirmAdd(autoStartEntry);
         }
 
         private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.RevertAdd(autoStartEntry.Id);
+            App.RevertAdd(autoStartEntry);
         }
 
         private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Enable(autoStartEntry.Id);
+            App.Enable(autoStartEntry);
         }
 
         private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Disable(autoStartEntry.Id);
+            App.Disable(autoStartEntry);
         }
 
         private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             if (autoStartEntry.Change == Change.Added) {
-                App.ConfirmAdd(autoStartEntry.Id);
+                App.ConfirmAdd(autoStartEntry);
             } else if (autoStartEntry.Change == Change.Removed) {
-                App.ConfirmRemove(autoStartEntry.Id);
+                App.ConfirmRemove(autoStartEntry);
             }
         }
 
@@ -173,39 +140,11 @@ namespace AutoStartConfirm.GUI {
             aboutWindow.Show();
         }
 
-        #endregion
-
-
-        #region Event handlers
-
-        private void CurrentAutoStartChangeHandler(AutoStartEntry autostart) {
-            CurrentAutoStartGridNeedsRefresh = true;
+        private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {
+            var connectorWindow = new ConnectorWindow();
+            connectorWindow.Show();
         }
 
-        private void HistoryAutoStartChangeHandler(AutoStartEntry autostart) {
-            HistoryAutoStartGridNeedsRefresh = true;
-        }
-
-        #endregion
-
-        #region IDisposable Support
-        private bool disposedValue;
-
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
-                    RefreshTimer.Stop();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose() {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
         #endregion
     }
 }

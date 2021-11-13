@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    class CurrentUserGroupPolicyRunConnector : RegistryConnector {
+    public class CurrentUserGroupPolicyRunConnector : RegistryConnector {
 
         private readonly Category category = Category.CurrentUserGroupPolicyRun;
 
