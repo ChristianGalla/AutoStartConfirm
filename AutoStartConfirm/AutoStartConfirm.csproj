@@ -22,6 +22,11 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	<Company></Company>
+	<Authors>Auto Start Confirm Galla</Authors>
+	<Product>ProductName</Product>
+	<Description />
+	<Copyright>Copyright © 2020 Christian Galla</Copyright>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
@@ -79,6 +84,7 @@
     <PackageReference Include="NLog">
       <Version>4.7.13</Version>
     </PackageReference>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Runtime.WindowsRuntime.UI.Xaml">
       <Version>4.7.0</Version>
@@ -92,7 +98,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
   </ItemGroup>
-  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject>AutoStartConfirm.App</StartupObject>
+  </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="If Not Exist $(ProjectDir)Nlog.config Copy $(ProjectDir)Nlog.sample.config $(ProjectDir)Nlog.config" />
   </Target>

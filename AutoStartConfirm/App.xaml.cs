@@ -168,28 +168,34 @@ namespace AutoStartConfirm {
         /// <summary>
         /// Application Entry Point.
         /// </summary>
-        [System.STAThreadAttribute()]
-        public static int Main(string[] args) {
-            try {
-                Logger.Info("Starting");
-                using (App app = new App()) {
-                    Logger.Info("Parameters: {args}", args);
-                    if (app.HandleCommandLineParameters(args)) {
-                        return 0;
-                    }
-                    Logger.Info("Normal start");
-                    app.Start();
-                    app.Run(); // blocks until program is closing
-                    Logger.Info("Finished");
-                }
-                AppInstance = null;
-                return 0;
-            } catch (Exception e) {
-                var err = new Exception("Failed to run", e);
-                Logger.Error(err);
-                return 1;
-            }
-        }
+        //[System.STAThreadAttribute()]
+        //public static int Main(string[] args)
+        //{
+        //    try
+        //    {
+        //        Logger.Info("Starting");
+        //        using (App app = new App())
+        //        {
+        //            Logger.Info("Parameters: {args}", args);
+        //            if (app.HandleCommandLineParameters(args))
+        //            {
+        //                return 0;
+        //            }
+        //            Logger.Info("Normal start");
+        //            app.Start();
+        //            app.Run(); // blocks until program is closing
+        //            Logger.Info("Finished");
+        //        }
+        //        AppInstance = null;
+        //        return 0;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        var err = new Exception("Failed to run", e);
+        //        Logger.Error(err);
+        //        return 1;
+        //    }
+        //}
 
         /// <summary>
         /// Handles auto starts if command line parameters are set
