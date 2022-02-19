@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AutoStartConfirmGUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AutoStartConfirmGUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
