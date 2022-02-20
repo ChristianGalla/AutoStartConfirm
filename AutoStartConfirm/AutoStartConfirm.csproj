@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.19041</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
     <Deterministic>false</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -23,8 +22,8 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<Company></Company>
-	<Authors>Auto Start Confirm Galla</Authors>
-	<Product>ProductName</Product>
+	<Authors>Christian Galla</Authors>
+	<Product>Auto Start Confirm</Product>
 	<Description />
 	<Copyright>Copyright © 2020 Christian Galla</Copyright>
   </PropertyGroup>
@@ -100,6 +99,7 @@
   </ItemGroup>
   <PropertyGroup>
     <StartupObject>AutoStartConfirm.App</StartupObject>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="If Not Exist $(ProjectDir)Nlog.config Copy $(ProjectDir)Nlog.sample.config $(ProjectDir)Nlog.config" />

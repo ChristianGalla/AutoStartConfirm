@@ -353,3 +353,4 @@ MigrationBackup/
 /AutoStartConfirm/Nlog.config
 /*.sarif
 /*.clef
+/.upgrade-assistant
