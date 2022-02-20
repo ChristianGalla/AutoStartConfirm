@@ -21,60 +21,54 @@ namespace AutoStartConfirm.GUI {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window
+    {
         public bool IsClosed { get; private set; }
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private App app;
+        private readonly IAutoStartService _autoStartService;
 
-        private IAutoStartService autoStartService;
+        public readonly IAppStatus _appStatus;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
+        private readonly ConnectorWindow _connectorWindow;
 
-        public AppStatus AppStatus {
-            get => App.AppStatus;
-        }
+        private readonly AboutWindow _aboutWindow;
 
-        public IAutoStartService AutoStartService {
-            get {
-                if (autoStartService == null) {
-                    autoStartService = App.AutoStartService;
-                }
-                return autoStartService;
-            }
-            set {
-                autoStartService = value;
-            }
-        }
+        private readonly IBusiness _business;
 
-        public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
-            get {
-                return AutoStartService.CurrentAutoStarts;
-            }
-        }
-
-        public ObservableCollection<AutoStartEntry> HistoryAutoStarts {
-            get {
-                return AutoStartService.HistoryAutoStarts;
-            }
-        }
-
-        public MainWindow()
+        public ObservableCollection<AutoStartEntry> CurrentAutoStarts
         {
-            Logger.Trace("Window opened");
-            InitializeComponent();
+            get
+            {
+                return _autoStartService.CurrentAutoStarts;
+            }
         }
+
+        public ObservableCollection<AutoStartEntry> HistoryAutoStarts
+        {
+            get
+            {
+                return _autoStartService.HistoryAutoStarts;
+            }
+        }
+
+        //public MainWindow(
+        //    //IAutoStartService autoStartService,
+        //    //IAppStatus appStatus,
+        //    //ConnectorWindow connectorWindow,
+        //    //AboutWindow aboutWindow,
+        //    //IBusiness business
+        //    )
+        //{
+        //    //_autoStartService = autoStartService;
+        //    //_appStatus = appStatus;
+        //    //_connectorWindow = connectorWindow;
+        //    //_aboutWindow = aboutWindow;
+        //    //_business = business;
+        //    Logger.Trace("Window opened");
+        //    InitializeComponent();
+        //}
         protected override void OnClosed(EventArgs e)
         {
             Logger.Trace("Window closed");
@@ -84,66 +78,80 @@ namespace AutoStartConfirm.GUI {
 
         #region Click handlers
 
-        private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
+        private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.ConfirmAdd(autoStartEntry);
+            _business.ConfirmAdd(autoStartEntry);
         }
 
-        private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
+        private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.RevertAdd(autoStartEntry);
+            _business.RevertAdd(autoStartEntry);
         }
 
-        private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
+        private void CurrentEnableButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Enable(autoStartEntry);
+            _business.Enable(autoStartEntry);
         }
 
-        private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
+        private void CurrentDisableButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Disable(autoStartEntry);
+            _business.Disable(autoStartEntry);
         }
 
-        private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e) {
+        private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            if (autoStartEntry.Change == Change.Added) {
-                App.ConfirmAdd(autoStartEntry);
-            } else if (autoStartEntry.Change == Change.Removed) {
-                App.ConfirmRemove(autoStartEntry);
+            if (autoStartEntry.Change == Change.Added)
+            {
+                _business.ConfirmAdd(autoStartEntry);
+            }
+            else if (autoStartEntry.Change == Change.Removed)
+            {
+                _business.ConfirmRemove(autoStartEntry);
             }
         }
 
-        private void HistoryRevertButton_Click(object sender, RoutedEventArgs e) {
+        private void HistoryRevertButton_Click(object sender, RoutedEventArgs e)
+        {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            if (autoStartEntry.Change == Change.Added) {
-                App.RevertAdd(autoStartEntry.Id);
-            } else if (autoStartEntry.Change == Change.Removed) {
-                App.RevertRemove(autoStartEntry.Id);
+            if (autoStartEntry.Change == Change.Added)
+            {
+                _business.RevertAdd(autoStartEntry.Id);
+            }
+            else if (autoStartEntry.Change == Change.Removed)
+            {
+                _business.RevertRemove(autoStartEntry.Id);
             }
         }
 
-        private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
+        {
             window.Close();
         }
 
-        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
-            App.ToggleOwnAutoStart();
+        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e)
+        {
+            _business.ToggleOwnAutoStart();
         }
 
-        private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Show();
+        private void MenuItemAbout_Click(object sender, RoutedEventArgs e)
+        {
+            _aboutWindow.Show();
         }
 
-        private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {
-            var connectorWindow = new ConnectorWindow();
-            connectorWindow.Show();
+        private void MenuItemConnectors_Click(object sender, RoutedEventArgs e)
+        {
+            _connectorWindow.Show();
         }
 
         #endregion

@@ -10,15 +10,22 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    public class CanBeEnabledConverter : ConverterBase, IMultiValueConverter {
+    public class CanBeEnabledConverter : IMultiValueConverter
+    {
+        private readonly IAutoStartService _autoStartService;
 
-		public object Convert(object[] value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        //public CanBeEnabledConverter(IAutoStartService autoStartService)
+        //{
+        //    _autoStartService = autoStartService;
+        //}
+
+        public object Convert(object[] value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
 			var autoStart = (AutoStartEntry)value[0];
             if (autoStart.CanBeEnabled.HasValue) {
 				return autoStart.CanBeEnabled.Value;
 			}
 			Task.Run(() => {
-				AutoStartService.LoadCanBeEnabled(autoStart);
+				_autoStartService.LoadCanBeEnabled(autoStart);
 			});
 			return false;
 		}

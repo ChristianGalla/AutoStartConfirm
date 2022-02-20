@@ -10,8 +10,16 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    public class CanBeRevertedConverter : ConverterBase, IMultiValueConverter {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
+    public class CanBeRevertedConverter : IMultiValueConverter
+	{
+		private readonly IAutoStartService _autoStartService;
+
+		//public CanBeRevertedConverter(IAutoStartService autoStartService)
+		//{
+		//	_autoStartService = autoStartService;
+		//}
+
+		public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
 			var autoStart = (AutoStartEntry)values[0];
 			switch (autoStart.Change) {
 				case Change.Added:
@@ -19,7 +27,7 @@ namespace AutoStartConfirm.Converters {
 						return autoStart.CanBeRemoved.Value;
 					}
 					Task.Run(() => {
-						AutoStartService.LoadCanBeRemoved(autoStart);
+						_autoStartService.LoadCanBeRemoved(autoStart);
 					});
 					break;
 				case Change.Removed:
@@ -27,7 +35,7 @@ namespace AutoStartConfirm.Converters {
 						return autoStart.CanBeAdded.Value;
 					}
 					Task.Run(() => {
-						AutoStartService.LoadCanBeAdded(autoStart);
+						_autoStartService.LoadCanBeAdded(autoStart);
 					});
 					break;
 				case Change.Enabled:
@@ -35,7 +43,7 @@ namespace AutoStartConfirm.Converters {
 						return autoStart.CanBeDisabled.Value;
 					}
 					Task.Run(() => {
-						AutoStartService.LoadCanBeDisabled(autoStart);
+						_autoStartService.LoadCanBeDisabled(autoStart);
 					});
 					break;
 				case Change.Disabled:
@@ -43,7 +51,7 @@ namespace AutoStartConfirm.Converters {
 						return autoStart.CanBeEnabled.Value;
 					}
 					Task.Run(() => {
-						AutoStartService.LoadCanBeEnabled(autoStart);
+						_autoStartService.LoadCanBeEnabled(autoStart);
 					});
 					break;
 			}

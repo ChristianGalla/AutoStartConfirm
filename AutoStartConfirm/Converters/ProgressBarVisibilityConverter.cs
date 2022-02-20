@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    public class ProgressBarVisibilityConverter : ConverterBase, IValueConverter {
+    public class ProgressBarVisibilityConverter : IValueConverter {
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             var runningActionCount = (int)value;

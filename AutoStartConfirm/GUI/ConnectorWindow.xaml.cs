@@ -20,47 +20,30 @@ namespace AutoStartConfirm.GUI {
     /// <summary>
     /// Interaction logic for ConnectorWindow.xaml
     /// </summary>
-    public partial class ConnectorWindow : Window, IDisposable {
+    public partial class ConnectorWindow : Window, IDisposable
+    {
 
         protected ObservableCollection<ConnectorEnableRow> connectors;
         private bool disposedValue;
 
-        private App app;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
+        private readonly ISettingsService _settingsService;
+        private readonly IAppStatus _appStatus;
 
-
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService {
-            get {
-                if (settingsService == null) {
-                    settingsService = App.SettingsService;
-                }
-                return settingsService;
-            }
-            set => settingsService = value;
-        }
-
-        public ObservableCollection<ConnectorEnableRow> Connectors {
-            get {
-                if (connectors == null) {
+        public ObservableCollection<ConnectorEnableRow> Connectors
+        {
+            get
+            {
+                if (connectors == null)
+                {
                     connectors = new ObservableCollection<ConnectorEnableRow>();
                     connectors.CollectionChanged += CollectionChanged;
-                    foreach (Category category in Enum.GetValues(typeof(Category))) {
-                        var row = new ConnectorEnableRow() {
+                    foreach (Category category in Enum.GetValues(typeof(Category)))
+                    {
+                        var row = new ConnectorEnableRow()
+                        {
                             Category = category,
-                            Enabled = !SettingsService.DisabledConnectors.Contains(category.ToString())
+                            Enabled = !_settingsService.DisabledConnectors.Contains(category.ToString())
                         };
                         connectors.Add(row);
                     }
@@ -69,47 +52,70 @@ namespace AutoStartConfirm.GUI {
             }
         }
 
-        public ConnectorWindow() {
+        public ConnectorWindow(
+            ISettingsService settingsService,
+            IAppStatus appStatus)
+        {
+            _settingsService = settingsService;
+            _appStatus = appStatus;
             InitializeComponent();
         }
 
-        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-            if (e.Action == NotifyCollectionChangedAction.Add) {
-                foreach (ConnectorEnableRow newItem in e.NewItems) {
+        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (ConnectorEnableRow newItem in e.NewItems)
+                {
                     newItem.PropertyChanged += PropertyChangedHandler;
                 }
             }
         }
 
-        private void PropertyChangedHandler(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            Task.Run(() => {
-                try {
-                    App.AppStatus.IncrementRunningActionCount();
-                    if (e.PropertyName != "Enabled") {
+        private void PropertyChangedHandler(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    _appStatus.IncrementRunningActionCount();
+                    if (e.PropertyName != "Enabled")
+                    {
                         return;
                     }
                     var changedItem = (ConnectorEnableRow)sender;
                     var categoryString = changedItem.Category.ToString();
-                    if (changedItem.Enabled) {
-                        while (SettingsService.DisabledConnectors.Contains(categoryString)) {
-                            SettingsService.DisabledConnectors.Remove(categoryString);
+                    if (changedItem.Enabled)
+                    {
+                        while (_settingsService.DisabledConnectors.Contains(categoryString))
+                        {
+                            _settingsService.DisabledConnectors.Remove(categoryString);
                         }
-                    } else {
-                        SettingsService.DisabledConnectors.Add(categoryString);
                     }
-                    SettingsService.Save();
-                } finally {
-                    App.AppStatus.DecrementRunningActionCount();
+                    else
+                    {
+                        _settingsService.DisabledConnectors.Add(categoryString);
+                    }
+                    _settingsService.Save();
+                }
+                finally
+                {
+                    _appStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
-                    if (connectors != null) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (connectors != null)
+                    {
                         connectors.CollectionChanged -= CollectionChanged;
-                        foreach (var connetor in connectors) {
+                        foreach (var connetor in connectors)
+                        {
                             connetor.PropertyChanged -= PropertyChangedHandler;
                         }
                     }
@@ -119,7 +125,8 @@ namespace AutoStartConfirm.GUI {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);

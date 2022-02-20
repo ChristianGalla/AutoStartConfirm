@@ -7,22 +7,11 @@ using System.Windows;
 
 namespace AutoStartConfirm.Models {
     public class NotifyIconViewModel {
-        private App app;
+        protected readonly AppStatus _appStatus;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
+        public NotifyIconViewModel()
+        {
 
-        public AppStatus AppStatus {
-            get => App.AppStatus;
         }
     }
 }

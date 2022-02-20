@@ -1,4 +1,5 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,7 +10,14 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    public class CanBeAddedConverter : ConverterBase, IMultiValueConverter {
+    public class CanBeAddedConverter : IMultiValueConverter
+    {
+        private readonly IAutoStartService _autoStartService;
+
+        //public CanBeAddedConverter(IAutoStartService autoStartService)
+        //{
+        //    _autoStartService = autoStartService;
+        //}
 
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             var autoStart = (AutoStartEntry)values[0];
@@ -17,7 +25,7 @@ namespace AutoStartConfirm.Converters {
                 return autoStart.CanBeAdded.Value;
             }
             Task.Run(() => {
-                AutoStartService.LoadCanBeAdded(autoStart);
+                _autoStartService.LoadCanBeAdded(autoStart);
             });
             return false;
         }

@@ -26,7 +26,6 @@ namespace AutoStartConfirm.Connectors {
         /// </summary>
         ObservableCollection<AutoStartEntry> AllHistoryAutoStarts { get; }
 
-        IAutoStartConnectorService ConnectorService { get; set; }
         bool HasOwnAutoStart { get; }
         string CurrentExePath { get; set; }
 

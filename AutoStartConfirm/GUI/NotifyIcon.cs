@@ -13,18 +13,12 @@ using System.Windows.Data;
 namespace AutoStartConfirm.GUI
 {
     public partial class NotifyIcon {
-        private App app;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
+        private readonly IBusiness _business;
+
+        public NotifyIcon(IBusiness business)
+        {
+            _business = business;
         }
 
         private void ExitClicked(object sender, RoutedEventArgs e)
@@ -34,7 +28,7 @@ namespace AutoStartConfirm.GUI
 
         private void OwnAutoStartClicked(object sender, RoutedEventArgs e) {
             Application.Current.Dispatcher.Invoke(delegate {
-                App.ToggleOwnAutoStart();
+                _business.ToggleOwnAutoStart();
             });
         }
     }

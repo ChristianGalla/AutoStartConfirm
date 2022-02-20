@@ -9,9 +9,16 @@ namespace AutoStartConfirm.GUI
     /// </summary>
     public class NotifyIconDoubleClickCommand : ICommand
     {
+        public readonly IBusiness _business;
+
+        public NotifyIconDoubleClickCommand(IBusiness business)
+        {
+            _business = business;
+        }
+
         public void Execute(object parameter)
         {
-            App.ToggleMainWindow();
+            _business.ToggleMainWindow();
         }
 
         public bool CanExecute(object parameter)

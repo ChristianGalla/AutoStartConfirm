@@ -10,14 +10,22 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters {
-    public class CanBeRemovedConverter : ConverterBase, IMultiValueConverter {
+    public class CanBeRemovedConverter : IMultiValueConverter
+    {
+        private readonly IAutoStartService _autoStartService;
+
+        //public CanBeRemovedConverter(IAutoStartService autoStartService)
+        //{
+        //    _autoStartService = autoStartService;
+        //}
+
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
 			var autoStart = (AutoStartEntry)values[0];
 			if (autoStart.CanBeRemoved.HasValue) {
 				return autoStart.CanBeRemoved.Value;
 			}
 			Task.Run(() => {
-				AutoStartService.LoadCanBeRemoved(autoStart);
+				_autoStartService.LoadCanBeRemoved(autoStart);
 			});
 			return false;
 		}

@@ -40,46 +40,23 @@ namespace AutoStartConfirm.Connectors {
             }
         }
 
-        private App app;
-
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
-
         public bool WatcherStarted { get; private set; }
 
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService {
-            get {
-                if (settingsService == null) {
-                    settingsService = App.SettingsService;
-                }
-                return settingsService;
-            }
-            set => settingsService = value;
-        }
+        private readonly ISettingsService _settingsService;
         #endregion
 
         #region Methods
 
-        public AutoStartConnectorService() {
-            SettingsService.SettingsSaving += SettingsSavingHandler;
-            SettingsService.SettingsLoaded += SettingsLoadedHandler;
+        public AutoStartConnectorService(ISettingsService settingsService) {
+            _settingsService = settingsService;
+            _settingsService.SettingsSaving += SettingsSavingHandler;
+            _settingsService.SettingsLoaded += SettingsLoadedHandler;
         }
 
         private void CreateOrUpdateEnabledConnectors() {
             var newEnabledConnectors = new Dictionary<Category, IAutoStartConnector>();
             foreach (var connector in AllConnectors.Values) {
-                var isEnabled = !SettingsService.DisabledConnectors.Contains(connector.Category.ToString());
+                var isEnabled = !_settingsService.DisabledConnectors.Contains(connector.Category.ToString());
                 if (isEnabled) {
                     newEnabledConnectors.Add(connector.Category, connector);
                 }
@@ -303,8 +280,8 @@ namespace AutoStartConfirm.Connectors {
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    SettingsService.SettingsSaving -= SettingsSavingHandler;
-                    SettingsService.SettingsLoaded -= SettingsLoadedHandler;
+                    _settingsService.SettingsSaving -= SettingsSavingHandler;
+                    _settingsService.SettingsLoaded -= SettingsLoadedHandler;
                     foreach (var connector in AllConnectors.Values) {
                         connector.Add -= AddHandler;
                         connector.Remove -= RemoveHandler;

@@ -15,7 +15,7 @@
         Width="1181.667"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
-    <Window.Resources>
+    <!--<Window.Resources>
         <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
         <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
         <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
@@ -26,7 +26,7 @@
         <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
     </Window.Resources>
     <Window.Cursor>
-        <Binding Path="AppStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
+        <Binding Path="_appStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
     </Window.Cursor>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -39,7 +39,7 @@
                     Header="_Start 'Auto Start Confirm' on logon of current user"
                     IsCheckable="True"
                     Click="MenuItemAutoStart_Click"
-                    IsChecked="{Binding ElementName=window, Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
+                    IsChecked="{Binding ElementName=window, Path=_appStatus.HasOwnAutoStart, Mode=OneWay}" />
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Click="MenuItemAbout_Click" />
@@ -48,7 +48,7 @@
         <StatusBar DockPanel.Dock="Bottom" >
             <StatusBarItem HorizontalAlignment="Right">
                 <ProgressBar Minimum="0" Maximum="100" Name="pbStatus" IsIndeterminate="True" Height="15" Width="100"
-                             Visibility="{Binding ElementName=window, Path=AppStatus.RunningActionCount, Mode=OneWay, Converter={StaticResource ProgressBarVisibilityConverter}}">
+                             Visibility="{Binding ElementName=window, Path=_appStatus.RunningActionCount, Mode=OneWay, Converter={StaticResource ProgressBarVisibilityConverter}}">
                 </ProgressBar>
             </StatusBarItem>
         </StatusBar>
@@ -183,5 +183,5 @@
                 </DataGrid>
             </TabItem>
         </TabControl>
-    </DockPanel>
+    </DockPanel>-->
 </Window>

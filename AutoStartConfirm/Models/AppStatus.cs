@@ -8,15 +8,19 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Models {
-    public class AppStatus : INotifyPropertyChanged {
+    public class AppStatus : INotifyPropertyChanged, IAppStatus
+    {
 
         protected bool hasOwnAutoStart;
 
-        public bool HasOwnAutoStart {
-            get {
+        public bool HasOwnAutoStart
+        {
+            get
+            {
                 return hasOwnAutoStart;
             }
-            set {
+            set
+            {
                 hasOwnAutoStart = value;
                 NotifyPropertyChanged();
             }
@@ -24,18 +28,22 @@ namespace AutoStartConfirm.Models {
 
         protected int runningActionCount = 0;
 
-        public int RunningActionCount {
-            get {
+        public int RunningActionCount
+        {
+            get
+            {
                 return runningActionCount;
             }
         }
 
-        public void IncrementRunningActionCount() {
+        public void IncrementRunningActionCount()
+        {
             Interlocked.Increment(ref runningActionCount);
             NotifyPropertyChanged("RunningActionCount");
         }
 
-        public void DecrementRunningActionCount() {
+        public void DecrementRunningActionCount()
+        {
             Interlocked.Decrement(ref runningActionCount);
             NotifyPropertyChanged("RunningActionCount");
         }
@@ -47,7 +55,8 @@ namespace AutoStartConfirm.Models {
         // This method is called by the Set accessor of each property.  
         // The CallerMemberName attribute that is applied to the optional propertyName  
         // parameter causes the property name of the caller to be substituted as an argument.  
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
