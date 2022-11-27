@@ -7,8 +7,18 @@ name: Build & Test
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'AutoStartConfirm/**'
+      - 'AutoStartConfirmSetup/**'
+      - 'AutoStartConfirmTests/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [ master ]
+    paths:
+      - 'AutoStartConfirm/**'
+      - 'AutoStartConfirmSetup/**'
+      - 'AutoStartConfirmTests/**'
+      - '.github/workflows/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
