@@ -11,6 +11,7 @@ Therefore, this program monitors whether a program wants to start automatically 
 
 ## Table of contents
 
+* [Changelog](#changelog)
 * [Installation](#installation)
 * [User documentation](#user-documentation)
 * [Usage warning](#usage-warning)
@@ -18,6 +19,11 @@ Therefore, this program monitors whether a program wants to start automatically 
 * [Current limitations](#current-limitations)
 * [Similar programs](#similar-programs)
 * [How to build and debug](#how-to-build-and-debug)
+
+## Changelog
+
+You can find recent changes in the file [CHANGELOG.md](https://github.com/ChristianGalla/AutoStartConfirm/blob/master/CHANGELOG.md).
+ 
 
 ## Installation
 
@@ -111,7 +117,7 @@ that was used as reference to determine where Auto Start Confirm should look for
 
 ## How to build and debug
 
-This program was created Visual Studio.
+This program was created in Visual Studio.
 
 There are some NuGet dependencies that must be installed before it can be compiled.
 
