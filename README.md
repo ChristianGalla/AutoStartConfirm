@@ -11,12 +11,23 @@ Therefore, this program monitors whether a program wants to start automatically 
 
 ## Table of contents
 
+* [Installation](#installation)
 * [User documentation](#user-documentation)
 * [Usage warning](#usage-warning)
 * [State of development](#state-of-development)
 * [Current limitations](#current-limitations)
 * [Similar programs](#similar-programs)
 * [How to build and debug](#how-to-build-and-debug)
+
+## Installation
+
+The installer of the latest version can be downloaded from the [release page](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest).
+
+Also, this program is available via [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/):
+
+```powershell
+winget install ChristianGalla.AutoStartConfirm
+```
 
 ## User documentation
 
@@ -100,8 +111,8 @@ that was used as reference to determine where Auto Start Confirm should look for
 
 ## How to build and debug
 
-This program was created using Visual Studio 2019.
+This program was created Visual Studio.
 
 There are some NuGet dependencies that must be installed before it can be compiled.
 
-The installer is build using [WiX Toolset build tools](https://wixtoolset.org/releases/) and the WiX Toolset Visual Studio 2019 Extension.
+The installer is build using [WiX Toolset build tools](https://wixtoolset.org/releases/) and the WiX Toolset Visual Studio Extension.
