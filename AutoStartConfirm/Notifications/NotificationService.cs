@@ -1,16 +1,9 @@
 ﻿using AutoStartConfirm.Models;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 
-namespace AutoStartConfirm.Notifications {
+namespace AutoStartConfirm.Notifications
+{
     public class NotificationService : INotificationService {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -103,6 +96,28 @@ namespace AutoStartConfirm.Notifications {
                 var err = new Exception("Failed to show disabled auto start notification", e);
                 Logger.Error(err);
             }
+        }
+
+        public void ShowNewVersionNotification(string newVersion, string currentVersion)
+        {
+            try
+            {
+                Logger.Trace("ShowNewVersionNotification called for {@newVersion}", newVersion);
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewUpdate")
+                    .AddText("New version available", AdaptiveTextStyle.Title)
+                    .AddText($"New version: {newVersion}")
+                    .AddText($"Current version: {currentVersion}")
+                    .AddButton("Show", ToastActivationType.Background, new ToastArguments().Add("action", "viewUpdate").ToString())
+                    .Show();
+                Logger.Trace("ShowNewVersionNotification finished");
+            }
+            catch (Exception e)
+            {
+                var err = new Exception("Failed to show disabled auto start notification", e);
+                Logger.Error(err);
+            }
+
         }
     }
 }

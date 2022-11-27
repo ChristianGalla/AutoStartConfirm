@@ -1,10 +1,10 @@
 ﻿using AutoStartConfirm.Models;
-using AutoStartConfirm.Connectors;
 using System;
 using System.IO;
 using System.Windows;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors
+{
     public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor {
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();

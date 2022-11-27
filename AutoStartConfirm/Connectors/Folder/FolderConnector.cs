@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using AutoStartConfirm.Models;
-using Microsoft.Win32;
-using System.Windows;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows.Input;
 using System.IO;
-using AutoStartConfirm.Exceptions;
 
-namespace AutoStartConfirm.Connectors.Folder {
+namespace AutoStartConfirm.Connectors.Folder
+{
     public abstract class FolderConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();

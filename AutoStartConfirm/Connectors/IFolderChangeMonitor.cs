@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
-using AutoStartConfirm.Connectors;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors
+{
     public interface IFolderChangeMonitor {
         string BasePath { get; set; }
         Category Category { get; set; }

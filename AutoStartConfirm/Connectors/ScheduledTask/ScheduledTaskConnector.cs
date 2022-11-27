@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using AutoStartConfirm.Models;
-using Microsoft.Win32;
-using System.Windows;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows.Input;
-using AutoStartConfirm.Exceptions;
 using Microsoft.Win32.TaskScheduler;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Concurrent;
 
-namespace AutoStartConfirm.Connectors.ScheduledTask {
+namespace AutoStartConfirm.Connectors.ScheduledTask
+{
     public class ScheduledTaskConnector : IAutoStartConnector, IDisposable {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 

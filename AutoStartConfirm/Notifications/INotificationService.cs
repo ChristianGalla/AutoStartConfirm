@@ -6,5 +6,6 @@ namespace AutoStartConfirm.Notifications {
         void ShowEnabledAutoStartEntryNotification(AutoStartEntry autostart);
         void ShowNewAutoStartEntryNotification(AutoStartEntry addedAutostart);
         void ShowRemovedAutoStartEntryNotification(AutoStartEntry removedAutostart);
+        void ShowNewVersionNotification(string newVersion, string currentVersion);
     }
 }

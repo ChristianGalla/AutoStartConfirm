@@ -4,32 +4,23 @@ using AutoStartConfirm.Models;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 using System.Diagnostics;
-using System.Reflection;
 using Windows.Foundation.Collections;
 using AutoStartConfirm.GUI;
-using System.Collections.ObjectModel;
 using AutoStartConfirm.Properties;
-using System.Collections.Specialized;
-using AutoStartConfirm.Connectors.Registry;
+using AutoStartConfirm.Update;
 
-namespace AutoStartConfirm {
+namespace AutoStartConfirm
+{
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : Application, IDisposable {
+    public partial class App : System.Windows.Application, IDisposable {
         private static MainWindow Window = null;
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -104,6 +95,24 @@ namespace AutoStartConfirm {
             }
         }
 
+        private IUpdateService updateService;
+
+        public IUpdateService UpdateService
+        {
+            get
+            {
+                if (updateService == null)
+                {
+                    updateService = new UpdateService();
+                }
+                return updateService;
+            }
+            set
+            {
+                updateService = value;
+            }
+        }
+
 
         private static App AppInstance;
 
@@ -143,6 +152,11 @@ namespace AutoStartConfirm {
                 AutoStartService.Disable += DisableHandler;
             }
             AutoStartService.StartWatcher();
+
+            if (SettingsService.CheckForUpdatesOnStart)
+            {
+                UpdateService.CheckUpdateAndShowNotification();
+            }
 
             if (!skipInitializing) {
                 InitializeComponent();
@@ -239,7 +253,7 @@ namespace AutoStartConfirm {
 
         private static AutoStartEntry LoadAutoStartFromFile(string path) {
             Logger.Trace("LoadAutoStartFromFile called");
-            using (Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+            using (Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read)) {
                 IFormatter formatter = new BinaryFormatter();
                 try {
                     var ret = (AutoStartEntry)formatter.Deserialize(stream);
@@ -369,7 +383,7 @@ namespace AutoStartConfirm {
             Logger.Trace("StartSubProcessAsAdmin called");
             string path = Path.GetTempFileName();
             try {
-                using (Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
+                using (Stream stream = new FileStream(path, System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
                     IFormatter formatter = new BinaryFormatter();
                     formatter.Serialize(stream, autoStart);
                 }
@@ -578,6 +592,11 @@ namespace AutoStartConfirm {
             });
         }
 
+        public void ViewUpdate()
+        {
+            Process.Start("https://github.com/ChristianGalla/AutoStartConfirm/releases");
+        }
+
         #region Event handlers
         protected override void OnStartup(StartupEventArgs e) {
             // Listen to notification activation
@@ -590,7 +609,7 @@ namespace AutoStartConfirm {
                 ValueSet userInput = toastArgs.UserInput;
 
                 // Need to dispatch to UI thread if performing UI operations
-                Application.Current.Dispatcher.Invoke(delegate {
+                System.Windows.Application.Current.Dispatcher.Invoke(delegate {
                     Logger.Trace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
                     switch (args["action"]) {
                         case "viewRemove":
@@ -619,6 +638,9 @@ namespace AutoStartConfirm {
                             break;
                         case "enable":
                             Enable(Guid.Parse(args["id"]));
+                            break;
+                        case "viewUpdate":
+                            ViewUpdate();
                             break;
                         case "disable":
                             Disable(Guid.Parse(args["id"]));

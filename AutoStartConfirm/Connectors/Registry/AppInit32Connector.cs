@@ -1,7 +1,7 @@
 ﻿using AutoStartConfirm.Models;
-using Microsoft.Win32;
 
-namespace AutoStartConfirm.Connectors.Registry {
+namespace AutoStartConfirm.Connectors.Registry
+{
     public class AppInit32Connector : RegistryConnector {
 
         private readonly Category category = Category.AppInit32;

@@ -1,11 +1,8 @@
 ﻿using AutoStartConfirm.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AutoStartConfirm.Connectors.Folder {
+namespace AutoStartConfirm.Connectors.Folder
+{
     public class CurrentUserStartMenuAutoStartFolderConnector : FolderConnector {
 
         private readonly Category category = Category.CurrentUserStartMenuAutoStartFolder;

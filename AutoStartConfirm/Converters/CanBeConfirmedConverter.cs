@@ -1,13 +1,10 @@
 ﻿using AutoStartConfirm.Models;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace AutoStartConfirm.Converters {
+namespace AutoStartConfirm.Converters
+{
     public class CanBeConfirmedConverter : ConverterBase, IMultiValueConverter {
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {

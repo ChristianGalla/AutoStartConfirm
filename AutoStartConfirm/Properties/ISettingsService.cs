@@ -5,7 +5,11 @@ using System.Configuration;
 
 namespace AutoStartConfirm.Properties {
     public interface ISettingsService: IDisposable {
-        StringCollection DisabledConnectors { get; }
+        StringCollection DisabledConnectors { get; set; }
+
+        bool CheckForUpdatesOnStart { get; set; }
+
+        string LastNotifiedNewVersion { get; set; }
 
         event SettingChangingEventHandler SettingChanging;
         event PropertyChangedEventHandler PropertyChanged;

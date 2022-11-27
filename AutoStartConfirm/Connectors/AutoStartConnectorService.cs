@@ -7,12 +7,10 @@ using AutoStartConfirm.Properties;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors
+{
     public class AutoStartConnectorService : IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector>, IAutoStartConnectorService {
 
         #region Attributes

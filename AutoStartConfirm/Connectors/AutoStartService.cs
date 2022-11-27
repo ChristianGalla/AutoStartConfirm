@@ -5,19 +5,17 @@ using AutoStartConfirm.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors
+{
 
     public delegate void AutoStartsChangeHandler(AutoStartEntry e);
 

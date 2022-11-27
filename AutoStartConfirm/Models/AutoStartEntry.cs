@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Windows;
 
 namespace AutoStartConfirm.Models
 {

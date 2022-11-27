@@ -1,9 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AutoStartConfirm.Connectors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FakeItEasy;
 using AutoStartConfirm.Models;
@@ -11,7 +9,8 @@ using AutoStartConfirm.Exceptions;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Connectors.Registry;
 
-namespace AutoStartConfirm.Connectors.Tests {
+namespace AutoStartConfirm.Connectors.Tests
+{
     [TestClass()]
     public class AutoStartServiceTests {
 

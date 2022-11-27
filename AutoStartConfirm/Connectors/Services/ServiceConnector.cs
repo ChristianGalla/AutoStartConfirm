@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Management;
 using System.ServiceProcess;
 using System.Threading;
-using System.Threading.Tasks;
 using AutoStartConfirm.Models;
 
-namespace AutoStartConfirm.Connectors.Services {
+namespace AutoStartConfirm.Connectors.Services
+{
     public abstract class ServiceConnector : IAutoStartConnector, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();

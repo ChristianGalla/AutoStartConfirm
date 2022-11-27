@@ -1,25 +1,21 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AutoStartConfirm;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FakeItEasy;
 using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Models;
 using AutoStartConfirm.GUI;
-using System.Collections.ObjectModel;
 using AutoStartConfirm.Properties;
+using AutoStartConfirm.Update;
 
-namespace AutoStartConfirm.Tests {
+namespace AutoStartConfirm.Tests
+{
     [TestClass()]
     public class AppTests {
         private IAutoStartService AutoStartService = A.Fake<IAutoStartService>();
-        private INotificationService NotificationServicee = A.Fake<INotificationService>();
+        private INotificationService NotificationService = A.Fake<INotificationService>();
         private IMessageService MessageService = A.Fake<IMessageService>();
         private ISettingsService SettingsService = A.Fake<ISettingsService>();
+        private IUpdateService UpdateService = A.Fake<IUpdateService>();
 
         private static App app;
 
@@ -33,10 +29,19 @@ namespace AutoStartConfirm.Tests {
             AddFakes(app);
         }
 
-        private void AddFakes(App app) {
+        private void AddFakes(App app)
+        {
+            Fake.ClearRecordedCalls(AutoStartService);
+            Fake.ClearRecordedCalls(NotificationService);
+            Fake.ClearRecordedCalls(MessageService);
+            Fake.ClearRecordedCalls(SettingsService);
+            Fake.ClearRecordedCalls(UpdateService);
+
             app.AutoStartService = AutoStartService;
-            app.NotificationService = NotificationServicee;
+            app.NotificationService = NotificationService;
             app.MessageService = MessageService;
+            app.SettingsService = SettingsService;
+            app.UpdateService = UpdateService;
         }
 
         [TestCleanup]
@@ -60,6 +65,26 @@ namespace AutoStartConfirm.Tests {
 
             A.CallTo(() => AutoStartService.LoadCurrentAutoStarts()).MustHaveHappened();
             A.CallTo(() => AutoStartService.StartWatcher()).MustHaveHappened();
+        }
+
+        [TestMethod()]
+        public void Start_ChecksForUpdatesIfEnabled()
+        {
+            A.CallTo(() => SettingsService.CheckForUpdatesOnStart).Returns(true);
+
+            app.Start(true);
+
+            A.CallTo(() => UpdateService.CheckUpdateAndShowNotification()).MustHaveHappened();
+        }
+
+        [TestMethod()]
+        public void Start_ChecksNotForUpdatesIfDisabled()
+        {
+            A.CallTo(() => SettingsService.CheckForUpdatesOnStart).Returns(false);
+
+            app.Start(true);
+
+            A.CallTo(() => UpdateService.CheckUpdateAndShowNotification()).MustNotHaveHappened();
         }
 
         [TestMethod()]

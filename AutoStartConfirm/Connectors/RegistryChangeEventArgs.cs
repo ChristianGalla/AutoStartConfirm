@@ -1,5 +1,4 @@
-﻿using AutoStartConfirm.Connectors;
-using System;
+﻿using System;
 
 namespace AutoStartConfirm.Connectors
 {

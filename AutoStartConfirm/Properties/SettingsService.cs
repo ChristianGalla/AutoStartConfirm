@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AutoStartConfirm.Properties {
+namespace AutoStartConfirm.Properties
+{
     public class SettingsService : ISettingsService, IDisposable {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -32,7 +29,42 @@ namespace AutoStartConfirm.Properties {
             Logger.Debug("Ensured configuration");
         }
 
-        public StringCollection DisabledConnectors => Settings.Default.DisabledConnectors;
+        public StringCollection DisabledConnectors
+        {
+            get {
+                return Settings.Default.DisabledConnectors;
+            }
+            set
+            {
+                Settings.Default.DisabledConnectors = value;
+                Save();
+            }
+        }
+
+        public bool CheckForUpdatesOnStart
+        {
+            get
+            {
+                return Settings.Default.CheckForUpdatesOnStart;
+            }
+            set
+            {
+                Settings.Default.CheckForUpdatesOnStart = value;
+                Save();
+            }
+        }
+
+        public string LastNotifiedNewVersion {
+            get
+            {
+                return Settings.Default.LastNotifiedNewVersion;
+            }
+            set
+            {
+                Settings.Default.LastNotifiedNewVersion = value;
+                Save();
+            }
+        }
 
 
         /// <summary>
