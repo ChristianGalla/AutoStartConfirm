@@ -1,6 +1,9 @@
 # Auto Start Confirm
 
-[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ChristianGalla/AutoStartConfirm?label=Latest%20release%20version)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
+[![GitHub Release Date](https://img.shields.io/github/release-date/ChristianGalla/AutoStartConfirm?label=Latest%20release%20date)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
+[![GitHub](https://img.shields.io/github/license/ChristianGalla/AutoStartConfirm?label=License)](https://github.com/ChristianGalla/AutoStartConfirm/blob/master/LICENSE)
+[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml)
 
 More and more programs want to start automatically when Windows starts, or a user logs on.
 
