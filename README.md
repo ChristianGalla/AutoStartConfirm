@@ -1,6 +1,9 @@
 # Auto Start Confirm
 
-[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/main.yml)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ChristianGalla/AutoStartConfirm?label=Latest%20release%20version)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
+[![GitHub Release Date](https://img.shields.io/github/release-date/ChristianGalla/AutoStartConfirm?label=Latest%20release%20date)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
+[![GitHub](https://img.shields.io/github/license/ChristianGalla/AutoStartConfirm?label=License)](https://github.com/ChristianGalla/AutoStartConfirm/blob/master/LICENSE)
+[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml)
 
 More and more programs want to start automatically when Windows starts, or a user logs on.
 
@@ -11,6 +14,7 @@ Therefore, this program monitors whether a program wants to start automatically 
 
 ## Table of contents
 
+* [Changelog](#changelog)
 * [Installation](#installation)
 * [User documentation](#user-documentation)
 * [Usage warning](#usage-warning)
@@ -18,6 +22,11 @@ Therefore, this program monitors whether a program wants to start automatically 
 * [Current limitations](#current-limitations)
 * [Similar programs](#similar-programs)
 * [How to build and debug](#how-to-build-and-debug)
+
+## Changelog
+
+You can find recent changes in the file [CHANGELOG.md](https://github.com/ChristianGalla/AutoStartConfirm/blob/master/CHANGELOG.md).
+ 
 
 ## Installation
 
@@ -111,7 +120,7 @@ that was used as reference to determine where Auto Start Confirm should look for
 
 ## How to build and debug
 
-This program was created Visual Studio.
+This program was created in Visual Studio.
 
 There are some NuGet dependencies that must be installed before it can be compiled.
 
