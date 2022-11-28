@@ -14,6 +14,7 @@ using Windows.Foundation.Collections;
 using AutoStartConfirm.GUI;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
+using System.ServiceModel.Channels;
 
 namespace AutoStartConfirm
 {
@@ -597,6 +598,17 @@ namespace AutoStartConfirm
             Process.Start("https://github.com/ChristianGalla/AutoStartConfirm/releases");
         }
 
+        public void InstallUpdate(string msiUrl = null)
+        {
+            if (msiUrl == null || msiUrl.Length == 0)
+            {
+                var err = new Exception("msi URL missing");
+                Logger.Error(err);
+                return;
+            }
+            Process.Start("Msiexec.exe", $"/i \"{msiUrl}\" /qb+");
+        }
+
         #region Event handlers
         protected override void OnStartup(StartupEventArgs e) {
             // Listen to notification activation
@@ -644,6 +656,9 @@ namespace AutoStartConfirm
                             break;
                         case "disable":
                             Disable(Guid.Parse(args["id"]));
+                            break;
+                        case "installUpdate":
+                            InstallUpdate(args["msiUrl"]);
                             break;
                         default:
                             Logger.Trace("Unknown action {Action}", args["action"]);

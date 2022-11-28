@@ -98,18 +98,22 @@ namespace AutoStartConfirm.Notifications
             }
         }
 
-        public void ShowNewVersionNotification(string newVersion, string currentVersion)
+        public void ShowNewVersionNotification(string newVersion, string currentVersion, string msiUrl = null)
         {
             try
             {
                 Logger.Trace("ShowNewVersionNotification called for {@newVersion}", newVersion);
-                new ToastContentBuilder()
+                var toast = new ToastContentBuilder()
                     .AddArgument("action", "viewUpdate")
                     .AddText("New version available", AdaptiveTextStyle.Title)
                     .AddText($"New version: {newVersion}")
                     .AddText($"Current version: {currentVersion}")
-                    .AddButton("Show", ToastActivationType.Background, new ToastArguments().Add("action", "viewUpdate").ToString())
-                    .Show();
+                    .AddButton("Show", ToastActivationType.Background, new ToastArguments().Add("action", "viewUpdate").ToString());
+                if (msiUrl != null && msiUrl.Length > 0)
+                {
+                    toast = toast.AddButton("Install", ToastActivationType.Background, new ToastArguments().Add("action", "installUpdate").Add("msiUrl", msiUrl).ToString());
+                }
+                toast.Show();
                 Logger.Trace("ShowNewVersionNotification finished");
             }
             catch (Exception e)
