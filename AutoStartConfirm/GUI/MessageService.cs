@@ -9,7 +9,7 @@ namespace AutoStartConfirm.GUI
         public MainWindow Window {
             get {
                 if (window == null) {
-                    window = (MainWindow)Application.Current.MainWindow;
+                    window = Application.Current.MainWindow as MainWindow;
                 }
                 return window;
             }
