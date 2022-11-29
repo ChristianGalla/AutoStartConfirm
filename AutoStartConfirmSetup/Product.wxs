@@ -2,213 +2,219 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Id="*" Name="Auto Start Confirm" Language="1033" Version="!(bind.FileVersion.MainExecutable)" Manufacturer="Christian Galla" UpgradeCode="9795b8c4-0f77-4094-a3e4-43a914b674c2">
 		<Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Description="Auto Start Confirm Installer" Manufacturer="Christian Galla" Platform="x64" />
-    
-    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
-    
+
+		<WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <Media Id="1" Cabinet="setup.cab" EmbedCab="yes" />
+		<Media Id="1" Cabinet="setup.cab" EmbedCab="yes" />
 
 		<Feature Id="Complete" Title="Auto Start Confirm" Description='The complete package.' Level="1" Display='expand' ConfigurableDirectory='APPLICATIONFOLDER'>
-      <Feature Id='MainProgram' Title='Program' Description='The main executable. Required.' Level='1' Absent='disallow'>
-        <ComponentGroupRef Id="ProductComponents" />
-        <ComponentGroupRef Id="ProductAssetComponents" />
-        <ComponentRef Id="ApplicationDesktopShortcut" />
-        <ComponentRef Id="ApplicationStartMenuShortcut" />
-      </Feature>
+			<Feature Id='MainProgram' Title='Program' Description='The main executable. Required.' Level='1' Absent='disallow'>
+				<ComponentGroupRef Id="ProductComponents" />
+				<ComponentGroupRef Id="ProductAssetComponents" />
+				<ComponentRef Id="ApplicationDesktopShortcut" />
+				<ComponentRef Id="ApplicationStartMenuShortcut" />
+			</Feature>
 		</Feature>
 
-    <Icon Id="icon.ico" SourceFile="$(var.AutoStartConfirm.ProjectDir)Assets\Icon.ico"/>
-    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
-    
-    <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+		<Icon Id="icon.ico" SourceFile="$(var.AutoStartConfirm.ProjectDir)Assets\Icon.ico"/>
+		<Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
-    <Property Id="INSTALLSHORTCUT" Secure="yes" />
+		<Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
 
-    <Property Id="START_AFTER_INSTALL" Value="1"/>
-    
-	  <Directory Id="TARGETDIR" Name="SourceDir">
-		  <Directory Id="ProgramFiles64Folder">
-			  <Directory Id="APPLICATIONFOLDER" Name="Auto Start Confirm">
-          <Directory Id="ASSETS" Name="Assets" />
-        </Directory>
-		  </Directory>
-      <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="Auto Start Confirm"/>
-      </Directory>
-      <Directory Id="DesktopFolder" Name="Desktop" />
-    </Directory>
+		<Property Id="INSTALLSHORTCUT" Secure="yes" />
+
+		<Property Id="START_AFTER_INSTALL" Value="1"/>
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="APPLICATIONFOLDER" Name="Auto Start Confirm">
+					<Directory Id="ASSETS" Name="Assets" />
+				</Directory>
+			</Directory>
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="Auto Start Confirm"/>
+			</Directory>
+			<Directory Id="DesktopFolder" Name="Desktop" />
+		</Directory>
 
 
 
-    <UIRef Id="CustomUI" />
-    <UIRef Id="WixUI_Common" />
+		<UIRef Id="CustomUI" />
+		<UIRef Id="WixUI_Common" />
 
-    <Property Id="WixShellExecTarget" Value="[#MainExecutable]" />
-    <CustomAction Id="LaunchApplication"
-        BinaryKey="WixCA"
-        DllEntry="WixShellExec"
-        Impersonate="yes" />
+		<Property Id="WixShellExecTarget" Value="[#MainExecutable]" />
+		<CustomAction Id="LaunchApplication"
+			BinaryKey="WixCA"
+			DllEntry="WixShellExec"
+			Impersonate="yes" />
 	</Product>
 
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="APPLICATIONFOLDER">
 			<Component Id="MainExecutable" Guid="{5DA0A1A5-9166-4DF6-9AEB-B527376A62D3}">
-        <File Id="MainExecutable" Source="$(var.AutoStartConfirm.TargetPath)" Name="$(var.AutoStartConfirm.TargetFileName)" KeyPath='yes' />
+				<File Id="MainExecutable" Source="$(var.AutoStartConfirm.TargetPath)" Name="$(var.AutoStartConfirm.TargetFileName)" KeyPath='yes' />
 			</Component>
-      <Component Id="Config" Guid="{6AEBE607-EC78-4086-A432-A2D31C03A4D6}">
-        <File Source="$(var.AutoStartConfirm.TargetPath).config" />
-      </Component>
-      <Component Id="Hardcodet.NotifyIcon.Wpf.dll" Guid="{75BECCF7-A8D0-407B-A50E-96242B5AF87A}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Hardcodet.NotifyIcon.Wpf.dll" />
-      </Component>
-      <Component Id="Nlog.config" Guid="{4095BCD0-581B-43C6-80AC-7EFCB2E62788}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Nlog.sample.config" Name="Nlog.config" />
-      </Component>
-      <Component Id="NLog.dll" Guid="{579EB525-E1E7-4F7D-BD46-E07C34DEF849}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)NLog.dll" />
-      </Component>
-      <Component Id="Microsoft.Toolkit.Uwp.Notifications.dll" Guid="{CAFA0E35-A8DC-4748-896B-F81DDFFAB59B}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Toolkit.Uwp.Notifications.dll" />
-      </Component>
-      <Component Id="System.ValueTuple.dll" Guid="{9E6D9472-4104-4055-8973-41199D6E2AC5}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)System.ValueTuple.dll" />
-      </Component>
-      <Component Id="QueryString.NETCore.dll" Guid="{9372D359-7A01-4C36-AA47-F9280A63748C}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)QueryString.NETCore.dll" />
-      </Component>
-      <Component Id="Microsoft.Win32.TaskScheduler.dll" Guid="{C3A85824-6BCA-4ECD-8E33-7EBB55A077DA}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Win32.TaskScheduler.dll" />
-      </Component>
-    </ComponentGroup>
-    
-    <ComponentGroup Id="ProductAssetComponents" Directory="ASSETS">
-      <Component Id="AddIcon.png" Guid="{9178B764-D4C8-467D-BC85-796E525E543C}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Assets\AddIcon.png" />
-      </Component>
-      <Component Id="RemoveIcon.png" Guid="{F64E7D3D-EFEA-4FAB-AC4D-EBB39E02E818}">
-        <File Source="$(var.AutoStartConfirm.TargetDir)Assets\RemoveIcon.png" />
-      </Component>
-    </ComponentGroup>
+			<Component Id="Config" Guid="{6AEBE607-EC78-4086-A432-A2D31C03A4D6}">
+				<File Source="$(var.AutoStartConfirm.TargetPath).config" />
+			</Component>
+			<Component Id="Hardcodet.NotifyIcon.Wpf.dll" Guid="{75BECCF7-A8D0-407B-A50E-96242B5AF87A}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Hardcodet.NotifyIcon.Wpf.dll" />
+			</Component>
+			<Component Id="Nlog.config" Guid="{4095BCD0-581B-43C6-80AC-7EFCB2E62788}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Nlog.sample.config" Name="Nlog.config" />
+			</Component>
+			<Component Id="NLog.dll" Guid="{579EB525-E1E7-4F7D-BD46-E07C34DEF849}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)NLog.dll" />
+			</Component>
+			<Component Id="Microsoft.Toolkit.Uwp.Notifications.dll" Guid="{CAFA0E35-A8DC-4748-896B-F81DDFFAB59B}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Toolkit.Uwp.Notifications.dll" />
+			</Component>
+			<Component Id="System.ValueTuple.dll" Guid="{9E6D9472-4104-4055-8973-41199D6E2AC5}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)System.ValueTuple.dll" />
+			</Component>
+			<Component Id="QueryString.NETCore.dll" Guid="{9372D359-7A01-4C36-AA47-F9280A63748C}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)QueryString.NETCore.dll" />
+			</Component>
+			<Component Id="Microsoft.Win32.TaskScheduler.dll" Guid="{C3A85824-6BCA-4ECD-8E33-7EBB55A077DA}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Win32.TaskScheduler.dll" />
+			</Component>
+			<Component Id="Octokit.dll" Guid="{F4169EE7-36FE-4C37-9F77-34A98D1B2509}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)\Octokit.dll" />
+			</Component>
+			<Component Id="Semver.dll" Guid="{AAD96699-463E-4FC2-92D6-1B79A3AD1EFA}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)\Semver.dll" />
+			</Component>
+		</ComponentGroup>
 
-    <DirectoryRef Id="ApplicationProgramsFolder">
-      <Component Id="ApplicationStartMenuShortcut" Guid="{CB1D72D9-27EF-4798-AE69-4FDC6BCCECBD}">
-        <Shortcut Id="ApplicationStartMenuShortcut"
-                  Name="Auto Start Confirm"
-                  Target="[#MainExecutable]"
-                  WorkingDirectory="APPLICATIONFOLDER">
-          <!--AUMID-->
-          <ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
-          <!--COM CLSID-->
-          <ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
-        </Shortcut>
-        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="StartMenuShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
-      </Component>
-    </DirectoryRef>
-    
-    <DirectoryRef Id="DesktopFolder">
-      <Component Id="ApplicationDesktopShortcut" Guid="{84E64D2C-AC8D-4B67-9DA0-8E3E2EFCE352}">
-        <Condition>INSTALLSHORTCUT</Condition>
-        <Shortcut Id="ApplicationDesktopShortcut"
-                  Name="Auto Start Confirm"
-                  Target="[#MainExecutable]"
-                  WorkingDirectory="APPLICATIONFOLDER">
-          <!--AUMID-->
-          <ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
-          <!--COM CLSID-->
-          <ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
-        </Shortcut>
-        <RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="DesktopShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
-      </Component>
-    </DirectoryRef>
-  </Fragment>
+		<ComponentGroup Id="ProductAssetComponents" Directory="ASSETS">
+			<Component Id="AddIcon.png" Guid="{9178B764-D4C8-467D-BC85-796E525E543C}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Assets\AddIcon.png" />
+			</Component>
+			<Component Id="RemoveIcon.png" Guid="{F64E7D3D-EFEA-4FAB-AC4D-EBB39E02E818}">
+				<File Source="$(var.AutoStartConfirm.TargetDir)Assets\RemoveIcon.png" />
+			</Component>
+		</ComponentGroup>
 
-  <Fragment>
-    <UI Id="CustomUI">
-      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
-      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ApplicationStartMenuShortcut" Guid="{CB1D72D9-27EF-4798-AE69-4FDC6BCCECBD}">
+				<Shortcut Id="ApplicationStartMenuShortcut"
+						  Name="Auto Start Confirm"
+						  Target="[#MainExecutable]"
+						  WorkingDirectory="APPLICATIONFOLDER">
+					<!--AUMID-->
+					<ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
+					<!--COM CLSID-->
+					<ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
+				</Shortcut>
+				<RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="StartMenuShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
 
-      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
-      <Property Id="WixUI_Mode" Value="InstallDir" />
+		<DirectoryRef Id="DesktopFolder">
+			<Component Id="ApplicationDesktopShortcut" Guid="{84E64D2C-AC8D-4B67-9DA0-8E3E2EFCE352}">
+				<Condition>INSTALLSHORTCUT</Condition>
+				<Shortcut Id="ApplicationDesktopShortcut"
+						  Name="Auto Start Confirm"
+						  Target="[#MainExecutable]"
+						  WorkingDirectory="APPLICATIONFOLDER">
+					<!--AUMID-->
+					<ShortcutProperty Key="System.AppUserModel.ID" Value="ChristianGalla.AutoStartConfirm"/>
+					<!--COM CLSID-->
+					<ShortcutProperty Key="System.AppUserModel.ToastActivatorCLSID" Value="{DF651CDF-EC4A-4C98-9419-DE2709B00863}"/>
+				</Shortcut>
+				<RegistryValue Root="HKCU" Key="Software\Christian Galla\Auto Start Confirm" Name="DesktopShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
 
-      <DialogRef Id="BrowseDlg" />
-      <DialogRef Id="DiskCostDlg" />
-      <DialogRef Id="ErrorDlg" />
-      <DialogRef Id="FatalError" />
-      <DialogRef Id="FilesInUse" />
-      <DialogRef Id="MsiRMFilesInUse" />
-      <DialogRef Id="PrepareDlg" />
-      <DialogRef Id="ProgressDlg" />
-      <DialogRef Id="ResumeDlg" />
-      <DialogRef Id="UserExit" />
+	<Fragment>
+		<UI Id="CustomUI">
+			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
 
-      <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
-      <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+			<Property Id="WixUI_Mode" Value="InstallDir" />
 
-      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
-      <Publish Dialog="ExitDialog"
-            Control="Finish"
-            Event="DoAction"
-            Value="LaunchApplication">START_AFTER_INSTALL = 1 and NOT Installed</Publish>
+			<DialogRef Id="BrowseDlg" />
+			<DialogRef Id="DiskCostDlg" />
+			<DialogRef Id="ErrorDlg" />
+			<DialogRef Id="FatalError" />
+			<DialogRef Id="FilesInUse" />
+			<DialogRef Id="MsiRMFilesInUse" />
+			<DialogRef Id="PrepareDlg" />
+			<DialogRef Id="ProgressDlg" />
+			<DialogRef Id="ResumeDlg" />
+			<DialogRef Id="UserExit" />
 
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+			<Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+			<Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
 
-      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">LicenseAccepted = "1"</Publish>
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+			<Publish Dialog="ExitDialog"
+				  Control="Finish"
+				  Event="DoAction"
+				  Value="LaunchApplication">START_AFTER_INSTALL = 1</Publish>
 
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="AdditionalSettingsDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
-      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
 
-      <Publish Dialog="AdditionalSettingsDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
-      <Publish Dialog="AdditionalSettingsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-      
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="AdditionalSettingsDlg" Order="1">NOT Installed</Publish>
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+			<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+			<Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">LicenseAccepted = "1"</Publish>
 
-      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="AdditionalSettingsDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
 
-      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+			<Publish Dialog="AdditionalSettingsDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+			<Publish Dialog="AdditionalSettingsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
 
-      <Property Id="ARPNOMODIFY" Value="1" />
-    </UI>
-    
-    <UI>
-      <Dialog Id="AdditionalSettingsDlg" Width="370" Height="270" Title="[ProductName] Setup">
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="AdditionalSettingsDlg" Order="1">NOT Installed</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
 
-        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configure additional settings." />
-        <Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Additional settings" />
-        
-        <Control Id="InstallShortcutCheckbox" Type="CheckBox"
-                 X="20" Y="65" Width="300" Height="17"
-                 Property="INSTALLSHORTCUT" CheckBoxValue="1"
-                 Text="Create desktop shortcut for all users" />
-        <Control Id="StartAfterInstallCheckbox" Type="CheckBox"
-                 X="20" Y="85" Width="300" Height="17"
-                 Property="START_AFTER_INSTALL" CheckBoxValue="1"
-                 Text="Start Auto Start Confirm after installation (to System Tray)" />
-        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
-        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
-        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
-          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
-        </Control>
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+
+			<Property Id="ARPNOMODIFY" Value="1" />
+		</UI>
+
+		<UI>
+			<Dialog Id="AdditionalSettingsDlg" Width="370" Height="270" Title="[ProductName] Setup">
+
+				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
+				<Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+				<Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configure additional settings." />
+				<Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Additional settings" />
+
+				<Control Id="InstallShortcutCheckbox" Type="CheckBox"
+						 X="20" Y="65" Width="300" Height="17"
+						 Property="INSTALLSHORTCUT" CheckBoxValue="1"
+						 Text="Create desktop shortcut for all users" />
+				<Control Id="StartAfterInstallCheckbox" Type="CheckBox"
+						 X="20" Y="85" Width="300" Height="17"
+						 Property="START_AFTER_INSTALL" CheckBoxValue="1"
+						 Text="Start Auto Start Confirm after installation (to System Tray)" />
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+				</Control>
 
 
-      </Dialog>
-    </UI>
-    
-  </Fragment>
+			</Dialog>
+		</UI>
+
+	</Fragment>
 
 </Wix>

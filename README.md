@@ -16,7 +16,7 @@ Therefore, this program monitors whether a program wants to start automatically 
 
 * [Changelog](#changelog)
 * [Installation](#installation)
-* [User documentation](#user-documentation)
+* [Usage documentation](#usage-documentation)
 * [Usage warning](#usage-warning)
 * [State of development](#state-of-development)
 * [Current limitations](#current-limitations)
@@ -38,7 +38,7 @@ Also, this program is available via [winget](https://learn.microsoft.com/en-us/w
 winget install ChristianGalla.AutoStartConfirm
 ```
 
-## User documentation
+## Usage documentation
 
 The program starts in the background and can be accessed using its icon in the notification area
 (usually in the bottom right corner of the taskbar).
@@ -70,8 +70,6 @@ Also, for example a blocked update service may lead to insecure environments bec
 Therefore, auto starts should only be blocked if there is no negative impact on the affected programs.
 
 ## State of development
-
-The core functionality of Auto Start Confirm is implemented but needs some testing and polishing.
 
 There are many locations Windows provides for programs to start automatically.
 Currently only the following locations are monitored by Auto Start Confirm.
