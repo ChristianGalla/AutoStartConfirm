@@ -8,13 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Nothing
+
+
+## [1.1.8368] (2022-11-29)
+
 ### Added 
 - Connector disabling
 - Busy indicator
 - Update check
-
-### Changed
-- Button texts to images
+- Button icons
 
 
 ## [1.0.7958] (2021-10-15)
@@ -37,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base functionality
 
-[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.0.7958...HEAD
+[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.1.8368...HEAD
+[1.1.8368]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.0...v1.1.8368
 [1.0.7958]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v0.1.0...v1.0.7958
 [0.1.0]: https://github.com/ChristianGalla/AutoStartConfirm/releases/tag/v0.1.0
