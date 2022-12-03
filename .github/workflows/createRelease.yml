@@ -1,0 +1,26 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/ci.yml
+  
+  create_release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: AutoStartConfirmSetup
+          
+      - name: Create tag and release
+        uses: jasondavis303/tag-and-release-and-upload@v1.2.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}          
+          version: v${{ needs.build.outputs.version_number }}
+          assets: '[ "AutoStartConfirmSetup.msi" ]'
+          overwrite: false    
+  
