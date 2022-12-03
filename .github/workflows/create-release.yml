@@ -20,8 +20,8 @@ jobs:
           name: AutoStartConfirmSetup
           
       - name: Create tag and release
-        with:
-          uses: dothq/tag-and-release-and-upload@v1.0.2
+        uses: dothq/tag-and-release-and-upload@v1.0.2
+        with:          
           github-token: ${{ secrets.GITHUB_TOKEN }}          
           version: v${{ needs.build.outputs.version_number }}
           assets: '[ "AutoStartConfirmSetup.msi" ]'
