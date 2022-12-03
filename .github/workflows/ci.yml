@@ -29,7 +29,7 @@ jobs:
       version_number: ${{ steps.get-version-number.outputs.version_number }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
@@ -40,7 +40,7 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1
       
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Restore NuGet cache
       with:
         path: ~/.nuget/packages
