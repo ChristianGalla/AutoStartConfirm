@@ -57,7 +57,7 @@ jobs:
     - name: Get version number
       id: get-version-number
       working-directory: .\AutoStartConfirmTests\bin\x64\Release
-      run: (Get-Item .\AutoStartConfirm.exe | Select-Object -ExpandProperty VersionInfo).FileVersion >> $env:GITHUB_OUTPUT
+      run: $env:GITHUB_OUTPUT = (Get-Item .\AutoStartConfirm.exe | Select-Object -ExpandProperty VersionInfo).FileVersion
       shell: pwsh
       
     - name: Test solution
