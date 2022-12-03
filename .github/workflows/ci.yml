@@ -1,10 +1,11 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Build & Test
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
+  workflow_call:
+    outputs:
+      version_number:
+          description: "Build version number"
+          value: ${{ jobs.build.outputs.version_number }}
   push:
     branches: [ master ]
     paths:
@@ -20,16 +21,14 @@ on:
       - 'AutoStartConfirmTests/**'
       - '.github/workflows/**'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: windows-latest
+    
+    outputs:
+      version_number: ${{ steps.get-version-number.outputs.version_number }}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     
     - name: Setup MSBuild
@@ -54,6 +53,12 @@ jobs:
     
     - name: Build solution
       run: msbuild AutoStartConfirm.sln -property:Configuration=Release
+      
+    - name: Get version number
+      id: get-version-number
+      working-directory: .\AutoStartConfirmTests\bin\x64\Release
+      run: (Get-Item .\AutoStartConfirm.exe | Select-Object -ExpandProperty VersionInfo).FileVersion >> $env:GITHUB_OUTPUT
+      shell: pwsh
       
     - name: Test solution
       working-directory: .\AutoStartConfirmTests\bin\x64\Release
