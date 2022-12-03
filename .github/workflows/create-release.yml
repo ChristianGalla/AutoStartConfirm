@@ -19,6 +19,9 @@ jobs:
         with:
           name: AutoStartConfirmSetup
           
+      - name: Display structure of downloaded files
+        run: ls -R
+          
       - name: Create tag and release
         uses: dothq/tag-and-release-and-upload@v1.0.2
         with:          
