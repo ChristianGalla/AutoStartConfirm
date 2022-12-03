@@ -11,13 +11,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: version
+        run: echo new version ${{ needs.build.outputs.version_number }}
+        
       - name: Download build artifact
         uses: actions/download-artifact@v3.0.1
         with:
           name: AutoStartConfirmSetup
           
       - name: Create tag and release
-        uses: dothq/tag-and-release-and-upload@v1.0.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}          
           version: v${{ needs.build.outputs.version_number }}
