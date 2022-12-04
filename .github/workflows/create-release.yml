@@ -26,7 +26,7 @@ jobs:
         run: ls -R
           
       - name: Create tag and release
-        run: gh release create v${{needs.build.outputs.version_number}} -d -p --title ${{needs.build.outputs.version_number}} AutoStartConfirmSetup.msi
+        run: gh release create v${{needs.build.outputs.version_number}} -d -p --title ${{needs.build.outputs.version_number}} --generate-notes AutoStartConfirmSetup.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
