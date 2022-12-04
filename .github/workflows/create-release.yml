@@ -11,8 +11,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: version
+      - name: Version
         run: echo new version ${{ needs.build.outputs.version_number }}
+        
+      - name: Checkout
+        uses: actions/checkout@v3
         
       - name: Download build artifact
         uses: actions/download-artifact@v3.0.1
