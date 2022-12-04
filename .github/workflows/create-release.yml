@@ -23,10 +23,15 @@ jobs:
         run: ls -R
           
       - name: Create tag and release
-        uses: dothq/tag-and-release-and-upload@v1.0.2
-        with:          
-          github-token: ${{ secrets.GITHUB_TOKEN }}          
-          version: v${{ needs.build.outputs.version_number }}
-          assets: '[ "AutoStartConfirmSetup.msi" ]'
-          overwrite: false    
+        run: gh release create v${{needs.build.outputs.version_number}} -d -p --title ${{needs.build.outputs.version_number}} AutoStartConfirmSetup.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      
+       # uses: dothq/tag-and-release-and-upload@v1.0.2
+       # with:          
+       #   github-token: ${{ secrets.GITHUB_TOKEN }}          
+       #   version: v${{ needs.build.outputs.version_number }}
+       #   assets: '[ "AutoStartConfirmSetup.msi" ]'
+       #   overwrite: false    
   
