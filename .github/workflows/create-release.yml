@@ -22,15 +22,10 @@ jobs:
         with:
           name: AutoStartConfirmSetup
           
-      - name: Display structure of downloaded files
-        run: ls -R
-          
       - name: Create tag and release
         run: |
           $v = "${{needs.build.outputs.version_number}}" -split "\."
           $semver = ($v | Select-Object -SkipLast 1) -join "."
-          Write-Host $semver
-          Write-Host "gh release create \"v${{needs.build.outputs.version_number}}\" -d -p --title \"$semver\" --generate-notes AutoStartConfirmSetup.msi"
           gh release create "v${{needs.build.outputs.version_number}}" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
