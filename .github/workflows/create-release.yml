@@ -26,7 +26,10 @@ jobs:
         run: ls -R
           
       - name: Create tag and release
-        # todo: change to semver (Major.Minor.Patch)
-        run: gh release create v${{needs.build.outputs.version_number}} -d -p --title ${{needs.build.outputs.version_number}} --generate-notes AutoStartConfirmSetup.msi
+        run: |
+          $v = ${{needs.build.outputs.version_number}} -split "\."
+          $semver = ($v | Select-Object -SkipLast 1) -join "."
+          gh release create "v$semver" -d -p --title $semver --generate-notes AutoStartConfirmSetup.msi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
