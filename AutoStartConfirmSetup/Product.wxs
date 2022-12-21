@@ -73,9 +73,6 @@
 			<Component Id="System.ValueTuple.dll" Guid="{9E6D9472-4104-4055-8973-41199D6E2AC5}">
 				<File Source="$(var.AutoStartConfirm.TargetDir)System.ValueTuple.dll" />
 			</Component>
-			<Component Id="QueryString.NETCore.dll" Guid="{9372D359-7A01-4C36-AA47-F9280A63748C}">
-				<File Source="$(var.AutoStartConfirm.TargetDir)QueryString.NETCore.dll" />
-			</Component>
 			<Component Id="Microsoft.Win32.TaskScheduler.dll" Guid="{C3A85824-6BCA-4ECD-8E33-7EBB55A077DA}">
 				<File Source="$(var.AutoStartConfirm.TargetDir)Microsoft.Win32.TaskScheduler.dll" />
 			</Component>
