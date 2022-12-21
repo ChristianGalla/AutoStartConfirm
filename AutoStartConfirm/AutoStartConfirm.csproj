@@ -24,7 +24,11 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <Platforms>x64</Platforms>
 	<EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
-	<StartupObject >AutoStartConfirm.App</StartupObject >
+	<StartupObject>AutoStartConfirm.App</StartupObject>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
