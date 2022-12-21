@@ -1,19 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}</ProjectGuid>
+    <TargetFramework>net6.0-windows10.0.19041</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>AutoStartConfirm</RootNamespace>
-    <AssemblyName>AutoStartConfirm</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>false</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -30,9 +19,10 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
@@ -41,249 +31,36 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Management" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Converters\BusyCursorConverter.cs" />
-    <Compile Include="Converters\ProgressBarVisibilityConverter.cs" />
-    <Compile Include="Converters\CanBeRevertedConverter.cs" />
-    <Compile Include="Converters\ConverterBase.cs" />
-    <Compile Include="GUI\AboutWindow.xaml.cs">
-      <DependentUpon>AboutWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Models\AppStatus.cs" />
-    <Compile Include="Models\ConnectorEnableRow.cs" />
-    <Compile Include="GUI\ConnectorWindow.xaml.cs">
-      <DependentUpon>ConnectorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\IMessageService.cs" />
-    <Compile Include="GUI\MessageService.cs" />
-    <Compile Include="Models\Change.cs" />
-    <Compile Include="Connectors\IAutoStartService.cs" />
-    <Compile Include="Models\NotifyIconViewModel.cs" />
-    <Compile Include="Models\ServiceAutoStartEntry.cs" />
-    <Compile Include="Models\ScheduledTaskAutoStartEntry.cs" />
-    <Compile Include="Models\FolderAutoStartEntry.cs" />
-    <Compile Include="Models\RegistryAutoStartEntry.cs" />
-    <Compile Include="Connectors\AutoStartService.cs" />
-    <Compile Include="Connectors\IAutoStartConnectorService.cs" />
-    <Compile Include="Connectors\IRegistryDisableService.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserLoadConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserLocalGroupPolicyScriptLogoffConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserLocalGroupPolicyScriptLogonConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserLocalGroupPolicyScriptShutdownConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserLocalGroupPolicyScriptStartupConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRunOnceEx64Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRunOnce64Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRunOnceEx32Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRunOnce32Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserTerminalServerRunOnceExConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserTerminalServerRunOnceConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserUserInitMprLogonScriptConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserGroupPolicyShellOverwriteConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserGroupPolicyRunConnector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRun32Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserRun64Connector.cs" />
-    <Compile Include="Connectors\Registry\CurrentUserTerminalServerRunConnector.cs" />
-    <Compile Include="Connectors\Registry\DomainGroupPolicyScriptLogoffConnector.cs" />
-    <Compile Include="Connectors\Registry\DomainGroupPolicyScriptLogonConnector.cs" />
-    <Compile Include="Connectors\Registry\DomainGroupPolicyScriptShutdownConnector.cs" />
-    <Compile Include="Connectors\Registry\LocalGroupPolicyScriptLogoffConnector.cs" />
-    <Compile Include="Connectors\Registry\LocalGroupPolicyScriptLogonConnector.cs" />
-    <Compile Include="Connectors\Registry\LocalGroupPolicyScriptShutdownConnector.cs" />
-    <Compile Include="Connectors\Folder\FolderConnector.cs" />
-    <Compile Include="Connectors\RegistryDisableService.cs" />
-    <Compile Include="Connectors\Registry\RunOnce64Connector.cs" />
-    <Compile Include="Connectors\Registry\RunOnceEx64Connector.cs" />
-    <Compile Include="Connectors\Registry\RunOnceEx32Connector.cs" />
-    <Compile Include="Connectors\Registry\RunOnce32Connector.cs" />
-    <Compile Include="Connectors\Folder\CurrentUserStartMenuAutoStartFolderConnector.cs" />
-    <Compile Include="Connectors\Folder\StartMenuAutoStartFolderConnector.cs" />
-    <Compile Include="Connectors\Registry\TerminalServerRunOnceExConnector.cs" />
-    <Compile Include="Connectors\Registry\TerminalServerRunOnceConnector.cs" />
-    <Compile Include="Connectors\Registry\WindowsCEServicesAutoStartOnDisconnect64Connector.cs" />
-    <Compile Include="Connectors\Registry\WindowsCEServicesAutoStartOnDisconnect32Connector.cs" />
-    <Compile Include="Connectors\Registry\WindowsCEServicesAutoStartOnConnect32Connector.cs" />
-    <Compile Include="Connectors\Registry\WindowsCEServicesAutoStartOnConnect64Connector.cs" />
-    <Compile Include="Connectors\Registry\IconServiceLibConnector.cs" />
-    <Compile Include="Connectors\Registry\ActiveSetup32Connector.cs" />
-    <Compile Include="Connectors\Registry\ActiveSetup64Connector.cs" />
-    <Compile Include="Connectors\Registry\GroupPolicyRunConnector.cs" />
-    <Compile Include="Connectors\Registry\Run64Connector.cs" />
-    <Compile Include="Connectors\Registry\TerminalServerInitialProgramConnector.cs" />
-    <Compile Include="Connectors\Registry\Run32Connector.cs" />
-    <Compile Include="Connectors\Registry\TerminalServerRunConnector.cs" />
-    <Compile Include="Connectors\Registry\TerminalServerStartupProgramsConnector.cs" />
-    <Compile Include="Connectors\Registry\AvailableShellsConnector.cs" />
-    <Compile Include="Connectors\Registry\AlternateShellConnector.cs" />
-    <Compile Include="Connectors\Registry\LocalGroupPolicyScriptStartupConnector.cs" />
-    <Compile Include="Connectors\Registry\GroupPolicyExtensionsConnector.cs" />
-    <Compile Include="Connectors\Registry\DomainGroupPolicyScriptStartupConnector.cs" />
-    <Compile Include="Connectors\Registry\GroupPolicyShellOverwriteConnector.cs" />
-    <Compile Include="Connectors\Registry\UserInitMprLogonScriptConnector.cs" />
-    <Compile Include="Connectors\Registry\LogonConnector.cs" />
-    <Compile Include="Connectors\Registry\AppCertDllConnector.cs" />
-    <Compile Include="Connectors\Registry\AppInit32Connector.cs" />
-    <Compile Include="Connectors\Registry\AppInit64Connector.cs" />
-    <Compile Include="Connectors\ScheduledTask\ScheduledTaskConnector.cs" />
-    <Compile Include="Connectors\Services\OtherServiceConnector.cs" />
-    <Compile Include="Connectors\Services\DeviceServiceConnector.cs" />
-    <Compile Include="Connectors\Services\ServiceConnector.cs" />
-    <Compile Include="Converters\CanBeAddedConverter.cs" />
-    <Compile Include="Converters\CanBeEnabledConverter.cs" />
-    <Compile Include="Converters\CanBeDisabledConverter.cs" />
-    <Compile Include="Converters\CanBeRemovedConverter.cs" />
-    <Compile Include="Converters\CanBeConfirmedConverter.cs" />
-    <Compile Include="Connectors\AutoStartConnectorService.cs" />
-    <Compile Include="Models\Category.cs" />
-    <Compile Include="Connectors\Registry\RegistryConnector.cs" />
-    <Compile Include="Connectors\Registry\BootExecuteConnector.cs" />
-    <Compile Include="Connectors\IAutoStartConnector.cs" />
-    <Compile Include="Models\AutoStartEntry.cs" />
-    <Compile Include="Exceptions\AlreadySetByOtherException.cs" />
-    <Compile Include="Exceptions\AlreadySetException.cs" />
-    <Compile Include="Connectors\FolderChangeMonitor.cs" />
-    <Compile Include="Connectors\IFolderChangeMonitor.cs" />
-    <Compile Include="Connectors\IRegistryChangeMonitor.cs" />
-    <Compile Include="Update\IUpdateService.cs" />
-    <Compile Include="Update\UpdateService.cs" />
-    <Compile Include="Notifications\INotificationService.cs" />
-    <Compile Include="Models\ConfirmStatus.cs" />
-    <Compile Include="Connectors\RegistryChangeEventArgs.cs" />
-    <Compile Include="Connectors\RegistryChangeMonitor.cs" />
-    <Compile Include="Notifications\NotificationService.cs" />
-    <Compile Include="GUI\NotifyIcon.cs" />
-    <Compile Include="GUI\NotifyIconDoubleClickCommand.cs" />
-    <Compile Include="Properties\ISettingsService.cs" />
-    <Compile Include="Properties\Settings.cs" />
-    <Compile Include="Properties\SettingsService.cs" />
-    <Page Include="GUI\AboutWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="GUI\ConnectorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="GUI\NotifyIcon.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="GUI\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="GUI\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="app.manifest" />
-    <None Include="Assets\Icon.xcf" />
-    <None Include="Assets\NotificationIcons.xcf" />
-    <None Include="Nlog.sample.config">
+    <None Update="Nlog.sample.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Nlog.config">
+    <None Update="Nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\AddIcon.png">
+    <None Update="Assets\AddIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\RemoveIcon.png">
+    <None Update="Assets\RemoveIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -291,6 +68,7 @@
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf">
       <Version>1.1.0</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
       <Version>7.1.3</Version>
     </PackageReference>
@@ -303,15 +81,21 @@
     <PackageReference Include="Semver">
       <Version>2.2.0</Version>
     </PackageReference>
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Runtime.WindowsRuntime.UI.Xaml">
       <Version>4.7.0</Version>
     </PackageReference>
     <PackageReference Include="TaskScheduler">
       <Version>2.10.1</Version>
     </PackageReference>
+    <PackageReference Include="System.ServiceModel.Federation" Version="4.8.1" />
+    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>If Not Exist $(ProjectDir)Nlog.config Copy $(ProjectDir)Nlog.sample.config $(ProjectDir)Nlog.config</PreBuildEvent>
-  </PropertyGroup>
+  <PropertyGroup />
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="If Not Exist $(ProjectDir)Nlog.config (Copy $(ProjectDir)Nlog.sample.config $(ProjectDir)Nlog.config)" />
+  </Target>
 </Project>
