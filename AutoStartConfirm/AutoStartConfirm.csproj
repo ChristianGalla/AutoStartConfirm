@@ -23,6 +23,8 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <Platforms>x64</Platforms>
+	<EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+	<StartupObject >AutoStartConfirm.App</StartupObject >
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
@@ -38,13 +40,6 @@
     <OutputPath>bin\x64\Release\</OutputPath>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
-    <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Transactions" />
-  </ItemGroup>
   <ItemGroup>
     <None Update="Nlog.sample.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
