@@ -76,4 +76,4 @@ jobs:
       with:
         name: AutoStartConfirmSetup
         path: |
-          \build\publish\*.msi
+          \build\publish\**\*.msi
