@@ -385,7 +385,7 @@ namespace AutoStartConfirm
             Logger.Trace("StartSubProcessAsAdmin called");
             string path = Path.GetTempFileName();
             try {
-                using (Stream stream = new FileStream($"{path}.xml", System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
+                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
                     XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
                     serializer.Serialize(stream, autoStart);
                 }

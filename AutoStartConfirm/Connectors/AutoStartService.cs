@@ -46,7 +46,7 @@ namespace AutoStartConfirm.Connectors
         public string CurrentExePath {
             get {
                 if (currentExePath == null) {
-                    currentExePath = Assembly.GetEntryAssembly().Location;
+                    currentExePath = Environment.ProcessPath;
                 }
                 return currentExePath;
             }
@@ -464,7 +464,9 @@ namespace AutoStartConfirm.Connectors
                         IFormatter formatter = new BinaryFormatter();
                         try
                         {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
                             var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
                             Logger.Trace($"Loaded last saved auto starts from file \"{file}\"");
                             return ret;
                         }
@@ -645,13 +647,15 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void StartWatcher() {
-            Logger.Trace("Starting watchers");
+            Logger.Info("Starting watchers");
             ConnectorService.StartWatcher();
+            Logger.Info("Started watchers");
         }
 
         public void StopWatcher() {
             Logger.Trace("Stopping watchers");
             ConnectorService.StopWatcher();
+            Logger.Trace("Stopped watchers");
         }
 
         public bool IsOwnAutoStart(AutoStartEntry autoStart) {

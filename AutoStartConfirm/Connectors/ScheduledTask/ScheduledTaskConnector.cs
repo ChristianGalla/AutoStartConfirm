@@ -10,7 +10,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
     public class ScheduledTaskConnector : IAutoStartConnector, IDisposable {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public int WatcherIntervalInMs = 1000 * 60;
+        public int WatcherIntervalInMs = 1000 * 10;
 
         public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
             return true;
@@ -100,7 +100,6 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     {
                         return;
                     }
-                    Thread.Sleep(WatcherIntervalInMs);
                     CheckChanges();
                 }
             })) {
