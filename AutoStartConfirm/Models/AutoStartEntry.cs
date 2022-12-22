@@ -3,9 +3,11 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 
 namespace AutoStartConfirm.Models
 {
+    [XmlInclude(typeof(FolderAutoStartEntry)), XmlInclude(typeof(RegistryAutoStartEntry)), XmlInclude(typeof(ScheduledTaskAutoStartEntry)), XmlInclude(typeof(ServiceAutoStartEntry))]
     [Serializable]
     public abstract class AutoStartEntry : INotifyPropertyChanged {
         private Guid id;
@@ -157,11 +159,11 @@ namespace AutoStartConfirm.Models
 
         public AutoStartEntry DeepCopy() {
             using (var ms = new MemoryStream()) {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, this);
+                XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
+                serializer.Serialize(ms, this);
                 ms.Position = 0;
 
-                return (AutoStartEntry)formatter.Deserialize(ms);
+                return (AutoStartEntry)serializer.Deserialize(ms);
             }
         }
 

@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace AutoStartConfirm.Connectors
 {
@@ -136,8 +137,8 @@ namespace AutoStartConfirm.Connectors
         public AutoStartService() {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var basePath = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}";
-            PathToLastAutoStarts = $"{basePath}LastAutoStarts.bin";
-            PathToHistoryAutoStarts = $"{basePath}HistoryAutoStarts.bin";
+            PathToLastAutoStarts = $"{basePath}LastAutoStarts";
+            PathToHistoryAutoStarts = $"{basePath}HistoryAutoStarts";
             SettingsService.SettingsSaving += SettingsSavingHandler;
             SettingsService.SettingsLoaded += SettingsLoadedHandler;
         }
@@ -424,54 +425,59 @@ namespace AutoStartConfirm.Connectors
                 return false;
             }
             try {
-                GetSavedCurrentAutoStarts(PathToLastAutoStarts);
+                GetSavedAutoStarts(PathToLastAutoStarts);
             } catch (Exception) {
                 return false;
             }
             return true;
         }
 
-        public ObservableCollection<AutoStartEntry> GetSavedCurrentAutoStarts(string path) {
+        public ObservableCollection<AutoStartEntry> GetSavedAutoStarts(string path) {
             try {
                 Logger.Trace("Loading auto starts from file {path}", path);
-                if (!File.Exists(path)) {
-                    return new ObservableCollection<AutoStartEntry>();
-                }
-                using (Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                    IFormatter formatter = new BinaryFormatter();
-                    try {
-                        var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
-                        var autoStartsToRemove = new List<AutoStartEntry>();
-                        Logger.Trace($"Loaded last saved auto starts from file \"{path}\"");
-                        return ret;
-                    } catch (Exception ex) {
-                        var err = new Exception($"Failed to deserialize from file \"{path}\"", ex);
-                        throw err;
+                if (File.Exists($"{path}.xml"))
+                {
+                    var file = $"{path}.xml";
+                    Logger.Info($"Loading new xml serialized file \"{file}\"");
+                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
+                        try
+                        {
+                            var ret = (ObservableCollection<AutoStartEntry>)serializer.Deserialize(stream);
+                            Logger.Trace($"Loaded last saved auto starts from file \"{file}\"");
+                            return ret;
+                        }
+                        catch (Exception ex)
+                        {
+                            var err = new Exception($"Failed to deserialize from file \"{file}\"", ex);
+                            throw err;
+                        }
                     }
                 }
-            } catch (Exception ex) {
-                var err = new Exception("Failed to load last auto starts", ex);
-                Logger.Error(err);
-                throw err;
-            }
-        }
-
-        public ObservableCollection<AutoStartEntry> GetSavedHistoryAutoStarts(string path) {
-            try {
-                Logger.Trace("Loading auto starts from file {path}", path);
-                if (!File.Exists(path)) {
-                    return new ObservableCollection<AutoStartEntry>();
-                }
-                using (Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                    IFormatter formatter = new BinaryFormatter();
-                    try {
-                        var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
-                        Logger.Trace($"Loaded last saved auto starts from file \"{path}\"");
-                        return ret;
-                    } catch (Exception ex) {
-                        var err = new Exception($"Failed to deserialize from file \"{path}\"", ex);
-                        throw err;
+                else if (File.Exists($"{path}.bin"))
+                {
+                    var file = $"{path}.bin";
+                    Logger.Info($"Loading old binary serialized file \"{file}\"");
+                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        IFormatter formatter = new BinaryFormatter();
+                        try
+                        {
+                            var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
+                            Logger.Trace($"Loaded last saved auto starts from file \"{file}\"");
+                            return ret;
+                        }
+                        catch (Exception ex)
+                        {
+                            var err = new Exception($"Failed to deserialize from file \"{file}\"", ex);
+                            throw err;
+                        }
                     }
+                }
+                else
+                {
+                    return new ObservableCollection<AutoStartEntry>();
                 }
             } catch (Exception ex) {
                 var err = new Exception("Failed to load last auto starts", ex);
@@ -495,7 +501,7 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        private void SaveAutoStarts(string path, object dictionary) {
+        private void SaveAutoStarts(string path, ObservableCollection<AutoStartEntry> dictionary) {
             Logger.Trace("Saving auto starts to file {path}", path);
             try {
                 try {
@@ -506,9 +512,9 @@ namespace AutoStartConfirm.Connectors
                     throw err;
                 }
                 try {
-                    using (Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
-                        IFormatter formatter = new BinaryFormatter();
-                        formatter.Serialize(stream, dictionary);
+                    using (Stream stream = new FileStream($"{path}.xml", FileMode.Create, FileAccess.Write, FileShare.None)) {
+                        XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
+                        serializer.Serialize(stream, dictionary);
                     }
                 } catch (Exception ex) {
                     var err = new Exception($"Failed to write file \"{path}\"", ex);
@@ -532,7 +538,7 @@ namespace AutoStartConfirm.Connectors
                 // get last saved auto starts
                 ObservableCollection<AutoStartEntry> lastSavedAutoStarts;
                 try {
-                    lastSavedAutoStarts = GetSavedCurrentAutoStarts(PathToLastAutoStarts);
+                    lastSavedAutoStarts = GetSavedAutoStarts(PathToLastAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load last saved auto starts", ex);
                     Logger.Error(err);
@@ -552,7 +558,7 @@ namespace AutoStartConfirm.Connectors
 
                 // get history auto starts
                 try {
-                    allHistoryAutoStarts = GetSavedHistoryAutoStarts(PathToHistoryAutoStarts);
+                    allHistoryAutoStarts = GetSavedAutoStarts(PathToHistoryAutoStarts);
                 } catch (Exception ex) {
                     var err = new Exception("Failed to load removed auto starts", ex);
                     Logger.Error(err);

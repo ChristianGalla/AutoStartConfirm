@@ -15,6 +15,7 @@ using AutoStartConfirm.GUI;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
 using System.ServiceModel.Channels;
+using System.Xml.Serialization;
 
 namespace AutoStartConfirm
 {
@@ -255,9 +256,9 @@ namespace AutoStartConfirm
         private static AutoStartEntry LoadAutoStartFromFile(string path) {
             Logger.Trace("LoadAutoStartFromFile called");
             using (Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                IFormatter formatter = new BinaryFormatter();
                 try {
-                    var ret = (AutoStartEntry)formatter.Deserialize(stream);
+                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
+                    var ret = (AutoStartEntry)serializer.Deserialize(stream);
                     return ret;
                 } catch (Exception ex) {
                     var err = new Exception("Failed to deserialize", ex);
@@ -384,9 +385,9 @@ namespace AutoStartConfirm
             Logger.Trace("StartSubProcessAsAdmin called");
             string path = Path.GetTempFileName();
             try {
-                using (Stream stream = new FileStream(path, System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
-                    IFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, autoStart);
+                using (Stream stream = new FileStream($"{path}.xml", System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
+                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
+                    serializer.Serialize(stream, autoStart);
                 }
 
                 var info = new ProcessStartInfo(
