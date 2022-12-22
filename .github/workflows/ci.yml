@@ -51,7 +51,7 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
     
-    - name: Build solution
+    - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
       
     - name: Get version number
@@ -61,10 +61,12 @@ jobs:
         $versionNumber=(Get-Item ".\AutoStartConfirm.exe" | Select-Object -ExpandProperty VersionInfo).FileVersion
         "version_number=$versionNumber" >> $env:GITHUB_OUTPUT
       shell: pwsh
+    
+    - name: Build tests
+      run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -property:Configuration=Release
       
     - name: Test solution
-      working-directory: .\AutoStartConfirmTests\bin\x64\Release
-      run: vstest.console.exe /Platform:x64 AutoStartConfirmTests.dll
+      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\Release\net6.0-windows10.0.19041\AutoStartConfirmTests.dll"
     
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
