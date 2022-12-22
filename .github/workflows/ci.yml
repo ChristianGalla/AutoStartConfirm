@@ -75,6 +75,5 @@ jobs:
       name: Upload artifacts
       with:
         name: AutoStartConfirmSetup
-        path: |
-          \build\publish\**\*.msi
+        path: build\publish\*.msi
         if-no-files-found: error
