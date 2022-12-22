@@ -623,46 +623,54 @@ namespace AutoStartConfirm
                 // Need to dispatch to UI thread if performing UI operations
                 System.Windows.Application.Current.Dispatcher.Invoke(delegate {
                     Logger.Trace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
-                    switch (args["action"]) {
-                        case "viewRemove":
-                            ShowRemoved(Guid.Parse(args["id"]));
-                            break;
-                        case "revertRemove":
-                            RevertRemove(Guid.Parse(args["id"]));
-                            break;
-                        case "confirmRemove":
-                            ConfirmRemove(Guid.Parse(args["id"]));
-                            break;
-                        case "viewAdd":
-                            ShowAdd(Guid.Parse(args["id"]));
-                            break;
-                        case "revertAdd":
-                            RevertAdd(Guid.Parse(args["id"]));
-                            break;
-                        case "confirmAdd":
-                            ConfirmAdd(Guid.Parse(args["id"]));
-                            break;
-                        case "confirmEnable":
-                            ConfirmAdd(Guid.Parse(args["id"]));
-                            break;
-                        case "confirmDisable":
-                            ConfirmAdd(Guid.Parse(args["id"]));
-                            break;
-                        case "enable":
-                            Enable(Guid.Parse(args["id"]));
-                            break;
-                        case "viewUpdate":
-                            ViewUpdate();
-                            break;
-                        case "disable":
-                            Disable(Guid.Parse(args["id"]));
-                            break;
-                        case "installUpdate":
-                            InstallUpdate(args["msiUrl"]);
-                            break;
-                        default:
-                            Logger.Trace("Unknown action {Action}", args["action"]);
-                            break;
+                    if (args.TryGetValue("action", out string action))
+                    {
+                        switch (action)
+                        {
+                            case "viewRemove":
+                                ShowRemoved(Guid.Parse(args["id"]));
+                                break;
+                            case "revertRemove":
+                                RevertRemove(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmRemove":
+                                ConfirmRemove(Guid.Parse(args["id"]));
+                                break;
+                            case "viewAdd":
+                                ShowAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "revertAdd":
+                                RevertAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmAdd":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmEnable":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmDisable":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "enable":
+                                Enable(Guid.Parse(args["id"]));
+                                break;
+                            case "viewUpdate":
+                                ViewUpdate();
+                                break;
+                            case "disable":
+                                Disable(Guid.Parse(args["id"]));
+                                break;
+                            case "installUpdate":
+                                InstallUpdate(args["msiUrl"]);
+                                break;
+                            default:
+                                Logger.Trace("Unknown action {Action}", action);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Logger.Trace("Missing action");
                     }
                 });
             };
