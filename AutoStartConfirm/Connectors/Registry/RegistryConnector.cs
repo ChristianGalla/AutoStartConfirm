@@ -97,9 +97,6 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        private void ErrorHandler(object sender, EventArrivedEventArgs e) {
-            Logger.Error("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
-        }
 
         #region IAutoStartConnector implementation
         public abstract Category Category { get; }
@@ -254,7 +251,6 @@ namespace AutoStartConfirm.Connectors.Registry
             }
             monitor = new RegistryChangeMonitor(BasePath);
             monitor.Changed += ChangeHandler;
-            monitor.Error += ErrorHandler;
             monitor.Start();
             Logger.Trace("Watcher started");
         }
@@ -267,7 +263,6 @@ namespace AutoStartConfirm.Connectors.Registry
                 return;
             }
             monitor.Changed -= ChangeHandler;
-            monitor.Error -= ErrorHandler;
             monitor.Stop();
             monitor.Dispose();
             monitor = null;

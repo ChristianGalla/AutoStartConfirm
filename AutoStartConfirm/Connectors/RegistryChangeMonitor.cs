@@ -54,7 +54,6 @@ namespace AutoStartConfirm.Connectors
         public bool Monitoring => watcher != null;
 
         public event RegistryChangeHandler Changed;
-        public event RegistryChangeHandler Error;
 
 
         public void Start()

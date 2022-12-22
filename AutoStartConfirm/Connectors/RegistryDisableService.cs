@@ -208,10 +208,6 @@ namespace AutoStartConfirm.Connectors
             return currentValueByteArray;
         }
 
-        private void ErrorHandler(object sender, EventArrivedEventArgs e) {
-            Logger.Error("Error on monitoring of {DisableBasePath}: {@Exception}", DisableBasePath, e);
-        }
-
         /// <summary>
         /// Watches the assigned registry keys
         /// </summary>
@@ -229,7 +225,6 @@ namespace AutoStartConfirm.Connectors
             lastEnableStatus = GetCurrentEnableStatus();
             monitor = new RegistryChangeMonitor(DisableBasePath);
             monitor.Changed += ChangeHandler;
-            monitor.Error += ErrorHandler;
             monitor.Start();
             Logger.Trace("Watcher started");
         }
@@ -241,7 +236,6 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             monitor.Changed -= ChangeHandler;
-            monitor.Error -= ErrorHandler;
             monitor.Stop();
             monitor.Dispose();
             monitor = null;
