@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="APPLICATIONFOLDER">
+            <Component Id="cmpEC7A445EC77588CD73967AC0487D60F7" Guid="{7E8A85A9-EA1F-4F63-BDCF-8C8F92A0C9E1}">
+                <File Id="fil1BD6973B04E5142497E97E8A38CB500B" KeyPath="yes" Source="$(var.BasePath)\AutoStartConfirm.dll.config" />
+            </Component>
+            <Component Id="cmp47985660C8417AA458C1AB19FF2E7702" Guid="{ACF9E651-B40C-40FF-A7E7-17D470E61B51}">
+                <File Id="filCB336C425CDA5D991B15C98720E6C3A8" KeyPath="yes" Source="$(var.BasePath)\D3DCompiler_47_cor3.dll" />
+            </Component>
+            <Component Id="cmp8C90E5BB9F5A3B45F11B777B6CB28CCB" Guid="{2996B7FD-1BAE-45BC-A8A6-BE857938DDA6}">
+                <File Id="filEDB10888829A358802B235A83DEE8BB0" KeyPath="yes" Source="$(var.BasePath)\PenImc_cor3.dll" />
+            </Component>
+            <Component Id="cmpDA4979D576ABFF1C11D373875C275A51" Guid="{EC7BAEF9-CE8E-4ED0-ACB7-52944CDE8517}">
+                <File Id="fil696D4F0F708B3D1577DA0DE273606E1F" KeyPath="yes" Source="$(var.BasePath)\PresentationNative_cor3.dll" />
+            </Component>
+            <Component Id="cmpF1DC967D929B7175D8B46FB61E49B832" Guid="{0CB27B65-F315-4924-A18A-A2D9F7230484}">
+                <File Id="fil625BEE96A660AC7EA19884DF07484AFC" KeyPath="yes" Source="$(var.BasePath)\sni.dll" />
+            </Component>
+            <Component Id="cmp404AE5F7A5B824122417EA012CC32A71" Guid="{AC9D28D0-16BA-417F-8C9A-4E55C86F300A}">
+                <File Id="filC2FB26B8A0C24E6E4F962C0AA563F7BA" KeyPath="yes" Source="$(var.BasePath)\vcruntime140_cor3.dll" />
+            </Component>
+            <Component Id="cmpD5F0E4F3D534EA4A0547200269C066F2" Guid="{8B016D77-E88F-40E7-B556-81028721B63F}">
+                <File Id="fil34E40F515C01F1ED9F5E11EA1D78FD3C" KeyPath="yes" Source="$(var.BasePath)\wpfgfx_cor3.dll" />
+            </Component>
+            <Directory Id="dir04CFA674C1F419519A95E6B27F48E162" Name="Assets">
+                <Component Id="cmp58F3C6511E879DD483BFC339B60EC8B5" Guid="{43A646CA-B043-4AD0-8DED-2B110675AFFB}">
+                    <File Id="fil93E70D414B078AEFF40BFBA458A6C56D" KeyPath="yes" Source="$(var.BasePath)\Assets\AddIcon.png" />
+                </Component>
+                <Component Id="cmpBEDB2B89637AA1545BBA31AF5BF70AA6" Guid="{CFCFED98-D517-45F1-BA85-065BBFB9F1CC}">
+                    <File Id="fil8661A0931DC0D6617F2F81465306F848" KeyPath="yes" Source="$(var.BasePath)\Assets\RemoveIcon.png" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="AutoStartConfirm_Project">
+            <ComponentRef Id="cmpEC7A445EC77588CD73967AC0487D60F7" />
+            <ComponentRef Id="cmp47985660C8417AA458C1AB19FF2E7702" />
+            <ComponentRef Id="cmp8C90E5BB9F5A3B45F11B777B6CB28CCB" />
+            <ComponentRef Id="cmpDA4979D576ABFF1C11D373875C275A51" />
+            <ComponentRef Id="cmpF1DC967D929B7175D8B46FB61E49B832" />
+            <ComponentRef Id="cmp404AE5F7A5B824122417EA012CC32A71" />
+            <ComponentRef Id="cmpD5F0E4F3D534EA4A0547200269C066F2" />
+            <ComponentRef Id="cmp58F3C6511E879DD483BFC339B60EC8B5" />
+            <ComponentRef Id="cmpBEDB2B89637AA1545BBA31AF5BF70AA6" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

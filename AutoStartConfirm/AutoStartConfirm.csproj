@@ -93,7 +93,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
   </ItemGroup>
-  <PropertyGroup />
+  <PropertyGroup>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+  </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="If Not Exist $(ProjectDir)Nlog.config (Copy $(ProjectDir)Nlog.sample.config $(ProjectDir)Nlog.config)" />
   </Target>

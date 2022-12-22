@@ -52,11 +52,11 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
     
     - name: Build solution
-      run: msbuild AutoStartConfirm.sln -property:Configuration=Release
+      run: msbuild build/Daily.targets /property:Configuration=Release
       
     - name: Get version number
       id: get-version-number
-      working-directory: .\AutoStartConfirmTests\bin\x64\Release
+      working-directory: .\build\publish\Release_win10-x64
       run: |
         $versionNumber=(Get-Item ".\AutoStartConfirm.exe" | Select-Object -ExpandProperty VersionInfo).FileVersion
         "version_number=$versionNumber" >> $env:GITHUB_OUTPUT
@@ -71,5 +71,4 @@ jobs:
       with:
         name: AutoStartConfirmSetup
         path: |
-          AutoStartConfirmSetup\bin\x64\Release
-          !**\*.wixpdb
+          \build\publish\*.msi
