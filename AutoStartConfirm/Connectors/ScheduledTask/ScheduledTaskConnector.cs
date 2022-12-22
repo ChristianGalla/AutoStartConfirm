@@ -73,6 +73,8 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             }
         }
 
+        private CancellationTokenSource cancellationTokenSource;
+
         public void StartWatcher() {
             Logger.Trace("StartWatcher called");
             if (watcher != null) {
@@ -80,16 +82,31 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 return;
             }
 
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+            }
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
+
             // Thread is created manually because
             // thread pool should not be used for long running tasks
             // https://docs.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool#when-not-to-use-thread-pool-threads
             watcher = new Thread(new ThreadStart(() => {
                 while (true) {
+                    token.WaitHandle.WaitOne(WatcherIntervalInMs);
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     Thread.Sleep(WatcherIntervalInMs);
                     CheckChanges();
                 }
             })) {
-                Priority = ThreadPriority.Lowest
+                Priority = ThreadPriority.Lowest,
+                IsBackground = true,
+                Name = $"{Category} watcher",
             };
             watcher.Start();
             Logger.Trace("Watcher started");
@@ -172,7 +189,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 return;
             }
             Logger.Trace("Stopping watcher");
-            watcher.Abort();
+            cancellationTokenSource.Cancel();
             watcher.Join();
             watcher = null;
             Logger.Trace("Stopped watcher");
@@ -295,6 +312,10 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             if (!disposedValue) {
                 if (disposing) {
                     StopWatcher();
+                    if (cancellationTokenSource != null)
+                    {
+                        cancellationTokenSource.Dispose();
+                    }
                 }
 
                 disposedValue = true;

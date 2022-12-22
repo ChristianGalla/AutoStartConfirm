@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Management;
 using System.ServiceProcess;
 using System.Threading;
+using System.Threading.Tasks;
 using AutoStartConfirm.Models;
 
 namespace AutoStartConfirm.Connectors.Services
@@ -154,6 +155,8 @@ namespace AutoStartConfirm.Connectors.Services
             }
         }
 
+        private CancellationTokenSource cancellationTokenSource;
+
         public void StartWatcher() {
             Logger.Trace("StartWatcher called");
 
@@ -162,17 +165,30 @@ namespace AutoStartConfirm.Connectors.Services
                 return;
             }
 
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+            }
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
             // Thread is created manually because
             // thread pool should not be used for long running tasks
             // https://docs.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool#when-not-to-use-thread-pool-threads
             watcher = new Thread(new ThreadStart(() => {
-                while (true) {
-                    Thread.Sleep(WatcherIntervalInMs);
+                while (true)
+                {
+                    token.WaitHandle.WaitOne(WatcherIntervalInMs);
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     CheckChanges();
                 }
             })) {
                 Priority = ThreadPriority.Lowest,
                 IsBackground = true,
+                Name = $"{Category} watcher",
             };
             watcher.Start();
             Logger.Trace("Watcher started");
@@ -255,7 +271,7 @@ namespace AutoStartConfirm.Connectors.Services
                 return;
             }
             Logger.Trace("Stopping watcher");
-            watcher.Abort();
+            cancellationTokenSource.Cancel();
             watcher.Join();
             watcher = null;
             Logger.Trace("Stopped watcher");
@@ -268,6 +284,10 @@ namespace AutoStartConfirm.Connectors.Services
             if (!disposedValue) {
                 if (disposing) {
                     StopWatcher();
+                    if (cancellationTokenSource != null)
+                    {
+                        cancellationTokenSource.Dispose();
+                    }
                 }
 
                 disposedValue = true;
