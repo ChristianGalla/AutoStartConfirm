@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.rtf" />
-    <Content Include="RemoveMyExeComponent.xslt" />
+    <Content Include="SkipSpecialFiles.xslt" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
