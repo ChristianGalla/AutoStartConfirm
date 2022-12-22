@@ -6,6 +6,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Linq;
 using AutoStartConfirm.Exceptions;
+using System.Management;
 
 namespace AutoStartConfirm.Connectors.Registry
 {
@@ -51,7 +52,7 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
+        private void ChangeHandler(object sender, EventArrivedEventArgs e) {
             Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<RegistryAutoStartEntry>();
@@ -96,7 +97,7 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
+        private void ErrorHandler(object sender, EventArrivedEventArgs e) {
             Logger.Error("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
         }
 

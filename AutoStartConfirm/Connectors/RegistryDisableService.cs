@@ -3,6 +3,7 @@ using AutoStartConfirm.Exceptions;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Management;
 
 namespace AutoStartConfirm.Connectors
 {
@@ -120,7 +121,7 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        private void ChangeHandler(object sender, RegistryChangeEventArgs e) {
+        private void ChangeHandler(object sender, EventArrivedEventArgs e) {
             Logger.Trace("ChangeHandler called for {DisableBasePath}", DisableBasePath);
             var newEnableStatus = GetCurrentEnableStatus();
             foreach (var newStatus in newEnableStatus) {
@@ -207,7 +208,7 @@ namespace AutoStartConfirm.Connectors
             return currentValueByteArray;
         }
 
-        private void ErrorHandler(object sender, RegistryChangeEventArgs e) {
+        private void ErrorHandler(object sender, EventArrivedEventArgs e) {
             Logger.Error("Error on monitoring of {DisableBasePath}: {@Exception}", DisableBasePath, e);
         }
 

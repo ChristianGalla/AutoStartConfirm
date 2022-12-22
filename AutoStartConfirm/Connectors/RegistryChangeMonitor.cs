@@ -1,223 +1,143 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Management;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using Microsoft.Win32;
+using Windows.Devices.Geolocation;
 
 namespace AutoStartConfirm.Connectors
 {
-    // source: https://www.pinvoke.net/default.aspx/advapi32.regnotifychangekeyvalue
-
-    // todo: switch to https://github.com/microsoft/Windows-driver-samples/tree/master/general/registry/regfltr
+    // source: https://erikengberg.com/4-ways-to-monitor-windows-registry-using-c/
 
     #region Delegates
-    public delegate void RegistryChangeHandler(object sender, RegistryChangeEventArgs e);
+    public delegate void RegistryChangeHandler(object sender, EventArrivedEventArgs e);
     #endregion
 
-    public class RegistryChangeMonitor : IDisposable, IRegistryChangeMonitor {
-        #region Fields
+    public class RegistryChangeMonitor : IDisposable, IRegistryChangeMonitor
+    {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-        private string _registryPath;
-        private REG_NOTIFY_CHANGE _filter;
-        private Thread _monitorThread;
-        private RegistryKey _monitorKey;
-        #endregion
 
-        #region Imports
-        [DllImport("Advapi32.dll")]
-        private static extern int RegNotifyChangeKeyValue(
-           IntPtr hKey,
-           bool watchSubtree,
-           REG_NOTIFY_CHANGE notifyFilter,
-           IntPtr hEvent,
-           bool asynchronous
-           );
-        #endregion
+        public string RegistryPath { get; }
 
-        #region Enumerations
-        [Flags]
-        public enum REG_NOTIFY_CHANGE : uint {
-            NAME = 0x1,
-            ATTRIBUTES = 0x2,
-            LAST_SET = 0x4,
-            SECURITY = 0x8
+        private ManagementEventWatcher watcher;
+        private bool disposedValue;
+
+        public RegistryChangeMonitor(string registryPath)
+        {
+            RegistryPath = registryPath;
         }
-        #endregion
 
-        #region Constructors
-        public RegistryChangeMonitor(string registryPath) : this(registryPath, REG_NOTIFY_CHANGE.LAST_SET) {; }
-        public RegistryChangeMonitor(string registryPath, REG_NOTIFY_CHANGE filter) {
-            this._registryPath = registryPath.ToUpper();
-            this._filter = filter;
-        }
-        ~RegistryChangeMonitor() {
-            this.Dispose(false);
-        }
-        #endregion
+        private string GetQuery()
+        {
+            var splitted = RegistryPath.Split('\\', 2);
+            var hive = splitted[0];
+            var rootPath = splitted[1].Replace(@"\", @"\\");
 
-        #region Methods
-        private void Dispose(bool disposing) {
-            if (disposing)
-                GC.SuppressFinalize(this);
-
-            this.Stop();
-        }
-        public void Dispose() {
-            this.Dispose(true);
-        }
-        public void Start() {
-            Logger.Trace("Starting monitoring of {Path}", _registryPath);
-            lock (this) {
-                if (this._monitorThread == null) {
-                    ThreadStart ts = new ThreadStart(this.MonitorThread);
-                    this._monitorThread = new Thread(ts) {
-                        Priority = ThreadPriority.Lowest
-                    };
-                    this._monitorThread.IsBackground = true;
-                }
-
-                if (!this._monitorThread.IsAlive) {
-                    this._monitorThread.Start();
-                }
+            if (hive == "HKEY_CURRENT_USER")
+            {
+                // ManagementEventWatcher not supports monitoring of HKEY_CURRENT_USER
+                // => Monitor current user in HKEY_USERS instead
+                hive = "HKEY_USERS";
+                var currentUser = WindowsIdentity.GetCurrent();
+                rootPath = $"{currentUser.User.Value}\\\\{rootPath}";
             }
+
+            return $"SELECT * FROM RegistryTreeChangeEvent " +
+                $"WHERE Hive='{hive}' " +
+                $"AND RootPath='{rootPath}'";
         }
 
-        public void Stop() {
-            Logger.Trace("Stopping monitoring of {Path}", _registryPath);
-            lock (this) {
-                var monitorThread = this._monitorThread;
-                if (this._monitorThread != null) {
-                    this._monitorThread = null;
-                }
+        public bool Monitoring => watcher != null;
 
-                // The "Close()" will trigger RegNotifyChangeKeyValue if it is still listening
-                if (this._monitorKey != null) {
-                    this._monitorKey.Close();
-                    this._monitorKey = null;
-                }
-                if (monitorThread != null) {
-                    monitorThread.Join();
-                    monitorThread = null;
-                }
-            }
-        }
-
-        private void MonitorThread() {
-            try {
-                IntPtr ptr = IntPtr.Zero;
-
-                lock (this) {
-                    if (this._registryPath.StartsWith("HKEY_CLASSES_ROOT"))
-                        this._monitorKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(18));
-                    else if (this._registryPath.StartsWith("HKCR"))
-                        this._monitorKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(this._registryPath.Substring(5));
-                    else if (this._registryPath.StartsWith("HKEY_CURRENT_USER"))
-                        this._monitorKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(18));
-                    else if (this._registryPath.StartsWith("HKCU"))
-                        this._monitorKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this._registryPath.Substring(5));
-                    else if (this._registryPath.StartsWith("HKEY_LOCAL_MACHINE"))
-                        this._monitorKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(19));
-                    else if (this._registryPath.StartsWith("HKLM"))
-                        this._monitorKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(this._registryPath.Substring(5));
-                    else if (this._registryPath.StartsWith("HKEY_USERS"))
-                        this._monitorKey = Microsoft.Win32.Registry.Users.OpenSubKey(this._registryPath.Substring(11));
-                    else if (this._registryPath.StartsWith("HKU"))
-                        this._monitorKey = Microsoft.Win32.Registry.Users.OpenSubKey(this._registryPath.Substring(4));
-                    else if (this._registryPath.StartsWith("HKEY_CURRENT_CONFIG"))
-                        this._monitorKey = Microsoft.Win32.Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(20));
-                    else if (this._registryPath.StartsWith("HKCC"))
-                        this._monitorKey = Microsoft.Win32.Registry.CurrentConfig.OpenSubKey(this._registryPath.Substring(5));
-
-                    // Fetch the native handle
-                    if (this._monitorKey != null) {
-                        object hkey = typeof(RegistryKey).InvokeMember(
-                           "hkey",
-                           BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic,
-                           null,
-                           this._monitorKey,
-                           null
-                           );
-
-                        ptr = (IntPtr)typeof(SafeHandle).InvokeMember(
-                           "handle",
-                           BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic,
-                           null,
-                           hkey,
-                           null);
-                    }
-                }
-
-                if (ptr != IntPtr.Zero) {
-                    while (true) {
-                        // If this._monitorThread is null that probably means Dispose is being called. Don't monitor anymore.
-                        if ((this._monitorThread == null) || (this._monitorKey == null))
-                            break;
-
-                        Logger.Trace("Monitoring of {Path}", _registryPath);
-                        // RegNotifyChangeKeyValue blocks until a change occurs.
-                        int result = RegNotifyChangeKeyValue(ptr, true, this._filter, IntPtr.Zero, false);
-                        Logger.Trace("Handling monitoring event of {Path}", _registryPath);
-
-                        if ((this._monitorThread == null) || (this._monitorKey == null))
-                            break;
-
-                        if (result == 0) {
-                            Logger.Trace("Change detected on {Path}", _registryPath);
-                            if (this.Changed != null) {
-                                RegistryChangeEventArgs e = new RegistryChangeEventArgs(this);
-                                this.Changed(this, e);
-
-                                if (e.Stop) break;
-                            }
-                        } else {
-                            Logger.Trace("Error on monitoring of {Path}", _registryPath);
-                            if (this.Error != null) {
-                                Win32Exception ex = new Win32Exception();
-
-                                // Unless the exception is thrown, nobody is nice enough to set a good stacktrace for us. Set it ourselves.
-                                typeof(Exception).InvokeMember(
-                                "_stackTrace",
-                                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.SetField,
-                                null,
-                                ex,
-                                new object[] { new StackTrace(true) }
-                                );
-
-                                RegistryChangeEventArgs e = new RegistryChangeEventArgs(this);
-                                e.Exception = ex;
-                                this.Error(this, e);
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                if (this.Error != null) {
-                    RegistryChangeEventArgs e = new RegistryChangeEventArgs(this);
-                    e.Exception = ex;
-                    this.Error(this, e);
-                }
-            }
-        }
-        #endregion
-
-        #region Events
         public event RegistryChangeHandler Changed;
         public event RegistryChangeHandler Error;
-        #endregion
 
-        #region Properties
-        public bool Monitoring {
-            get {
-                if (this._monitorThread != null)
-                    return this._monitorThread.IsAlive;
 
-                return false;
+        public void Start()
+        {
+            String query = "";
+            try
+            {
+                if (watcher != null)
+                {
+                    return;
+                }
+                query = GetQuery();
+                Logger.Debug("Query: {Query}", query);
+                watcher = new ManagementEventWatcher(query);
+                watcher.EventArrived +=
+                    new EventArrivedEventHandler(RegistryEventHandler);
+                watcher.Start();
+            }
+            catch (Exception ex)
+            {
+                var error = new Exception($"Failed to start watcher for {RegistryPath}", ex);
+                if (ex is ManagementException)
+                {
+                    ManagementException manEx = (ManagementException)ex;
+                    if (manEx.ErrorCode == ManagementStatus.NotFound)
+                    {
+                        Logger.Warn(error);
+                    } else { 
+                        Logger.Error(error);
+                    }
+                    return;
+                }
+                Logger.Error(error);
+                throw error;
             }
         }
-        #endregion
+
+        public void Stop()
+        {
+            if (watcher == null)
+            {
+                return;
+            }
+            watcher.Stop();
+            watcher.Dispose();
+            watcher = null;
+        }
+
+        private void RegistryEventHandler(object sender, EventArrivedEventArgs e)
+        {
+            if (Changed != null)
+            {
+                Changed(this, e);
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Stop();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~WmiRegistryEventListener()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
