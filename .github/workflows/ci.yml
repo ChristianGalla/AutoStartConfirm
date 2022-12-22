@@ -77,3 +77,4 @@ jobs:
         name: AutoStartConfirmSetup
         path: |
           \build\publish\**\*.msi
+        if-no-files-found: error
