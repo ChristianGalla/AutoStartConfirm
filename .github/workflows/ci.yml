@@ -61,6 +61,9 @@ jobs:
         $versionNumber=(Get-Item ".\AutoStartConfirm.exe" | Select-Object -ExpandProperty VersionInfo).FileVersion
         "version_number=$versionNumber" >> $env:GITHUB_OUTPUT
       shell: pwsh
+      
+    - name: Restore tests
+      run: dotnet restore AutoStartConfirmTests\AutoStartConfirmTests.csproj
     
     - name: Build tests
       run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -property:Configuration=Release
