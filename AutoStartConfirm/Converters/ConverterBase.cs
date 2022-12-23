@@ -1,34 +1,47 @@
 ﻿using AutoStartConfirm.Connectors;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Windows;
 
 namespace AutoStartConfirm.Converters {
-    public class ConverterBase {
-        private App app;
+    public class ConverterBase: IDisposable {
+        private bool disposedValue;
 
-        private IAutoStartService autoStartService;
+        private readonly IServiceScope ServiceScope;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
+        public readonly IAutoStartService AutoStartService;
+
+        public ConverterBase()
+        {
+            ServiceScope = App.ServiceProvider.CreateScope();
+            AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    ServiceScope.Dispose();
                 }
-                return app;
-            }
-            set {
-                app = value;
+
+                disposedValue = true;
             }
         }
 
-        public IAutoStartService AutoStartService {
-            get {
-                if (autoStartService == null) {
-                    autoStartService = App.AutoStartService;
-                }
-                return autoStartService;
-            }
-            set {
-                autoStartService = value;
-            }
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~ConverterBase()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

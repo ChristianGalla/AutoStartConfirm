@@ -2,7 +2,8 @@
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors.Registry {
-    public class ActiveSetup64Connector : RegistryConnector {
+    public class ActiveSetup64Connector : RegistryConnector, IActiveSetup64Connector
+    {
 
         private readonly Category category = Category.ActiveSetup64;
 
@@ -12,44 +13,57 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         private readonly string[] valueNames = null;
 
-        public override string DisableBasePath {
-            get {
+        public override string DisableBasePath
+        {
+            get
+            {
                 return null;
             }
         }
 
-        protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+        protected override bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level)
+        {
             return level == 1 && valueName == "StubPath";
         }
 
         private readonly bool monitorSubkeys = true;
 
-        public override string BasePath {
-            get {
+        public override string BasePath
+        {
+            get
+            {
                 return basePath;
             }
         }
 
-        public override string[] SubKeyNames {
-            get {
+        public override string[] SubKeyNames
+        {
+            get
+            {
                 return subKeys;
             }
         }
 
-        public override string[] ValueNames {
-            get {
+        public override string[] ValueNames
+        {
+            get
+            {
                 return valueNames;
             }
         }
 
-        public override Category Category {
-            get {
+        public override Category Category
+        {
+            get
+            {
                 return category;
             }
         }
 
-        public override bool MonitorSubkeys {
-            get {
+        public override bool MonitorSubkeys
+        {
+            get
+            {
                 return monitorSubkeys;
             }
         }

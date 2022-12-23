@@ -2,8 +2,10 @@
 using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Connectors.ScheduledTask;
 using AutoStartConfirm.Connectors.Services;
+using AutoStartConfirm.GUI;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,15 +19,7 @@ namespace AutoStartConfirm.Connectors
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private Dictionary<Category, IAutoStartConnector> allConnectors;
-        public Dictionary<Category, IAutoStartConnector> AllConnectors {
-            get {
-                if (allConnectors == null) {
-                    CreateConnectors();
-                }
-                return allConnectors;
-            }
-        }
+        private Dictionary<Category, IAutoStartConnector> AllConnectors = new Dictionary<Category, IAutoStartConnector>();
 
         private Dictionary<Category, IAutoStartConnector> enabledConnectors;
 
@@ -38,40 +32,150 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        private App app;
-
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
-
         public bool WatcherStarted { get; private set; }
 
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService {
-            get {
-                if (settingsService == null) {
-                    settingsService = App.SettingsService;
-                }
-                return settingsService;
-            }
-            set => settingsService = value;
-        }
+        private readonly ISettingsService SettingsService;
         #endregion
 
         #region Methods
 
-        public AutoStartConnectorService() {
+        public AutoStartConnectorService(
+            ISettingsService settingsService,
+            IBootExecuteConnector bootExecuteConnector,
+            IAppInit32Connector appInit32Connector,
+            IAppInit64Connector appInit64Connector,
+            IAppCertDllConnector appCertDllConnector,
+            ILogonConnector logonConnector,
+            IUserInitMprLogonScriptConnector userInitMprLogonScriptConnector,
+            IGroupPolicyExtensionsConnector groupPolicyExtensionsConnector,
+            IDomainGroupPolicyScriptStartupConnector domainGroupPolicyScriptStartupConnector,
+            IDomainGroupPolicyScriptShutdownConnector domainGroupPolicyScriptShutdownConnector,
+            IDomainGroupPolicyScriptLogonConnector domainGroupPolicyScriptLogonConnector,
+            IDomainGroupPolicyScriptLogoffConnector domainGroupPolicyScriptLogoffConnector,
+            ILocalGroupPolicyScriptStartupConnector localGroupPolicyScriptStartupConnector,
+            ILocalGroupPolicyScriptShutdownConnector localGroupPolicyScriptShutdownConnector,
+            ILocalGroupPolicyScriptLogonConnector localGroupPolicyScriptLogonConnector,
+            ILocalGroupPolicyScriptLogoffConnector localGroupPolicyScriptLogoffConnector,
+            IGroupPolicyShellOverwriteConnector groupPolicyShellOverwriteConnector,
+            IAlternateShellConnector alternateShellConnector,
+            IAvailableShellsConnector availableShellsConnector,
+            ITerminalServerStartupProgramsConnector terminalServerStartupProgramsConnector,
+            ITerminalServerRunConnector terminalServerRunConnector,
+            ITerminalServerRunOnceConnector terminalServerRunOnceConnector,
+            ITerminalServerRunOnceExConnector terminalServerRunOnceExConnector,
+            ITerminalServerInitialProgramConnector terminalServerInitialProgramConnector,
+            IRun32Connector run32Connector,
+            IRunOnce32Connector runOnce32Connector,
+            IRunOnceEx32Connector runOnceEx32Connector,
+            IRun64Connector run64Connector,
+            IRunOnce64Connector runOnce64Connector,
+            IRunOnceEx64Connector runOnceEx64Connector,
+            IGroupPolicyRunConnector groupPolicyRunConnector,
+            IActiveSetup32Connector activeSetup32Connector,
+            IActiveSetup64Connector activeSetup64Connector,
+            IIconServiceLibConnector iconServiceLibConnector,
+            IWindowsCEServicesAutoStartOnConnect32Connector windowsCEServicesAutoStartOnConnect32Connector,
+            IWindowsCEServicesAutoStartOnDisconnect32Connector windowsCEServicesAutoStartOnDisconnect32Connector,
+            IWindowsCEServicesAutoStartOnConnect64Connector windowsCEServicesAutoStartOnConnect64Connector,
+            IWindowsCEServicesAutoStartOnDisconnect64Connector windowsCEServicesAutoStartOnDisconnect64Connector,
+            ICurrentUserLocalGroupPolicyScriptStartupConnector currentUserLocalGroupPolicyScriptStartupConnector,
+            ICurrentUserLocalGroupPolicyScriptShutdownConnector currentUserLocalGroupPolicyScriptShutdownConnector,
+            ICurrentUserLocalGroupPolicyScriptLogonConnector currentUserLocalGroupPolicyScriptLogonConnector,
+            ICurrentUserLocalGroupPolicyScriptLogoffConnector currentUserLocalGroupPolicyScriptLogoffConnector,
+            ICurrentUserUserInitMprLogonScriptConnector currentUserUserInitMprLogonScriptConnector,
+            ICurrentUserGroupPolicyShellOverwriteConnector currentUserGroupPolicyShellOverwriteConnector,
+            ICurrentUserLoadConnector currentUserLoadConnector,
+            ICurrentUserGroupPolicyRunConnector currentUserGroupPolicyRunConnector,
+            ICurrentUserRun32Connector currentUserRun32Connector,
+            ICurrentUserRunOnce32Connector currentUserRunOnce32Connector,
+            ICurrentUserRunOnceEx32Connector currentUserRunOnceEx32Connector,
+            ICurrentUserRun64Connector currentUserRun64Connector,
+            ICurrentUserRunOnce64Connector currentUserRunOnce64Connector,
+            ICurrentUserRunOnceEx64Connector currentUserRunOnceEx64Connector,
+            ICurrentUserTerminalServerRunConnector currentUserTerminalServerRunConnector,
+            ICurrentUserTerminalServerRunOnceConnector currentUserTerminalServerRunOnceConnector,
+            ICurrentUserTerminalServerRunOnceExConnector currentUserTerminalServerRunOnceExConnector,
+            IStartMenuAutoStartFolderConnector startMenuAutoStartFolderConnector,
+            ICurrentUserStartMenuAutoStartFolderConnector currentUserStartMenuAutoStartFolderConnector,
+            IScheduledTaskConnector scheduledTaskConnector,
+            IDeviceServiceConnector deviceServiceConnector,
+            IOtherServiceConnector otherServiceConnector
+        ) {
+            SettingsService = settingsService;
             SettingsService.SettingsSaving += SettingsSavingHandler;
             SettingsService.SettingsLoaded += SettingsLoadedHandler;
+
+
+
+            // todo: filter for specifiy sub sub keys if needed
+            // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
+            // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)
+            AllConnectors.Add(bootExecuteConnector.Category, bootExecuteConnector);
+            AllConnectors.Add(appInit32Connector.Category, appInit32Connector);
+            AllConnectors.Add(appInit64Connector.Category, appInit64Connector);
+            AllConnectors.Add(appCertDllConnector.Category, appCertDllConnector);
+            AllConnectors.Add(logonConnector.Category, logonConnector);
+            AllConnectors.Add(userInitMprLogonScriptConnector.Category, userInitMprLogonScriptConnector);
+            AllConnectors.Add(groupPolicyExtensionsConnector.Category, groupPolicyExtensionsConnector);
+            AllConnectors.Add(domainGroupPolicyScriptStartupConnector.Category, domainGroupPolicyScriptStartupConnector);
+            AllConnectors.Add(domainGroupPolicyScriptShutdownConnector.Category, domainGroupPolicyScriptShutdownConnector);
+            AllConnectors.Add(domainGroupPolicyScriptLogonConnector.Category, domainGroupPolicyScriptLogonConnector);
+            AllConnectors.Add(domainGroupPolicyScriptLogoffConnector.Category, domainGroupPolicyScriptLogoffConnector);
+            AllConnectors.Add(localGroupPolicyScriptStartupConnector.Category, localGroupPolicyScriptStartupConnector);
+            AllConnectors.Add(localGroupPolicyScriptShutdownConnector.Category, localGroupPolicyScriptShutdownConnector);
+            AllConnectors.Add(localGroupPolicyScriptLogonConnector.Category, localGroupPolicyScriptLogonConnector);
+            AllConnectors.Add(localGroupPolicyScriptLogoffConnector.Category, localGroupPolicyScriptLogoffConnector);
+            AllConnectors.Add(groupPolicyShellOverwriteConnector.Category, groupPolicyShellOverwriteConnector);
+            AllConnectors.Add(alternateShellConnector.Category, alternateShellConnector);
+            AllConnectors.Add(availableShellsConnector.Category, availableShellsConnector);
+            AllConnectors.Add(terminalServerStartupProgramsConnector.Category, terminalServerStartupProgramsConnector);
+            AllConnectors.Add(terminalServerRunConnector.Category, terminalServerRunConnector);
+            AllConnectors.Add(terminalServerRunOnceConnector.Category, terminalServerRunOnceConnector);
+            AllConnectors.Add(terminalServerRunOnceExConnector.Category, terminalServerRunOnceExConnector);
+            AllConnectors.Add(terminalServerInitialProgramConnector.Category, terminalServerInitialProgramConnector);
+            AllConnectors.Add(run32Connector.Category, run32Connector);
+            AllConnectors.Add(runOnce32Connector.Category, runOnce32Connector);
+            AllConnectors.Add(runOnceEx32Connector.Category, runOnceEx32Connector);
+            AllConnectors.Add(run64Connector.Category, run64Connector);
+            AllConnectors.Add(runOnce64Connector.Category, runOnce64Connector);
+            AllConnectors.Add(runOnceEx64Connector.Category, runOnceEx64Connector);
+            AllConnectors.Add(groupPolicyRunConnector.Category, groupPolicyRunConnector);
+            AllConnectors.Add(activeSetup32Connector.Category, activeSetup32Connector);
+            AllConnectors.Add(activeSetup64Connector.Category, activeSetup64Connector);
+            AllConnectors.Add(iconServiceLibConnector.Category, iconServiceLibConnector);
+            AllConnectors.Add(windowsCEServicesAutoStartOnConnect32Connector.Category, windowsCEServicesAutoStartOnConnect32Connector);
+            AllConnectors.Add(windowsCEServicesAutoStartOnDisconnect32Connector.Category, windowsCEServicesAutoStartOnDisconnect32Connector);
+            AllConnectors.Add(windowsCEServicesAutoStartOnConnect64Connector.Category, windowsCEServicesAutoStartOnConnect64Connector);
+            AllConnectors.Add(windowsCEServicesAutoStartOnDisconnect64Connector.Category, windowsCEServicesAutoStartOnDisconnect64Connector);
+            AllConnectors.Add(currentUserLocalGroupPolicyScriptStartupConnector.Category, currentUserLocalGroupPolicyScriptStartupConnector);
+            AllConnectors.Add(currentUserLocalGroupPolicyScriptShutdownConnector.Category, currentUserLocalGroupPolicyScriptShutdownConnector);
+            AllConnectors.Add(currentUserLocalGroupPolicyScriptLogonConnector.Category, currentUserLocalGroupPolicyScriptLogonConnector);
+            AllConnectors.Add(currentUserLocalGroupPolicyScriptLogoffConnector.Category, currentUserLocalGroupPolicyScriptLogoffConnector);
+            AllConnectors.Add(currentUserUserInitMprLogonScriptConnector.Category, currentUserUserInitMprLogonScriptConnector);
+            AllConnectors.Add(currentUserGroupPolicyShellOverwriteConnector.Category, currentUserGroupPolicyShellOverwriteConnector);
+            AllConnectors.Add(currentUserLoadConnector.Category, currentUserLoadConnector);
+            AllConnectors.Add(currentUserGroupPolicyRunConnector.Category, currentUserGroupPolicyRunConnector);
+            AllConnectors.Add(currentUserRun32Connector.Category, currentUserRun32Connector);
+            AllConnectors.Add(currentUserRunOnce32Connector.Category, currentUserRunOnce32Connector);
+            AllConnectors.Add(currentUserRunOnceEx32Connector.Category, currentUserRunOnceEx32Connector);
+            AllConnectors.Add(currentUserRun64Connector.Category, currentUserRun64Connector);
+            AllConnectors.Add(currentUserRunOnce64Connector.Category, currentUserRunOnce64Connector);
+            AllConnectors.Add(currentUserRunOnceEx64Connector.Category, currentUserRunOnceEx64Connector);
+            AllConnectors.Add(currentUserTerminalServerRunConnector.Category, currentUserTerminalServerRunConnector);
+            AllConnectors.Add(currentUserTerminalServerRunOnceConnector.Category, currentUserTerminalServerRunOnceConnector);
+            AllConnectors.Add(currentUserTerminalServerRunOnceExConnector.Category, currentUserTerminalServerRunOnceExConnector);
+            AllConnectors.Add(startMenuAutoStartFolderConnector.Category, startMenuAutoStartFolderConnector);
+            AllConnectors.Add(currentUserStartMenuAutoStartFolderConnector.Category, currentUserStartMenuAutoStartFolderConnector);
+            AllConnectors.Add(scheduledTaskConnector.Category, scheduledTaskConnector);
+            AllConnectors.Add(deviceServiceConnector.Category, deviceServiceConnector);
+            AllConnectors.Add(otherServiceConnector.Category, otherServiceConnector);
+            foreach (var connector in AllConnectors.Values)
+            {
+                connector.Add += AddHandler;
+                connector.Remove += RemoveHandler;
+                connector.Enable += EnableHandler;
+                connector.Disable += DisableHandler;
+            }
         }
 
         private void CreateOrUpdateEnabledConnectors() {
@@ -90,81 +194,67 @@ namespace AutoStartConfirm.Connectors
             enabledConnectors = newEnabledConnectors;
         }
 
-        private void CreateConnectors() {
-            // todo: filter for specifiy sub sub keys if needed
-            // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
-            // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)
-            var connectorList = new List<IAutoStartConnector> {
-                new BootExecuteConnector(),
-                new AppInit32Connector(),
-                new AppInit64Connector(),
-                new AppCertDllConnector(),
-                new LogonConnector(),
-                new UserInitMprLogonScriptConnector(),
-                new GroupPolicyExtensionsConnector(),
-                new DomainGroupPolicyScriptStartupConnector(),
-                new DomainGroupPolicyScriptShutdownConnector(),
-                new DomainGroupPolicyScriptLogonConnector(),
-                new DomainGroupPolicyScriptLogoffConnector(),
-                new LocalGroupPolicyScriptStartupConnector(),
-                new LocalGroupPolicyScriptShutdownConnector(),
-                new LocalGroupPolicyScriptLogonConnector(),
-                new LocalGroupPolicyScriptLogoffConnector(),
-                new GroupPolicyShellOverwriteConnector(),
-                new AlternateShellConnector(),
-                new AvailableShellsConnector(),
-                new TerminalServerStartupProgramsConnector(),
-                new TerminalServerRunConnector(),
-                new TerminalServerRunOnceConnector(),
-                new TerminalServerRunOnceExConnector(),
-                new TerminalServerInitialProgramConnector(),
-                new Run32Connector(),
-                new RunOnce32Connector(),
-                new RunOnceEx32Connector(),
-                new Run64Connector(),
-                new RunOnce64Connector(),
-                new RunOnceEx64Connector(),
-                new GroupPolicyRunConnector(),
-                new ActiveSetup32Connector(),
-                new ActiveSetup64Connector(),
-                new IconServiceLibConnector(),
-                new WindowsCEServicesAutoStartOnConnect32Connector(),
-                new WindowsCEServicesAutoStartOnDisconnect32Connector(),
-                new WindowsCEServicesAutoStartOnConnect64Connector(),
-                new WindowsCEServicesAutoStartOnDisconnect64Connector(),
-                new CurrentUserLocalGroupPolicyScriptStartupConnector(),
-                new CurrentUserLocalGroupPolicyScriptShutdownConnector(),
-                new CurrentUserLocalGroupPolicyScriptLogonConnector(),
-                new CurrentUserLocalGroupPolicyScriptLogoffConnector(),
-                new CurrentUserUserInitMprLogonScriptConnector(),
-                new CurrentUserGroupPolicyShellOverwriteConnector(),
-                new CurrentUserLoadConnector(),
-                new CurrentUserGroupPolicyRunConnector(),
-                new CurrentUserRun32Connector(),
-                new CurrentUserRunOnce32Connector(),
-                new CurrentUserRunOnceEx32Connector(),
-                new CurrentUserRun64Connector(),
-                new CurrentUserRunOnce64Connector(),
-                new CurrentUserRunOnceEx64Connector(),
-                new CurrentUserTerminalServerRunConnector(),
-                new CurrentUserTerminalServerRunOnceConnector(),
-                new CurrentUserTerminalServerRunOnceExConnector(),
-                new StartMenuAutoStartFolderConnector(),
-                new CurrentUserStartMenuAutoStartFolderConnector(),
-                new ScheduledTaskConnector(),
-                new DeviceServiceConnector(),
-                new OtherServiceConnector(),
-            };
-            allConnectors = new Dictionary<Category, IAutoStartConnector>();
-            foreach (var connector in connectorList) {
-                allConnectors.Add(connector.Category, connector);
-            }
-            foreach (var connector in allConnectors.Values) {
-                connector.Add += AddHandler;
-                connector.Remove += RemoveHandler;
-                connector.Enable += EnableHandler;
-                connector.Disable += DisableHandler;
-            }
+        public static void ConfigureServices(ServiceCollection services)
+        {
+            services.AddSingleton<IBootExecuteConnector, BootExecuteConnector>()
+                .AddSingleton<IAppInit32Connector, AppInit32Connector>()
+                .AddSingleton<IAppInit64Connector, AppInit64Connector>()
+                .AddSingleton<IAppCertDllConnector, AppCertDllConnector>()
+                .AddSingleton<ILogonConnector, LogonConnector>()
+                .AddSingleton<IUserInitMprLogonScriptConnector, UserInitMprLogonScriptConnector>()
+                .AddSingleton<IGroupPolicyExtensionsConnector, GroupPolicyExtensionsConnector>()
+                .AddSingleton<IDomainGroupPolicyScriptStartupConnector, DomainGroupPolicyScriptStartupConnector>()
+                .AddSingleton<IDomainGroupPolicyScriptShutdownConnector, DomainGroupPolicyScriptShutdownConnector>()
+                .AddSingleton<IDomainGroupPolicyScriptLogonConnector, DomainGroupPolicyScriptLogonConnector>()
+                .AddSingleton<IDomainGroupPolicyScriptLogoffConnector, DomainGroupPolicyScriptLogoffConnector>()
+                .AddSingleton<ILocalGroupPolicyScriptStartupConnector, LocalGroupPolicyScriptStartupConnector>()
+                .AddSingleton<ILocalGroupPolicyScriptShutdownConnector, LocalGroupPolicyScriptShutdownConnector>()
+                .AddSingleton<ILocalGroupPolicyScriptLogonConnector, LocalGroupPolicyScriptLogonConnector>()
+                .AddSingleton<ILocalGroupPolicyScriptLogoffConnector, LocalGroupPolicyScriptLogoffConnector>()
+                .AddSingleton<IGroupPolicyShellOverwriteConnector, GroupPolicyShellOverwriteConnector>()
+                .AddSingleton<IAlternateShellConnector, AlternateShellConnector>()
+                .AddSingleton<IAvailableShellsConnector, AvailableShellsConnector>()
+                .AddSingleton<ITerminalServerStartupProgramsConnector, TerminalServerStartupProgramsConnector>()
+                .AddSingleton<ITerminalServerRunConnector, TerminalServerRunConnector>()
+                .AddSingleton<ITerminalServerRunOnceConnector, TerminalServerRunOnceConnector>()
+                .AddSingleton<ITerminalServerRunOnceExConnector, TerminalServerRunOnceExConnector>()
+                .AddSingleton<ITerminalServerInitialProgramConnector, TerminalServerInitialProgramConnector>()
+                .AddSingleton<IRun32Connector, Run32Connector>()
+                .AddSingleton<IRunOnce32Connector, RunOnce32Connector>()
+                .AddSingleton<IRunOnceEx32Connector, RunOnceEx32Connector>()
+                .AddSingleton<IRun64Connector, Run64Connector>()
+                .AddSingleton<IRunOnce64Connector, RunOnce64Connector>()
+                .AddSingleton<IRunOnceEx64Connector, RunOnceEx64Connector>()
+                .AddSingleton<IGroupPolicyRunConnector, GroupPolicyRunConnector>()
+                .AddSingleton<IActiveSetup32Connector, ActiveSetup32Connector>()
+                .AddSingleton<IActiveSetup64Connector, ActiveSetup64Connector>()
+                .AddSingleton<IIconServiceLibConnector, IconServiceLibConnector>()
+                .AddSingleton<IWindowsCEServicesAutoStartOnConnect32Connector, WindowsCEServicesAutoStartOnConnect32Connector>()
+                .AddSingleton<IWindowsCEServicesAutoStartOnDisconnect32Connector, WindowsCEServicesAutoStartOnDisconnect32Connector>()
+                .AddSingleton<IWindowsCEServicesAutoStartOnConnect64Connector, WindowsCEServicesAutoStartOnConnect64Connector>()
+                .AddSingleton<IWindowsCEServicesAutoStartOnDisconnect64Connector, WindowsCEServicesAutoStartOnDisconnect64Connector>()
+                .AddSingleton<ICurrentUserLocalGroupPolicyScriptStartupConnector, CurrentUserLocalGroupPolicyScriptStartupConnector>()
+                .AddSingleton<ICurrentUserLocalGroupPolicyScriptShutdownConnector, CurrentUserLocalGroupPolicyScriptShutdownConnector>()
+                .AddSingleton<ICurrentUserLocalGroupPolicyScriptLogonConnector, CurrentUserLocalGroupPolicyScriptLogonConnector>()
+                .AddSingleton<ICurrentUserLocalGroupPolicyScriptLogoffConnector, CurrentUserLocalGroupPolicyScriptLogoffConnector>()
+                .AddSingleton<ICurrentUserUserInitMprLogonScriptConnector, CurrentUserUserInitMprLogonScriptConnector>()
+                .AddSingleton<ICurrentUserGroupPolicyShellOverwriteConnector, CurrentUserGroupPolicyShellOverwriteConnector>()
+                .AddSingleton<ICurrentUserLoadConnector, CurrentUserLoadConnector>()
+                .AddSingleton<ICurrentUserGroupPolicyRunConnector, CurrentUserGroupPolicyRunConnector>()
+                .AddSingleton<ICurrentUserRun32Connector, CurrentUserRun32Connector>()
+                .AddSingleton<ICurrentUserRunOnce32Connector, CurrentUserRunOnce32Connector>()
+                .AddSingleton<ICurrentUserRunOnceEx32Connector, CurrentUserRunOnceEx32Connector>()
+                .AddSingleton<ICurrentUserRun64Connector, CurrentUserRun64Connector>()
+                .AddSingleton<ICurrentUserRunOnce64Connector, CurrentUserRunOnce64Connector>()
+                .AddSingleton<ICurrentUserRunOnceEx64Connector, CurrentUserRunOnceEx64Connector>()
+                .AddSingleton<ICurrentUserTerminalServerRunConnector, CurrentUserTerminalServerRunConnector>()
+                .AddSingleton<ICurrentUserTerminalServerRunOnceConnector, CurrentUserTerminalServerRunOnceConnector>()
+                .AddSingleton<ICurrentUserTerminalServerRunOnceExConnector, CurrentUserTerminalServerRunOnceExConnector>()
+                .AddSingleton<IStartMenuAutoStartFolderConnector, StartMenuAutoStartFolderConnector>()
+                .AddSingleton<ICurrentUserStartMenuAutoStartFolderConnector, CurrentUserStartMenuAutoStartFolderConnector>()
+                .AddSingleton<IScheduledTaskConnector, ScheduledTaskConnector>()
+                .AddSingleton<IDeviceServiceConnector, DeviceServiceConnector>()
+                .AddSingleton<IOtherServiceConnector, OtherServiceConnector>();
         }
 
         public IList<AutoStartEntry> GetCurrentAutoStarts() {

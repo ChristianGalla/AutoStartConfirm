@@ -2,7 +2,8 @@
 
 namespace AutoStartConfirm.Connectors.Registry
 {
-    public class AppInit32Connector : RegistryConnector {
+    public class AppInit32Connector : RegistryConnector, IAppInit32Connector
+    {
 
         private readonly Category category = Category.AppInit32;
 
@@ -14,38 +15,50 @@ namespace AutoStartConfirm.Connectors.Registry
 
         private readonly bool monitorSubkeys = false;
 
-        public override string DisableBasePath {
-            get {
+        public override string DisableBasePath
+        {
+            get
+            {
                 return null;
             }
         }
 
-        public override string BasePath {
-            get {
+        public override string BasePath
+        {
+            get
+            {
                 return basePath;
             }
         }
 
-        public override string[] SubKeyNames {
-            get {
+        public override string[] SubKeyNames
+        {
+            get
+            {
                 return subKeys;
             }
         }
 
-        public override string[] ValueNames {
-            get {
+        public override string[] ValueNames
+        {
+            get
+            {
                 return valueNames;
             }
         }
 
-        public override Category Category {
-            get {
+        public override Category Category
+        {
+            get
+            {
                 return category;
             }
         }
 
-        public override bool MonitorSubkeys {
-            get {
+        public override bool MonitorSubkeys
+        {
+            get
+            {
                 return monitorSubkeys;
             }
         }

@@ -3,7 +3,8 @@ using System;
 
 namespace AutoStartConfirm.Connectors.Folder
 {
-    public class CurrentUserStartMenuAutoStartFolderConnector : FolderConnector {
+    public class CurrentUserStartMenuAutoStartFolderConnector : FolderConnector, ICurrentUserStartMenuAutoStartFolderConnector
+    {
 
         private readonly Category category = Category.CurrentUserStartMenuAutoStartFolder;
 
@@ -13,24 +14,31 @@ namespace AutoStartConfirm.Connectors.Folder
 
         private readonly static string disableBasePath = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
 
-        public override string DisableBasePath {
-            get {
+        public override string DisableBasePath
+        {
+            get
+            {
                 return disableBasePath;
             }
         }
 
-        public override bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+        public override bool IsAdminRequiredForChanges(AutoStartEntry autoStart)
+        {
             return false;
         }
 
-        public override Category Category {
-            get {
+        public override Category Category
+        {
+            get
+            {
                 return category;
             }
         }
 
-        public override string BasePath {
-            get {
+        public override string BasePath
+        {
+            get
+            {
                 return basePath;
             }
         }

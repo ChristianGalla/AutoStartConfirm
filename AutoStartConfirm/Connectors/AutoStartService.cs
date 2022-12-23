@@ -24,22 +24,7 @@ namespace AutoStartConfirm.Connectors
         #region Fields
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private IAutoStartConnectorService connectorServce;
-        public IAutoStartConnectorService ConnectorService {
-            get {
-                if (connectorServce == null) {
-                    connectorServce = new AutoStartConnectorService();
-                    connectorServce.Add += AddHandler;
-                    connectorServce.Remove += RemoveHandler;
-                    connectorServce.Enable += EnableHandler;
-                    connectorServce.Disable += DisableHandler;
-                }
-                return connectorServce;
-            }
-            set {
-                connectorServce = value;
-            }
-        }
+        private readonly IAutoStartConnectorService ConnectorService;
 
         private string currentExePath;
 
@@ -79,45 +64,9 @@ namespace AutoStartConfirm.Connectors
 
         public ObservableCollection<AutoStartEntry> AllHistoryAutoStarts => allHistoryAutoStarts;
 
-        private App app;
+        private readonly ISettingsService SettingsService;
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
-
-
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService {
-            get {
-                if (settingsService == null) {
-                    settingsService = App.SettingsService;
-                }
-                return settingsService;
-            }
-            set => settingsService = value;
-        }
-
-
-        private CurrentUserRun64Connector currentUserRun64Connector;
-
-        public CurrentUserRun64Connector CurrentUserRun64Connector {
-            get {
-                if (currentUserRun64Connector == null) {
-                    currentUserRun64Connector = new CurrentUserRun64Connector();
-                }
-                return currentUserRun64Connector;
-            }
-            set => currentUserRun64Connector = value;
-        }
+        private readonly ICurrentUserRun64Connector CurrentUserRun64Connector;
 
         public bool HasOwnAutoStart {
             get {
@@ -134,9 +83,17 @@ namespace AutoStartConfirm.Connectors
 
         #region Methods
 
-        public AutoStartService() {
+        public AutoStartService(IAutoStartConnectorService connectorService, ISettingsService settingsService, ICurrentUserRun64Connector currentUserRun64Connector)
+        {
+            ConnectorService = connectorService;
+            SettingsService = settingsService;
+            CurrentUserRun64Connector = currentUserRun64Connector;
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var basePath = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}";
+            ConnectorService.Add += AddHandler;
+            ConnectorService.Remove += RemoveHandler;
+            ConnectorService.Enable += EnableHandler;
+            ConnectorService.Disable += DisableHandler;
             PathToLastAutoStarts = $"{basePath}LastAutoStarts";
             PathToHistoryAutoStarts = $"{basePath}HistoryAutoStarts";
             SettingsService.SettingsSaving += SettingsSavingHandler;
@@ -806,15 +763,12 @@ namespace AutoStartConfirm.Connectors
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
-                    if (connectorServce != null) {
-                        connectorServce.Add -= AddHandler;
-                        connectorServce.Remove -= RemoveHandler;
-                        connectorServce.Enable -= EnableHandler;
-                        connectorServce.Disable -= DisableHandler;
-                        connectorServce.Dispose();
-                        SettingsService.SettingsSaving -= SettingsSavingHandler;
-                        SettingsService.SettingsLoaded -= SettingsLoadedHandler;
-                    }
+                    ConnectorService.Add -= AddHandler;
+                    ConnectorService.Remove -= RemoveHandler;
+                    ConnectorService.Enable -= EnableHandler;
+                    ConnectorService.Disable -= DisableHandler;
+                    SettingsService.SettingsSaving -= SettingsSavingHandler;
+                    SettingsService.SettingsLoaded -= SettingsLoadedHandler;
                 }
                 disposedValue = true;
             }

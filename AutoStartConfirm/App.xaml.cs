@@ -16,107 +16,37 @@ using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
 using System.ServiceModel.Channels;
 using System.Xml.Serialization;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.NetworkInformation;
+using AutoStartConfirm.Connectors.Registry;
 
 namespace AutoStartConfirm
 {
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : System.Windows.Application, IDisposable {
-        private static MainWindow Window = null;
+    public partial class App : System.Windows.Application, IDisposable, IApp
+    {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         public static TaskbarIcon Icon = null;
 
-        private AppStatus appStatus = null;
+        public static ServiceProvider ServiceProvider;
 
-        public AppStatus AppStatus { 
-            get {
-                if (appStatus == null) {
-                    appStatus = new AppStatus();
-                }
-                return appStatus;
-            }
-        }
+        private readonly MainWindow Window;
 
-        private IAutoStartService autoStartService;
+        private readonly IAppStatus AppStatus;
 
-        public IAutoStartService AutoStartService {
-            get {
-                if (autoStartService == null) {
-                    autoStartService = new AutoStartService();
-                }
-                return autoStartService;
-            }
-            set {
-                autoStartService = value;
-            }
-        }
+        private readonly IAutoStartService AutoStartService;
 
-        private INotificationService notificationService;
+        private readonly INotificationService NotificationService;
 
-        public INotificationService NotificationService {
-            get {
-                if (notificationService == null) {
-                    notificationService = new NotificationService();
-                }
-                return notificationService;
-            }
-            set {
-                notificationService = value;
-            }
-        }
+        private readonly IMessageService MessageService;
 
-        private IMessageService messageService;
+        private readonly ISettingsService SettingsService;
 
-        public IMessageService MessageService {
-            get {
-                if (messageService == null) {
-                    messageService = new MessageService();
-                }
-                return messageService;
-            }
-            set {
-                messageService = value;
-            }
-        }
-
-
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService {
-            get {
-                if (settingsService == null) {
-                    settingsService = new SettingsService();
-                }
-                return settingsService;
-            }
-            set {
-                settingsService = value;
-            }
-        }
-
-        private IUpdateService updateService;
-
-        public IUpdateService UpdateService
-        {
-            get
-            {
-                if (updateService == null)
-                {
-                    updateService = new UpdateService();
-                }
-                return updateService;
-            }
-            set
-            {
-                updateService = value;
-            }
-        }
-
-
-        private static App AppInstance;
+        private readonly IUpdateService UpdateService;
 
         private static readonly string RevertAddParameterName = "--revertAdd";
 
@@ -126,28 +56,56 @@ namespace AutoStartConfirm
 
         private static readonly string DisableParameterName = "--disable";
 
-        public App() {
-            SettingsService.EnsureConfiguration();
-            AppInstance = this;
+        private static void ConfigureServices(ServiceCollection services)
+        {
+            services.AddSingleton<MainWindow>()
+                .AddSingleton<IApp, App>()
+                .AddSingleton<IAppStatus, AppStatus>()
+                .AddSingleton<IAutoStartService, AutoStartService>()
+                .AddSingleton<INotificationService, NotificationService>()
+                .AddSingleton<IMessageService, MessageService>()
+                .AddSingleton<ISettingsService, SettingsService>()
+                .AddSingleton<IUpdateService, UpdateService>()
+                .AddSingleton<IAutoStartConnectorService, AutoStartConnectorService>();
+            AutoStartConnectorService.ConfigureServices(services);
         }
 
-        public void Start(bool skipInitializing = false) {
+
+        public App(MainWindow window, IAppStatus appStatus, IAutoStartService autoStartService, INotificationService notificationService, IMessageService messageService, ISettingsService settingsService, IUpdateService updateService)
+        {
+            Window = window;
+            AppStatus = appStatus;
+            AutoStartService = autoStartService;
+            NotificationService = notificationService;
+            MessageService = messageService;
+            SettingsService = settingsService;
+            UpdateService = updateService;
+            SettingsService.EnsureConfiguration();
+        }
+
+        public void Start(bool skipInitializing = false)
+        {
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
             bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
-            if (!isFirstRun) {
+            if (!isFirstRun)
+            {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
                 AutoStartService.Enable += EnableHandler;
                 AutoStartService.Disable += DisableHandler;
             }
 
-            try {
+            try
+            {
                 AutoStartService.LoadCurrentAutoStarts();
                 AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
             }
 
-            if (isFirstRun) {
+            if (isFirstRun)
+            {
                 AutoStartService.Add += AddHandler;
                 AutoStartService.Remove += RemoveHandler;
                 AutoStartService.Enable += EnableHandler;
@@ -160,22 +118,30 @@ namespace AutoStartConfirm
                 UpdateService.CheckUpdateAndShowNotification();
             }
 
-            if (!skipInitializing) {
+            if (!skipInitializing)
+            {
                 InitializeComponent();
             }
         }
 
-        public Task ToggleOwnAutoStart() {
-            return Task.Run(() => {
-                try {
+        public Task ToggleOwnAutoStart()
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
                     AutoStartService.ToggleOwnAutoStart();
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = "Failed to change own auto start";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
@@ -185,12 +151,20 @@ namespace AutoStartConfirm
         /// Application Entry Point.
         /// </summary>
         [System.STAThreadAttribute()]
-        public static int Main(string[] args) {
-            try {
-                Logger.Info("Starting");
-                using (App app = new App()) {
+        public static int Main(string[] args)
+        {
+            try
+            {
+                ServiceCollection services = new ServiceCollection();
+                ConfigureServices(services);
+                ServiceProvider = services.BuildServiceProvider();
+                using (var serviceScope = ServiceProvider.CreateScope())
+                {
+                    Logger.Info("Starting");
+                    App app = serviceScope.ServiceProvider.GetRequiredService<App>();
                     Logger.Info("Parameters: {args}", args);
-                    if (app.HandleCommandLineParameters(args)) {
+                    if (app.HandleCommandLineParameters(args))
+                    {
                         return 0;
                     }
                     Logger.Info("Normal start");
@@ -198,9 +172,10 @@ namespace AutoStartConfirm
                     app.Run(); // blocks until program is closing
                     Logger.Info("Finished");
                 }
-                AppInstance = null;
                 return 0;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 var err = new Exception("Failed to run", e);
                 Logger.Error(err);
                 return 1;
@@ -212,28 +187,37 @@ namespace AutoStartConfirm
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
-        private bool HandleCommandLineParameters(string[] args) {
-            for (int i = 0; i < args.Length; i++) {
+        private bool HandleCommandLineParameters(string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
                 var arg = args[i];
-                if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase)) {
+                if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
+                {
                     Logger.Info("Adding should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
                     AutoStartService.RemoveAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
-                } else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase)) {
+                }
+                else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
+                {
                     Logger.Info("Removing should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
                     AutoStartService.AddAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
-                } else if (string.Equals(arg, EnableParameterName, StringComparison.OrdinalIgnoreCase)) {
+                }
+                else if (string.Equals(arg, EnableParameterName, StringComparison.OrdinalIgnoreCase))
+                {
                     Logger.Info("Auto start should be enabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
                     AutoStartService.EnableAutoStart(autoStartEntry);
                     Logger.Info("Finished");
                     return true;
-                } else if (string.Equals(arg, DisableParameterName, StringComparison.OrdinalIgnoreCase)) {
+                }
+                else if (string.Equals(arg, DisableParameterName, StringComparison.OrdinalIgnoreCase))
+                {
                     Logger.Info("Auto start should be disabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
                     AutoStartService.DisableAutoStart(autoStartEntry);
@@ -244,8 +228,10 @@ namespace AutoStartConfirm
             return false;
         }
 
-        private static AutoStartEntry LoadAutoStartFromParameter(string[] args, int i) {
-            if (i + 1 >= args.Length) {
+        private static AutoStartEntry LoadAutoStartFromParameter(string[] args, int i)
+        {
+            if (i + 1 >= args.Length)
+            {
                 throw new ArgumentException("Missing path to file");
             }
             var path = args[i + 1];
@@ -253,207 +239,243 @@ namespace AutoStartConfirm
             return autoStartEntry;
         }
 
-        private static AutoStartEntry LoadAutoStartFromFile(string path) {
+        private static AutoStartEntry LoadAutoStartFromFile(string path)
+        {
             Logger.Trace("LoadAutoStartFromFile called");
-            using (Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                try {
+            using (Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                try
+                {
                     XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
                     var ret = (AutoStartEntry)serializer.Deserialize(stream);
                     return ret;
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     var err = new Exception("Failed to deserialize", ex);
                     throw err;
                 }
             }
         }
 
-        void App_Startup(object sender, StartupEventArgs e) {
-            Logger.Trace("App_Startup called"); 
+        void App_Startup(object sender, StartupEventArgs e)
+        {
+            Logger.Trace("App_Startup called");
             Icon = (TaskbarIcon)FindResource("NotifyIcon");
         }
 
-        public static void ToggleMainWindow() {
+        public void ToggleMainWindow()
+        {
             Logger.Trace("Toggling main window");
-            if (Window == null || Window.IsClosed) {
-                Logger.Trace("Creating new main window");
-                Window = new MainWindow();
-            }
-            if (Window.IsVisible) {
+            if (Window.IsVisible)
+            {
                 Logger.Trace("Closing main window");
                 Window.Close();
-            } else {
+            }
+            else
+            {
                 Logger.Trace("Showing main window");
                 Window.Show();
             }
         }
 
-        /// <summary>
-        /// Ensures that the main window is open
-        /// </summary>
-        /// <param name="hidden">If true creates a new hidden window if it not already exists</param>
-        /// <returns>true if a new window has been created</returns>
-        public static bool EnsureMainWindow(bool hidden = false) {
-            Logger.Trace("Showing main window");
-            bool newCreated = false;
-            if (Window == null || Window.IsClosed) {
-                Logger.Trace("Creating new main window");
-                Window = new MainWindow();
-                newCreated = true;
-            }
-            if (newCreated && hidden) {
-                Window.WindowState = WindowState.Minimized;
-                Logger.Trace("Showing main window");
-                Window.Show();
-            } else if (!hidden && !Window.IsVisible) {
-                Logger.Trace("Showing main window");
-                Window.Show();
-            }
-            return newCreated;
-        }
-
-        internal static void Close() {
+        internal static void Close()
+        {
             Logger.Info("Closing application");
-            try {
+            try
+            {
                 Current.Shutdown();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Logger.Error(e);
             }
         }
 
-        protected override void OnExit(ExitEventArgs e) {
-            try {
+        protected override void OnExit(ExitEventArgs e)
+        {
+            try
+            {
                 AutoStartService.SaveAutoStarts();
-            } finally {
-                try {
+            }
+            finally
+            {
+                try
+                {
                     Icon.Dispose();
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                 }
                 base.OnExit(e);
             }
         }
 
-        public void ShowAdd(Guid id) {
+        public void ShowAdd(Guid id)
+        {
             // todo: jump to added
             Logger.Trace("ShowAdd called");
-            EnsureMainWindow();
         }
 
-        public void ShowRemoved(Guid id) {
+        public void ShowRemoved(Guid id)
+        {
             // todo: jump to removed
             Logger.Trace("ShowRemoved called");
-            EnsureMainWindow();
         }
 
-        public void RevertAdd(Guid id) {
+        public void RevertAdd(Guid id)
+        {
             Logger.Info("Addition of {id} should be reverted", id);
-            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart)) {
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart))
+            {
                 RevertAdd(autoStart);
-            } else {
+            }
+            else
+            {
                 var message = "Failed to get auto start to remove";
                 Logger.Error(message);
                 MessageService.ShowError(message);
             }
         }
 
-        public void RevertAdd(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public void RevertAdd(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("Should add {@autoStart}", autoStart);
-                try {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?")) {
+                    if (!MessageService.ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?"))
+                    {
                         return;
                     }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
+                    {
                         StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    } else {
+                    }
+                    else
+                    {
                         AutoStartService.RemoveAutoStart(autoStart);
                     }
                     MessageService.ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = "Failed to revert add";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName) {
+        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
+        {
             Logger.Trace("StartSubProcessAsAdmin called");
             string path = Path.GetTempFileName();
-            try {
-                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None)) {
+            try
+            {
+                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None))
+                {
                     XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
                     serializer.Serialize(stream, autoStart);
                 }
 
                 var info = new ProcessStartInfo(
                     AutoStartService.CurrentExePath,
-                    $"{parameterName} {path}") {
+                    $"{parameterName} {path}")
+                {
                     Verb = "runas", // indicates to elevate privileges
                 };
 
-                var process = new Process {
+                var process = new Process
+                {
                     EnableRaisingEvents = true, // enable WaitForExit()
                     StartInfo = info
                 };
 
                 process.Start();
                 process.WaitForExit();
-                if (process.ExitCode != 0) {
+                if (process.ExitCode != 0)
+                {
                     throw new Exception("Sub process failed to execute");
                 }
-            } finally {
+            }
+            finally
+            {
                 File.Delete(path);
             }
         }
 
-        public void RevertRemove(Guid id) {
+        public void RevertRemove(Guid id)
+        {
             Logger.Info("Removal of {id} should be reverted", id);
-            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart)) {
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart))
+            {
                 RevertRemove(autoStart);
-            } else {
+            }
+            else
+            {
                 var message = "Failed to get auto start to add";
                 Logger.Error(message);
                 MessageService.ShowError(message);
             }
         }
 
-        public void RevertRemove(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public void RevertRemove(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("Should remove {@autoStart}", autoStart);
-                try {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?")) {
+                    if (!MessageService.ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?"))
+                    {
                         return;
                     }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
+                    {
                         StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    } else {
+                    }
+                    else
+                    {
                         AutoStartService.AddAutoStart(autoStart);
                     }
                     MessageService.ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = "Failed to revert remove";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void Enable(Guid id) {
-            Task.Run(() => {
+        public void Enable(Guid id)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("{id} should be enabled", id);
-                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart))
+                {
                     Enable(autoStart);
-                } else {
+                }
+                else
+                {
                     var message = "Failed to get auto start to enable";
                     Logger.Error(message);
                     MessageService.ShowError(message);
@@ -461,38 +483,54 @@ namespace AutoStartConfirm
             });
         }
 
-        public void Enable(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public void Enable(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("Should enable {@autoStart}", autoStart);
-                try {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?")) {
+                    if (!MessageService.ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?"))
+                    {
                         return;
                     }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
+                    {
                         StartSubProcessAsAdmin(autoStart, EnableParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Enabled;
-                    } else {
+                    }
+                    else
+                    {
                         AutoStartService.EnableAutoStart(autoStart);
                     }
                     MessageService.ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = "Failed to enable";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void Disable(Guid id) {
-            Task.Run(() => {
+        public void Disable(Guid id)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("{id} should be disabled", id);
-                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart)) {
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart))
+                {
                     Disable(autoStart);
-                } else {
+                }
+                else
+                {
                     var message = "Failed to get auto start to disable";
                     Logger.Error(message);
                     MessageService.ShowError(message);
@@ -500,95 +538,134 @@ namespace AutoStartConfirm
             });
         }
 
-        public void Disable(AutoStartEntry autoStart) {
-            Task.Run(() => {
+        public void Disable(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
                 Logger.Info("Should disable {@autoStart}", autoStart);
-                try {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?")) {
+                    if (!MessageService.ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?"))
+                    {
                         return;
                     }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart)) {
+                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
+                    {
                         StartSubProcessAsAdmin(autoStart, DisableParameterName);
                         autoStart.ConfirmStatus = ConfirmStatus.Disabled;
-                    } else {
+                    }
+                    else
+                    {
                         AutoStartService.DisableAutoStart(autoStart);
                     }
                     MessageService.ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = "Failed to disable";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void ConfirmAdd(Guid id) {
-            Task.Run(() => {
-                try {
+        public void ConfirmAdd(Guid id)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmAdd called");
                     AutoStartService.ConfirmAdd(id);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = $"Failed to confirm add of {id}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void ConfirmAdd(AutoStartEntry autoStart) {
-            Task.Run(() => {
-                try {
+        public void ConfirmAdd(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmAdd called");
                     AutoStartService.ConfirmAdd(autoStart);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = $"Failed to confirm add of {autoStart}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void ConfirmRemove(Guid id) {
-            Task.Run(() => {
-                try {
+        public void ConfirmRemove(Guid id)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmRemove called");
                     AutoStartService.ConfirmRemove(id);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = $"Failed to confirm remove of {id}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
         }
 
-        public void ConfirmRemove(AutoStartEntry autoStart) {
-            Task.Run(() => {
-                try {
+        public void ConfirmRemove(AutoStartEntry autoStart)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
                     AppStatus.IncrementRunningActionCount();
                     Logger.Trace("ConfirmRemove called");
                     AutoStartService.ConfirmRemove(autoStart);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     var message = $"Failed to confirm remove of {autoStart}";
                     var err = new Exception(message, e);
                     Logger.Error(err);
                     MessageService.ShowError(message, e);
-                } finally {
+                }
+                finally
+                {
                     AppStatus.DecrementRunningActionCount();
                 }
             });
@@ -611,9 +688,11 @@ namespace AutoStartConfirm
         }
 
         #region Event handlers
-        protected override void OnStartup(StartupEventArgs e) {
+        protected override void OnStartup(StartupEventArgs e)
+        {
             // Listen to notification activation
-            ToastNotificationManagerCompat.OnActivated += toastArgs => {
+            ToastNotificationManagerCompat.OnActivated += toastArgs =>
+            {
                 Logger.Trace("Toast activated {Arguments}", toastArgs.Argument);
                 // Obtain the arguments from the notification
                 ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
@@ -622,7 +701,8 @@ namespace AutoStartConfirm
                 ValueSet userInput = toastArgs.UserInput;
 
                 // Need to dispatch to UI thread if performing UI operations
-                System.Windows.Application.Current.Dispatcher.Invoke(delegate {
+                System.Windows.Application.Current.Dispatcher.Invoke(delegate
+                {
                     Logger.Trace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
                     if (args.TryGetValue("action", out string action))
                     {
@@ -678,30 +758,36 @@ namespace AutoStartConfirm
             base.OnStartup(e);
         }
 
-        private void AddHandler(AutoStartEntry addedAutostart) {
+        private void AddHandler(AutoStartEntry addedAutostart)
+        {
             Logger.Trace("AddHandler called");
-            if (AutoStartService.IsOwnAutoStart(addedAutostart)) {
+            if (AutoStartService.IsOwnAutoStart(addedAutostart))
+            {
                 Logger.Info("Own auto start added");
                 AppStatus.HasOwnAutoStart = true;
             }
             NotificationService.ShowNewAutoStartEntryNotification(addedAutostart);
         }
 
-        private void RemoveHandler(AutoStartEntry removedAutostart) {
+        private void RemoveHandler(AutoStartEntry removedAutostart)
+        {
             Logger.Trace("RemoveHandler called");
-            if (AutoStartService.IsOwnAutoStart(removedAutostart)) {
+            if (AutoStartService.IsOwnAutoStart(removedAutostart))
+            {
                 Logger.Info("Own auto start removed");
                 AppStatus.HasOwnAutoStart = false;
             }
             NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
         }
 
-        private void EnableHandler(AutoStartEntry enabledAutostart) {
+        private void EnableHandler(AutoStartEntry enabledAutostart)
+        {
             Logger.Trace("EnableHandler called");
             NotificationService.ShowEnabledAutoStartEntryNotification(enabledAutostart);
         }
 
-        private void DisableHandler(AutoStartEntry disabledAutostart) {
+        private void DisableHandler(AutoStartEntry disabledAutostart)
+        {
             Logger.Trace("DisableHandler called");
             NotificationService.ShowDisabledAutoStartEntryNotification(disabledAutostart);
         }
@@ -710,19 +796,21 @@ namespace AutoStartConfirm
         #region IDisposable Support
         private bool disposedValue = false;
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
-                    if (AutoStartService != null) {
-                        AutoStartService.Dispose();
-                    }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    ServiceProvider.Dispose();
                 }
                 disposedValue = true;
             }
         }
 
         // This code added to correctly implement the disposable pattern.
-        public void Dispose() {
+        public void Dispose()
+        {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
         }

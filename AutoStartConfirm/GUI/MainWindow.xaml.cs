@@ -16,55 +16,9 @@ namespace AutoStartConfirm.GUI
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private App app;
-
-        private IAutoStartService autoStartService;
-
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
-
-        public AppStatus AppStatus {
-            get => App.AppStatus;
-        }
-
-        public IAutoStartService AutoStartService {
-            get {
-                if (autoStartService == null) {
-                    autoStartService = App.AutoStartService;
-                }
-                return autoStartService;
-            }
-            set {
-                autoStartService = value;
-            }
-        }
-
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService
-        {
-            get
-            {
-                if (settingsService == null)
-                {
-                    settingsService = new SettingsService();
-                }
-                return settingsService;
-            }
-            set
-            {
-                settingsService = value;
-            }
-        }
+        private readonly ConnectorWindow ConnectorWindow;
+        private readonly IAutoStartService AutoStartService;
+        private readonly App App;
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
             get {
@@ -78,8 +32,11 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public MainWindow()
+        public MainWindow(ConnectorWindow connectorWindow, AutoStartService autoStartService, App app)
         {
+            ConnectorWindow = connectorWindow;
+            AutoStartService = autoStartService;
+            App = app;
             Logger.Trace("Window opened");
             InitializeComponent();
         }
@@ -150,8 +107,7 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {
-            var connectorWindow = new ConnectorWindow();
-            connectorWindow.Show();
+            ConnectorWindow.Show();
         }
 
         #endregion

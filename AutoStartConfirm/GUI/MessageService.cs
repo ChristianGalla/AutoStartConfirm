@@ -4,21 +4,15 @@ using System.Windows;
 namespace AutoStartConfirm.GUI
 {
     public class MessageService : IMessageService {
-        private MainWindow window;
-
-        public MainWindow Window {
-            get {
-                if (window == null) {
-                    window = Application.Current.MainWindow as MainWindow;
-                }
-                return window;
-            }
-            set {
-                window = value;
-            }
-        }
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+        private readonly MainWindow MainWindow;
+
+        public MessageService(MainWindow mainWindow)
+        {
+            MainWindow = mainWindow;
+        }
 
         public void ShowError(string caption, Exception error) {
             ShowError(caption, error.Message);
@@ -29,9 +23,9 @@ namespace AutoStartConfirm.GUI
                 // Message boxes can only be shown if a parent window exists
                 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
                 bool newWindow = EnsureMainWindow();
-                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(MainWindow, message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (newWindow) {
-                    Window.Close();
+                    MainWindow.Close();
                 }
             });
         }
@@ -41,9 +35,9 @@ namespace AutoStartConfirm.GUI
                 // Message boxes can only be shown if a parent window exists
                 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
                 bool newWindow = EnsureMainWindow();
-                var ret = MessageBox.Show(Window, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                var ret = MessageBox.Show(MainWindow, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (newWindow) {
-                    Window.Close();
+                    MainWindow.Close();
                 }
                 return ret == MessageBoxResult.Yes;
             });
@@ -54,9 +48,9 @@ namespace AutoStartConfirm.GUI
                 // Message boxes can only be shown if a parent window exists
                 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf
                 bool newWindow = EnsureMainWindow();
-                MessageBox.Show(Window, message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(MainWindow, message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
                 if (newWindow) {
-                    Window.Close();
+                    MainWindow.Close();
                 }
             });
         }
@@ -70,16 +64,7 @@ namespace AutoStartConfirm.GUI
         private bool EnsureMainWindow() {
             Logger.Trace("Showing main window");
             bool newCreated = false;
-            if (Window == null || Window.IsClosed) {
-                Logger.Trace("Creating new main window");
-                Window = new MainWindow();
-                newCreated = true;
-            }
-            if (newCreated) {
-                Window.WindowState = WindowState.Minimized;
-                Logger.Trace("Showing main window");
-                Window.Show();
-            }
+            MainWindow.Show();
             return newCreated;
         }
     }

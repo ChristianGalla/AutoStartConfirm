@@ -30,45 +30,9 @@ namespace AutoStartConfirm.Update
         }
 
 
-        private INotificationService notificationService;
-
-        public INotificationService NotificationService
-        {
-            get
-            {
-                if (notificationService == null)
-                {
-                    notificationService = new NotificationService();
-                }
-                return notificationService;
-            }
-            set
-            {
-                notificationService = value;
-            }
-        }
-
-
-        private ISettingsService settingsService;
-
-        public ISettingsService SettingsService
-        {
-            get
-            {
-                if (settingsService == null)
-                {
-                    settingsService = new SettingsService();
-                }
-                return settingsService;
-            }
-            set
-            {
-                settingsService = value;
-            }
-        }
-
-
         public IGitHubClient gitHubClient;
+        private SettingsService SettingsService;
+        private NotificationService NotificationService;
 
         public IGitHubClient GitHubClient
         {
@@ -87,7 +51,9 @@ namespace AutoStartConfirm.Update
         }
 
 
-        public UpdateService() {
+        public UpdateService(SettingsService settingsService, NotificationService notificationService) {
+            SettingsService = settingsService;
+            NotificationService = notificationService;
         }
 
         public async Task<Release> GetNewestRelease()
