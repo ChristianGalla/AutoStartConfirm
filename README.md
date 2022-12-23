@@ -16,6 +16,7 @@ Therefore, this program monitors whether a program wants to start automatically 
 
 * [Changelog](#changelog)
 * [Installation](#installation)
+  * [Windows Package Manager (Winget)](#windows-package-manager-winget)
 * [Usage documentation](#usage-documentation)
 * [Usage warning](#usage-warning)
 * [State of development](#state-of-development)
@@ -30,9 +31,22 @@ You can find recent changes in the file [CHANGELOG.md](https://github.com/Christ
 
 ## Installation
 
-The installer of the latest version can be downloaded from the [release page](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest).
+The installers of the latest version can be downloaded from the [release page](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest).
 
-Also, this program is available via [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/):
+There are two versions:
+1. AutoStartConfirmSetup_Standalone.msi
+2. AutoStartConfirmSetup_FrameworkDependent.msi
+
+Usually, you should download and install **AutoStartConfirmSetup_Standalone.msi**. This version includes all dependencies and can easily be installed on any computer.
+
+The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) and is therefore much smaller.
+If multiple programs are using this runtime, it is possible to save disk space having only one central runtime installation.
+When using this installer, you are responsible for installing the runtime. If it is not installed, the program cannot run.
+
+### Windows Package Manager (Winget)
+
+This program is available via [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/).
+You can install it using the following command prompt or PowerShell command:
 
 ```powershell
 winget install ChristianGalla.AutoStartConfirm
@@ -122,4 +136,4 @@ This program was created in Visual Studio.
 
 There are some NuGet dependencies that must be installed before it can be compiled.
 
-The installer is build using [WiX Toolset build tools](https://wixtoolset.org/releases/) and the WiX Toolset Visual Studio Extension.
+The installers are build using [WiX Toolset build tools v3](https://wixtoolset.org/docs/wix3/) and the WiX Toolset Visual Studio Extension.

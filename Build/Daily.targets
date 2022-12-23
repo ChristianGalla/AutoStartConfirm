@@ -28,7 +28,7 @@
 		</PropertyGroup>
 
 		<!-- Build both framework-dependent and standalone releases -->
-		<Exec Command="dotnet publish $(ProjectFile) -c $(Configuration) --no-self-contained -r $(Architecture) --output $(PublishDir)$(Configuration)_$(Architecture)\" />
+		<Exec Command="dotnet publish $(ProjectFile) -c $(Configuration) --no-self-contained -r $(Architecture) --output $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" />
 		<Exec Command="dotnet publish $(ProjectFile) -c $(Configuration) --self-contained -r $(Architecture) --output $(PublishDir)$(Configuration)_Standalone_$(Architecture)\" />
 
 		<!-- Once build is done, we can now get the assembly version to embed in files below -->
@@ -53,11 +53,11 @@
 				FromDailyTargets=true
 			</BuildParams>
 		</PropertyGroup>
-		<MsBuild Projects="$(WixProject)" Targets="Build" Properties="BuildType=Framework-dependent;$(BuildParams)"/>
+		<MsBuild Projects="$(WixProject)" Targets="Build" Properties="BuildType=FrameworkDependent;$(BuildParams)"/>
 		<MsBuild Projects="$(WixProject)" Targets="Build" Properties="BuildType=Standalone;$(BuildParams)"/>
 
 		<!-- Optional: Clean up intermediate build directories. Warning though... this breaks your ability to build the WiX project within VS!
-		<RemoveDir Directories="$(PublishDir)$(Configuration)_$(Architecture)\"/>
+		<RemoveDir Directories="$(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\"/>
 		<RemoveDir Directories="$(PublishDir)$(Configuration)_Standalone_$(Architecture)\"/>
 		-->
 

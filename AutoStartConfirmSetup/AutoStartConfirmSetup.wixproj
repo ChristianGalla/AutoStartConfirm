@@ -2,10 +2,11 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- Imported variables section. Default values should be set here for when the project is built from within VS. -->
-    <!-- Logic to figure out if we're doing a framework-dependent or static build. Do framework-dependent by default -->
+    <!-- Logic to figure out if we're doing a FrameworkDependent or static build. Do FrameworkDependent by default -->
     <!-- Note that these must match the calling property values exactly -->
-    <BuildType Condition="'$(BuildType)' == '' ">Framework-dependent</BuildType>
+    <BuildType Condition="'$(BuildType)' == '' ">FrameworkDependent</BuildType>
     <BuildDirModifier Condition="'$(BuildType)' == 'Standalone'">_Standalone</BuildDirModifier>
+	<BuildDirModifier Condition="'$(BuildType)' == 'FrameworkDependent'">_FrameworkDependent</BuildDirModifier>
     <OSTarget Condition="'$(OSTarget)' == ''">win10</OSTarget>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
     <Architecture Condition="'$(Architecture)' == ''">$(OSTarget)-$(Platform)</Architecture>
