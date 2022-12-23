@@ -18,7 +18,7 @@ namespace AutoStartConfirm.GUI
 
         private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
-        private readonly App App;
+        private readonly IApp App;
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
             get {
@@ -32,7 +32,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public MainWindow(ConnectorWindow connectorWindow, AutoStartService autoStartService, App app)
+        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService, IApp app)
         {
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;

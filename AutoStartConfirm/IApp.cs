@@ -15,6 +15,7 @@ namespace AutoStartConfirm
         void Dispose();
         void Enable(AutoStartEntry autoStart);
         void Enable(Guid id);
+        bool HandleCommandLineParameters(string[] args);
         void InitializeComponent();
         void InstallUpdate(string msiUrl = null);
         void RevertAdd(AutoStartEntry autoStart);
@@ -27,5 +28,6 @@ namespace AutoStartConfirm
         void ToggleMainWindow();
         Task ToggleOwnAutoStart();
         void ViewUpdate();
+        public int Run();
     }
 }

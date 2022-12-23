@@ -3,6 +3,7 @@
 namespace AutoStartConfirm.GUI
 {
     public partial class NotifyIcon {
+        // TODO: Add DI
         private App app;
 
         public App App {

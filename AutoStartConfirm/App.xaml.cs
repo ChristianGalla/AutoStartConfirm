@@ -59,6 +59,8 @@ namespace AutoStartConfirm
         private static void ConfigureServices(ServiceCollection services)
         {
             services.AddSingleton<MainWindow>()
+                .AddSingleton<ConnectorWindow>()
+                .AddSingleton<AboutWindow>()
                 .AddSingleton<IApp, App>()
                 .AddSingleton<IAppStatus, AppStatus>()
                 .AddSingleton<IAutoStartService, AutoStartService>()
@@ -161,7 +163,7 @@ namespace AutoStartConfirm
                 using (var serviceScope = ServiceProvider.CreateScope())
                 {
                     Logger.Info("Starting");
-                    App app = serviceScope.ServiceProvider.GetRequiredService<App>();
+                    IApp app = serviceScope.ServiceProvider.GetRequiredService<IApp>();
                     Logger.Info("Parameters: {args}", args);
                     if (app.HandleCommandLineParameters(args))
                     {
@@ -187,7 +189,7 @@ namespace AutoStartConfirm
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
-        private bool HandleCommandLineParameters(string[] args)
+        public bool HandleCommandLineParameters(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
             {
