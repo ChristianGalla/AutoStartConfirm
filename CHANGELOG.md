@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing
+### Changed
+- Runtime environment from .NET Framework 4 to .NET 6
 
 
 ## [1.1.8368] (2022-11-29)
