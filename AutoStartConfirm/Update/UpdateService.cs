@@ -31,8 +31,8 @@ namespace AutoStartConfirm.Update
 
 
         public IGitHubClient gitHubClient;
-        private SettingsService SettingsService;
-        private NotificationService NotificationService;
+        private ISettingsService SettingsService;
+        private INotificationService NotificationService;
 
         public IGitHubClient GitHubClient
         {
@@ -51,7 +51,7 @@ namespace AutoStartConfirm.Update
         }
 
 
-        public UpdateService(SettingsService settingsService, NotificationService notificationService) {
+        public UpdateService(ISettingsService settingsService, INotificationService notificationService) {
             SettingsService = settingsService;
             NotificationService = notificationService;
         }

@@ -16,8 +16,6 @@ namespace AutoStartConfirm.Properties {
         event SettingsSavingEventHandler SettingsSaving;
         event SettingsLoadedEventHandler SettingsLoaded;
 
-        void EnsureConfiguration();
-
         void Save();
     }
 }

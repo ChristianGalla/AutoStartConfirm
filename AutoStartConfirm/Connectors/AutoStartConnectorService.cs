@@ -311,8 +311,10 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region IAutoStartConnector implementation
-        public Category Category => throw new NotImplementedException();
 
+#pragma warning disable CA1065
+        public Category Category => throw new NotImplementedException();
+#pragma warning restore CA1065
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
             Logger.Trace("Checking if auto start {@autoStart} can be added", autoStart);

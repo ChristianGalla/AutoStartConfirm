@@ -5,11 +5,10 @@
     x:Name="Icon"
     xmlns:local="clr-namespace:AutoStartConfirm.GUI"
     xmlns:local1="clr-namespace:AutoStartConfirm.Models">
-    <local:NotifyIconDoubleClickCommand x:Key="NotifyIconDoubleClickCommand"></local:NotifyIconDoubleClickCommand>
     <tb:TaskbarIcon x:Key="NotifyIcon"
                   IconSource="/Assets/Icon.ico"
                   ToolTipText="Auto Start Confirm"
-                  DoubleClickCommand="{StaticResource NotifyIconDoubleClickCommand}">
+                  DoubleClickCommand="IconDoubleClicked">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
                 <MenuItem

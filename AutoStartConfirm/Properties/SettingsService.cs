@@ -14,7 +14,7 @@ namespace AutoStartConfirm.Properties
         /// <summary>
         /// Ensures a valid configuration exists and upgrades configuration from a previous version if needed
         /// </summary>
-        public void EnsureConfiguration() {
+        private void EnsureConfiguration() {
             Logger.Debug("Ensuring configuration");
             if (Settings.Default.UpgradeRequired) {
                 Logger.Info("Upgrading configuration");
@@ -23,15 +23,17 @@ namespace AutoStartConfirm.Properties
                 Settings.Default.Save();
                 Logger.Info("Configuration upgraded");
             }
-            if (Settings.Default.DisabledConnectors == null) {
-                Settings.Default.DisabledConnectors = new StringCollection();
-            }
             Logger.Debug("Ensured configuration");
         }
 
         public StringCollection DisabledConnectors
         {
-            get {
+            get
+            {
+                if (Settings.Default.DisabledConnectors == null)
+                {
+                    Settings.Default.DisabledConnectors = new StringCollection();
+                }
                 return Settings.Default.DisabledConnectors;
             }
             set
@@ -93,6 +95,7 @@ namespace AutoStartConfirm.Properties
         public void Save() => Settings.Default.Save();
 
         public SettingsService() {
+            EnsureConfiguration();
             Settings.Default.SettingChanging += SettingChangingHandler;
             Settings.Default.PropertyChanged += PropertyChangedHandler;
             Settings.Default.SettingsSaving += SettingsSavingHandler;

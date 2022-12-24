@@ -25,12 +25,12 @@ namespace AutoStartConfirm
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : System.Windows.Application, IDisposable, IApp
+    public partial class App : System.Windows.Application, IDisposable
     {
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public static TaskbarIcon Icon = null;
+        public static NotifyIcon Icon = null;
 
         public static ServiceProvider ServiceProvider;
 
@@ -58,10 +58,10 @@ namespace AutoStartConfirm
 
         private static void ConfigureServices(ServiceCollection services)
         {
-            services.AddSingleton<MainWindow>()
+            services.AddSingleton<App>()
+                .AddSingleton<MainWindow>()
                 .AddSingleton<ConnectorWindow>()
                 .AddSingleton<AboutWindow>()
-                .AddSingleton<IApp, App>()
                 .AddSingleton<IAppStatus, AppStatus>()
                 .AddSingleton<IAutoStartService, AutoStartService>()
                 .AddSingleton<INotificationService, NotificationService>()
@@ -82,7 +82,51 @@ namespace AutoStartConfirm
             MessageService = messageService;
             SettingsService = settingsService;
             UpdateService = updateService;
-            SettingsService.EnsureConfiguration();
+
+            Window.ConfirmAdd += ConfirmAddHandler;
+            Window.RevertAdd += RevertAddHandler;
+            Window.RevertAddId += RevertAddIdHandler;
+            Window.Enable += EnableHandler;
+            Window.Disable += DisableHandler;
+            Window.ConfirmRemove += ConfirmRemoveHandler;
+            Window.RevertRemove += RevertRemoveHandler;
+            Window.RevertRemoveId += RevertRemoveIdHandler;
+            Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
+        }
+
+        private void RevertRemoveIdHandler(Guid e)
+        {
+            RevertRemove(e);
+        }
+
+        private void RevertRemoveHandler(AutoStartEntry e)
+        {
+            RevertRemove(e);
+        }
+
+        private void ConfirmRemoveHandler(AutoStartEntry e)
+        {
+            ConfirmRemove(e);
+        }
+
+        private void RevertAddIdHandler(Guid e)
+        {
+            RevertAdd(e);
+        }
+
+        private void RevertAddHandler(AutoStartEntry e)
+        {
+            RevertAddHandler(e);
+        }
+
+        private void ConfirmAddHandler(AutoStartEntry e)
+        {
+            ConfirmAdd(e);
+        }
+
+        private void ToggleOwnAutoStartHandler(object sender, EventArgs e)
+        {
+            ToggleOwnAutoStart();
         }
 
         public void Start(bool skipInitializing = false)
@@ -163,7 +207,7 @@ namespace AutoStartConfirm
                 using (var serviceScope = ServiceProvider.CreateScope())
                 {
                     Logger.Info("Starting");
-                    IApp app = serviceScope.ServiceProvider.GetRequiredService<IApp>();
+                    App app = serviceScope.ServiceProvider.GetRequiredService<App>();
                     Logger.Info("Parameters: {args}", args);
                     if (app.HandleCommandLineParameters(args))
                     {
@@ -263,7 +307,26 @@ namespace AutoStartConfirm
         void App_Startup(object sender, StartupEventArgs e)
         {
             Logger.Trace("App_Startup called");
-            Icon = (TaskbarIcon)FindResource("NotifyIcon");
+            // todo: implement via dependency injection
+            Icon = (NotifyIcon)FindResource("NotifyIcon");
+            Icon.Exit += ExitHandler;
+            Icon.OwnAutoStartToggle += OwnAutoStartToggleHandler;
+            Icon.Open += OpenHandler;
+        }
+
+        private void ExitHandler(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void OwnAutoStartToggleHandler(object sender, EventArgs e)
+        {
+            ToggleOwnAutoStart();
+        }
+
+        private void OpenHandler(object sender, EventArgs e)
+        {
+            MainWindow.Show();
         }
 
         public void ToggleMainWindow()
@@ -302,13 +365,6 @@ namespace AutoStartConfirm
             }
             finally
             {
-                try
-                {
-                    Icon.Dispose();
-                }
-                catch (Exception)
-                {
-                }
                 base.OnExit(e);
             }
         }

@@ -8,6 +8,9 @@ using System.Windows.Controls;
 
 namespace AutoStartConfirm.GUI
 {
+    public delegate void AutoStartsActionHandler(AutoStartEntry e);
+    public delegate void AutoStartsActionIdHandler(Guid e);
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -18,7 +21,6 @@ namespace AutoStartConfirm.GUI
 
         private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
-        private readonly IApp App;
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
             get {
@@ -32,11 +34,10 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService, IApp app)
+        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService)
         {
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
-            App = app;
             Logger.Trace("Window opened");
             InitializeComponent();
         }
@@ -52,34 +53,34 @@ namespace AutoStartConfirm.GUI
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.ConfirmAdd(autoStartEntry);
+            ConfirmAdd?.Invoke(autoStartEntry);
         }
 
         private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.RevertAdd(autoStartEntry);
+            RevertAdd?.Invoke(autoStartEntry);
         }
 
         private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Enable(autoStartEntry);
+            Enable?.Invoke(autoStartEntry);
         }
 
         private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            App.Disable(autoStartEntry);
+            Disable?.Invoke(autoStartEntry);
         }
 
         private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             if (autoStartEntry.Change == Change.Added) {
-                App.ConfirmAdd(autoStartEntry);
+                ConfirmAdd?.Invoke(autoStartEntry);
             } else if (autoStartEntry.Change == Change.Removed) {
-                App.ConfirmRemove(autoStartEntry);
+                ConfirmRemove?.Invoke(autoStartEntry);
             }
         }
 
@@ -87,9 +88,9 @@ namespace AutoStartConfirm.GUI
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             if (autoStartEntry.Change == Change.Added) {
-                App.RevertAdd(autoStartEntry.Id);
+                RevertAddId?.Invoke(autoStartEntry.Id);
             } else if (autoStartEntry.Change == Change.Removed) {
-                App.RevertRemove(autoStartEntry.Id);
+                RevertRemoveId?.Invoke(autoStartEntry.Id);
             }
         }
 
@@ -98,7 +99,7 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
-            App.ToggleOwnAutoStart();
+            ToggleOwnAutoStart?.Invoke(this, EventArgs.Empty);
         }
 
         private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
@@ -110,6 +111,19 @@ namespace AutoStartConfirm.GUI
             ConnectorWindow.Show();
         }
 
+        #endregion
+
+        #region events
+
+        public event AutoStartsActionHandler ConfirmAdd;
+        public event AutoStartsActionHandler RevertAdd;
+        public event AutoStartsActionIdHandler RevertAddId;
+        public event AutoStartsActionHandler Enable;
+        public event AutoStartsActionHandler Disable;
+        public event AutoStartsActionHandler ConfirmRemove;
+        public event AutoStartsActionHandler RevertRemove;
+        public event AutoStartsActionIdHandler RevertRemoveId;
+        public event EventHandler ToggleOwnAutoStart;
         #endregion
     }
 }

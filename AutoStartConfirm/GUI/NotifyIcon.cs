@@ -1,32 +1,38 @@
-﻿using System.Windows;
+﻿using AutoStartConfirm.Models;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Windows;
 
 namespace AutoStartConfirm.GUI
 {
-    public partial class NotifyIcon {
-        // TODO: Add DI
-        private App app;
+    public partial class NotifyIcon : INotifyIcon
+    {
+        public NotifyIconDoubleClickCommand NotifyIconDoubleClickCommand = new();
 
-        public App App {
-            get {
-                if (app == null) {
-                    app = (App)Application.Current;
-                }
-                return app;
-            }
-            set {
-                app = value;
-            }
-        }
-
-        private void ExitClicked(object sender, RoutedEventArgs e)
+        public NotifyIcon()
         {
-            App.Close();
+            NotifyIconDoubleClickCommand.DoubleClick += IconDoubleClicked;
+            InitializeComponent();
         }
 
-        private void OwnAutoStartClicked(object sender, RoutedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(delegate {
-                App.ToggleOwnAutoStart();
-            });
+
+        private void ExitClicked(object sender, EventArgs e)
+        {
+            Exit?.Invoke(sender, e);
         }
+
+        private void OwnAutoStartClicked(object sender, EventArgs e)
+        {
+            OwnAutoStartToggle?.Invoke(sender, e);
+        }
+
+        private void IconDoubleClicked(object sender, EventArgs e)
+        {
+            Open?.Invoke(sender, e);
+        }
+
+        public event EventHandler Exit;
+        public event EventHandler OwnAutoStartToggle;
+        public event EventHandler Open;
     }
 }
