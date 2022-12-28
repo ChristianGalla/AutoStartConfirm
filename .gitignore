@@ -350,5 +350,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/AutoStartConfirm/Nlog.config
+/AutoStartConfirm/nlog.config
 /AutoStartConfirmSetup/AutoStartConfirm.wxs

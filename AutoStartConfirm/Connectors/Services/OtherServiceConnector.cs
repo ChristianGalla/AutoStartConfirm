@@ -1,10 +1,14 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using System.ServiceProcess;
 
 namespace AutoStartConfirm.Connectors.Services
 {
     public class OtherServiceConnector : ServiceConnector, IOtherServiceConnector
     {
+        public OtherServiceConnector(ILogger<ServiceConnector> logger) : base(logger)
+        {
+        }
 
         public override Category Category
         {

@@ -6,8 +6,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
+using AutoStartConfirm.Connectors.Registry;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Windows.Devices.Geolocation;
+using Windows.Web;
 
 namespace AutoStartConfirm.Connectors
 {
@@ -19,16 +22,16 @@ namespace AutoStartConfirm.Connectors
 
     public class RegistryChangeMonitor : IDisposable, IRegistryChangeMonitor
     {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<RegistryChangeMonitor> Logger;
 
-        public string RegistryPath { get; }
+        public string RegistryPath { get; set; }
 
         private ManagementEventWatcher watcher;
         private bool disposedValue;
 
-        public RegistryChangeMonitor(string registryPath)
+        public RegistryChangeMonitor(ILogger<RegistryChangeMonitor> logger)
         {
-            RegistryPath = registryPath;
+            Logger = logger;
         }
 
         private string GetQuery()
@@ -58,6 +61,10 @@ namespace AutoStartConfirm.Connectors
 
         public void Start()
         {
+            if (RegistryPath == null)
+            {
+                throw new InvalidOperationException("RegistryPath is not set");
+            }
             String query = "";
             try
             {
@@ -66,7 +73,7 @@ namespace AutoStartConfirm.Connectors
                     return;
                 }
                 query = GetQuery();
-                Logger.Debug("Query: {Query}", query);
+                Logger.LogDebug("Query: {Query}", query);
                 watcher = new ManagementEventWatcher(query);
                 watcher.EventArrived +=
                     new EventArrivedEventHandler(RegistryEventHandler);
@@ -74,25 +81,32 @@ namespace AutoStartConfirm.Connectors
             }
             catch (Exception ex)
             {
-                var error = new Exception($"Failed to start watcher for {RegistryPath}", ex);
-                if (ex is ManagementException)
+                var message = "Failed to start watcher for {RegistryPath}";
+#pragma warning disable CA2254 // Template should be a static expression
+                if (ex is ManagementException manEx)
                 {
-                    ManagementException manEx = (ManagementException)ex;
                     if (manEx.ErrorCode == ManagementStatus.NotFound)
                     {
-                        Logger.Warn(error);
-                    } else { 
-                        Logger.Error(error);
+                        Logger.LogWarning(ex, message, RegistryPath);
+                    }
+                    else
+                    {
+                        Logger.LogError(ex, message, RegistryPath);
                     }
                     return;
                 }
-                Logger.Error(error);
-                throw error;
+                Logger.LogError(ex, message, RegistryPath);
+#pragma warning restore CA2254 // Template should be a static expression
+                throw new Exception($"Failed to start watcher for {RegistryPath}");
             }
         }
 
         public void Stop()
         {
+            if (RegistryPath == null)
+            {
+                throw new InvalidOperationException("RegistryPath is not set");
+            }
             if (watcher == null)
             {
                 return;
@@ -104,10 +118,7 @@ namespace AutoStartConfirm.Connectors
 
         private void RegistryEventHandler(object sender, EventArrivedEventArgs e)
         {
-            if (Changed != null)
-            {
-                Changed(this, e);
-            }
+            Changed?.Invoke(this, e);
         }
 
         protected virtual void Dispose(bool disposing)

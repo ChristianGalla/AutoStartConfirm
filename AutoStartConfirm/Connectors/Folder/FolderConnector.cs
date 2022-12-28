@@ -2,29 +2,15 @@
 using System.Collections.Generic;
 using AutoStartConfirm.Models;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Folder
 {
     public abstract class FolderConnector : IAutoStartConnector, IDisposable, IFolderConnector
     {
+        private readonly ILogger<FolderConnector> Logger;
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-
-        private IRegistryDisableService registryDisableService = null;
-
-        private IRegistryDisableService RegistryDisableService
-        {
-            get
-            {
-                if (registryDisableService == null)
-                {
-                    registryDisableService = new RegistryDisableService(DisableBasePath);
-                    registryDisableService.Enable += EnableHandler;
-                    registryDisableService.Disable += DisableHandler;
-                }
-                return registryDisableService;
-            }
-        }
+        private IRegistryDisableService RegistryDisableService;
 
         public abstract string BasePath { get; }
 
@@ -32,13 +18,13 @@ namespace AutoStartConfirm.Connectors.Folder
 
         public abstract bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
-        private IFolderChangeMonitor monitor;
+        private IFolderChangeMonitor FolderChangeMonitor;
 
         // todo: read target of links?
         // read sub directories?
         public IList<AutoStartEntry> GetCurrentAutoStarts()
         {
-            Logger.Trace("GetCurrentAutoStarts called");
+            Logger.LogTrace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
             string[] filePaths = Directory.GetFiles(BasePath);
             foreach (var filePath in filePaths)
@@ -60,44 +46,47 @@ namespace AutoStartConfirm.Connectors.Folder
             return ret;
         }
 
+        public FolderConnector(ILogger<FolderConnector> logger, IRegistryDisableService registryDisableService, IFolderChangeMonitor folderChangeMonitor)
+        {
+            Logger = logger;
+            RegistryDisableService = registryDisableService;
+            RegistryDisableService.DisableBasePath = DisableBasePath;
+            RegistryDisableService.Enable += EnableHandler;
+            RegistryDisableService.Disable += DisableHandler;
+            FolderChangeMonitor = folderChangeMonitor;
+            FolderChangeMonitor.BasePath = BasePath;
+            FolderChangeMonitor.Category = Category;
+            FolderChangeMonitor.Add += AddHandler;
+            FolderChangeMonitor.Remove += RemoveHandler;
+        }
+
 
         #region IAutoStartConnector implementation
         public abstract Category Category { get; }
 
         public void StartWatcher()
         {
-            Logger.Trace("StartWatcher called for {BasePath}", BasePath);
+            Logger.LogTrace("StartWatcher called for {BasePath}", BasePath);
             RegistryDisableService.StartWatcher();
-            if (monitor != null)
-            {
-                Logger.Trace("Watcher already started");
-                return;
-            }
-            monitor = new FolderChangeMonitor()
-            {
-                BasePath = BasePath,
-                Category = Category,
-            };
-            monitor.Add += AddHandler;
-            monitor.Remove += RemoveHandler;
-            Logger.Trace("Watcher started");
+            FolderChangeMonitor.Start();
+            Logger.LogTrace("Watcher started");
         }
 
         private void RemoveHandler(AutoStartEntry e)
         {
-            Logger.Trace("RemoveHandler called");
+            Logger.LogTrace("RemoveHandler called");
             Remove?.Invoke(e);
         }
 
         private void AddHandler(AutoStartEntry e)
         {
-            Logger.Trace("AddHandler called");
+            Logger.LogTrace("AddHandler called");
             Add?.Invoke(e);
         }
 
         private void EnableHandler(string name)
         {
-            Logger.Trace("EnableHandler called");
+            Logger.LogTrace("EnableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
             foreach (var currentAutoStart in currentAutoStarts)
             {
@@ -110,7 +99,7 @@ namespace AutoStartConfirm.Connectors.Folder
 
         private void DisableHandler(string name)
         {
-            Logger.Trace("DisableHandler called");
+            Logger.LogTrace("DisableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
             foreach (var currentAutoStart in currentAutoStarts)
             {
@@ -123,30 +112,21 @@ namespace AutoStartConfirm.Connectors.Folder
 
         public void StopWatcher()
         {
-            Logger.Trace("StopWatcher called for {BasePath}", BasePath);
+            Logger.LogTrace("StopWatcher called for {BasePath}", BasePath);
             RegistryDisableService.StopWatcher();
-            if (monitor == null)
-            {
-                Logger.Trace("No watcher running");
-                return;
-            }
-            monitor.Add -= AddHandler;
-            monitor.Remove -= RemoveHandler;
-            monitor.Stop();
-            monitor.Dispose();
-            monitor = null;
-            Logger.Trace("Watcher stopped");
+            FolderChangeMonitor.Stop();
+            Logger.LogTrace("Watcher stopped");
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart)
         {
-            Logger.Trace("CanBeAdded called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("CanBeAdded called for {AutoStartEntry}", autoStart);
             return false;
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart)
         {
-            Logger.Trace("CanBeRemoved called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("CanBeRemoved called for {AutoStartEntry}", autoStart);
             try
             {
                 RemoveAutoStart(autoStart, true);
@@ -160,7 +140,7 @@ namespace AutoStartConfirm.Connectors.Folder
 
         public void AddAutoStart(AutoStartEntry autoStart)
         {
-            Logger.Trace("AddAutoStart called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("AddAutoStart called for {AutoStartEntry}", autoStart);
             throw new NotImplementedException();
         }
 
@@ -171,7 +151,7 @@ namespace AutoStartConfirm.Connectors.Folder
 
         public void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun = false)
         {
-            Logger.Trace("RemoveAutoStart called for {AutoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
+            Logger.LogTrace("RemoveAutoStart called for {AutoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
             if (autoStartEntry == null)
             {
                 throw new ArgumentNullException("AutoStartEntry is required");
@@ -186,7 +166,7 @@ namespace AutoStartConfirm.Connectors.Folder
                         return;
                     }
                     File.Delete(fullPath);
-                    Logger.Info("Removed {Value} from {Path}", folderAutoStartEntry.Value, folderAutoStartEntry.Path);
+                    Logger.LogInformation("Removed {Value} from {Path}", folderAutoStartEntry.Value, folderAutoStartEntry.Path);
                 }
                 else
                 {
@@ -237,11 +217,10 @@ namespace AutoStartConfirm.Connectors.Folder
                 if (disposing)
                 {
                     StopWatcher();
-                    if (registryDisableService != null)
-                    {
-                        registryDisableService.Enable -= EnableHandler;
-                        registryDisableService.Disable -= DisableHandler;
-                    }
+                    FolderChangeMonitor.Add -= AddHandler;
+                    FolderChangeMonitor.Remove -= RemoveHandler;
+                    RegistryDisableService.Enable -= EnableHandler;
+                    RegistryDisableService.Disable -= DisableHandler;
                 }
 
                 disposedValue = true;

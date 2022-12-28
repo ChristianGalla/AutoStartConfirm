@@ -58,8 +58,8 @@
 			<Component Id="MainExecutable" Guid="{5DA0A1A5-9166-4DF6-9AEB-B527376A62D3}">
 				<File Id="MainExecutable" Source="$(var.BasePath)\$(var.ProjectName).exe" KeyPath='yes' />
 			</Component>
-			<Component Id="Nlog.config" Guid="{4095BCD0-581B-43C6-80AC-7EFCB2E62788}">
-				<File Source="$(var.BasePath)\Nlog.sample.config" Name="Nlog.config" />
+			<Component Id="nlog.config" Guid="{4095BCD0-581B-43C6-80AC-7EFCB2E62788}">
+				<File Source="$(var.BasePath)\nlog.sample.config" Name="nlog.config" />
 			</Component>
 		</ComponentGroup>
 		

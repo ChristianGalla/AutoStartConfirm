@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace AutoStartConfirm.Connectors.Folder
@@ -13,6 +14,10 @@ namespace AutoStartConfirm.Connectors.Folder
         private readonly static string basePath = $"{programmDataPath}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
 
         private readonly static string disableBasePath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
+
+        public StartMenuAutoStartFolderConnector(ILogger<FolderConnector> logger, IRegistryDisableService registryDisableService, IFolderChangeMonitor folderChangeMonitor) : base(logger, registryDisableService, folderChangeMonitor)
+        {
+        }
 
         public override bool IsAdminRequiredForChanges(AutoStartEntry autoStart)
         {

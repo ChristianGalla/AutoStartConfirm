@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Registry {
     public class AvailableShellsConnector : RegistryConnector, IAvailableShellsConnector
@@ -13,6 +14,10 @@ namespace AutoStartConfirm.Connectors.Registry {
         private readonly string[] valueNames = new string[] { "AvailableShells" };
 
         private readonly bool monitorSubkeys = false;
+
+        public AvailableShellsConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor) : base(logger, registryDisableService, registryChangeMonitor)
+        {
+        }
 
         public override string DisableBasePath
         {

@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Registry {
     public class TerminalServerInitialProgramConnector : RegistryConnector, ITerminalServerInitialProgramConnector
@@ -13,6 +14,10 @@ namespace AutoStartConfirm.Connectors.Registry {
         private readonly string[] valueNames = new string[] { "InitialProgram" };
 
         private readonly bool monitorSubkeys = false;
+
+        public TerminalServerInitialProgramConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor) : base(logger, registryDisableService, registryChangeMonitor)
+        {
+        }
 
         public override string DisableBasePath
         {

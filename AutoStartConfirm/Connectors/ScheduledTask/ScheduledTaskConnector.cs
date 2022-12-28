@@ -4,12 +4,13 @@ using AutoStartConfirm.Models;
 using Microsoft.Win32.TaskScheduler;
 using System.Threading;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.ScheduledTask
 {
     public class ScheduledTaskConnector : IAutoStartConnector, IDisposable, IScheduledTaskConnector
     {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<ScheduledTaskConnector> Logger;
 
         public int WatcherIntervalInMs = 1000 * 10;
 
@@ -39,9 +40,14 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             }
         }
 
+        public ScheduledTaskConnector(ILogger<ScheduledTaskConnector> logger)
+        {
+            Logger = logger;
+        }
+
         public IList<AutoStartEntry> GetCurrentAutoStarts()
         {
-            Logger.Trace("GetCurrentAutoStarts called");
+            Logger.LogTrace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
             using (var taskService = TaskService.Instance)
             {
@@ -63,7 +69,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                         catch (Exception)
                         {
                         }
-                        Logger.Error(new Exception($"Failed to get details of scheduled task {path}", ex));
+                        Logger.LogError(ex, "Failed to get details of scheduled task {path}", path);
                     }
                 }
                 return ret;
@@ -96,10 +102,10 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
 
         public void StartWatcher()
         {
-            Logger.Trace("StartWatcher called");
+            Logger.LogTrace("StartWatcher called");
             if (watcher != null)
             {
-                Logger.Trace("Watcher already running");
+                Logger.LogTrace("Watcher already running");
                 return;
             }
 
@@ -132,12 +138,12 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 Name = $"{Category} watcher",
             };
             watcher.Start();
-            Logger.Trace("Watcher started");
+            Logger.LogTrace("Watcher started");
         }
 
         private void CheckChanges()
         {
-            Logger.Trace("CheckChanges called");
+            Logger.LogTrace("CheckChanges called");
             var currentAutoStarts = GetCurrentAutoStarts();
             var currentAutoStartsDictionary = new Dictionary<string, AutoStartEntry>();
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
@@ -147,7 +153,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             var autoStartsToRemove = new List<AutoStartEntry>();
             foreach (var oldAutoStart in LastAutoStartEntries)
             {
-                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out AutoStartEntry newAutoStartEntry);
+                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out _);
                 if (!found)
                 {
                     autoStartsToRemove.Add(oldAutoStart.Value);
@@ -202,52 +208,52 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
 
         private void RemoveHandler(AutoStartEntry e)
         {
-            Logger.Trace("RemoveHandler called");
+            Logger.LogTrace("RemoveHandler called");
             Remove?.Invoke(e);
         }
 
         private void AddHandler(AutoStartEntry e)
         {
-            Logger.Trace("AddHandler called");
+            Logger.LogTrace("AddHandler called");
             Add?.Invoke(e);
         }
 
         private void EnableHandler(AutoStartEntry e)
         {
-            Logger.Trace("EnableHandler called");
+            Logger.LogTrace("EnableHandler called");
             Enable?.Invoke(e);
         }
 
         private void DisableHandler(AutoStartEntry e)
         {
-            Logger.Trace("DisableHandler called");
+            Logger.LogTrace("DisableHandler called");
             Disable?.Invoke(e);
         }
 
         public void StopWatcher()
         {
-            Logger.Trace("StopWatcher called");
+            Logger.LogTrace("StopWatcher called");
             if (watcher == null)
             {
-                Logger.Trace("No watcher running");
+                Logger.LogTrace("No watcher running");
                 return;
             }
-            Logger.Trace("Stopping watcher");
+            Logger.LogTrace("Stopping watcher");
             cancellationTokenSource.Cancel();
             watcher.Join();
             watcher = null;
-            Logger.Trace("Stopped watcher");
+            Logger.LogTrace("Stopped watcher");
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart)
         {
-            Logger.Trace("CanBeAdded called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("CanBeAdded called for {AutoStartEntry}", autoStart);
             return false;
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart)
         {
-            Logger.Trace("CanBeRemoved called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("CanBeRemoved called for {AutoStartEntry}", autoStart);
             try
             {
                 RemoveAutoStart(autoStart, true);
@@ -261,7 +267,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
 
         public void AddAutoStart(AutoStartEntry autoStart)
         {
-            Logger.Trace("AddAutoStart called for {AutoStartEntry}", autoStart);
+            Logger.LogTrace("AddAutoStart called for {AutoStartEntry}", autoStart);
             throw new NotImplementedException();
         }
 
@@ -272,10 +278,10 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
 
         public void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun = false)
         {
-            Logger.Trace("RemoveAutoStart called for {AutoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
+            Logger.LogTrace("RemoveAutoStart called for {AutoStartEntry} (dryRun: {DryRun})", autoStartEntry, dryRun);
             if (autoStartEntry == null)
             {
-                throw new ArgumentNullException("AutoStartEntry is required");
+                throw new ArgumentNullException(nameof(autoStartEntry));
             }
             if (autoStartEntry is ScheduledTaskAutoStartEntry ScheduledTaskAutoStartEntry)
             {
@@ -287,7 +293,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                         return;
                     }
                     task.Folder.DeleteTask(task.Name);
-                    Logger.Info("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
+                    Logger.LogInformation("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
                     bool removed = lastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry removedAutoStart);
                     if (removed)
                     {
@@ -392,10 +398,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 if (disposing)
                 {
                     StopWatcher();
-                    if (cancellationTokenSource != null)
-                    {
-                        cancellationTokenSource.Dispose();
-                    }
+                    cancellationTokenSource?.Dispose();
                 }
 
                 disposedValue = true;
@@ -405,6 +408,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void Open(AutoStartEntry autoStart)

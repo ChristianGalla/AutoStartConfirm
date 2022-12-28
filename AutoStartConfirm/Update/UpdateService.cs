@@ -1,5 +1,7 @@
 ﻿using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
+using Microsoft.Extensions.Logging;
+using NLog;
 using Octokit;
 using Semver;
 using System;
@@ -8,8 +10,9 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Update
 {
-    public class UpdateService : IUpdateService {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    public class UpdateService : IUpdateService
+    {
+        private readonly ILogger<UpdateService> Logger;
 
         private SemVersion currentVersion;
 
@@ -30,65 +33,54 @@ namespace AutoStartConfirm.Update
         }
 
 
-        public IGitHubClient gitHubClient;
-        private ISettingsService SettingsService;
-        private INotificationService NotificationService;
+        private readonly ISettingsService SettingsService;
+        private readonly INotificationService NotificationService;
 
-        public IGitHubClient GitHubClient
-        {
-            get
-            {
-                if (gitHubClient == null)
-                {
-                    gitHubClient = new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
-                }
-                return gitHubClient;
-            }
-            set
-            {
-                gitHubClient = value;
-            }
-        }
+        private readonly IGitHubClient GitHubClient = new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
 
-
-        public UpdateService(ISettingsService settingsService, INotificationService notificationService) {
+        public UpdateService(ILogger<UpdateService> logger, ISettingsService settingsService, INotificationService notificationService) {
+            Logger = logger;
             SettingsService = settingsService;
             NotificationService = notificationService;
         }
 
         public async Task<Release> GetNewestRelease()
         {
-            Logger.Trace("GetNewestRelease called");
+            Logger.LogTrace("GetNewestRelease called");
             Release newestRelease;
             try
             {
                 newestRelease = await GitHubClient.Repository.Release.GetLatest("ChristianGalla", "AutoStartConfirm");
-                Logger.Trace("Got newest release");
+                Logger.LogTrace("Got newest release");
                 return newestRelease;
             }
             catch (Exception e)
             {
-                var err = new Exception("Failed to get newest release from GitHub", e);
-                Logger.Error(err);
-                throw err;
+                var message = "Failed to get newest release from GitHub";
+#pragma warning disable CA2254 // Template should be a static expression
+                Logger.LogError(e, message);
+#pragma warning restore CA2254 // Template should be a static expression
+                throw new Exception(message, e);
             }
         }
 
         public SemVersion GetSemverVersion(Release release)
         {
-            Logger.Trace("GetSemverVersion called");
+            Logger.LogTrace("GetSemverVersion called");
             SemVersion newestVersion;
             try
             {
                 newestVersion = SemVersion.Parse(release.TagName, SemVersionStyles.AllowLowerV | SemVersionStyles.OptionalPatch);
-                Logger.Trace("GetSemverVersion finished");
+                Logger.LogTrace("GetSemverVersion finished");
                 return newestVersion;
             }
             catch (Exception e)
             {
-                var err = new Exception("Failed to parse release tag version", e);
-                Logger.Error(err);
-                throw err;
+                var message = "Failed to parse release tag version";
+#pragma warning disable CA2254 // Template should be a static expression
+                Logger.LogError(e, message);
+#pragma warning restore CA2254 // Template should be a static expression
+                throw new Exception(message, e);
             }
         }
 
@@ -96,18 +88,20 @@ namespace AutoStartConfirm.Update
         {
             try
             {
-                Logger.Trace("GetCurrentVersion called");
+                Logger.LogTrace("GetCurrentVersion called");
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 var semverVersionString = $"{version.Major}.{version.Minor}.{version.Build}";
                 var semverVersion = SemVersion.Parse(semverVersionString, SemVersionStyles.Strict);
-                Logger.Trace("GetCurrentVersion finished");
+                Logger.LogTrace("GetCurrentVersion finished");
                 return semverVersion;
             }
             catch (Exception e)
             {
-                var err = new Exception("Failed to get current version", e);
-                Logger.Error(err);
-                throw err;
+                var message = "Failed to get current version";
+#pragma warning disable CA2254 // Template should be a static expression
+                Logger.LogError(e, message);
+#pragma warning restore CA2254 // Template should be a static expression
+                throw new Exception(message, e);
             }
         }
 
@@ -115,7 +109,7 @@ namespace AutoStartConfirm.Update
         {
             try
             {
-                Logger.Trace("CheckUpdateAndShowNotification called");
+                Logger.LogTrace("CheckUpdateAndShowNotification called");
                 var newestRelease = await GetNewestRelease();
                 var newestSemverVersion = GetSemverVersion(newestRelease);
 
@@ -124,26 +118,26 @@ namespace AutoStartConfirm.Update
                     var lastNotifiedVersion = SemVersion.Parse(SettingsService.LastNotifiedNewVersion, SemVersionStyles.Strict);
                     if (newestSemverVersion.ComparePrecedenceTo(lastNotifiedVersion) <= 0)
                     {
-                        Logger.Info("Already notified about newest version {version}", newestSemverVersion);
+                        Logger.LogInformation("Already notified about newest version {version}", newestSemverVersion);
                         return;
                     }
                 }
                 if (newestSemverVersion.ComparePrecedenceTo(CurrentVersion) <= 0)
                 {
-                    Logger.Info("Current program is up to date");
+                    Logger.LogInformation("Current program is up to date");
                     return;
                 }
                 if (newestSemverVersion.Major > CurrentVersion.Major)
                 {
-                    Logger.Info("There is a new major version {version} available", newestSemverVersion);
+                    Logger.LogInformation("There is a new major version {version} available", newestSemverVersion);
                 }
                 if (newestSemverVersion.Minor > CurrentVersion.Minor)
                 {
-                    Logger.Info("There is a new minor version {version} available", newestSemverVersion);
+                    Logger.LogInformation("There is a new minor version {version} available", newestSemverVersion);
                 }
                 if (newestSemverVersion.Patch > CurrentVersion.Patch)
                 {
-                    Logger.Info("There is a new patch version {version} available", newestSemverVersion);
+                    Logger.LogInformation("There is a new patch version {version} available", newestSemverVersion);
                 }
 
                 string msiUrl = null;
@@ -157,13 +151,15 @@ namespace AutoStartConfirm.Update
                 }
                 SettingsService.LastNotifiedNewVersion = newestSemverVersion.ToString();
                 NotificationService.ShowNewVersionNotification(newestSemverVersion.ToString(), CurrentVersion.ToString(), msiUrl);
-                Logger.Trace("CheckUpdateAndShowNotification finished");
+                Logger.LogTrace("CheckUpdateAndShowNotification finished");
             }
             catch (Exception e)
             {
-                var err = new Exception("Failed to check for updates", e);
-                Logger.Error(err);
-                throw err;
+                var message = "Failed to check for updates";
+#pragma warning disable CA2254 // Template should be a static expression
+                Logger.LogError(e, message);
+#pragma warning restore CA2254 // Template should be a static expression
+                throw new Exception(message, e); ;
             }
         }
 

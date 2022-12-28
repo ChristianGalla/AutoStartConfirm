@@ -7,12 +7,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using AutoStartConfirm.Exceptions;
 using System.Management;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Registry
 {
     abstract public class RegistryConnector : IAutoStartConnector, IDisposable {
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<RegistryConnector> Logger;
 
         public abstract string BasePath { get; }
 
@@ -30,30 +31,28 @@ namespace AutoStartConfirm.Connectors.Registry
             return ValueNames == null || ValueNames.Contains(valueName);
         }
 
-        private IRegistryChangeMonitor monitor;
+        private IRegistryChangeMonitor RegistryChangeMonitor;
 
         protected List<RegistryAutoStartEntry> lastAutostarts = null;
 
-        private IRegistryDisableService registryDisableService = null;
+        private IRegistryDisableService RegistryDisableService;
 
         public abstract string DisableBasePath { get; }
 
-        private IRegistryDisableService RegistryDisableService {
-            get {
-                if (DisableBasePath == null) {
-                    return null;
-                }
-                if (registryDisableService == null) {
-                    registryDisableService = new RegistryDisableService(DisableBasePath);
-                    registryDisableService.Enable += EnableHandler;
-                    registryDisableService.Disable += DisableHandler;
-                }
-                return registryDisableService;
-            }
+        public RegistryConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor)
+        {
+            Logger = logger;
+            RegistryDisableService = registryDisableService;
+            RegistryDisableService.DisableBasePath = DisableBasePath;
+            RegistryDisableService.Enable += EnableHandler;
+            RegistryDisableService.Disable += DisableHandler;
+            RegistryChangeMonitor = registryChangeMonitor;
+            RegistryChangeMonitor.RegistryPath = BasePath;
+            RegistryChangeMonitor.Changed += ChangeHandler;
         }
 
         private void ChangeHandler(object sender, EventArrivedEventArgs e) {
-            Logger.Trace("ChangeHandler called for {BasePath}", BasePath);
+            Logger.LogTrace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<RegistryAutoStartEntry>();
             var removedAutostarts = new List<RegistryAutoStartEntry>();
@@ -157,7 +156,7 @@ namespace AutoStartConfirm.Connectors.Registry
                         case RegistryValueKind.Unknown:
                         case RegistryValueKind.None:
                         default:
-                            Logger.Trace("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
+                            Logger.LogTrace("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
                             break;
                     }
                 } catch (Exception ex) {
@@ -180,7 +179,7 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         public virtual IList<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("GetCurrentAutoStarts called for {BasePath}", BasePath);
+            Logger.LogTrace("GetCurrentAutoStarts called for {BasePath}", BasePath);
             try {
                 var ret = new List<AutoStartEntry>();
                 using (RegistryKey baseRegistryKey = GetBaseRegistry()) {
@@ -204,12 +203,12 @@ namespace AutoStartConfirm.Connectors.Registry
                         }
                     }
                 }
-                Logger.Trace("Got current auto starts");
+                Logger.LogTrace("Got current auto starts");
                 return ret;
             } catch (Exception ex) {
-                var err = new Exception("Failed to get current auto starts", ex);
-                Logger.Error(err);
-                throw err;
+                var message = "Failed to get current auto starts";
+                Logger.LogError(ex, message);
+                throw new Exception(message, ex);
             }
         }
 
@@ -238,39 +237,32 @@ namespace AutoStartConfirm.Connectors.Registry
         /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
         /// </remarks>
         public void StartWatcher() {
-            Logger.Trace("StartWatcher called for {BasePath}", BasePath);
-            RegistryDisableService?.StartWatcher();
-            if (monitor != null) {
-                Logger.Trace("Watcher already started");
-                return;
+            Logger.LogTrace("StartWatcher called for {BasePath}", BasePath);
+            if (DisableBasePath != null)
+            {
+                RegistryDisableService.StartWatcher();
             }
             var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
             lastAutostarts = new List<RegistryAutoStartEntry>();
             foreach (var currentAutoStart in currentAutoStarts) {
                 lastAutostarts.Add((RegistryAutoStartEntry)currentAutoStart);
             }
-            monitor = new RegistryChangeMonitor(BasePath);
-            monitor.Changed += ChangeHandler;
-            monitor.Start();
-            Logger.Trace("Watcher started");
+            RegistryChangeMonitor.Start();
+            Logger.LogTrace("Watcher started");
         }
 
         public void StopWatcher() {
-            Logger.Trace("StopWatcher called for {BasePath}", BasePath);
-            RegistryDisableService?.StopWatcher();
-            if (monitor == null) {
-                Logger.Trace("No watcher running");
-                return;
+            Logger.LogTrace("StopWatcher called for {BasePath}", BasePath);
+            if (DisableBasePath != null)
+            {
+                RegistryDisableService.StopWatcher();
             }
-            monitor.Changed -= ChangeHandler;
-            monitor.Stop();
-            monitor.Dispose();
-            monitor = null;
-            Logger.Trace("Stopped watcher");
+            RegistryChangeMonitor.Stop();
+            Logger.LogTrace("Stopped watcher");
         }
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
-            Logger.Trace("CanBeAdded called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            Logger.LogTrace("CanBeAdded called for {Value} in {Path}", autoStart.Value, autoStart.Path);
             try {
                 AddAutoStart(autoStart, true);
             } catch (Exception) {
@@ -280,7 +272,7 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart) {
-            Logger.Trace("CanBeRemoved called for {Value} in {Path}", autoStart.Value, autoStart.Path);
+            Logger.LogTrace("CanBeRemoved called for {Value} in {Path}", autoStart.Value, autoStart.Path);
             try {
                 RemoveAutoStart(autoStart, true);
             } catch (Exception) {
@@ -298,7 +290,7 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         protected void AddAutoStart(AutoStartEntry autoStart, bool dryRun) {
-            Logger.Trace("AddAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStart.Value, autoStart.Path, dryRun);
+            Logger.LogTrace("AddAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStart.Value, autoStart.Path, dryRun);
             if (!(autoStart is RegistryAutoStartEntry)) {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
@@ -334,7 +326,7 @@ namespace AutoStartConfirm.Connectors.Registry
                                 return;
                             }
                             Microsoft.Win32.Registry.SetValue(keyPath, valueName, regAutoStart.Value, regAutoStart.RegistryValueKind);
-                            Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
+                            Logger.LogInformation("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
                             break;
                         }
                     case RegistryValueKind.MultiString: {
@@ -356,7 +348,7 @@ namespace AutoStartConfirm.Connectors.Registry
                                     return;
                                 }
                                 Microsoft.Win32.Registry.SetValue(keyPath, valueName, newValues.ToArray(), regAutoStart.RegistryValueKind);
-                                Logger.Info("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
+                                Logger.LogInformation("Added {Value} to {Path}", regAutoStart.Value, regAutoStart.Path);
                             } else {
                                 throw new AlreadySetException($"\"{regAutoStart.Value}\" already exists at \"{regAutoStart.Path}\"");
                             }
@@ -374,7 +366,7 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         protected void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun) {
-            Logger.Trace("RemoveAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStartEntry.Value, autoStartEntry.Path, dryRun);
+            Logger.LogTrace("RemoveAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStartEntry.Value, autoStartEntry.Path, dryRun);
             if (!(autoStartEntry is RegistryAutoStartEntry)) {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
@@ -398,7 +390,7 @@ namespace AutoStartConfirm.Connectors.Registry
                                     return;
                                 }
                                 key.DeleteValue(valueName);
-                                Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                Logger.LogInformation("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                             } else {
                                 throw new ArgumentException("Value not found");
                             }
@@ -424,7 +416,7 @@ namespace AutoStartConfirm.Connectors.Registry
                                 } else {
                                     key.SetValue(valueName, newValues.ToArray(), RegistryValueKind.MultiString);
                                 }
-                                Logger.Info("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
+                                Logger.LogInformation("Removed {Value} from {Path}", registryAutoStartEntry.Value, registryAutoStartEntry.Path);
                             } else {
                                 throw new ArgumentException("Value not found");
                             }
@@ -441,42 +433,42 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         public bool CanBeEnabled(AutoStartEntry autoStart) {
-            if (RegistryDisableService == null) {
+            if (DisableBasePath == null) {
                 return false;
             }
             return RegistryDisableService.CanBeEnabled(autoStart);
         }
 
         public bool CanBeDisabled(AutoStartEntry autoStart) {
-            if (RegistryDisableService == null) {
+            if (DisableBasePath == null) {
                 return false;
             }
             return RegistryDisableService.CanBeDisabled(autoStart);
         }
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
-            if (RegistryDisableService == null) {
+            if (DisableBasePath == null) {
                 throw new NotImplementedException();
             }
             RegistryDisableService.EnableAutoStart(autoStart);
         }
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
-            if (RegistryDisableService == null) {
+            if (DisableBasePath == null) {
                 throw new NotImplementedException();
             }
             RegistryDisableService.DisableAutoStart(autoStart);
         }
 
         public bool IsEnabled(AutoStartEntry autoStart) {
-            if (RegistryDisableService == null) {
+            if (DisableBasePath == null) {
                 return true;
             }
             return RegistryDisableService.CanBeDisabled(autoStart);
         }
 
         private void EnableHandler(string name) {
-            Logger.Trace("EnableHandler called");
+            Logger.LogTrace("EnableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
             foreach (var currentAutoStart in currentAutoStarts) {
                 var currentDisableName = currentAutoStart.Path.Substring(currentAutoStart.Path.LastIndexOf('\\') + 1);
@@ -487,7 +479,7 @@ namespace AutoStartConfirm.Connectors.Registry
         }
 
         private void DisableHandler(string name) {
-            Logger.Trace("DisableHandler called");
+            Logger.LogTrace("DisableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
             foreach (var currentAutoStart in currentAutoStarts) {
                 var currentDisableName = currentAutoStart.Path.Substring(currentAutoStart.Path.LastIndexOf('\\') + 1);
@@ -506,10 +498,9 @@ namespace AutoStartConfirm.Connectors.Registry
             if (!disposedValue) {
                 if (disposing) {
                     StopWatcher();
-                    if (registryDisableService != null) {
-                        registryDisableService.Enable -= EnableHandler;
-                        registryDisableService.Disable -= DisableHandler;
-                    }
+                    RegistryDisableService.Enable -= EnableHandler;
+                    RegistryDisableService.Disable -= DisableHandler;
+                    RegistryChangeMonitor.Changed -= ChangeHandler;
                 }
 
                 disposedValue = true;

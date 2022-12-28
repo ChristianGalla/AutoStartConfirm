@@ -5,14 +5,15 @@ using System.Management;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoStartConfirm.Connectors.Folder;
 using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Services
 {
     public abstract class ServiceConnector : IAutoStartConnector, IDisposable, IServiceConnector
     {
-
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<ServiceConnector> Logger;
 
         public int WatcherIntervalInMs = 1000 * 60;
 
@@ -44,16 +45,21 @@ namespace AutoStartConfirm.Connectors.Services
             }
         }
 
+        public ServiceConnector(ILogger<ServiceConnector> logger)
+        {
+            Logger = logger;
+        }
+
 
         public void Open(AutoStartEntry autoStart)
         {
-            Logger.Trace("Open called for AutoStartEntry {AutoStartEntry}", autoStart);
+            Logger.LogTrace("Open called for AutoStartEntry {AutoStartEntry}", autoStart);
             throw new NotImplementedException();
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStart)
         {
-            Logger.Trace("RemoveAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
+            Logger.LogTrace("RemoveAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
             throw new NotImplementedException();
         }
 
@@ -116,7 +122,7 @@ namespace AutoStartConfirm.Connectors.Services
 
         public IList<AutoStartEntry> GetCurrentAutoStarts()
         {
-            Logger.Trace("GetCurrentAutoStarts called");
+            Logger.LogTrace("GetCurrentAutoStarts called");
             var serviceControllers = GetServiceControllers();
             var ret = new List<AutoStartEntry>();
             foreach (var sc in serviceControllers)
@@ -129,7 +135,7 @@ namespace AutoStartConfirm.Connectors.Services
 
         public void DisableAutoStart(AutoStartEntry autoStart)
         {
-            Logger.Trace("DisableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
+            Logger.LogTrace("DisableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
             if (!(autoStart is ServiceAutoStartEntry))
             {
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
@@ -173,7 +179,7 @@ namespace AutoStartConfirm.Connectors.Services
 
         public void EnableAutoStart(AutoStartEntry autoStart)
         {
-            Logger.Trace("EnableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
+            Logger.LogTrace("EnableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
             if (!(autoStart is ServiceAutoStartEntry))
             {
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
@@ -194,11 +200,11 @@ namespace AutoStartConfirm.Connectors.Services
 
         public void StartWatcher()
         {
-            Logger.Trace("StartWatcher called");
+            Logger.LogTrace("StartWatcher called");
 
             if (watcher != null)
             {
-                Logger.Trace("Watcher already running");
+                Logger.LogTrace("Watcher already running");
                 return;
             }
 
@@ -230,12 +236,12 @@ namespace AutoStartConfirm.Connectors.Services
                 Name = $"{Category} watcher",
             };
             watcher.Start();
-            Logger.Trace("Watcher started");
+            Logger.LogTrace("Watcher started");
         }
 
         private void CheckChanges()
         {
-            Logger.Trace("CheckChanges called");
+            Logger.LogTrace("CheckChanges called");
             var currentAutoStarts = GetCurrentAutoStarts();
             var currentAutoStartsDictionary = new Dictionary<string, AutoStartEntry>();
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
@@ -300,41 +306,41 @@ namespace AutoStartConfirm.Connectors.Services
 
         private void RemoveHandler(AutoStartEntry e)
         {
-            Logger.Trace("RemoveHandler called");
+            Logger.LogTrace("RemoveHandler called");
             Remove?.Invoke(e);
         }
 
         private void AddHandler(AutoStartEntry e)
         {
-            Logger.Trace("AddHandler called");
+            Logger.LogTrace("AddHandler called");
             Add?.Invoke(e);
         }
 
         private void EnableHandler(AutoStartEntry e)
         {
-            Logger.Trace("EnableHandler called");
+            Logger.LogTrace("EnableHandler called");
             Enable?.Invoke(e);
         }
 
         private void DisableHandler(AutoStartEntry e)
         {
-            Logger.Trace("DisableHandler called");
+            Logger.LogTrace("DisableHandler called");
             Disable?.Invoke(e);
         }
 
         public void StopWatcher()
         {
-            Logger.Trace("StopWatcher called");
+            Logger.LogTrace("StopWatcher called");
             if (watcher == null)
             {
-                Logger.Trace("No watcher running");
+                Logger.LogTrace("No watcher running");
                 return;
             }
-            Logger.Trace("Stopping watcher");
+            Logger.LogTrace("Stopping watcher");
             cancellationTokenSource.Cancel();
             watcher.Join();
             watcher = null;
-            Logger.Trace("Stopped watcher");
+            Logger.LogTrace("Stopped watcher");
         }
 
         #region IDisposable Support

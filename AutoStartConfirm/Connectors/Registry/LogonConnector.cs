@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Registry {
     public class LogonConnector : RegistryConnector, ILogonConnector
@@ -13,6 +14,10 @@ namespace AutoStartConfirm.Connectors.Registry {
         private readonly string[] valueNames = new string[] { "VmApplet", "Userinit", "Shell", "TaskMan", "AppSetup" };
 
         private readonly bool monitorSubkeys = false;
+
+        public LogonConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor) : base(logger, registryDisableService, registryChangeMonitor)
+        {
+        }
 
         public override string DisableBasePath
         {

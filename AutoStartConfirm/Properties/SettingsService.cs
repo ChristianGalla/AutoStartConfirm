@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AutoStartConfirm.Notifications;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
@@ -7,7 +9,7 @@ namespace AutoStartConfirm.Properties
 {
     public class SettingsService : ISettingsService, IDisposable {
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<SettingsService> Logger;
 
         private bool disposedValue;
 
@@ -15,15 +17,15 @@ namespace AutoStartConfirm.Properties
         /// Ensures a valid configuration exists and upgrades configuration from a previous version if needed
         /// </summary>
         private void EnsureConfiguration() {
-            Logger.Debug("Ensuring configuration");
+            Logger.LogDebug("Ensuring configuration");
             if (Settings.Default.UpgradeRequired) {
-                Logger.Info("Upgrading configuration");
+                Logger.LogInformation("Upgrading configuration");
                 Settings.Default.Upgrade();
                 Settings.Default.UpgradeRequired = false;
                 Settings.Default.Save();
-                Logger.Info("Configuration upgraded");
+                Logger.LogInformation("Configuration upgraded");
             }
-            Logger.Debug("Ensured configuration");
+            Logger.LogDebug("Ensured configuration");
         }
 
         public StringCollection DisabledConnectors
@@ -94,7 +96,8 @@ namespace AutoStartConfirm.Properties
         /// </summary>
         public void Save() => Settings.Default.Save();
 
-        public SettingsService() {
+        public SettingsService(ILogger<SettingsService> logger) {
+            Logger = logger;
             EnsureConfiguration();
             Settings.Default.SettingChanging += SettingChangingHandler;
             Settings.Default.PropertyChanged += PropertyChangedHandler;

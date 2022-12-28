@@ -1,6 +1,8 @@
 ﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Connectors.Services;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -17,7 +19,7 @@ namespace AutoStartConfirm.GUI
     public partial class MainWindow : Window {
         public bool IsClosed { get; private set; }
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<MainWindow> Logger;
 
         private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
@@ -37,14 +39,21 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService, AboutWindow aboutWindow, IAppStatus appStatus, ISettingsService settingsService)
+        public MainWindow(
+            ILogger<MainWindow> logger,
+            ConnectorWindow connectorWindow,
+            IAutoStartService autoStartService,
+            AboutWindow aboutWindow,
+            IAppStatus appStatus,
+            ISettingsService settingsService)
         {
+            Logger = logger;
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
             SettingsService = settingsService;
             AboutWindow = aboutWindow;
             AppStatus = appStatus;
-            Logger.Trace("Window opened");
+            Logger.LogTrace("Window opened");
             InitializeComponent();
         }
 
@@ -56,7 +65,7 @@ namespace AutoStartConfirm.GUI
 
         protected override void OnClosed(EventArgs e)
         {
-            Logger.Trace("Window closed");
+            Logger.LogTrace("Window closed");
             base.OnClosed(e);
             IsClosed = true;
         }

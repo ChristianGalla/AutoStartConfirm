@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Windows;
 
@@ -6,13 +7,14 @@ namespace AutoStartConfirm.GUI
 {
     public class MessageService : IMessageService {
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<MessageService> Logger;
 
         private readonly MainWindow MainWindow;
         private readonly IAppStatus AppStatus;
 
-        public MessageService(MainWindow mainWindow, IAppStatus appStatus)
+        public MessageService(ILogger<MessageService> logger, MainWindow mainWindow, IAppStatus appStatus)
         {
+            Logger = logger;
             MainWindow = mainWindow;
             AppStatus = appStatus;
         }
@@ -65,7 +67,7 @@ namespace AutoStartConfirm.GUI
         /// </summary>
         /// <returns>true if a new window has been created</returns>
         private bool EnsureMainWindow() {
-            Logger.Trace("Showing main window");
+            Logger.LogTrace("Showing main window");
             bool newCreated = false;
             MainWindow.Show();
             return newCreated;

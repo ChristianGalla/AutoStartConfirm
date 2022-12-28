@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors.Registry
 {
@@ -14,6 +15,10 @@ namespace AutoStartConfirm.Connectors.Registry
         private readonly string[] valueNames = new string[] { "AlternateShell" };
 
         private readonly bool monitorSubkeys = false;
+
+        public AlternateShellConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor) : base(logger, registryDisableService, registryChangeMonitor)
+        {
+        }
 
         public override string DisableBasePath
         {

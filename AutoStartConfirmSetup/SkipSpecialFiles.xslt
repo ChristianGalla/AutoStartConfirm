@@ -31,13 +31,13 @@
 	
 	<xsl:key
         name="NLogConfigToRemove"
-        match="wix:Component[ substring( wix:File/@Source, string-length( wix:File/@Source ) - string-length( 'Nlog.config' ) + 1 ) = 'Nlog.config' ]"
+        match="wix:Component[ substring( wix:File/@Source, string-length( wix:File/@Source ) - string-length( 'nlog.config' ) + 1 ) = 'nlog.config' ]"
         use="@Id"
     />
 
 	<xsl:key
         name="NLogSampleConfigToRemove"
-        match="wix:Component[ substring( wix:File/@Source, string-length( wix:File/@Source ) - string-length( 'Nlog.sample.config' ) + 1 ) = 'Nlog.sample.config' ]"
+        match="wix:Component[ substring( wix:File/@Source, string-length( wix:File/@Source ) - string-length( 'nlog.sample.config' ) + 1 ) = 'nlog.sample.config' ]"
         use="@Id"
     />
 

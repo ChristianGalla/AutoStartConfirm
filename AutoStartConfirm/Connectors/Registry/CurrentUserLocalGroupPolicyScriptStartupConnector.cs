@@ -1,4 +1,5 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
 namespace AutoStartConfirm.Connectors.Registry {
@@ -19,6 +20,10 @@ namespace AutoStartConfirm.Connectors.Registry {
         private readonly string[] valueNames = null;
 
         private readonly bool monitorSubkeys = true;
+
+        public CurrentUserLocalGroupPolicyScriptStartupConnector(ILogger<RegistryConnector> logger, IRegistryDisableService registryDisableService, IRegistryChangeMonitor registryChangeMonitor) : base(logger, registryDisableService, registryChangeMonitor)
+        {
+        }
 
         public override string DisableBasePath
         {

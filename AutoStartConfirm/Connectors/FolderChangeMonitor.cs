@@ -1,4 +1,6 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Connectors.Folder;
+using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Windows;
@@ -7,7 +9,7 @@ namespace AutoStartConfirm.Connectors
 {
     public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor {
         #region Fields
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<FolderChangeMonitor> Logger;
 
         private bool disposedValue;
 
@@ -19,8 +21,13 @@ namespace AutoStartConfirm.Connectors
 
         #region Methods
 
+        public FolderChangeMonitor(ILogger<FolderChangeMonitor> logger)
+        {
+            Logger = logger;
+        }
+
         public void Start() {
-            Logger.Trace($"Starting monitoring of {BasePath}");
+            Logger.LogTrace("Starting monitoring of {BasePath}", BasePath);
             watcher = new FileSystemWatcher(BasePath) {
                 NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
@@ -45,7 +52,7 @@ namespace AutoStartConfirm.Connectors
 
         public void Stop() {
             if (watcher != null) {
-                Logger.Trace($"Stopping monitoring of {BasePath}");
+                Logger.LogTrace("Stopping monitoring of {BasePath}", BasePath);
                 watcher.Created -= OnCreated;
                 watcher.Deleted -= OnDeleted;
                 watcher.Renamed -= OnRenamed;
@@ -61,9 +68,9 @@ namespace AutoStartConfirm.Connectors
                 e.Name.ToLower() == "desktop.ini") {
                 return;
             }
-            Logger.Trace($"Changed: {e.FullPath}");
+            Logger.LogTrace("Changed: {FullPath}", e.FullPath);
             Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath.Substring(0, e.FullPath.LastIndexOf("\\"));
+                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var removedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.Name,
@@ -85,9 +92,9 @@ namespace AutoStartConfirm.Connectors
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }
-            Logger.Trace($"Created: {e.FullPath}");
+            Logger.LogTrace("Created: {FullPath}", e.FullPath);
             Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath.Substring(0, e.FullPath.LastIndexOf("\\"));
+                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var addedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.Name,
@@ -102,9 +109,9 @@ namespace AutoStartConfirm.Connectors
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }
-            Logger.Trace($"Deleted: {e.FullPath}");
+            Logger.LogTrace("Deleted: {FullPath}", e.FullPath);
             Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath.Substring(0, e.FullPath.LastIndexOf("\\"));
+                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var removedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.Name,
@@ -119,9 +126,9 @@ namespace AutoStartConfirm.Connectors
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }
-            Logger.Trace($"Renamed: {e.OldFullPath} to {e.FullPath}");
+            Logger.LogTrace("Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
             Application.Current.Dispatcher.Invoke(delegate {
-                var oldParentDirectory = e.OldFullPath.Substring(0, e.OldFullPath.LastIndexOf("\\"));
+                var oldParentDirectory = e.OldFullPath[..e.OldFullPath.LastIndexOf("\\")];
                 var removedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.OldName,
@@ -129,7 +136,7 @@ namespace AutoStartConfirm.Connectors
                     Date = DateTime.Now,
                 };
                 Remove?.Invoke(removedAutostart);
-                var newParentDirectory = e.FullPath.Substring(0, e.FullPath.LastIndexOf("\\"));
+                var newParentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var addedAutostart = new FolderAutoStartEntry() {
                     Category = Category,
                     Value = e.Name,
@@ -141,7 +148,7 @@ namespace AutoStartConfirm.Connectors
         }
 
         private void OnError(object sender, ErrorEventArgs e) {
-            Logger.Error("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
+            Logger.LogError("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
         }
 
         #endregion

@@ -6,6 +6,7 @@ using AutoStartConfirm.GUI;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace AutoStartConfirm.Connectors
 
         #region Attributes
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private readonly ILogger<AutoStartConnectorService> Logger;
 
         private Dictionary<Category, IAutoStartConnector> AllConnectors = new Dictionary<Category, IAutoStartConnector>();
 
@@ -40,6 +41,7 @@ namespace AutoStartConfirm.Connectors
         #region Methods
 
         public AutoStartConnectorService(
+            ILogger<AutoStartConnectorService> logger,
             ISettingsService settingsService,
             IBootExecuteConnector bootExecuteConnector,
             IAppInit32Connector appInit32Connector,
@@ -101,6 +103,7 @@ namespace AutoStartConfirm.Connectors
             IDeviceServiceConnector deviceServiceConnector,
             IOtherServiceConnector otherServiceConnector
         ) {
+            Logger = logger;
             SettingsService = settingsService;
             SettingsService.SettingsSaving += SettingsSavingHandler;
             SettingsService.SettingsLoaded += SettingsLoadedHandler;
@@ -196,7 +199,13 @@ namespace AutoStartConfirm.Connectors
 
         public static void ConfigureServices(ServiceCollection services)
         {
-            services.AddSingleton<IBootExecuteConnector, BootExecuteConnector>()
+            services
+                .AddSingleton<IAutoStartConnectorService, AutoStartConnectorService>()
+                .AddTransient<IRegistryDisableService, RegistryDisableService>()
+                .AddTransient<IRegistryChangeMonitor, RegistryChangeMonitor>()
+                .AddTransient<IScheduledTaskConnector, ScheduledTaskConnector>()
+                .AddTransient<IFolderChangeMonitor, FolderChangeMonitor>()
+                .AddSingleton<IBootExecuteConnector, BootExecuteConnector>()
                 .AddSingleton<IAppInit32Connector, AppInit32Connector>()
                 .AddSingleton<IAppInit64Connector, AppInit64Connector>()
                 .AddSingleton<IAppCertDllConnector, AppCertDllConnector>()
@@ -252,13 +261,12 @@ namespace AutoStartConfirm.Connectors
                 .AddSingleton<ICurrentUserTerminalServerRunOnceExConnector, CurrentUserTerminalServerRunOnceExConnector>()
                 .AddSingleton<IStartMenuAutoStartFolderConnector, StartMenuAutoStartFolderConnector>()
                 .AddSingleton<ICurrentUserStartMenuAutoStartFolderConnector, CurrentUserStartMenuAutoStartFolderConnector>()
-                .AddSingleton<IScheduledTaskConnector, ScheduledTaskConnector>()
                 .AddSingleton<IDeviceServiceConnector, DeviceServiceConnector>()
                 .AddSingleton<IOtherServiceConnector, OtherServiceConnector>();
         }
 
         public IList<AutoStartEntry> GetCurrentAutoStarts() {
-            Logger.Trace("GetCurrentAutoStarts called");
+            Logger.LogTrace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
             foreach (var connector in EnabledConnectors.Values) {
                 var connectorAutoStarts = connector.GetCurrentAutoStarts();
@@ -281,22 +289,22 @@ namespace AutoStartConfirm.Connectors
 
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
-            Logger.Trace("AddHandler called");
+            Logger.LogTrace("AddHandler called");
             Add?.Invoke(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
-            Logger.Trace("RemoveHandler called");
+            Logger.LogTrace("RemoveHandler called");
             Remove?.Invoke(removedAutostart);
         }
 
         private void EnableHandler(AutoStartEntry enabledAutostart) {
-            Logger.Trace("EnableHandler called");
+            Logger.LogTrace("EnableHandler called");
             Enable?.Invoke(enabledAutostart);
         }
 
         private void DisableHandler(AutoStartEntry disabledAutostart) {
-            Logger.Trace("DisableHandler called");
+            Logger.LogTrace("DisableHandler called");
             Disable?.Invoke(disabledAutostart);
         }
 
@@ -317,32 +325,32 @@ namespace AutoStartConfirm.Connectors
 #pragma warning restore CA1065
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
-            Logger.Trace("Checking if auto start {@autoStart} can be added", autoStart);
+            Logger.LogTrace("Checking if auto start {@autoStart} can be added", autoStart);
             return AllConnectors[autoStart.Category].CanBeAdded(autoStart);
         }
 
         public bool CanBeRemoved(AutoStartEntry autoStart) {
-            Logger.Trace("Checking if auto start {@autoStart} can be removed", autoStart);
+            Logger.LogTrace("Checking if auto start {@autoStart} can be removed", autoStart);
             return AllConnectors[autoStart.Category].CanBeRemoved(autoStart);
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.Info("Adding auto start {@autoStart}", autoStart);
+            Logger.LogInformation("Adding auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].AddAutoStart(autoStart);
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
-            Logger.Info("Removing auto start {@autoStart}", autoStart);
+            Logger.LogInformation("Removing auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].RemoveAutoStart(autoStart);
         }
 
         public bool CanBeEnabled(AutoStartEntry autoStart) {
-            Logger.Trace("Checking if auto start {@autoStart} can be enabled", autoStart);
+            Logger.LogTrace("Checking if auto start {@autoStart} can be enabled", autoStart);
             return AllConnectors[autoStart.Category].CanBeEnabled(autoStart);
         }
 
         public bool CanBeDisabled(AutoStartEntry autoStart) {
-            Logger.Trace("Checking if auto start {@autoStart} can be disabled", autoStart);
+            Logger.LogTrace("Checking if auto start {@autoStart} can be disabled", autoStart);
             return AllConnectors[autoStart.Category].CanBeDisabled(autoStart);
         }
 
@@ -351,12 +359,12 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
-            Logger.Info("Enabling auto start {@autoStart}", autoStart);
+            Logger.LogInformation("Enabling auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].EnableAutoStart(autoStart);
         }
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
-            Logger.Info("Disabling auto start {@autoStart}", autoStart);
+            Logger.LogInformation("Disabling auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].DisableAutoStart(autoStart);
         }
 
@@ -365,7 +373,7 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void StartWatcher() {
-            Logger.Info("Starting watchers");
+            Logger.LogInformation("Starting watchers");
             WatcherStarted = true;
             foreach (var connector in EnabledConnectors.Values) {
                 try {
@@ -376,7 +384,7 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void StopWatcher() {
-            Logger.Info("Stopping watchers");
+            Logger.LogInformation("Stopping watchers");
             WatcherStarted = false;
             foreach (var connector in EnabledConnectors.Values) {
                 try {

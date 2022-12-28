@@ -1,20 +1,24 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.GUI;
+using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 
 namespace AutoStartConfirm.Notifications
 {
-    public class NotificationService : INotificationService {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    public class NotificationService : INotificationService
+    {
+        private readonly ILogger<NotificationService> Logger;
 
         private readonly string assetDirectoryPath = $"{AppContext.BaseDirectory}Assets/";
 
-        public NotificationService() {
+        public NotificationService(ILogger<NotificationService> logger) {
+            Logger = logger;
         }
 
         public void ShowNewAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowNewAutoStartEntryNotification called for {@autostart}", autostart);
+                Logger.LogTrace("ShowNewAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewAdd")
                     .AddArgument("id", autostart.Id.ToString())
@@ -27,16 +31,15 @@ namespace AutoStartConfirm.Notifications
                     .AddButton("Revert", ToastActivationType.Background, new ToastArguments().Add("action", "revertAdd").Add("id", autostart.Id.ToString()).ToString())
                     .Show();
 
-                Logger.Trace("ShowNewAutoStartEntryNotification finished");
+                Logger.LogTrace("ShowNewAutoStartEntryNotification finished");
             } catch (Exception e) {
-                var err = new Exception("Failed to show new auto start notification", e);
-                Logger.Error(err);
+                Logger.LogError(e, "Failed to show new auto start notification");
             }
         }
 
         public void ShowEnabledAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowEnabledAutoStartEntryNotification called for {@autostart}", autostart);
+                Logger.LogTrace("ShowEnabledAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewAdd")
                     .AddArgument("id", autostart.Id.ToString())
@@ -49,16 +52,15 @@ namespace AutoStartConfirm.Notifications
                     .AddButton("Remove", ToastActivationType.Background, new ToastArguments().Add("action", "revertAdd").Add("id", autostart.Id.ToString()).ToString())
                     .Show();
 
-                Logger.Trace("ShowEnabledAutoStartEntryNotification finished");
+                Logger.LogTrace("ShowEnabledAutoStartEntryNotification finished");
             } catch (Exception e) {
-                var err = new Exception("Failed to show enabled auto start notification", e);
-                Logger.Error(err);
+                Logger.LogError(e, "Failed to show enabled auto start notification");
             }
         }
 
         public void ShowRemovedAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowRemovedAutoStartEntryNotification called for {@autostart}", autostart);
+                Logger.LogTrace("ShowRemovedAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewRemove")
                     .AddArgument("id", autostart.Id.ToString())
@@ -70,16 +72,15 @@ namespace AutoStartConfirm.Notifications
                     .AddButton("Revert", ToastActivationType.Background, new ToastArguments().Add("action", "revertRemove").Add("id", autostart.Id.ToString()).ToString())
                     .Show();
 
-                Logger.Trace("ShowRemovedAutoStartEntryNotification finished");
+                Logger.LogTrace("ShowRemovedAutoStartEntryNotification finished");
             } catch (Exception e) {
-                var err = new Exception("Failed to show removed auto start notification", e);
-                Logger.Error(err);
+                Logger.LogError(e, "Failed to show removed auto start notification");
             }
         }
 
         public void ShowDisabledAutoStartEntryNotification(AutoStartEntry autostart) {
             try {
-                Logger.Trace("ShowDisabledAutoStartEntryNotification called for {@autostart}", autostart);
+                Logger.LogTrace("ShowDisabledAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewAdd")
                     .AddArgument("id", autostart.Id.ToString())
@@ -91,10 +92,9 @@ namespace AutoStartConfirm.Notifications
                     .AddButton("Enable", ToastActivationType.Background, new ToastArguments().Add("action", "enable").Add("id", autostart.Id.ToString()).ToString())
                     .AddButton("Remove", ToastActivationType.Background, new ToastArguments().Add("action", "revertRemove").Add("id", autostart.Id.ToString()).ToString())
                     .Show();
-                Logger.Trace("ShowDisabledAutoStartEntryNotification finished");
+                Logger.LogTrace("ShowDisabledAutoStartEntryNotification finished");
             } catch (Exception e) {
-                var err = new Exception("Failed to show disabled auto start notification", e);
-                Logger.Error(err);
+                Logger.LogError(e, "Failed to show disabled auto start notification");
             }
         }
 
@@ -102,7 +102,7 @@ namespace AutoStartConfirm.Notifications
         {
             try
             {
-                Logger.Trace("ShowNewVersionNotification called for {@newVersion}", newVersion);
+                Logger.LogTrace("ShowNewVersionNotification called for {@newVersion}", newVersion);
                 var toast = new ToastContentBuilder()
                     .AddArgument("action", "viewUpdate")
                     .AddText("New version available", AdaptiveTextStyle.Title)
@@ -114,12 +114,11 @@ namespace AutoStartConfirm.Notifications
                     toast = toast.AddButton("Install", ToastActivationType.Background, new ToastArguments().Add("action", "installUpdate").Add("msiUrl", msiUrl).ToString());
                 }
                 toast.Show();
-                Logger.Trace("ShowNewVersionNotification finished");
+                Logger.LogTrace("ShowNewVersionNotification finished");
             }
             catch (Exception e)
             {
-                var err = new Exception("Failed to show disabled auto start notification", e);
-                Logger.Error(err);
+                Logger.LogError(e, "Failed to show disabled auto start notification");
             }
 
         }

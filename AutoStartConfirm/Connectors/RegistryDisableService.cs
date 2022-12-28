@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Management;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors
 {
@@ -11,172 +12,246 @@ namespace AutoStartConfirm.Connectors
     public delegate void EnableChangeHandler(string name);
     #endregion
 
-    public class RegistryDisableService : IDisposable, IRegistryDisableService {
+    public class RegistryDisableService : IDisposable, IRegistryDisableService
+    {
 
-        public string DisableBasePath { get; }
+        private string disableBasePath;
 
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        public string DisableBasePath {
+            get => disableBasePath;
+            set {
+                disableBasePath = value;
+                RegistryChangeMonitor.RegistryPath = disableBasePath;
+            }
+        }
+
+        private readonly ILogger<RegistryDisableService> Logger;
 
         protected static readonly byte[] defaultEnabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         protected static readonly byte[] defaultDisabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
         private Dictionary<string, bool> lastEnableStatus;
-        protected IRegistryChangeMonitor monitor;
+        protected IRegistryChangeMonitor RegistryChangeMonitor;
 
-        public RegistryDisableService(string DisableBasePath) {
-            this.DisableBasePath = DisableBasePath;
+        public RegistryDisableService(ILogger<RegistryDisableService> logger, IRegistryChangeMonitor registryChangeMonitor)
+        {
+            Logger = logger;
+            RegistryChangeMonitor = registryChangeMonitor;
+            RegistryChangeMonitor.Changed += ChangeHandler;
         }
 
-        private RegistryKey GetBaseRegistry(string basePath) {
+        private RegistryKey GetBaseRegistry(string basePath)
+        {
             RegistryKey registryKey;
-            if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+            if (basePath.StartsWith("HKEY_LOCAL_MACHINE"))
+            {
                 registryKey = Microsoft.Win32.Registry.LocalMachine;
-            } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
+            }
+            else if (basePath.StartsWith("HKEY_CURRENT_USER"))
+            {
                 registryKey = Microsoft.Win32.Registry.CurrentUser;
-            } else {
+            }
+            else
+            {
                 throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
             }
             return registryKey;
         }
 
-        public bool CanBeEnabled(AutoStartEntry autoStart) {
-            try {
+        public bool CanBeEnabled(AutoStartEntry autoStart)
+        {
+            try
+            {
                 EnableAutoStart(autoStart, true);
                 return true;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
         }
 
-        public bool CanBeDisabled(AutoStartEntry autoStart) {
-            try {
+        public bool CanBeDisabled(AutoStartEntry autoStart)
+        {
+            try
+            {
+
                 DisableAutoStart(autoStart, true);
                 return true;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
         }
 
-        public void EnableAutoStart(AutoStartEntry autoStart) {
+        public void EnableAutoStart(AutoStartEntry autoStart)
+        {
             EnableAutoStart(autoStart, false);
         }
 
-        public void EnableAutoStart(AutoStartEntry autoStart, bool dryRun) {
+        public void EnableAutoStart(AutoStartEntry autoStart, bool dryRun)
+        {
             ToggleAutoStartEnable(autoStart, true, dryRun);
         }
 
-        public void DisableAutoStart(AutoStartEntry autoStart) {
+        public void DisableAutoStart(AutoStartEntry autoStart)
+        {
             DisableAutoStart(autoStart, false);
         }
 
-        public void DisableAutoStart(AutoStartEntry autoStart, bool dryRun) {
+        public void DisableAutoStart(AutoStartEntry autoStart, bool dryRun)
+        {
             ToggleAutoStartEnable(autoStart, false, dryRun);
         }
 
-        public void ToggleAutoStartEnable(AutoStartEntry autoStart, bool enable, bool dryRun) {
-            Logger.Trace("ToggleAutoStartEnable called for {Value} in {Path} (enable: {Enable}, dryRun: {DryRun})", autoStart.Value, autoStart.Path, enable, dryRun);
+        public void ToggleAutoStartEnable(AutoStartEntry autoStart, bool enable, bool dryRun)
+        {
+            Logger.LogTrace("ToggleAutoStartEnable called for {Value} in {Path} (enable: {Enable}, dryRun: {DryRun})", autoStart.Value, autoStart.Path, enable, dryRun);
+            if (DisableBasePath == null)
+            {
+                throw new InvalidOperationException("DisableBasePath not set");
+            }
             var firstDelimiterPos = DisableBasePath.IndexOf('\\');
             var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
             string valueName;
-            if (autoStart is FolderAutoStartEntry) {
+            if (autoStart is FolderAutoStartEntry)
+            {
                 valueName = autoStart.Value;
-            } else if (autoStart is RegistryAutoStartEntry) {
+            }
+            else if (autoStart is RegistryAutoStartEntry)
+            {
                 valueName = autoStart.Path.Substring(autoStart.Path.LastIndexOf('\\') + 1);
-            } else {
+            }
+            else
+            {
                 throw new NotImplementedException();
             }
             using (var registry = GetBaseRegistry(DisableBasePath))
-            using (var key = registry.OpenSubKey(subKeyPath, !dryRun)) {
-                if (key == null && dryRun) {
+            using (var key = registry.OpenSubKey(subKeyPath, !dryRun))
+            {
+                if (key == null && dryRun)
+                {
                     return;
                 }
                 object currentValue = key.GetValue(valueName, null);
                 byte[] currentValueByteArray = null;
-                if (currentValue == null) {
-                    if (enable) {
+                if (currentValue == null)
+                {
+                    if (enable)
+                    {
                         throw new AlreadySetException($"Auto start already enabled");
                     }
                     currentValueByteArray = defaultEnabledByteArray;
-                } else if (currentValue != null) {
+                }
+                else if (currentValue != null)
+                {
                     var currentValueKind = key.GetValueKind(valueName);
-                    if (currentValueKind != RegistryValueKind.Binary) {
+                    if (currentValueKind != RegistryValueKind.Binary)
+                    {
                         throw new ArgumentException($"Registry value has the wrong type \"{currentValueKind}\"");
                     }
                     currentValueByteArray = (byte[])currentValue;
                     var isEnabled = GetIsEnabled(currentValueByteArray);
-                    if (enable && isEnabled) {
+                    if (enable && isEnabled)
+                    {
                         throw new AlreadySetException($"Auto start already enabled");
-                    } else if (!enable && !isEnabled) {
+                    }
+                    else if (!enable && !isEnabled)
+                    {
                         throw new AlreadySetException($"Auto start already disabled");
                     }
                 }
-                if (dryRun) {
+                if (dryRun)
+                {
                     return;
                 }
-                if (enable) {
+                if (enable)
+                {
                     Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
-                } else {
+                }
+                else
+                {
                     Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
                 }
             }
         }
 
-        private void ChangeHandler(object sender, EventArrivedEventArgs e) {
-            Logger.Trace("ChangeHandler called for {DisableBasePath}", DisableBasePath);
+        private void ChangeHandler(object sender, EventArrivedEventArgs e)
+        {
+            Logger.LogTrace("ChangeHandler called for {DisableBasePath}", DisableBasePath);
             var newEnableStatus = GetCurrentEnableStatus();
-            foreach (var newStatus in newEnableStatus) {
+            foreach (var newStatus in newEnableStatus)
+            {
                 var name = newStatus.Key;
                 var nowEnabled = newStatus.Value;
                 var wasEnabled = true;
-                if (lastEnableStatus.ContainsKey(name)) {
+                if (lastEnableStatus.ContainsKey(name))
+                {
                     wasEnabled = lastEnableStatus[name];
                 }
-                if (wasEnabled != nowEnabled) {
-                    if (nowEnabled) {
+                if (wasEnabled != nowEnabled)
+                {
+                    if (nowEnabled)
+                    {
                         Enable?.Invoke(name);
-                    } else {
+                    }
+                    else
+                    {
                         Disable?.Invoke(name);
                     }
                 }
             }
-            foreach (var lastStatus in lastEnableStatus) {
+            foreach (var lastStatus in lastEnableStatus)
+            {
                 var name = lastStatus.Key;
                 var wasEnabled = lastStatus.Value;
-                if (newEnableStatus.ContainsKey(name)) {
+                if (newEnableStatus.ContainsKey(name))
+                {
                     continue;
                 }
-                if (!wasEnabled) {
+                if (!wasEnabled)
+                {
                     Enable?.Invoke(name);
                 }
             }
             lastEnableStatus = newEnableStatus;
         }
 
-        public Dictionary<string, bool> GetCurrentEnableStatus() {
-            Logger.Trace("GetCurrentEnableStatus called");
+        public Dictionary<string, bool> GetCurrentEnableStatus()
+        {
+            Logger.LogTrace("GetCurrentEnableStatus called");
             var firstDelimiterPos = DisableBasePath.IndexOf('\\');
             var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
             var ret = new Dictionary<string, bool>();
             using (var registry = GetBaseRegistry(DisableBasePath))
-            using (var key = registry.OpenSubKey(subKeyPath, false)) {
-                if (key == null) {
+            using (var key = registry.OpenSubKey(subKeyPath, false))
+            {
+                if (key == null)
+                {
                     return ret;
                 }
                 var valueNames = key.GetValueNames();
-                foreach (var valueName in valueNames) {
+                foreach (var valueName in valueNames)
+                {
                     object currentValue = key.GetValue(valueName, null);
-                    if (currentValue == null) {
+                    if (currentValue == null)
+                    {
                         continue;
                     }
                     var currentValueKind = key.GetValueKind(valueName);
-                    if (currentValueKind != RegistryValueKind.Binary) {
+                    if (currentValueKind != RegistryValueKind.Binary)
+                    {
                         continue;
                     }
                     var currentValueByteArray = (byte[])currentValue;
                     var isEnabled = GetIsEnabled(currentValueByteArray);
-                    if (isEnabled) {
+                    if (isEnabled)
+                    {
                         ret.Add(valueName, true);
-                    } else {
+                    }
+                    else
+                    {
                         ret.Add(valueName, false);
                     }
                 }
@@ -184,23 +259,27 @@ namespace AutoStartConfirm.Connectors
             return ret;
         }
 
-        private static bool GetIsEnabled(byte[] currentValueByteArray) {
+        private static bool GetIsEnabled(byte[] currentValueByteArray)
+        {
             // enabled if most and least significant bytes are even
             return (currentValueByteArray[0] & 0b1) == 0 && (currentValueByteArray[11] & 0b1) == 0;
         }
 
-        private static byte[] GetEnabledValue(byte[] currentValueByteArray) {
+        private static byte[] GetEnabledValue(byte[] currentValueByteArray)
+        {
             // enabled if most and least significant bytes are not even
             // also all other bytes should be 0
             var firstByteAsInt = currentValueByteArray[0] & 0b_1111_1110;
             currentValueByteArray[0] = (byte)firstByteAsInt;
-            for (int i = 1; i < currentValueByteArray.Length; i++) {
+            for (int i = 1; i < currentValueByteArray.Length; i++)
+            {
                 currentValueByteArray[i] = 0b0;
             }
             return currentValueByteArray;
         }
 
-        private static byte[] GetDisabledValue(byte[] currentValueByteArray) {
+        private static byte[] GetDisabledValue(byte[] currentValueByteArray)
+        {
             // disabled if most and least significant bytes are not even
             // other bytes are maybe a timestamp when disabled via task manager, but this is not relevant to disable the auto start
             currentValueByteArray[0] |= 0b1;
@@ -216,46 +295,42 @@ namespace AutoStartConfirm.Connectors
         /// See https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regnotifychangekeyvalue
         /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
         /// </remarks>
-        public void StartWatcher() {
-            Logger.Trace("StartWatcher called for {DisableBasePath}", DisableBasePath);
-            if (monitor != null) {
-                Logger.Trace("Watcher already running");
-                return;
-            }
+        public void StartWatcher()
+        {
+            Logger.LogTrace("StartWatcher called for {DisableBasePath}", DisableBasePath);
             lastEnableStatus = GetCurrentEnableStatus();
-            monitor = new RegistryChangeMonitor(DisableBasePath);
-            monitor.Changed += ChangeHandler;
-            monitor.Start();
-            Logger.Trace("Watcher started");
+            RegistryChangeMonitor.Start();
+            Logger.LogTrace("Watcher started");
         }
 
-        public void StopWatcher() {
-            Logger.Trace("StopWatcher called for {DisableBasePath}", DisableBasePath);
-            if (monitor == null) {
-                Logger.Trace("No watcher running");
-                return;
-            }
-            monitor.Changed -= ChangeHandler;
-            monitor.Stop();
-            monitor.Dispose();
-            monitor = null;
-            Logger.Trace("Watcher stopped");
+        public void StopWatcher()
+        {
+            Logger.LogTrace("StopWatcher called for {DisableBasePath}", DisableBasePath);
+            RegistryChangeMonitor.Stop();
+            Logger.LogTrace("Watcher stopped");
         }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     StopWatcher();
+                    RegistryChangeMonitor.Changed -= ChangeHandler;
+                    RegistryChangeMonitor.Dispose();
+                    RegistryChangeMonitor = null;
                 }
 
                 disposedValue = true;
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
 

@@ -1,5 +1,8 @@
 ﻿namespace AutoStartConfirm.Connectors {
-    public interface IRegistryChangeMonitor {
+    public interface IRegistryChangeMonitor
+    {
+        public string RegistryPath { get; set; }
+
         bool Monitoring { get; }
 
         event RegistryChangeHandler Changed;
