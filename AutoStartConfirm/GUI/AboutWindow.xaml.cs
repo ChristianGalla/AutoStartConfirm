@@ -31,6 +31,11 @@ namespace AutoStartConfirm.GUI
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
 
     }
 }

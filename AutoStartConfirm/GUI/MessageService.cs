@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoStartConfirm.Models;
+using System;
 using System.Windows;
 
 namespace AutoStartConfirm.GUI
@@ -8,10 +9,12 @@ namespace AutoStartConfirm.GUI
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly MainWindow MainWindow;
+        private readonly IAppStatus AppStatus;
 
-        public MessageService(MainWindow mainWindow)
+        public MessageService(MainWindow mainWindow, IAppStatus appStatus)
         {
             MainWindow = mainWindow;
+            AppStatus = appStatus;
         }
 
         public void ShowError(string caption, Exception error) {
@@ -25,7 +28,7 @@ namespace AutoStartConfirm.GUI
                 bool newWindow = EnsureMainWindow();
                 MessageBox.Show(MainWindow, message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (newWindow) {
-                    MainWindow.Close();
+                    MainWindow.Hide();
                 }
             });
         }
@@ -37,7 +40,7 @@ namespace AutoStartConfirm.GUI
                 bool newWindow = EnsureMainWindow();
                 var ret = MessageBox.Show(MainWindow, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (newWindow) {
-                    MainWindow.Close();
+                    MainWindow.Hide();
                 }
                 return ret == MessageBoxResult.Yes;
             });
@@ -50,7 +53,7 @@ namespace AutoStartConfirm.GUI
                 bool newWindow = EnsureMainWindow();
                 MessageBox.Show(MainWindow, message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
                 if (newWindow) {
-                    MainWindow.Close();
+                    MainWindow.Hide();
                 }
             });
         }

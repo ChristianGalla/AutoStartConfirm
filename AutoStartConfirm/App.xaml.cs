@@ -1,7 +1,6 @@
 ﻿using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Models;
-using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.IO;
@@ -19,6 +18,8 @@ using System.Xml.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.NetworkInformation;
 using AutoStartConfirm.Connectors.Registry;
+using System.Windows.Input;
+using H.NotifyIcon;
 
 namespace AutoStartConfirm
 {
@@ -30,13 +31,13 @@ namespace AutoStartConfirm
 
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public static NotifyIcon Icon = null;
+        public static TaskbarIcon NotifyIcon = null;
 
         public static ServiceProvider ServiceProvider;
 
         private readonly MainWindow Window;
 
-        private readonly IAppStatus AppStatus;
+        public IAppStatus AppStatus;
 
         private readonly IAutoStartService AutoStartService;
 
@@ -73,7 +74,14 @@ namespace AutoStartConfirm
         }
 
 
-        public App(MainWindow window, IAppStatus appStatus, IAutoStartService autoStartService, INotificationService notificationService, IMessageService messageService, ISettingsService settingsService, IUpdateService updateService)
+        public App(
+            MainWindow window,
+            IAppStatus appStatus,
+            IAutoStartService autoStartService,
+            INotificationService notificationService,
+            IMessageService messageService,
+            ISettingsService settingsService,
+            IUpdateService updateService)
         {
             Window = window;
             AppStatus = appStatus;
@@ -304,14 +312,14 @@ namespace AutoStartConfirm
             }
         }
 
-        void App_Startup(object sender, StartupEventArgs e)
+        void OnStartup(object sender, StartupEventArgs e)
         {
-            Logger.Trace("App_Startup called");
-            // todo: implement via dependency injection
-            Icon = (NotifyIcon)FindResource("NotifyIcon");
-            Icon.Exit += ExitHandler;
-            Icon.OwnAutoStartToggle += OwnAutoStartToggleHandler;
-            Icon.Open += OpenHandler;
+            Logger.Trace("OnStartup called");
+            // base.OnStartup(e);
+
+            //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
+            NotifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
+            NotifyIcon.ForceCreate();
         }
 
         private void ExitHandler(object sender, EventArgs e)
@@ -335,7 +343,7 @@ namespace AutoStartConfirm
             if (Window.IsVisible)
             {
                 Logger.Trace("Closing main window");
-                Window.Close();
+                Window.Hide();
             }
             else
             {
@@ -743,6 +751,22 @@ namespace AutoStartConfirm
                 return;
             }
             Process.Start("Msiexec.exe", $"/i \"{msiUrl}\" /qb+");
+        }
+
+
+        private void ExitClicked(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void OwnAutoStartClicked(object sender, EventArgs e)
+        {
+            ToggleOwnAutoStart();
+        }
+
+        private void IconDoubleClicked(object sender, RoutedEventArgs e)
+        {
+            ToggleMainWindow();
         }
 
         #region Event handlers

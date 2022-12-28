@@ -21,6 +21,9 @@ namespace AutoStartConfirm.GUI
 
         private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
+        private readonly ISettingsService SettingsService;
+        private readonly AboutWindow AboutWindow;
+        private readonly IAppStatus AppStatus;
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
             get {
@@ -34,13 +37,23 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService)
+        public MainWindow(ConnectorWindow connectorWindow, IAutoStartService autoStartService, AboutWindow aboutWindow, IAppStatus appStatus, ISettingsService settingsService)
         {
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
+            SettingsService = settingsService;
+            AboutWindow = aboutWindow;
+            AppStatus = appStatus;
             Logger.Trace("Window opened");
             InitializeComponent();
         }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             Logger.Trace("Window closed");
@@ -95,7 +108,7 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
-            window.Close();
+            window.Hide();
         }
 
         private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
@@ -103,8 +116,7 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Show();
+            AboutWindow.Show();
         }
 
         private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {

@@ -93,6 +93,11 @@ namespace AutoStartConfirm.GUI
                 }
             });
         }
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
 
         protected virtual void Dispose(bool disposing)
         {
