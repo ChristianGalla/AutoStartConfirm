@@ -31,13 +31,9 @@ namespace AutoStartConfirm
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : System.Windows.Application, IDisposable
+    public partial class App : System.Windows.Application
     {
         private static TaskbarIcon NotifyIcon;
-
-        private static ServiceProvider serviceProvider;
-
-        public static ServiceProvider ServiceProvider { get => serviceProvider; }
 
         private readonly ILogger<App> Logger;
 
@@ -63,27 +59,6 @@ namespace AutoStartConfirm
 
         private static readonly string DisableParameterName = "--disable";
 
-        private static void ConfigureServices(ServiceCollection services)
-        {
-            var nlogPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "nlog.config");
-            services.AddLogging(loggingBuilder =>
-                {
-                    // configure Logging with NLog
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                    loggingBuilder.AddNLogWeb(nlogPath);
-                }).AddSingleton<App>()
-                .AddSingleton<MainWindow>()
-                .AddSingleton<ConnectorWindow>()
-                .AddSingleton<AboutWindow>()
-                .AddSingleton<IAppStatus, AppStatus>()
-                .AddSingleton<IAutoStartService, AutoStartService>()
-                .AddSingleton<INotificationService, NotificationService>()
-                .AddSingleton<IMessageService, MessageService>()
-                .AddSingleton<ISettingsService, SettingsService>()
-                .AddSingleton<IUpdateService, UpdateService>();
-            AutoStartConnectorService.ConfigureServices(services);
-        }
 
 
         public App(
@@ -214,48 +189,6 @@ namespace AutoStartConfirm
                     AppStatus.DecrementRunningActionCount();
                 }
             });
-        }
-
-        /// <summary>
-        /// Application Entry Point.
-        /// </summary>
-        [System.STAThreadAttribute()]
-        public static int Main(string[] args)
-        {
-            try
-            {
-                ServiceCollection services = new ServiceCollection();
-                ConfigureServices(services);
-                serviceProvider = services.BuildServiceProvider();
-                using (var serviceScope = ServiceProvider.CreateScope())
-                {
-                    var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<App>>();
-                    try
-                    {
-                        logger.LogInformation("Starting");
-                        App app = serviceScope.ServiceProvider.GetRequiredService<App>();
-                        logger.LogInformation("Parameters: {args}", args);
-                        if (app.HandleCommandLineParameters(args))
-                        {
-                            return 0;
-                        }
-                        logger.LogInformation("Normal start");
-                        app.Start();
-                        app.Run(); // blocks until program is closing
-                        logger.LogInformation("Finished");
-                    }
-                    catch (Exception e)
-                    {
-                        logger.LogCritical("Failed to run", e);
-                        return 1;
-                    }
-                }
-                return 0;
-            }
-            catch (Exception)
-            {
-                return 2;
-            }
         }
 
         /// <summary>
@@ -890,29 +823,6 @@ namespace AutoStartConfirm
         {
             Logger.LogTrace("DisableHandler called");
             NotificationService.ShowDisabledAutoStartEntryNotification(disabledAutostart);
-        }
-        #endregion
-
-        #region IDisposable Support
-        private bool disposedValue = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    ServiceProvider.Dispose();
-                }
-                disposedValue = true;
-            }
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
         }
         #endregion
     }
