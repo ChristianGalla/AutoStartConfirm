@@ -25,6 +25,10 @@ namespace AutoStartConfirm.Models
 
         protected int runningActionCount = 0;
 
+        public AppStatus()
+        {
+        }
+
         public int RunningActionCount
         {
             get

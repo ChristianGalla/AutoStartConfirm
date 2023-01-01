@@ -69,23 +69,23 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Changed: {FullPath}", e.FullPath);
-            Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-                var removedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.Name,
-                    Path = parentDirectory,
-                    Date = DateTime.Now,
-                };
-                Remove?.Invoke(removedAutostart);
-                var addedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.Name,
-                    Path = parentDirectory,
-                    Date = DateTime.Now,
-                };
-                Add?.Invoke(addedAutostart);
-            });
+            //Application.Current.Dispatcher.Invoke(delegate {
+            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+            //    var removedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.Name,
+            //        Path = parentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Remove?.Invoke(removedAutostart);
+            //    var addedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.Name,
+            //        Path = parentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Add?.Invoke(addedAutostart);
+            //});
         }
 
         private void OnCreated(object sender, FileSystemEventArgs e) {
@@ -93,16 +93,16 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Created: {FullPath}", e.FullPath);
-            Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-                var addedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.Name,
-                    Path = parentDirectory,
-                    Date = DateTime.Now,
-                };
-                Add?.Invoke(addedAutostart);
-            });
+            //Application.Current.Dispatcher.Invoke(delegate {
+            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+            //    var addedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.Name,
+            //        Path = parentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Add?.Invoke(addedAutostart);
+            //});
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e) {
@@ -110,16 +110,16 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Deleted: {FullPath}", e.FullPath);
-            Application.Current.Dispatcher.Invoke(delegate {
-                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-                var removedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.Name,
-                    Path = parentDirectory,
-                    Date = DateTime.Now,
-                };
-                Remove?.Invoke(removedAutostart);
-            });
+            //Application.Current.Dispatcher.Invoke(delegate {
+            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+            //    var removedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.Name,
+            //        Path = parentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Remove?.Invoke(removedAutostart);
+            //});
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e) {
@@ -127,24 +127,24 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
-            Application.Current.Dispatcher.Invoke(delegate {
-                var oldParentDirectory = e.OldFullPath[..e.OldFullPath.LastIndexOf("\\")];
-                var removedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.OldName,
-                    Path = oldParentDirectory,
-                    Date = DateTime.Now,
-                };
-                Remove?.Invoke(removedAutostart);
-                var newParentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-                var addedAutostart = new FolderAutoStartEntry() {
-                    Category = Category,
-                    Value = e.Name,
-                    Path = newParentDirectory,
-                    Date = DateTime.Now,
-                };
-                Add?.Invoke(addedAutostart);
-            });
+            //Application.Current.Dispatcher.Invoke(delegate {
+            //    var oldParentDirectory = e.OldFullPath[..e.OldFullPath.LastIndexOf("\\")];
+            //    var removedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.OldName,
+            //        Path = oldParentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Remove?.Invoke(removedAutostart);
+            //    var newParentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+            //    var addedAutostart = new FolderAutoStartEntry() {
+            //        Category = Category,
+            //        Value = e.Name,
+            //        Path = newParentDirectory,
+            //        Date = DateTime.Now,
+            //    };
+            //    Add?.Invoke(addedAutostart);
+            //});
         }
 
         private void OnError(object sender, ErrorEventArgs e) {

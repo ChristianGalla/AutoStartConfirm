@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
-using Windows.ApplicationModel;
 using Windows.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,6 +13,11 @@ using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
 using NLog.Web;
+using Microsoft.UI.Dispatching;
+using System.IO;
+using Microsoft.Windows.AppLifecycle;
+using Windows.ApplicationModel.Activation;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace AutoStartConfirm
 {
@@ -49,6 +51,7 @@ namespace AutoStartConfirm
                         ServiceCollection services = new();
                         ConfigureServices(services);
                         ServiceProvider = services.BuildServiceProvider();
+                        Ioc.Default.ConfigureServices(ServiceProvider);
                         using var serviceScope = ServiceProvider.CreateScope();
                         var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<App>>();
                         try
@@ -58,17 +61,14 @@ namespace AutoStartConfirm
                             logger.LogInformation("Parameters: {args}", args);
                             if (app.HandleCommandLineParameters(args))
                             {
-                                return 0;
+                                return;
                             }
                             logger.LogInformation("Normal start");
-                            app.Start();
-                            app.Run(); // blocks until program is closing
-                            logger.LogInformation("Finished");
                         }
                         catch (Exception e)
                         {
-                            logger.LogCritical("Failed to run", e);
-                            return 1;
+                            logger.LogCritical(e, "Failed to run");
+                            throw;
                         }
                     });
                 }

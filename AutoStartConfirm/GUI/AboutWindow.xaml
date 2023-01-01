@@ -3,17 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Name="window"
-        Title="About Auto Start Confirm" Height="99.473" Width="330" WindowStartupLocation="CenterScreen">
-    <Grid>
+        mc:Ignorable="d">
+    <!--<Grid>
         <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
             Auto Start Confirm
             <Run Text="{Binding ElementName=window, Path=Version, Mode=OneWay}"></Run>
             <LineBreak />
             <Run Text="{Binding ElementName=window, Path=Copyright, Mode=OneWay}"></Run>
             <LineBreak />
-            <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm" RequestNavigate="Hyperlink_RequestNavigate">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
+            <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
         </TextBlock>
-    </Grid>
+    </Grid>-->
 </Window>

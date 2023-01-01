@@ -5,13 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoStartConfirm.GUI"
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-        mc:Ignorable="d"
-        x:Name="window"
-        Title="Enabled Connectors"
-        Height="700"
-        Width="400"
-        WindowStartupLocation="CenterScreen">
-    <Window.Resources>
+        mc:Ignorable="d">
+    <!--<Window.Resources>
         <CollectionViewSource
                         x:Key="connectorViewSource"
                         Source="{Binding ElementName=window, Path=Connectors}">
@@ -31,6 +26,6 @@
             </DataGridTemplateColumn>
             <DataGridTextColumn Header="Connector" Binding="{Binding Path=CategoryName, Mode=OneWay }" IsReadOnly="True" />
         </DataGrid.Columns>
-    </DataGrid>
+    </DataGrid>-->
 
 </Window>

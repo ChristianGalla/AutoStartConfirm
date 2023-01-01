@@ -5,7 +5,13 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using System.Windows;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace AutoStartConfirm.GUI
 {
@@ -93,11 +99,11 @@ namespace AutoStartConfirm.GUI
                 }
             });
         }
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            Hide();
-            e.Cancel = true;
-        }
+        //protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        //{
+        //    Hide();
+        //    e.Cancel = true;
+        //}
 
         protected virtual void Dispose(bool disposing)
         {

@@ -5,8 +5,13 @@ using AutoStartConfirm.Properties;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace AutoStartConfirm.GUI
 {
@@ -45,8 +50,8 @@ namespace AutoStartConfirm.GUI
             IAutoStartService autoStartService,
             AboutWindow aboutWindow,
             IAppStatus appStatus,
-            ISettingsService settingsService)
-        {
+            ISettingsService settingsService
+        ) {
             Logger = logger;
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
@@ -57,18 +62,18 @@ namespace AutoStartConfirm.GUI
             InitializeComponent();
         }
 
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            Hide();
-            e.Cancel = true;
-        }
+        //protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        //{
+        //    Hide();
+        //    e.Cancel = true;
+        //}
 
-        protected override void OnClosed(EventArgs e)
-        {
-            Logger.LogTrace("Window closed");
-            base.OnClosed(e);
-            IsClosed = true;
-        }
+        //protected override void OnClosed(EventArgs e)
+        //{
+        //    Logger.LogTrace("Window closed");
+        //    base.OnClosed(e);
+        //    IsClosed = true;
+        //}
 
         #region Click handlers
 
@@ -117,7 +122,7 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
-            window.Hide();
+            // window.Hide();
         }
 
         private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
@@ -125,11 +130,11 @@ namespace AutoStartConfirm.GUI
         }
 
         private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
-            AboutWindow.Show();
+            // AboutWindow.Show();
         }
 
         private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {
-            ConnectorWindow.Show();
+            // ConnectorWindow.Show();
         }
 
         #endregion

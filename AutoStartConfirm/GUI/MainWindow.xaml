@@ -6,16 +6,10 @@
         xmlns:local="clr-namespace:AutoStartConfirm.GUI"
         xmlns:AutoStarts="clr-namespace:AutoStartConfirm.Models"
         xmlns:myConverters="clr-namespace:AutoStartConfirm.Converters"
-        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         x:Name="window"
         x:Class="AutoStartConfirm.GUI.MainWindow"
-        mc:Ignorable="d"
-        Title="Auto Start Confirm"
-        Height="408.667"
-        Width="1181.667"
-        WindowStartupLocation="CenterScreen"
-        WindowState="Maximized">
-    <Window.Resources>
+        mc:Ignorable="d">
+    <!--<Window.Resources>
         <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
         <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
         <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
@@ -187,5 +181,5 @@
                 </DataGrid>
             </TabItem>
         </TabControl>
-    </DockPanel>
+    </DockPanel>-->
 </Window>

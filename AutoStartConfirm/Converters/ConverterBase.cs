@@ -13,7 +13,7 @@ namespace AutoStartConfirm.Converters {
 
         public ConverterBase()
         {
-            ServiceScope = App.ServiceProvider.CreateScope();
+            // ServiceScope = App.ServiceProvider.CreateScope();
             AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
         }
 

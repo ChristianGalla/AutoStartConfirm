@@ -15,7 +15,7 @@ namespace AutoStartConfirm.Models
 
         public NotifyIconViewModel()
         {
-            ServiceScope = App.ServiceProvider.CreateScope();
+            // ServiceScope = App.ServiceProvider.CreateScope();
             AppStatus = ServiceScope.ServiceProvider.GetRequiredService<IAppStatus>();
         }
 

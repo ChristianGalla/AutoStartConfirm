@@ -1,4 +1,6 @@
-﻿namespace AutoStartConfirm.Properties
+﻿using System.Configuration;
+
+namespace AutoStartConfirm.Properties
 {
 
 
@@ -18,7 +20,7 @@
             //
         }
         
-        private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e) {
+        private void SettingChangingEventHandler(object sender, SettingChangingEventArgs e) {
             // Add code to handle the SettingChangingEvent event here.
         }
         

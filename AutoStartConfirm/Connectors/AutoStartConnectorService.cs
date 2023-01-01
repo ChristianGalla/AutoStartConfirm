@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Windows;
 
 namespace AutoStartConfirm.Connectors
@@ -308,7 +309,7 @@ namespace AutoStartConfirm.Connectors
             Disable?.Invoke(disabledAutostart);
         }
 
-        private void SettingsLoadedHandler(object sender, System.Configuration.SettingsLoadedEventArgs e) {
+        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
             CreateOrUpdateEnabledConnectors();
         }
 

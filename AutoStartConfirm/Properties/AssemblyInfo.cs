@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows;
 using System.Runtime.Versioning;
 
 // Allgemeine Informationen über eine Assembly werden über die folgenden
@@ -32,14 +31,14 @@ using System.Runtime.Versioning;
 //[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
 
 
-[assembly: ThemeInfo(
-    ResourceDictionaryLocation.None, //Speicherort der designspezifischen Ressourcenwörterbücher
-                                     //(wird verwendet, wenn eine Ressource auf der Seite nicht gefunden wird,
-                                     // oder in den Anwendungsressourcen-Wörterbüchern nicht gefunden werden kann.)
-    ResourceDictionaryLocation.SourceAssembly //Speicherort des generischen Ressourcenwörterbuchs
-                                              //(wird verwendet, wenn eine Ressource auf der Seite nicht gefunden wird,
-                                              // designspezifischen Ressourcenwörterbuch nicht gefunden werden kann.)
-)]
+//[assembly: ThemeInfo(
+//    ResourceDictionaryLocation.None, //Speicherort der designspezifischen Ressourcenwörterbücher
+//                                     //(wird verwendet, wenn eine Ressource auf der Seite nicht gefunden wird,
+//                                     // oder in den Anwendungsressourcen-Wörterbüchern nicht gefunden werden kann.)
+//    ResourceDictionaryLocation.SourceAssembly //Speicherort des generischen Ressourcenwörterbuchs
+//                                              //(wird verwendet, wenn eine Ressource auf der Seite nicht gefunden wird,
+//                                              // designspezifischen Ressourcenwörterbuch nicht gefunden werden kann.)
+//)]
 
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:

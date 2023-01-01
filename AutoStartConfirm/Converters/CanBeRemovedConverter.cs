@@ -2,11 +2,10 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using System.Windows.Data;
 
 namespace AutoStartConfirm.Converters
 {
-    public class CanBeRemovedConverter : ConverterBase, IMultiValueConverter {
+    public class CanBeRemovedConverter : ConverterBase /*, IMultiValueConverter */ {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
 			var autoStart = (AutoStartEntry)values[0];
 			if (autoStart.CanBeRemoved.HasValue) {

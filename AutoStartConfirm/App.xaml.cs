@@ -1,43 +1,50 @@
-﻿using AutoStartConfirm.Connectors;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
+using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Models;
-using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Diagnostics;
 using Windows.Foundation.Collections;
 using AutoStartConfirm.GUI;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
-using System.ServiceModel.Channels;
 using System.Xml.Serialization;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Net.NetworkInformation;
-using AutoStartConfirm.Connectors.Registry;
-using System.Windows.Input;
 using H.NotifyIcon;
-using NLog;
-using NLog.Web;
-using NLog.Extensions.Logging;
-using AutoStartConfirm.Connectors.ScheduledTask;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoStartConfirm
 {
     /// <summary>
     /// Interaction logic for "App.xaml"
     /// </summary>
-    public partial class App : System.Windows.Application
+    public partial class App : Application, IDisposable
     {
         private static TaskbarIcon NotifyIcon;
 
         private readonly ILogger<App> Logger;
 
-        private readonly MainWindow Window;
+        // delay Window creation until App.InitializeComponent has been called
+        private MainWindow window = null;
+
+        private MainWindow Window {
+            get {
+                if (window == null)
+                {
+                    window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
+                }
+                return window;
+            }
+        }
 
         public IAppStatus AppStatus;
 
@@ -59,11 +66,13 @@ namespace AutoStartConfirm
 
         private static readonly string DisableParameterName = "--disable";
 
+        private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
+
+        private bool disposedValue;
 
 
         public App(
             ILogger<App> logger,
-            MainWindow window,
             IAppStatus appStatus,
             IAutoStartService autoStartService,
             INotificationService notificationService,
@@ -72,7 +81,6 @@ namespace AutoStartConfirm
             IUpdateService updateService)
         {
             Logger = logger;
-            Window = window;
             AppStatus = appStatus;
             AutoStartService = autoStartService;
             NotificationService = notificationService;
@@ -80,15 +88,44 @@ namespace AutoStartConfirm
             SettingsService = settingsService;
             UpdateService = updateService;
 
-            Window.ConfirmAdd += ConfirmAddHandler;
-            Window.RevertAdd += RevertAddHandler;
-            Window.RevertAddId += RevertAddIdHandler;
-            Window.Enable += EnableHandler;
-            Window.Disable += DisableHandler;
-            Window.ConfirmRemove += ConfirmRemoveHandler;
-            Window.RevertRemove += RevertRemoveHandler;
-            Window.RevertRemoveId += RevertRemoveIdHandler;
-            Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
+            this.InitializeComponent();
+
+            // disable notifications for new added auto starts on first start to avoid too many notifications at once
+            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
+            if (!isFirstRun)
+            {
+                AutoStartService.Add += AddHandler;
+                AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
+            }
+
+            try
+            {
+                AutoStartService.LoadCurrentAutoStarts();
+                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
+            }
+            catch (Exception)
+            {
+            }
+
+            if (isFirstRun)
+            {
+                AutoStartService.Add += AddHandler;
+                AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
+            }
+            AutoStartService.StartWatcher();
+
+            if (SettingsService.CheckForUpdatesOnStart)
+            {
+                UpdateService.CheckUpdateAndShowNotification();
+            }
+
+            //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
+            //NotifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
+            //NotifyIcon.ForceCreate();
         }
 
         private void RevertRemoveIdHandler(Guid e)
@@ -124,47 +161,6 @@ namespace AutoStartConfirm
         private void ToggleOwnAutoStartHandler(object sender, EventArgs e)
         {
             ToggleOwnAutoStart();
-        }
-
-        public void Start(bool skipInitializing = false)
-        {
-            // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
-            if (!isFirstRun)
-            {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
-            }
-
-            try
-            {
-                AutoStartService.LoadCurrentAutoStarts();
-                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
-            }
-            catch (Exception)
-            {
-            }
-
-            if (isFirstRun)
-            {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
-            }
-            AutoStartService.StartWatcher();
-
-            if (SettingsService.CheckForUpdatesOnStart)
-            {
-                UpdateService.CheckUpdateAndShowNotification();
-            }
-
-            if (!skipInitializing)
-            {
-                InitializeComponent();
-            }
         }
 
         public Task ToggleOwnAutoStart()
@@ -267,19 +263,9 @@ namespace AutoStartConfirm
             }
         }
 
-        void OnStartup(object sender, StartupEventArgs e)
-        {
-            Logger.LogTrace("OnStartup called");
-            // base.OnStartup(e);
-
-            //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
-            NotifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
-            NotifyIcon.ForceCreate();
-        }
-
         private void ExitHandler(object sender, EventArgs e)
         {
-            Close();
+            // Close();
         }
 
         private void OwnAutoStartToggleHandler(object sender, EventArgs e)
@@ -289,47 +275,22 @@ namespace AutoStartConfirm
 
         private void OpenHandler(object sender, EventArgs e)
         {
-            MainWindow.Show();
+            // MainWindow.Show();
         }
 
         public void ToggleMainWindow()
         {
             Logger.LogTrace("Toggling main window");
-            if (Window.IsVisible)
-            {
-                Logger.LogTrace("Closing main window");
-                Window.Hide();
-            }
-            else
-            {
-                Logger.LogTrace("Showing main window");
-                Window.Show();
-            }
-        }
-
-        internal void Close()
-        {
-            Logger.LogInformation("Closing application");
-            try
-            {
-                Current.Shutdown();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Failed to shutdown");
-            }
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            try
-            {
-                AutoStartService.SaveAutoStarts();
-            }
-            finally
-            {
-                base.OnExit(e);
-            }
+            //if (Window.IsVisible)
+            //{
+            //    Logger.LogTrace("Closing main window");
+            //    Window.Hide();
+            //}
+            //else
+            //{
+            //    Logger.LogTrace("Showing main window");
+            //    Window.Show();
+            //}
         }
 
 #pragma warning disable IDE0060 // Remove unused parameter
@@ -707,7 +668,7 @@ namespace AutoStartConfirm
 
         private void ExitClicked(object sender, EventArgs e)
         {
-            Close();
+            // Close();
         }
 
         private void OwnAutoStartClicked(object sender, EventArgs e)
@@ -721,74 +682,83 @@ namespace AutoStartConfirm
         }
 
         #region Event handlers
-        protected override void OnStartup(StartupEventArgs e)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            // Listen to notification activation
-            ToastNotificationManagerCompat.OnActivated += toastArgs =>
-            {
-                Logger.LogTrace("Toast activated {Arguments}", toastArgs.Argument);
-                // Obtain the arguments from the notification
-                ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
+            //// Listen to notification activation
+            //ToastNotificationManagerCompat.OnActivated += toastArgs =>
+            //{
+            //    Logger.LogTrace("Toast activated {Arguments}", toastArgs.Argument);
+            //    // Obtain the arguments from the notification
+            //    ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
 
-                // Obtain any user input (text boxes, menu selections) from the notification
-                ValueSet userInput = toastArgs.UserInput;
+            //    // Obtain any user input (text boxes, menu selections) from the notification
+            //    ValueSet userInput = toastArgs.UserInput;
 
-                // Need to dispatch to UI thread if performing UI operations
-                System.Windows.Application.Current.Dispatcher.Invoke(delegate
-                {
-                    Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
-                    if (args.TryGetValue("action", out string action))
-                    {
-                        switch (action)
-                        {
-                            case "viewRemove":
-                                ShowRemoved(Guid.Parse(args["id"]));
-                                break;
-                            case "revertRemove":
-                                RevertRemove(Guid.Parse(args["id"]));
-                                break;
-                            case "confirmRemove":
-                                ConfirmRemove(Guid.Parse(args["id"]));
-                                break;
-                            case "viewAdd":
-                                ShowAdd(Guid.Parse(args["id"]));
-                                break;
-                            case "revertAdd":
-                                RevertAdd(Guid.Parse(args["id"]));
-                                break;
-                            case "confirmAdd":
-                                ConfirmAdd(Guid.Parse(args["id"]));
-                                break;
-                            case "confirmEnable":
-                                ConfirmAdd(Guid.Parse(args["id"]));
-                                break;
-                            case "confirmDisable":
-                                ConfirmAdd(Guid.Parse(args["id"]));
-                                break;
-                            case "enable":
-                                Enable(Guid.Parse(args["id"]));
-                                break;
-                            case "viewUpdate":
-                                ViewUpdate();
-                                break;
-                            case "disable":
-                                Disable(Guid.Parse(args["id"]));
-                                break;
-                            case "installUpdate":
-                                InstallUpdate(args["msiUrl"]);
-                                break;
-                            default:
-                                Logger.LogTrace("Unknown action {Action}", action);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        Logger.LogTrace("Missing action");
-                    }
-                });
-            };
-            base.OnStartup(e);
+            //    Need to dispatch to UI thread if performing UI operations
+            //    System.Windows.Application.Current.Dispatcher.Invoke(delegate
+            //    {
+            //        Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
+            //        if (args.TryGetValue("action", out string action))
+            //        {
+            //            switch (action)
+            //            {
+            //                case "viewRemove":
+            //                    ShowRemoved(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "revertRemove":
+            //                    RevertRemove(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "confirmRemove":
+            //                    ConfirmRemove(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "viewAdd":
+            //                    ShowAdd(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "revertAdd":
+            //                    RevertAdd(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "confirmAdd":
+            //                    ConfirmAdd(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "confirmEnable":
+            //                    ConfirmAdd(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "confirmDisable":
+            //                    ConfirmAdd(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "enable":
+            //                    Enable(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "viewUpdate":
+            //                    ViewUpdate();
+            //                    break;
+            //                case "disable":
+            //                    Disable(Guid.Parse(args["id"]));
+            //                    break;
+            //                case "installUpdate":
+            //                    InstallUpdate(args["msiUrl"]);
+            //                    break;
+            //                default:
+            //                    Logger.LogTrace("Unknown action {Action}", action);
+            //                    break;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            Logger.LogTrace("Missing action");
+            //        }
+            //    });
+            //};
+
+            Window.ConfirmAdd += ConfirmAddHandler;
+            Window.RevertAdd += RevertAddHandler;
+            Window.RevertAddId += RevertAddIdHandler;
+            Window.Enable += EnableHandler;
+            Window.Disable += DisableHandler;
+            Window.ConfirmRemove += ConfirmRemoveHandler;
+            Window.RevertRemove += RevertRemoveHandler;
+            Window.RevertRemoveId += RevertRemoveIdHandler;
+            Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
         }
 
         private void AddHandler(AutoStartEntry addedAutostart)
@@ -823,6 +793,35 @@ namespace AutoStartConfirm
         {
             Logger.LogTrace("DisableHandler called");
             NotificationService.ShowDisabledAutoStartEntryNotification(disabledAutostart);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    ServiceScope.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~App()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

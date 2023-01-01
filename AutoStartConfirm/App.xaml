@@ -1,27 +1,25 @@
 ﻿<Application x:Class="AutoStartConfirm.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:tb="http://www.hardcodet.net/taskbar"
-             xmlns:local="clr-namespace:AutoStartConfirm.GUI"
-             Startup="OnStartup"
-             ShutdownMode="OnExplicitShutdown">
+             xmlns:tb="using:H.NotifyIcon"
+             xmlns:local="clr-namespace:AutoStartConfirm.GUI">
     <Application.Resources>
-        <tb:TaskbarIcon x:Key="NotifyIcon"
+        <!--<tb:TaskbarIcon x:Key="NotifyIcon"
                   IconSource="/Assets/Icon.ico"
                   ToolTipText="Auto Start Confirm"
                   TrayMouseDoubleClick="IconDoubleClicked">
             <tb:TaskbarIcon.ContextMenu>
-                <ContextMenu>
-                    <MenuItem
+                <controls:ContextMenu>
+                    <controls:MenuItem
                     Name="OwnAutoStartTaskbarMenuItem"
                     IsCheckable="True"
                     Click="OwnAutoStartClicked"
                     Header="Start 'Auto Start Confirm' on logon of current user"
                     IsChecked="{Binding Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
-                    <MenuItem Header="Exit" Click="ExitClicked" />
-                </ContextMenu>
+                    <controls:MenuItem Header="Exit" Click="ExitClicked" />
+                </controls:ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
-        </tb:TaskbarIcon>
+        </tb:TaskbarIcon>-->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
