@@ -4,28 +4,10 @@
              xmlns:tb="using:H.NotifyIcon"
              xmlns:local="clr-namespace:AutoStartConfirm.GUI">
     <Application.Resources>
-        <!--<tb:TaskbarIcon x:Key="NotifyIcon"
-                  IconSource="/Assets/Icon.ico"
-                  ToolTipText="Auto Start Confirm"
-                  TrayMouseDoubleClick="IconDoubleClicked">
-            <tb:TaskbarIcon.ContextMenu>
-                <controls:ContextMenu>
-                    <controls:MenuItem
-                    Name="OwnAutoStartTaskbarMenuItem"
-                    IsCheckable="True"
-                    Click="OwnAutoStartClicked"
-                    Header="Start 'Auto Start Confirm' on logon of current user"
-                    IsChecked="{Binding Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
-                    <controls:MenuItem Header="Exit" Click="ExitClicked" />
-                </controls:ContextMenu>
-            </tb:TaskbarIcon.ContextMenu>
-        </tb:TaskbarIcon>-->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
-            <!-- Other app resources here -->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

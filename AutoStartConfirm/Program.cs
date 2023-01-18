@@ -82,16 +82,19 @@ namespace AutoStartConfirm
         private static void ConfigureServices(ServiceCollection services)
         {
             var nlogPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "nlog.config");
-            services.AddLogging(loggingBuilder =>
-            {
-                // configure Logging with NLog
-                loggingBuilder.ClearProviders();
-                loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                loggingBuilder.AddNLogWeb(nlogPath);
-            }).AddSingleton<App>()
+            services
+                .AddLogging(loggingBuilder =>
+                {
+                    // configure Logging with NLog
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                    loggingBuilder.AddNLogWeb(nlogPath);
+                })
+                .AddSingleton<App>()
                 .AddSingleton<MainWindow>()
                 .AddSingleton<ConnectorWindow>()
                 .AddSingleton<AboutWindow>()
+                .AddSingleton<NotifyIcon>()
                 .AddSingleton<IAppStatus, AppStatus>()
                 .AddSingleton<IAutoStartService, AutoStartService>()
                 .AddSingleton<INotificationService, NotificationService>()

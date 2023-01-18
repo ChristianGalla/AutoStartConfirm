@@ -13,6 +13,7 @@
 		<Deterministic>false</Deterministic>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<PublishSingleFile>true</PublishSingleFile>
@@ -29,6 +30,13 @@
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Remove="Assets\Icon.xcf" />
+	  <Content Remove="Assets\NotificationIcons.xcf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Remove="TrayIconResources.xaml" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="nlog.sample.config">
@@ -39,9 +47,6 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<Resource Include="Assets\Icon.ico" />
-	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -62,12 +67,15 @@
 		  <Generator>SettingsSingleFileGenerator</Generator>
 		  <LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
+		<None Update="GUI\NotifyIcon.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
-		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.0.74" />
+		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.0.77" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
@@ -75,11 +83,11 @@
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221209.1" />
 		<Manifest Include="$(ApplicationManifest)" />
 		<PackageReference Include="NLog">
-			<Version>5.1.0</Version>
+			<Version>5.1.1</Version>
 		</PackageReference>
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.2.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.2.1" />
 		<PackageReference Include="Octokit">
-			<Version>4.0.3</Version>
+			<Version>4.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="Semver">
 			<Version>2.2.0</Version>
@@ -99,6 +107,12 @@
 	    <AutoGen>True</AutoGen>
 	    <DependentUpon>Settings.settings</DependentUpon>
 	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="Assets\Icon.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 	<PropertyGroup>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>

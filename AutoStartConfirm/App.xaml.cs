@@ -29,8 +29,6 @@ namespace AutoStartConfirm
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private static TaskbarIcon NotifyIcon;
-
         private readonly ILogger<App> Logger;
 
         // delay Window creation until App.InitializeComponent has been called
@@ -45,6 +43,22 @@ namespace AutoStartConfirm
                 return window;
             }
         }
+        // delay Window creation until App.InitializeComponent has been called
+        private NotifyIcon notifyIcon = null;
+
+        private NotifyIcon NotifyIcon
+        {
+            get
+            {
+                if (notifyIcon == null)
+                {
+                    notifyIcon = ServiceScope.ServiceProvider.GetRequiredService<NotifyIcon>();
+                }
+                return notifyIcon;
+            }
+        }
+
+        private TaskbarIcon TrayIcon;
 
         public IAppStatus AppStatus;
 
@@ -88,44 +102,49 @@ namespace AutoStartConfirm
             SettingsService = settingsService;
             UpdateService = updateService;
 
-            this.InitializeComponent();
+            InitializeComponent();
+
+
+            // Window.Show();
+            // messageService.ShowError("Title", "Test");
 
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
-            if (!isFirstRun)
-            {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
-            }
+            //bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
+            //if (!isFirstRun)
+            //{
+            //    AutoStartService.Add += AddHandler;
+            //    AutoStartService.Remove += RemoveHandler;
+            //    AutoStartService.Enable += EnableHandler;
+            //    AutoStartService.Disable += DisableHandler;
+            //}
 
-            try
-            {
-                AutoStartService.LoadCurrentAutoStarts();
-                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
-            }
-            catch (Exception)
-            {
-            }
+            //try
+            //{
+            //    AutoStartService.LoadCurrentAutoStarts();
+            //    AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
+            //}
+            //catch (Exception)
+            //{
+            //}
 
-            if (isFirstRun)
-            {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
-            }
-            AutoStartService.StartWatcher();
+            //if (isFirstRun)
+            //{
+            //    AutoStartService.Add += AddHandler;
+            //    AutoStartService.Remove += RemoveHandler;
+            //    AutoStartService.Enable += EnableHandler;
+            //    AutoStartService.Disable += DisableHandler;
+            //}
+            //AutoStartService.StartWatcher();
 
-            if (SettingsService.CheckForUpdatesOnStart)
-            {
-                UpdateService.CheckUpdateAndShowNotification();
-            }
+            //if (SettingsService.CheckForUpdatesOnStart)
+            //{
+            //    UpdateService.CheckUpdateAndShowNotification();
+            //}
 
             //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
             //NotifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
             //NotifyIcon.ForceCreate();
+
         }
 
         private void RevertRemoveIdHandler(Guid e)
@@ -263,9 +282,10 @@ namespace AutoStartConfirm
             }
         }
 
-        private void ExitHandler(object sender, EventArgs e)
+        private void ExitHandler(object sender, EventArgs args)
         {
-            // Close();
+            TrayIcon?.Dispose();
+            window?.Close();
         }
 
         private void OwnAutoStartToggleHandler(object sender, EventArgs e)
@@ -275,22 +295,22 @@ namespace AutoStartConfirm
 
         private void OpenHandler(object sender, EventArgs e)
         {
-            // MainWindow.Show();
+            // Window.Show();
         }
 
         public void ToggleMainWindow()
         {
             Logger.LogTrace("Toggling main window");
-            //if (Window.IsVisible)
-            //{
-            //    Logger.LogTrace("Closing main window");
-            //    Window.Hide();
-            //}
-            //else
-            //{
-            //    Logger.LogTrace("Showing main window");
-            //    Window.Show();
-            //}
+            if (Window.Visible)
+            {
+                Logger.LogTrace("Closing main window");
+                Window.Hide();
+            }
+            else
+            {
+                Logger.LogTrace("Showing main window");
+                Window.Show();
+            }
         }
 
 #pragma warning disable IDE0060 // Remove unused parameter
@@ -676,14 +696,19 @@ namespace AutoStartConfirm
             ToggleOwnAutoStart();
         }
 
-        private void IconDoubleClicked(object sender, RoutedEventArgs e)
+        private void IconDoubleClicked(object sender, ExecuteRequestedEventArgs args)
         {
             ToggleMainWindow();
         }
 
         #region Event handlers
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            NotifyIcon.Exit += ExitHandler;
+            NotifyIcon.ToggleMainWindow += ToggleMainWindowHandler;
+            TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
+            TrayIcon.ForceCreate();
+
             //// Listen to notification activation
             //ToastNotificationManagerCompat.OnActivated += toastArgs =>
             //{
@@ -759,6 +784,11 @@ namespace AutoStartConfirm
             Window.RevertRemove += RevertRemoveHandler;
             Window.RevertRemoveId += RevertRemoveIdHandler;
             Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
+        }
+
+        private void ToggleMainWindowHandler(object sender, EventArgs e)
+        {
+            ToggleMainWindow();
         }
 
         private void AddHandler(AutoStartEntry addedAutostart)

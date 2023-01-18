@@ -1,0 +1,61 @@
+﻿<ResourceDictionary
+    x:Class="AutoStartConfirm.GUI.NotifyIcon"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tb="using:H.NotifyIcon"
+    >
+    <XamlUICommand
+        x:Key="ShowHideWindowCommand"
+        Label="Show/Hide Window"
+        Description="Show/Hide Window"
+        >
+        <XamlUICommand.IconSource>
+            <SymbolIconSource Symbol="OpenPane" />
+        </XamlUICommand.IconSource>
+        <XamlUICommand.KeyboardAccelerators>
+            <KeyboardAccelerator
+                Key="S"
+                Modifiers="Control"
+                />
+        </XamlUICommand.KeyboardAccelerators>
+    </XamlUICommand>
+    <XamlUICommand
+        x:Key="ExitApplicationCommand"
+        Label="Exit"
+        Description="Exit"
+        >
+        <XamlUICommand.IconSource>
+            <SymbolIconSource Symbol="ClosePane" />
+        </XamlUICommand.IconSource>
+        <XamlUICommand.KeyboardAccelerators>
+            <KeyboardAccelerator
+                Key="E"
+                Modifiers="Control"
+                />
+        </XamlUICommand.KeyboardAccelerators>
+    </XamlUICommand>
+    <tb:TaskbarIcon
+        x:Key="TrayIcon"
+        Visibility="Visible"
+        ContextMenuMode="SecondWindow"
+        ToolTipText="Auto Start Confirm"
+        NoLeftClickDelay="True"
+        LeftClickCommand="{StaticResource ShowHideWindowCommand}"
+        IconSource="/Assets/Icon.ico">
+        <tb:TaskbarIcon.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Command="{StaticResource ShowHideWindowCommand}" />
+                <MenuFlyoutItem Command="{StaticResource ExitApplicationCommand}" />
+            </MenuFlyout>
+            <!--<controls:ContextMenu>
+                <controls:MenuItem
+                    Name="OwnAutoStartTaskbarMenuItem"
+                    IsCheckable="True"
+                    Click="OwnAutoStartClicked"
+                    Header="Start 'Auto Start Confirm' on logon of current user"
+                    IsChecked="{Binding Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
+                <controls:MenuItem Header="Exit" Click="ExitClicked" />
+            </controls:ContextMenu>-->
+        </tb:TaskbarIcon.ContextFlyout>
+    </tb:TaskbarIcon>
+</ResourceDictionary>
