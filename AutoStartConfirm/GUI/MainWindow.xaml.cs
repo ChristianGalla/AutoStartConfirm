@@ -58,8 +58,9 @@ namespace AutoStartConfirm.GUI
             SettingsService = settingsService;
             AboutWindow = aboutWindow;
             AppStatus = appStatus;
-            Logger.LogTrace("Window opened");
             InitializeComponent();
+            Title = "Auto Start Confirm";
+            Logger.LogTrace("Window opened");
         }
 
         //protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

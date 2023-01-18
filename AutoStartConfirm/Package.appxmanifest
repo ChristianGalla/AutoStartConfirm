@@ -31,8 +31,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="WinUI3"
-        Description="WinUI3"
+        DisplayName="Auto Start Confirm"
+        Description="Notifies and asks for permission if a program wants to get automatically started when Windows is started, or a user is logging on."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

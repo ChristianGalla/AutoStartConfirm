@@ -9,6 +9,7 @@
         x:Name="window"
         x:Class="AutoStartConfirm.GUI.MainWindow"
         mc:Ignorable="d">
+
     <!--<Window.Resources>
         <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
         <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />

@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using H.NotifyIcon;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Windows.UI.ViewManagement;
 
 namespace AutoStartConfirm
 {
@@ -32,17 +33,8 @@ namespace AutoStartConfirm
         private readonly ILogger<App> Logger;
 
         // delay Window creation until App.InitializeComponent has been called
-        private MainWindow window = null;
+        private MainWindow Window = null;
 
-        private MainWindow Window {
-            get {
-                if (window == null)
-                {
-                    window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
-                }
-                return window;
-            }
-        }
         // delay Window creation until App.InitializeComponent has been called
         private NotifyIcon notifyIcon = null;
 
@@ -103,6 +95,17 @@ namespace AutoStartConfirm
             UpdateService = updateService;
 
             InitializeComponent();
+
+            Window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
+            Window.ConfirmAdd += ConfirmAddHandler;
+            Window.RevertAdd += RevertAddHandler;
+            Window.RevertAddId += RevertAddIdHandler;
+            Window.Enable += EnableHandler;
+            Window.Disable += DisableHandler;
+            Window.ConfirmRemove += ConfirmRemoveHandler;
+            Window.RevertRemove += RevertRemoveHandler;
+            Window.RevertRemoveId += RevertRemoveIdHandler;
+            Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
 
 
             // Window.Show();
@@ -284,8 +287,11 @@ namespace AutoStartConfirm
 
         private void ExitHandler(object sender, EventArgs args)
         {
-            TrayIcon?.Dispose();
-            window?.Close();
+            // Window.Activate();
+            // ServiceScope.Dispose();
+            ShutdownGui();
+            // ServiceScope.Dispose();
+            Exit();
         }
 
         private void OwnAutoStartToggleHandler(object sender, EventArgs e)
@@ -303,7 +309,7 @@ namespace AutoStartConfirm
             Logger.LogTrace("Toggling main window");
             if (Window.Visible)
             {
-                Logger.LogTrace("Closing main window");
+                Logger.LogTrace("Hiding main window");
                 Window.Hide();
             }
             else
@@ -774,16 +780,6 @@ namespace AutoStartConfirm
             //        }
             //    });
             //};
-
-            Window.ConfirmAdd += ConfirmAddHandler;
-            Window.RevertAdd += RevertAddHandler;
-            Window.RevertAddId += RevertAddIdHandler;
-            Window.Enable += EnableHandler;
-            Window.Disable += DisableHandler;
-            Window.ConfirmRemove += ConfirmRemoveHandler;
-            Window.RevertRemove += RevertRemoveHandler;
-            Window.RevertRemoveId += RevertRemoveIdHandler;
-            Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
         }
 
         private void ToggleMainWindowHandler(object sender, EventArgs e)
@@ -838,6 +834,14 @@ namespace AutoStartConfirm
                 // TODO: set large fields to null
                 disposedValue = true;
             }
+        }
+
+        private void ShutdownGui()
+        {
+            Window.Close();
+            Window = null;
+            TrayIcon?.Dispose();
+            TrayIcon = null;
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
