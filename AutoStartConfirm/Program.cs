@@ -93,7 +93,6 @@ namespace AutoStartConfirm
                 .AddSingleton<App>()
                 .AddSingleton<MainWindow>()
                 .AddSingleton<ConnectorWindow>()
-                .AddSingleton<AboutWindow>()
                 .AddSingleton<NotifyIcon>()
                 .AddSingleton<IAppStatus, AppStatus>()
                 .AddSingleton<IAutoStartService, AutoStartService>()

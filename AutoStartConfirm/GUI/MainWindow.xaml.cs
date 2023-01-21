@@ -1,5 +1,4 @@
 ﻿using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Connectors.Services;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.Logging;
@@ -7,11 +6,7 @@ using System;
 using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
+using System.Linq;
 
 namespace AutoStartConfirm.GUI
 {
@@ -29,7 +24,6 @@ namespace AutoStartConfirm.GUI
         private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
         private readonly ISettingsService SettingsService;
-        private readonly AboutWindow AboutWindow;
         private readonly IAppStatus AppStatus;
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
@@ -48,7 +42,6 @@ namespace AutoStartConfirm.GUI
             ILogger<MainWindow> logger,
             ConnectorWindow connectorWindow,
             IAutoStartService autoStartService,
-            AboutWindow aboutWindow,
             IAppStatus appStatus,
             ISettingsService settingsService
         ) {
@@ -56,9 +49,10 @@ namespace AutoStartConfirm.GUI
             ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
             SettingsService = settingsService;
-            AboutWindow = aboutWindow;
             AppStatus = appStatus;
             InitializeComponent();
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
             Title = "Auto Start Confirm";
             Logger.LogTrace("Window opened");
         }
@@ -77,6 +71,55 @@ namespace AutoStartConfirm.GUI
         //}
 
         #region Click handlers
+        private void MainNavigation_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            if (args.IsSettingsInvoked)
+            {
+                ContentFrame.Navigate(typeof(SettingsPage));
+            }
+            else
+            {
+                // find NavigationViewItem with Content that equals InvokedItem
+                var item = sender.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(x => (string)x.Content == (string)args.InvokedItem);
+                if (item == null)
+                {
+                    item = sender.FooterMenuItems.OfType<NavigationViewItem>().FirstOrDefault(x => (string)x.Content == (string)args.InvokedItem);
+                }
+                if (item == null)
+                {
+                    return;
+                }
+                MainNavigation_Navigate(item);
+            }
+        }
+
+        private void MainNavigation_Loaded(object sender, RoutedEventArgs e)
+        {
+            // set the initial SelectedItem 
+            foreach (NavigationViewItemBase item in MainNavigation.MenuItems)
+            {
+                if (item is NavigationViewItem navItem && item.Tag.ToString() == "Home")
+                {
+                    MainNavigation.SelectedItem = item;
+                    MainNavigation_Navigate(navItem);
+                    break;
+                }
+            }
+        }
+
+        private void MainNavigation_Navigate(NavigationViewItem item)
+        {
+            switch (item.Tag)
+            {
+                case "Home":
+                    ContentFrame.Navigate(typeof(MainPage));
+                    break;
+
+                case "About":
+                    ContentFrame.Navigate(typeof(AboutPage));
+                    break;
+            }
+        }
 
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
             var button = (Button)sender;
@@ -152,5 +195,6 @@ namespace AutoStartConfirm.GUI
         public event AutoStartsActionIdHandler RevertRemoveId;
         public event EventHandler ToggleOwnAutoStart;
         #endregion
+
     }
 }

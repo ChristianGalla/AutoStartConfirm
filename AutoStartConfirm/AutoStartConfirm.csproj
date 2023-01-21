@@ -35,10 +35,24 @@
 	  <Content Remove="Assets\NotificationIcons.xcf" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Remove="GUI\AboutPage.xaml" />
+	  <None Remove="GUI\MainPage.xaml" />
+	  <None Remove="GUI\SettingsPage.xaml" />
+	</ItemGroup>
+	<ItemGroup>
 	  <Page Remove="TrayIconResources.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Page Update="GUI\MainPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="GUI\SettingsPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="GUI\AboutPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<None Update="nlog.sample.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
