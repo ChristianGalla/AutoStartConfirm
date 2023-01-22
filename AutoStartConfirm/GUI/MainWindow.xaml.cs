@@ -21,7 +21,6 @@ namespace AutoStartConfirm.GUI
 
         private readonly ILogger<MainWindow> Logger;
 
-        private readonly ConnectorWindow ConnectorWindow;
         private readonly IAutoStartService AutoStartService;
         private readonly ISettingsService SettingsService;
         private readonly IAppStatus AppStatus;
@@ -40,13 +39,11 @@ namespace AutoStartConfirm.GUI
 
         public MainWindow(
             ILogger<MainWindow> logger,
-            ConnectorWindow connectorWindow,
             IAutoStartService autoStartService,
             IAppStatus appStatus,
             ISettingsService settingsService
         ) {
             Logger = logger;
-            ConnectorWindow = connectorWindow;
             AutoStartService = autoStartService;
             SettingsService = settingsService;
             AppStatus = appStatus;

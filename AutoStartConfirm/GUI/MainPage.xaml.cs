@@ -30,7 +30,8 @@ namespace AutoStartConfirm.GUI
 
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            NavigationCacheMode = NavigationCacheMode.Enabled;
         }
 
         private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)

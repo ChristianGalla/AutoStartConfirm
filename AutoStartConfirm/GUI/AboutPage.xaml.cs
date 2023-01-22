@@ -48,7 +48,8 @@ namespace AutoStartConfirm.GUI
 
         public AboutPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            NavigationCacheMode = NavigationCacheMode.Enabled;
         }
     }
 }

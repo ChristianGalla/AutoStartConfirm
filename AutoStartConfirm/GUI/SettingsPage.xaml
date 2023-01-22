@@ -8,10 +8,31 @@
     xmlns:local="using:AutoStartConfirm.GUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:AutoStartConfirm.Models"
+    xmlns:scm="using:CommunityToolkit.WinUI.UI"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
+    <Page.Resources>
+        <DataTemplate x:Key="ConnectorListViewTemplate" x:Name="ConnectorListViewTemplate" x:DataType="models:ConnectorEnableRow">
+            <TextBlock Text="{x:Bind CategoryName}"
+                       Style="{ThemeResource BaseTextBlockStyle}"
+                       Margin="12,6,0,0"/>
+        </DataTemplate>
+    </Page.Resources>
 
-    <Grid Margin="24">
-        <TextBlock>Settings Page</TextBlock>
-    </Grid>
+    <Page.Content>
+
+        <ListView
+            x:Name="EnabledConnectorList"
+            Header="Enabled connectors"
+            Margin="24"
+            SelectionMode="Multiple"
+            SelectionChanged="ConnectorSelectionChanged"
+            ItemsSource="{x:Bind Connectors.Values, Mode=OneWay}"
+            ItemTemplate="{StaticResource ConnectorListViewTemplate}"/>
+
+    </Page.Content>
+
+
 </Page>
