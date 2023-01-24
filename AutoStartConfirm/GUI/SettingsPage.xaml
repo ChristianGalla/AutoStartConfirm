@@ -23,14 +23,30 @@
 
     <Page.Content>
 
-        <ListView
-            x:Name="EnabledConnectorList"
-            Header="Enabled connectors"
-            Margin="24"
-            SelectionMode="Multiple"
-            SelectionChanged="ConnectorSelectionChanged"
-            ItemsSource="{x:Bind Connectors.Values, Mode=OneWay}"
-            ItemTemplate="{StaticResource ConnectorListViewTemplate}"/>
+        <ScrollViewer>
+
+            <StackPanel Orientation="Vertical" Margin="24">
+                <CheckBox x:Name="OwnAutoStartCheckbox"
+                          Margin="0,0,0,25"
+                          Content="Start 'Auto Start Confirm' on logon of current user"
+                          IsChecked="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"                          
+                          Checked="OwnAutoStartCheckbox_Checked"
+                          Unchecked="OwnAutoStartCheckbox_Unchecked"/>
+
+                <CheckBox x:Name="UpdateCheckCheckbox"
+                          Margin="0,0,0,25"
+                          Content="Check for new version on start of 'Auto Start Confirm'"
+                          IsChecked="{x:Bind SettingsService.CheckForUpdatesOnStart, Mode=TwoWay}"/>
+
+                <ListView
+                    x:Name="EnabledConnectorList"
+                    Header="Monitored auto start locations"
+                    SelectionMode="Multiple"
+                    SelectionChanged="ConnectorSelectionChanged"
+                    ItemsSource="{x:Bind Connectors.Values, Mode=OneWay}"
+                    ItemTemplate="{StaticResource ConnectorListViewTemplate}"/>
+            </StackPanel>
+        </ScrollViewer>
 
     </Page.Content>
 

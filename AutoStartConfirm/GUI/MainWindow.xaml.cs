@@ -162,22 +162,6 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private void MenuItemExit_Click(object sender, RoutedEventArgs e) {
-            // window.Hide();
-        }
-
-        private void MenuItemAutoStart_Click(object sender, RoutedEventArgs e) {
-            ToggleOwnAutoStart?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void MenuItemAbout_Click(object sender, RoutedEventArgs e) {
-            // AboutWindow.Show();
-        }
-
-        private void MenuItemConnectors_Click(object sender, RoutedEventArgs e) {
-            // ConnectorWindow.Show();
-        }
-
         #endregion
 
         #region events

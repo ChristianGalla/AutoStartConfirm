@@ -30,26 +30,6 @@
             <Binding Path="AppStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
         </Window.Cursor>
         <DockPanel>
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_Exit" Click="MenuItemExit_Click" />
-                </MenuItem>
-                <MenuItem Header="_Options">
-                    <MenuItem Header="_Connectors" Click="MenuItemConnectors_Click" />
-                    <MenuItem
-                        Header="_Start 'Auto Start Confirm' on logon of current user"
-                        IsCheckable="True"
-                        Click="MenuItemAutoStart_Click"
-                        IsChecked="{Binding ElementName=window, Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
-                    <MenuItem
-                        Header="Check for _new version on start of 'Auto Start Confirm'"
-                        IsCheckable="True"
-                        IsChecked="{Binding ElementName=window, Path=SettingsService.CheckForUpdatesOnStart, Mode=TwoWay}" />
-                </MenuItem>
-                <MenuItem Header="_Help">
-                    <MenuItem Header="_About" Click="MenuItemAbout_Click" />
-                </MenuItem>
-            </Menu>
             <StatusBar DockPanel.Dock="Bottom" >
                 <StatusBarItem HorizontalAlignment="Right">
                     <ProgressBar Minimum="0" Maximum="100" Name="pbStatus" IsIndeterminate="True" Height="15" Width="100"

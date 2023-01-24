@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
+using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -54,6 +56,28 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private IAutoStartService autoStartService;
+
+        public IAutoStartService AutoStartService
+        {
+            get
+            {
+                autoStartService ??= ServiceScope.ServiceProvider.GetService<IAutoStartService>();
+                return autoStartService;
+            }
+        }
+
+        private ILogger logger;
+
+        public ILogger Logger
+        {
+            get
+            {
+                logger ??= ServiceScope.ServiceProvider.GetService<ILogger<SettingsPage>>();
+                return logger;
+            }
+        }
+
         private IAppStatus appStatus;
 
         public IAppStatus AppStatus
@@ -71,6 +95,7 @@ namespace AutoStartConfirm.GUI
             Connectors = new SortedList<string, ConnectorEnableRow>();
             foreach (Category category in Enum.GetValues(typeof(Category)))
             {
+                // todo: Change to better readable title and add description
                 var row = new ConnectorEnableRow()
                 {
                     Category = category,
@@ -110,6 +135,45 @@ namespace AutoStartConfirm.GUI
             {
                 SettingsService.DisabledConnectors.Add(disabled.CategoryName);
             }
+        }
+
+        public Task ToggleOwnAutoStart(bool? newStatus = null)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    AppStatus.IncrementRunningActionCount();
+                    if (newStatus == null)
+                    {
+                        AutoStartService.ToggleOwnAutoStart();
+                    } else
+                    {
+                    }
+                }
+                catch (Exception e)
+                {
+                    var message = "Failed to change own auto start";
+#pragma warning disable CA2254 // Template should be a static expression
+                    Logger.LogError(e, message);
+#pragma warning restore CA2254 // Template should be a static expression
+                    // MessageService.ShowError(message, e);
+                }
+                finally
+                {
+                    AppStatus.DecrementRunningActionCount();
+                }
+            });
+        }
+
+        private void OwnAutoStartCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            ToggleOwnAutoStart();
+        }
+
+        private void OwnAutoStartCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ToggleOwnAutoStart();
         }
 
 

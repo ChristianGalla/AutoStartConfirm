@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
-    public interface IAutoStartService {
+    public interface IAutoStartService: IDisposable {
         /// <summary>
         /// All current auto starts of all enabled connectors
         /// </summary>
