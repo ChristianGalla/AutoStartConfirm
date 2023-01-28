@@ -18,35 +18,12 @@ namespace AutoStartConfirm.GUI
     /// </summary>
     public partial class MainWindow : Window {
         // public bool IsClosed { get; private set; }
-
         private readonly ILogger<MainWindow> Logger;
 
-        private readonly IAutoStartService AutoStartService;
-        private readonly ISettingsService SettingsService;
-        private readonly IAppStatus AppStatus;
-
-        public ObservableCollection<AutoStartEntry> CurrentAutoStarts {
-            get {
-                return AutoStartService.CurrentAutoStarts;
-            }
-        }
-
-        public ObservableCollection<AutoStartEntry> HistoryAutoStarts {
-            get {
-                return AutoStartService.HistoryAutoStarts;
-            }
-        }
-
         public MainWindow(
-            ILogger<MainWindow> logger,
-            IAutoStartService autoStartService,
-            IAppStatus appStatus,
-            ISettingsService settingsService
+            ILogger<MainWindow> logger
         ) {
             Logger = logger;
-            AutoStartService = autoStartService;
-            SettingsService = settingsService;
-            AppStatus = appStatus;
             InitializeComponent();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
@@ -115,50 +92,6 @@ namespace AutoStartConfirm.GUI
                 case "About":
                     ContentFrame.Navigate(typeof(AboutPage));
                     break;
-            }
-        }
-
-        private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            ConfirmAdd?.Invoke(autoStartEntry);
-        }
-
-        private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            RevertAdd?.Invoke(autoStartEntry);
-        }
-
-        private void CurrentEnableButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            Enable?.Invoke(autoStartEntry);
-        }
-
-        private void CurrentDisableButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            Disable?.Invoke(autoStartEntry);
-        }
-
-        private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            if (autoStartEntry.Change == Change.Added) {
-                ConfirmAdd?.Invoke(autoStartEntry);
-            } else if (autoStartEntry.Change == Change.Removed) {
-                ConfirmRemove?.Invoke(autoStartEntry);
-            }
-        }
-
-        private void HistoryRevertButton_Click(object sender, RoutedEventArgs e) {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            if (autoStartEntry.Change == Change.Added) {
-                RevertAddId?.Invoke(autoStartEntry.Id);
-            } else if (autoStartEntry.Change == Change.Removed) {
-                RevertRemoveId?.Invoke(autoStartEntry.Id);
             }
         }
 

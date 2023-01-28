@@ -108,45 +108,38 @@ namespace AutoStartConfirm
             Window.ToggleOwnAutoStart += ToggleOwnAutoStartHandler;
 
 
-            // Window.Show();
-            // messageService.ShowError("Title", "Test");
-
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            //bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
-            //if (!isFirstRun)
-            //{
-            //    AutoStartService.Add += AddHandler;
-            //    AutoStartService.Remove += RemoveHandler;
-            //    AutoStartService.Enable += EnableHandler;
-            //    AutoStartService.Disable += DisableHandler;
-            //}
+            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
+            if (!isFirstRun)
+            {
+                AutoStartService.Add += AddHandler;
+                AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
+            }
 
-            //try
-            //{
-            //    AutoStartService.LoadCurrentAutoStarts();
-            //    AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
-            //}
-            //catch (Exception)
-            //{
-            //}
+            try
+            {
+                AutoStartService.LoadCurrentAutoStarts();
+                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
+            }
+            catch (Exception)
+            {
+            }
 
-            //if (isFirstRun)
-            //{
-            //    AutoStartService.Add += AddHandler;
-            //    AutoStartService.Remove += RemoveHandler;
-            //    AutoStartService.Enable += EnableHandler;
-            //    AutoStartService.Disable += DisableHandler;
-            //}
-            //AutoStartService.StartWatcher();
+            if (isFirstRun)
+            {
+                AutoStartService.Add += AddHandler;
+                AutoStartService.Remove += RemoveHandler;
+                AutoStartService.Enable += EnableHandler;
+                AutoStartService.Disable += DisableHandler;
+            }
+            AutoStartService.StartWatcher();
 
-            //if (SettingsService.CheckForUpdatesOnStart)
-            //{
-            //    UpdateService.CheckUpdateAndShowNotification();
-            //}
-
-            //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
-            //NotifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
-            //NotifyIcon.ForceCreate();
+            if (SettingsService.CheckForUpdatesOnStart)
+            {
+                UpdateService.CheckUpdateAndShowNotification();
+            }
 
         }
 

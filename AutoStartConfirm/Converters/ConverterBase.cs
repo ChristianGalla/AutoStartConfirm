@@ -1,20 +1,47 @@
 ﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Models;
+using AutoStartConfirm.Properties;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace AutoStartConfirm.Converters {
     public class ConverterBase: IDisposable {
         private bool disposedValue;
 
-        private readonly IServiceScope ServiceScope;
+        private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
-        public readonly IAutoStartService AutoStartService;
+        public SortedList<string, ConnectorEnableRow> Connectors;
+
+#pragma warning disable CA2213 // Disposable fields should be disposed
+        // Disposed by ServiceProvider
+        private ISettingsService settingsService;
+#pragma warning restore CA2213 // Disposable fields should be disposed
+
+        public ISettingsService SettingsService
+        {
+            get
+            {
+                settingsService ??= ServiceScope.ServiceProvider.GetService<ISettingsService>();
+                return settingsService;
+            }
+        }
+
+        private IAutoStartService autoStartService;
+
+        public IAutoStartService AutoStartService
+        {
+            get
+            {
+                autoStartService ??= ServiceScope.ServiceProvider.GetService<IAutoStartService>();
+                return autoStartService;
+            }
+        }
 
         public ConverterBase()
         {
-            // ServiceScope = App.ServiceProvider.CreateScope();
-            AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
         }
 
         protected virtual void Dispose(bool disposing)

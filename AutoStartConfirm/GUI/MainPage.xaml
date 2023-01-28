@@ -1,4 +1,4 @@
-<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
 <!-- Licensed under the MIT License. -->
 
 <Page
@@ -6,26 +6,146 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:AutoStartConfirm.GUI"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:AutoStartConfirm.Models"
+    xmlns:myConverters="using:AutoStartConfirm.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
+        <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
+        <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
+        <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
+        <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
+        <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
+        <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
+        <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
+    </Page.Resources>
+
     <Grid Margin="24">
-        <TextBlock Text="Main Page"></TextBlock>
 
+        <Pivot>
+            <PivotItem Header="Current">
+                <!--<PivotItem.Resources>
+                    <CollectionViewSource
+                            x:Key="currentAutoStartCollectionViewSource"
+                            Source="{x:Bind CurrentAutoStarts}">
+                        --><!--<CollectionViewSource.SortDescriptions>
+                            <scm:SortDescription PropertyName="Date" Direction="Descending" />
+                        </CollectionViewSource.SortDescriptions>--><!--
+                    </CollectionViewSource>
+                </PivotItem.Resources>-->
+                <controls:DataGrid
+                        x:Name="CurrentAutoStartGrid"
+                        MinHeight="50"
+                        MinWidth="200"
+                        IsReadOnly="True"
+                        AutoGenerateColumns="False"
+                        CanUserSortColumns="True"
+                        ItemsSource="{x:Bind AutoStartService.CurrentAutoStarts, Mode=OneWay}">
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTemplateColumn Header="Actions">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:AutoStartEntry">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button
+                                            Name="CurrentConfirmButton"
+                                            Click="CurrentConfirmButton_Click"
+                                            ToolTipService.ToolTip="Confirm"
+                                            Foreground="Green"
+                                            IsEnabled="{Binding Converter={StaticResource CanBeConfirmedConverter}}">
+                                            <Button.Content>✔</Button.Content>
+                                        </Button>
+                                        <Button
+                                            Name="CurrentEnableButton"
+                                            Click="CurrentEnableButton_Click"
+                                            ToolTipService.ToolTip="Enable"
+                                            Foreground="Orange"
+                                            IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}">
+                                            <Button.Content>💡</Button.Content>
+                                        </Button>
+                                        <Button
+                                            Name="CurrentDisableButton"
+                                            Click="CurrentDisableButton_Click"
+                                            ToolTipService.ToolTip="Disable"
+                                            Foreground="Gray"
+                                            IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}">
+                                            <Button.Content>💡</Button.Content>
+                                        </Button>
+                                        <Button
+                                            Name="CurrentRemoveButton"
+                                            Click="CurrentRemoveButton_Click"
+                                            ToolTipService.ToolTip="Remove"
+                                            Foreground="Black"
+                                            IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">
+                                            <Button.Content>🗑</Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Header="Status" Binding="{Binding  ConfirmStatus, Mode=OneWay}" />
+                        <!--<controls:DataGridTextColumn Header="Date added" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />-->
+                        <controls:DataGridTextColumn Header="Date added" Binding="{Binding Date}" SortDirection="Descending" />
+                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" />
+                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" />
+                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" />
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
+            </PivotItem>
+            <PivotItem Header="History">
+                <!--<DataGrid x:Name="HistoryAutoStartGrid"
+                              MinHeight="50"
+                              MinWidth="200"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False"
+                              SelectionUnit="CellOrRowHeader"
+                              ItemsSource="{Binding Source={StaticResource historyAutoStartCollectionViewSource}}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Actions">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
+                                            <Button.Content>?</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="ConfirmStatus" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" ToolTip="Revert" Foreground="Black">
+                                            <Button.Content>?</Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource CanBeRevertedConverter}">
+                                                    <Binding />
+                                                    <Binding Path="CanBeAdded" />
+                                                    <Binding Path="CanBeRemoved" />
+                                                    <Binding Path="CanBeEnabled" />
+                                                    <Binding Path="CanBeDisabled" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
+                        <DataGridTextColumn Header="Date" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Change" Binding="{Binding Path=Change}" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
+                    </DataGrid.Columns>
+                </DataGrid>-->
+            </PivotItem>
+        </Pivot>
 
-
-        <!--<Window.Resources>
-            <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
-            <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
-            <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
-            <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
-            <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
-            <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
-            <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
-            <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
-        </Window.Resources>
+        <!--
         <Window.Cursor>
             <Binding Path="AppStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
         </Window.Cursor>
@@ -39,77 +159,6 @@
             </StatusBar>
             <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
                 <TabItem Header="Current" VerticalAlignment="Top">
-                    <TabItem.Resources>
-                        <CollectionViewSource
-                            x:Key="currentAutoStartCollectionViewSource"
-                            Source="{Binding ElementName=window, Path=CurrentAutoStarts, Mode=OneWay}">
-                            <CollectionViewSource.SortDescriptions>
-                                <scm:SortDescription PropertyName="Date" Direction="Descending" />
-                            </CollectionViewSource.SortDescriptions>
-                        </CollectionViewSource>
-                    </TabItem.Resources>
-                    <DataGrid
-                        x:Name="CurrentAutoStartGrid"
-                        MinHeight="50"
-                        MinWidth="200"
-                        IsReadOnly="True"
-                        AutoGenerateColumns="False"
-                        SelectionUnit="CellOrRowHeader"
-                        ItemsSource="{Binding Source={StaticResource currentAutoStartCollectionViewSource}}">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Actions">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Name="CurrentConfirmButton" Click="CurrentConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
-                                                <Button.Content>?</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
-                                                        <Binding />
-                                                        <Binding Path="ConfirmStatus" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>
-                                            </Button>
-                                            <Button Name="CurrentEnableButton" Click="CurrentEnableButton_Click" ToolTip="Enable" Foreground="Orange">
-                                                <Button.Content>??</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeEnabledConverter}">
-                                                        <Binding />
-                                                        <Binding Path="CanBeEnabled" />
-                                                        <Binding Path="CanBeDisabled" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>
-                                            </Button>
-                                            <Button Name="CurrentDisableButton" Click="CurrentDisableButton_Click" ToolTip="Disable" Foreground="Gray">
-                                                <Button.Content>??</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeDisabledConverter}">
-                                                        <Binding />
-                                                        <Binding Path="CanBeDisabled" />
-                                                        <Binding Path="CanBeEnabled" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>
-                                            </Button>
-                                            <Button Name="CurrentRemoveButton" Click="CurrentRemoveButton_Click" ToolTip="Remove" Foreground="Black">
-                                                <Button.Content>??</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeRemovedConverter}">
-                                                        <Binding />
-                                                        <Binding Path="CanBeRemoved" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>
-                                            </Button>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
-                            <DataGridTextColumn Header="Date added" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                            <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
-                            <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                            <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
                 </TabItem>
                 <TabItem Header="History" VerticalAlignment="Top">
                     <TabItem.Resources>
@@ -121,51 +170,7 @@
                             </CollectionViewSource.SortDescriptions>
                         </CollectionViewSource>
                     </TabItem.Resources>
-                    <DataGrid x:Name="HistoryAutoStartGrid"
-                              MinHeight="50"
-                              MinWidth="200"
-                              IsReadOnly="True"
-                              AutoGenerateColumns="False"
-                              SelectionUnit="CellOrRowHeader"
-                              ItemsSource="{Binding Source={StaticResource historyAutoStartCollectionViewSource}}">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Actions">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
-                                                <Button.Content>?</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
-                                                        <Binding />
-                                                        <Binding Path="ConfirmStatus" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>                                            
-                                            </Button>
-                                            <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" ToolTip="Revert" Foreground="Black">
-                                                <Button.Content>?</Button.Content>
-                                                <Button.IsEnabled>
-                                                    <MultiBinding Converter="{StaticResource CanBeRevertedConverter}">
-                                                        <Binding />
-                                                        <Binding Path="CanBeAdded" />
-                                                        <Binding Path="CanBeRemoved" />
-                                                        <Binding Path="CanBeEnabled" />
-                                                        <Binding Path="CanBeDisabled" />
-                                                    </MultiBinding>
-                                                </Button.IsEnabled>
-                                            </Button>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
-                            <DataGridTextColumn Header="Date" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                            <DataGridTextColumn Header="Change" Binding="{Binding Path=Change}" />
-                            <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
-                            <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                            <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    
                 </TabItem>
             </TabControl>
         </DockPanel>-->
