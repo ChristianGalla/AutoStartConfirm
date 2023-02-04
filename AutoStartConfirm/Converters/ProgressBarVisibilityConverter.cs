@@ -1,16 +1,19 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Data;
+using System;
 using System.Globalization;
 
 namespace AutoStartConfirm.Converters
 {
-    public class ProgressBarVisibilityConverter : ConverterBase /*, IValueConverter */ {
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+    public class ProgressBarVisibilityConverter : ConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, string language)
+        {
             var runningActionCount = (int)value;
             return runningActionCount > 0 ? "Visible" : "Hidden";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
+        public override object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
             throw new NotImplementedException();
         }
     }

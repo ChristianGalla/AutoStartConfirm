@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:AutoStartConfirm.Models"
     xmlns:myConverters="using:AutoStartConfirm.Converters"
+    d:DataContext="{d:DesignInstance Type=models:AutoStartEntry}"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -20,6 +21,7 @@
         <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
         <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
         <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
+        <myConverters:CanBeToggledConverter x:Key="CanBeToggledConverter" />
         <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
         <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
         <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
@@ -29,25 +31,16 @@
 
         <Pivot>
             <PivotItem Header="Current">
-                <!--<PivotItem.Resources>
-                    <CollectionViewSource
-                            x:Key="currentAutoStartCollectionViewSource"
-                            Source="{x:Bind CurrentAutoStarts}">
-                        --><!--<CollectionViewSource.SortDescriptions>
-                            <scm:SortDescription PropertyName="Date" Direction="Descending" />
-                        </CollectionViewSource.SortDescriptions>--><!--
-                    </CollectionViewSource>
-                </PivotItem.Resources>-->
                 <controls:DataGrid
                         x:Name="CurrentAutoStartGrid"
                         MinHeight="50"
                         MinWidth="200"
-                        IsReadOnly="True"
                         AutoGenerateColumns="False"
                         CanUserSortColumns="True"
-                        ItemsSource="{x:Bind AutoStartService.CurrentAutoStarts, Mode=OneWay}">
+                        Sorting="Sorting"
+                        ItemsSource="{x:Bind AutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTemplateColumn Header="Actions">
+                        <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:AutoStartEntry">
                                     <StackPanel Orientation="Horizontal">
@@ -57,42 +50,35 @@
                                             ToolTipService.ToolTip="Confirm"
                                             Foreground="Green"
                                             IsEnabled="{Binding Converter={StaticResource CanBeConfirmedConverter}}">
-                                            <Button.Content>✔</Button.Content>
+                                            <Button.Content>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF13E;"/>
+                                            </Button.Content>
                                         </Button>
-                                        <Button
-                                            Name="CurrentEnableButton"
-                                            Click="CurrentEnableButton_Click"
-                                            ToolTipService.ToolTip="Enable"
-                                            Foreground="Orange"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeEnabledConverter}}">
-                                            <Button.Content>💡</Button.Content>
-                                        </Button>
-                                        <Button
-                                            Name="CurrentDisableButton"
-                                            Click="CurrentDisableButton_Click"
-                                            ToolTipService.ToolTip="Disable"
-                                            Foreground="Gray"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeDisabledConverter}}">
-                                            <Button.Content>💡</Button.Content>
-                                        </Button>
+                                        <ToggleSwitch
+                                            IsEnabled="{Binding Converter={StaticResource CanBeToggledConverter}}"
+                                            IsOn="{Binding Converter={StaticResource CanBeDisabledConverter}}"
+                                            OffContent="Disabled"
+                                            OnContent="Enabled"
+                                            Toggled="Enable_Toggled"
+                                            ToolTipService.ToolTip="Enable"/>
                                         <Button
                                             Name="CurrentRemoveButton"
                                             Click="CurrentRemoveButton_Click"
                                             ToolTipService.ToolTip="Remove"
-                                            Foreground="Black"
                                             IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">
-                                            <Button.Content>🗑</Button.Content>
+                                            <Button.Content>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
+                                            </Button.Content>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn Header="Status" Binding="{Binding  ConfirmStatus, Mode=OneWay}" />
-                        <!--<controls:DataGridTextColumn Header="Date added" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />-->
-                        <controls:DataGridTextColumn Header="Date added" Binding="{Binding Date}" SortDirection="Descending" />
-                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" />
-                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" />
-                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" />
+                        <controls:DataGridTextColumn Header="Status" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn Header="Date added" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
+                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
+                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
+                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>

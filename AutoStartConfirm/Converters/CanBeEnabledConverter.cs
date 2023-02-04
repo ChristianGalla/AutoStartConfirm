@@ -1,24 +1,28 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.UI.Xaml.Data;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Converters
 {
-    public class CanBeEnabledConverter : ConverterBase /*, IMultiValueConverter */ {
+    public class CanBeEnabledConverter : ConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, string language)
+        {
+            var autoStart = (AutoStartEntry)value;
+            if (autoStart.CanBeEnabled.HasValue)
+            {
+                return autoStart.CanBeEnabled.Value;
+            }
+            Task.Run(() => {
+                AutoStartService.LoadCanBeEnabled(autoStart);
+            });
+            return false;
+        }
 
-		public object Convert(object[] value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-			var autoStart = (AutoStartEntry)value[0];
-            if (autoStart.CanBeEnabled.HasValue) {
-				return autoStart.CanBeEnabled.Value;
-			}
-			Task.Run(() => {
-				AutoStartService.LoadCanBeEnabled(autoStart);
-			});
-			return false;
-		}
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
+        public override object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
             throw new NotImplementedException();
         }
     }

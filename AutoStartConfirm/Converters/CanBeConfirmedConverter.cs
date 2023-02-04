@@ -1,19 +1,23 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.UI.Xaml.Data;
 using System;
 using System.Globalization;
 
 namespace AutoStartConfirm.Converters
 {
-    public class CanBeConfirmedConverter : ConverterBase /*, IMultiValueConverter */ {
+    public class CanBeConfirmedConverter : ConverterBase
+    {
 
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
-			var item = (AutoStartEntry)values[0];
-			var status = item.ConfirmStatus;
-			return status == ConfirmStatus.New;
-		}
+        public override object Convert(object value, Type targetType, object parameter, string language)
+        {
+            var item = (AutoStartEntry)value;
+            var status = item.ConfirmStatus;
+            return status == ConfirmStatus.New;
+        }
 
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
-			throw new NotImplementedException();
-		}
-	}
+        public override object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 
 namespace AutoStartConfirm.Models
 {

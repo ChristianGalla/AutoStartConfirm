@@ -5,6 +5,8 @@ using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.WinUI.UI;
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -72,6 +74,21 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private AdvancedCollectionView autoStartCollectionView;
+
+        public AdvancedCollectionView AutoStartCollectionView
+        {
+            get
+            {
+                if (autoStartCollectionView == null)
+                {
+                    autoStartCollectionView = new AdvancedCollectionView(AutoStartService.CurrentAutoStarts, true);
+                    autoStartCollectionView.SortDescriptions.Add(new SortDescription("Date", SortDirection.Descending));
+                }
+                return autoStartCollectionView;
+            }
+        }
+
         public MainPage()
         {
             InitializeComponent();
@@ -82,28 +99,28 @@ namespace AutoStartConfirm.GUI
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //ConfirmAdd?.Invoke(autoStartEntry);
+            AutoStartService.ConfirmAdd(autoStartEntry);
         }
 
         private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //RevertAdd?.Invoke(autoStartEntry);
+            AutoStartService.RemoveAutoStart(autoStartEntry);
         }
 
         private void CurrentEnableButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //Enable?.Invoke(autoStartEntry);
+            AutoStartService.EnableAutoStart(autoStartEntry);
         }
 
         private void CurrentDisableButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //Disable?.Invoke(autoStartEntry);
+            AutoStartService.DisableAutoStart(autoStartEntry);
         }
 
         private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -132,6 +149,66 @@ namespace AutoStartConfirm.GUI
             //{
             //    RevertRemoveId?.Invoke(autoStartEntry.Id);
             //}
+        }
+
+        private async void Enable_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+            var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
+            if (toggleSwitch.IsOn && !autoStart.IsEnabled.Value)
+            {
+                if (!autoStart.CanBeEnabled.HasValue)
+                {
+                    await AutoStartService.LoadCanBeDisabled(autoStart);
+                }
+                if (!autoStart.CanBeEnabled.Value)
+                {
+                    return;
+                }
+                AutoStartService.EnableAutoStart(autoStart);
+            }
+            else if (!toggleSwitch.IsOn && autoStart.IsEnabled.Value)
+            {
+                if (!autoStart.CanBeDisabled.HasValue)
+                {
+                    await AutoStartService.LoadCanBeEnabled(autoStart);
+                }
+                if (!autoStart.CanBeDisabled.Value)
+                {
+                    return;
+                }
+                AutoStartService.DisableAutoStart(autoStart);
+            }
+        }
+
+        private void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        {
+            var newSortColumn = e.Column.Tag.ToString();
+            AutoStartCollectionView.SortDescriptions.Clear();
+            switch (e.Column.SortDirection)
+            {
+                case null:
+                    AutoStartCollectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Ascending));
+                    e.Column.SortDirection = DataGridSortDirection.Ascending;
+                    break;
+                case DataGridSortDirection.Ascending:
+                    AutoStartCollectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Descending));
+                    e.Column.SortDirection = DataGridSortDirection.Descending;
+                    break;
+                case DataGridSortDirection.Descending:
+                default:
+                    e.Column.SortDirection = null;
+                    break;
+            }
+
+            // Remove sorting indicators from other columns
+            foreach (var dgColumn in CurrentAutoStartGrid.Columns)
+            {
+                if (dgColumn.Tag.ToString() != newSortColumn)
+                {
+                    dgColumn.SortDirection = null;
+                }
+            }
         }
 
 

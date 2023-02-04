@@ -3,12 +3,13 @@ using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Data;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 
 namespace AutoStartConfirm.Converters {
-    public class ConverterBase: IDisposable {
+    public abstract class ConverterBase: IValueConverter, IDisposable {
         private bool disposedValue;
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
@@ -43,6 +44,9 @@ namespace AutoStartConfirm.Converters {
         public ConverterBase()
         {
         }
+
+        public abstract object Convert(object value, Type targetType, object parameter, string language);
+        public abstract object ConvertBack(object value, Type targetType, object parameter, string language);
 
         protected virtual void Dispose(bool disposing)
         {

@@ -1,15 +1,19 @@
 ﻿using AutoStartConfirm.Models;
+using Microsoft.UI.Xaml.Data;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Converters
 {
-    public class CanBeAddedConverter : ConverterBase /*, IMultiValueConverter*/ {
+    public class CanBeAddedConverter : ConverterBase
+    {
 
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            var autoStart = (AutoStartEntry)values[0];
-            if (autoStart.CanBeAdded.HasValue) {
+        public override object Convert(object value, Type targetType, object parameter, string language)
+        {
+            var autoStart = (AutoStartEntry)value;
+            if (autoStart.CanBeAdded.HasValue)
+            {
                 return autoStart.CanBeAdded.Value;
             }
             Task.Run(() => {
@@ -18,7 +22,8 @@ namespace AutoStartConfirm.Converters
             return false;
         }
 
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
+        public override object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
             throw new NotImplementedException();
         }
     }
