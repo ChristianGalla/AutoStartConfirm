@@ -22,6 +22,9 @@ using H.NotifyIcon;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Windows.UI.ViewManagement;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Microsoft.UI.Dispatching;
+using AutoStartConfirm.Helpers;
 
 namespace AutoStartConfirm
 {
@@ -64,6 +67,8 @@ namespace AutoStartConfirm
 
         private readonly IUpdateService UpdateService;
 
+        private readonly IDispatchService DispatchService;
+
         private static readonly string RevertAddParameterName = "--revertAdd";
 
         private static readonly string RevertRemoveParameterName = "--revertRemove";
@@ -84,7 +89,8 @@ namespace AutoStartConfirm
             INotificationService notificationService,
             IMessageService messageService,
             ISettingsService settingsService,
-            IUpdateService updateService)
+            IUpdateService updateService,
+            IDispatchService dispatchService)
         {
             Logger = logger;
             AppStatus = appStatus;
@@ -93,6 +99,7 @@ namespace AutoStartConfirm
             MessageService = messageService;
             SettingsService = settingsService;
             UpdateService = updateService;
+            DispatchService = dispatchService;
 
             InitializeComponent();
 
@@ -708,71 +715,70 @@ namespace AutoStartConfirm
             TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
             TrayIcon.ForceCreate();
 
-            //// Listen to notification activation
-            //ToastNotificationManagerCompat.OnActivated += toastArgs =>
-            //{
-            //    Logger.LogTrace("Toast activated {Arguments}", toastArgs.Argument);
-            //    // Obtain the arguments from the notification
-            //    ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
+            // Listen to notification activation
+            ToastNotificationManagerCompat.OnActivated += toastArgs =>
+            {
+                Logger.LogTrace("Toast activated {Arguments}", toastArgs.Argument);
+                // Obtain the arguments from the notification
+                ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
 
-            //    // Obtain any user input (text boxes, menu selections) from the notification
-            //    ValueSet userInput = toastArgs.UserInput;
+                // Obtain any user input (text boxes, menu selections) from the notification
+                ValueSet userInput = toastArgs.UserInput;
 
-            //    Need to dispatch to UI thread if performing UI operations
-            //    System.Windows.Application.Current.Dispatcher.Invoke(delegate
-            //    {
-            //        Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
-            //        if (args.TryGetValue("action", out string action))
-            //        {
-            //            switch (action)
-            //            {
-            //                case "viewRemove":
-            //                    ShowRemoved(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "revertRemove":
-            //                    RevertRemove(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "confirmRemove":
-            //                    ConfirmRemove(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "viewAdd":
-            //                    ShowAdd(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "revertAdd":
-            //                    RevertAdd(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "confirmAdd":
-            //                    ConfirmAdd(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "confirmEnable":
-            //                    ConfirmAdd(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "confirmDisable":
-            //                    ConfirmAdd(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "enable":
-            //                    Enable(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "viewUpdate":
-            //                    ViewUpdate();
-            //                    break;
-            //                case "disable":
-            //                    Disable(Guid.Parse(args["id"]));
-            //                    break;
-            //                case "installUpdate":
-            //                    InstallUpdate(args["msiUrl"]);
-            //                    break;
-            //                default:
-            //                    Logger.LogTrace("Unknown action {Action}", action);
-            //                    break;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            Logger.LogTrace("Missing action");
-            //        }
-            //    });
-            //};
+                // Need to dispatch to UI thread if performing UI operations
+                DispatchService.DispatcherQueue.TryEnqueue(() => {
+                    Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
+                    if (args.TryGetValue("action", out string action))
+                    {
+                        switch (action)
+                        {
+                            case "viewRemove":
+                                ShowRemoved(Guid.Parse(args["id"]));
+                                break;
+                            case "revertRemove":
+                                RevertRemove(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmRemove":
+                                ConfirmRemove(Guid.Parse(args["id"]));
+                                break;
+                            case "viewAdd":
+                                ShowAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "revertAdd":
+                                RevertAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmAdd":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmEnable":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "confirmDisable":
+                                ConfirmAdd(Guid.Parse(args["id"]));
+                                break;
+                            case "enable":
+                                Enable(Guid.Parse(args["id"]));
+                                break;
+                            case "viewUpdate":
+                                ViewUpdate();
+                                break;
+                            case "disable":
+                                Disable(Guid.Parse(args["id"]));
+                                break;
+                            case "installUpdate":
+                                InstallUpdate(args["msiUrl"]);
+                                break;
+                            default:
+                                Logger.LogTrace("Unknown action {Action}", action);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Logger.LogTrace("Missing action");
+                    }
+                });
+            };
         }
 
         private void ToggleMainWindowHandler(object sender, EventArgs e)

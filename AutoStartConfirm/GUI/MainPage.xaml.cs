@@ -154,6 +154,10 @@ namespace AutoStartConfirm.GUI
         private async void Enable_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+            if (toggleSwitch == null || !toggleSwitch.IsEnabled || toggleSwitch.FocusState == FocusState.Unfocused)
+            {
+                return;
+            }
             var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
             if (toggleSwitch.IsOn && !autoStart.IsEnabled.Value)
             {

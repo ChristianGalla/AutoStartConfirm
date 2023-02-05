@@ -18,6 +18,7 @@ using System.IO;
 using Microsoft.Windows.AppLifecycle;
 using Windows.ApplicationModel.Activation;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using AutoStartConfirm.Helpers;
 
 namespace AutoStartConfirm
 {
@@ -54,6 +55,7 @@ namespace AutoStartConfirm
                         Ioc.Default.ConfigureServices(ServiceProvider);
                         using var serviceScope = ServiceProvider.CreateScope();
                         var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<App>>();
+                        _ = serviceScope.ServiceProvider.GetRequiredService<IDispatchService>();
                         try
                         {
                             logger.LogInformation("Starting");
@@ -90,6 +92,7 @@ namespace AutoStartConfirm
                     loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
                     loggingBuilder.AddNLogWeb(nlogPath);
                 })
+                .AddSingleton<IDispatchService, DispatchService>()
                 .AddSingleton<App>()
                 .AddSingleton<MainWindow>()
                 .AddSingleton<NotifyIcon>()

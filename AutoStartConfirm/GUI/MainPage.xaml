@@ -49,23 +49,22 @@
                                             Click="CurrentConfirmButton_Click"
                                             ToolTipService.ToolTip="Confirm"
                                             Foreground="Green"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeConfirmedConverter}}">
+                                            IsEnabled="{Binding Converter={StaticResource CanBeConfirmedConverter}, Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF13E;"/>
                                             </Button.Content>
                                         </Button>
                                         <ToggleSwitch
-                                            IsEnabled="{Binding Converter={StaticResource CanBeToggledConverter}}"
-                                            IsOn="{Binding Converter={StaticResource CanBeDisabledConverter}}"
-                                            OffContent="Disabled"
-                                            OnContent="Enabled"
+                                            IsEnabled="{Binding Converter={StaticResource CanBeToggledConverter}, Mode=OneWay}"
+                                            IsOn="{Binding Converter={StaticResource CanBeDisabledConverter}, Mode=OneWay}"
+                                            Name="EnableToggle"
                                             Toggled="Enable_Toggled"
                                             ToolTipService.ToolTip="Enable"/>
                                         <Button
                                             Name="CurrentRemoveButton"
                                             Click="CurrentRemoveButton_Click"
                                             ToolTipService.ToolTip="Remove"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}}">
+                                            IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}, Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
                                             </Button.Content>

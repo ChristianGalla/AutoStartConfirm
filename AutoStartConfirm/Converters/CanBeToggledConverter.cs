@@ -11,6 +11,10 @@ namespace AutoStartConfirm.Converters
         public override object Convert(object value, Type targetType, object parameter, string language)
         {
             var autoStart = (AutoStartEntry)value;
+            if (!autoStart.IsEnabled.HasValue)
+            {
+                return false;
+            }
             if (autoStart.IsEnabled.Value)
             {
                 if (!autoStart.CanBeDisabled.HasValue)
