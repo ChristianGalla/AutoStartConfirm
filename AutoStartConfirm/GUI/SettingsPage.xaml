@@ -11,7 +11,7 @@
     xmlns:models="using:AutoStartConfirm.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    
+
     <Page.Resources>
         <DataTemplate x:Key="ConnectorListViewTemplate" x:Name="ConnectorListViewTemplate" x:DataType="models:ConnectorEnableRow">
             <TextBlock Text="{x:Bind CategoryName}"
@@ -25,12 +25,13 @@
         <ScrollViewer>
 
             <StackPanel Orientation="Vertical" Margin="24">
-                <CheckBox x:Name="OwnAutoStartCheckbox"
-                          Margin="0,0,0,25"
-                          Content="Start 'Auto Start Confirm' on logon of current user"
-                          IsChecked="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"                          
-                          Checked="OwnAutoStartCheckbox_Checked"
-                          Unchecked="OwnAutoStartCheckbox_Unchecked"/>
+                <ToggleSwitch 
+                    Margin="0,0,0,25"
+                    IsOn="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"
+                    Name="OwnAutoStartToggle"
+                    Header="Start 'Auto Start Confirm' on logon of current user"
+                    Toggled="OwnAutoStart_Toggled"
+                    ToolTipService.ToolTip="Enable"/>
 
                 <CheckBox x:Name="UpdateCheckCheckbox"
                           Margin="0,0,0,25"

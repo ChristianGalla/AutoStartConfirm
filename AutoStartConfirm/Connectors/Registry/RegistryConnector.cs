@@ -81,14 +81,10 @@ namespace AutoStartConfirm.Connectors.Registry
                 }
             }
             foreach (var addedAutostart in addedAutostarts) {
-                //Application.Current.Dispatcher.Invoke(delegate {
-                //    Add?.Invoke(addedAutostart);
-                //});
+                Add?.Invoke(addedAutostart);
             }
             foreach (var removedAutostart in removedAutostarts) {
-                //Application.Current.Dispatcher.Invoke(delegate {
-                //    Remove?.Invoke(removedAutostart);
-                //});
+                Remove?.Invoke(removedAutostart);
             }
             lastAutostarts.Clear();
             foreach (var newAutoStartEntry in newAutostarts) {

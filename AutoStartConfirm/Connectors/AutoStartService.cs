@@ -1,5 +1,6 @@
 ﻿using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.Logging;
@@ -31,9 +32,7 @@ namespace AutoStartConfirm.Connectors
 
         public string CurrentExePath {
             get {
-                if (currentExePath == null) {
-                    currentExePath = Environment.ProcessPath;
-                }
+                currentExePath ??= Environment.ProcessPath;
                 return currentExePath;
             }
             set {
@@ -46,28 +45,29 @@ namespace AutoStartConfirm.Connectors
         private readonly string PathToHistoryAutoStarts;
 
 
-        private ObservableCollection<AutoStartEntry> currentAutoStarts = new ObservableCollection<AutoStartEntry>();
-
+        private readonly ObservableCollection<AutoStartEntry> currentAutoStarts = new();
 
         public ObservableCollection<AutoStartEntry> CurrentAutoStarts => currentAutoStarts;
 
-        private ObservableCollection<AutoStartEntry> allCurrentAutoStarts = new ObservableCollection<AutoStartEntry>();
+
+        private readonly ObservableCollection<AutoStartEntry> allCurrentAutoStarts = new();
 
         public ObservableCollection<AutoStartEntry> AllCurrentAutoStarts => allCurrentAutoStarts;
 
 
-        private ObservableCollection<AutoStartEntry> historyAutoStarts = new ObservableCollection<AutoStartEntry>();
+        private readonly ObservableCollection<AutoStartEntry> historyAutoStarts = new();
 
         public ObservableCollection<AutoStartEntry> HistoryAutoStarts => historyAutoStarts;
 
 
-        private ObservableCollection<AutoStartEntry> allHistoryAutoStarts = new ObservableCollection<AutoStartEntry>();
+        private ObservableCollection<AutoStartEntry> allHistoryAutoStarts = new();
 
         public ObservableCollection<AutoStartEntry> AllHistoryAutoStarts => allHistoryAutoStarts;
 
         private readonly ISettingsService SettingsService;
 
         private readonly ICurrentUserRun64Connector CurrentUserRun64Connector;
+        private readonly IDispatchService DispatchService;
 
         public bool HasOwnAutoStart {
             get {
@@ -88,12 +88,14 @@ namespace AutoStartConfirm.Connectors
             ILogger<AutoStartService> logger,
             IAutoStartConnectorService connectorService,
             ISettingsService settingsService,
-            ICurrentUserRun64Connector currentUserRun64Connector
+            ICurrentUserRun64Connector currentUserRun64Connector,
+            IDispatchService dispatchService
         ) {
             Logger = logger;
             ConnectorService = connectorService;
             SettingsService = settingsService;
             CurrentUserRun64Connector = currentUserRun64Connector;
+            DispatchService = dispatchService;
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var basePath = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}";
             ConnectorService.Add += AddHandler;
@@ -114,21 +116,24 @@ namespace AutoStartConfirm.Connectors
             HandleSettingChanges();
         }
 
-        private void HandleSettingChanges() {
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    CurrentAutoStarts.Clear();
-            //    foreach (var autoStart in AllCurrentAutoStarts) {
-            //        if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
-            //            CurrentAutoStarts.Add(autoStart);
-            //        }
-            //    }
-            //    HistoryAutoStarts.Clear();
-            //    foreach (var autoStart in AllHistoryAutoStarts) {
-            //        if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString())) {
-            //            HistoryAutoStarts.Add(autoStart);
-            //        }
-            //    }
-            //});
+        private void HandleSettingChanges()
+        {
+            CurrentAutoStarts.Clear();
+            foreach (var autoStart in AllCurrentAutoStarts)
+            {
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                {
+                    CurrentAutoStarts.Add(autoStart);
+                }
+            }
+            HistoryAutoStarts.Clear();
+            foreach (var autoStart in AllHistoryAutoStarts)
+            {
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                {
+                    HistoryAutoStarts.Add(autoStart);
+                }
+            }
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
@@ -674,88 +679,107 @@ namespace AutoStartConfirm.Connectors
 
         #region Event handlers
         private void AddHandler(AutoStartEntry autostart) {
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    try {
-            //        Logger.LogInformation("Auto start added: {@value}", autostart);
-            //        autostart.Date = DateTime.Now;
-            //        autostart.Change = Change.Added;
-            //        ResetEditablePropertiesOfAutoStarts(autostart);
-            //        CurrentAutoStarts.Add(autostart);
-            //        AllCurrentAutoStarts.Add(autostart);
-            //        HistoryAutoStarts.Add(autostart);
-            //        AllHistoryAutoStarts.Add(autostart);
-            //        Add?.Invoke(autostart);
-            //        CurrentAutoStartChange?.Invoke(autostart);
-            //        HistoryAutoStartChange?.Invoke(autostart);
-            //        Logger.LogTrace("AddHandler finished");
-            //    } catch (Exception e) {
-            //        Logger.LogError(e, "Add handler failed");
-            //    }
-            //});
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    Logger.LogInformation("Auto start added: {@value}", autostart);
+                    autostart.Date = DateTime.Now;
+                    autostart.Change = Change.Added;
+                    ResetEditablePropertiesOfAutoStarts(autostart);
+                    CurrentAutoStarts.Add(autostart);
+                    AllCurrentAutoStarts.Add(autostart);
+                    HistoryAutoStarts.Add(autostart);
+                    AllHistoryAutoStarts.Add(autostart);
+                    Add?.Invoke(autostart);
+                    CurrentAutoStartChange?.Invoke(autostart);
+                    HistoryAutoStartChange?.Invoke(autostart);
+                    Logger.LogTrace("AddHandler finished");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Add handler failed");
+                }
+            });
         }
 
-        private void EnableHandler(AutoStartEntry autostart) {
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    try {
-            //        Logger.LogInformation("Auto start enabled: {@value}", autostart);
-            //        ResetAllDynamicFields(autostart);
-            //        var autostartCopy = autostart.DeepCopy();
-            //        autostartCopy.Date = DateTime.Now;
-            //        autostartCopy.Change = Change.Enabled;
-            //        CurrentAutoStarts.Remove(autostart);
-            //        CurrentAutoStarts.Add(autostartCopy);
-            //        HistoryAutoStarts.Add(autostartCopy);
-            //        Enable?.Invoke(autostartCopy);
-            //        CurrentAutoStartChange?.Invoke(autostartCopy);
-            //        HistoryAutoStartChange?.Invoke(autostartCopy);
-            //        Logger.LogTrace("EnableHandler finished");
-            //    } catch (Exception e) {
-            //        Logger.LogError(e, "Enable handler failed");
-            //    }
-            //});
+        private void EnableHandler(AutoStartEntry autostart)
+        {
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    Logger.LogInformation("Auto start enabled: {@value}", autostart);
+                    ResetAllDynamicFields(autostart);
+                    var autostartCopy = autostart.DeepCopy();
+                    autostartCopy.Date = DateTime.Now;
+                    autostartCopy.Change = Change.Enabled;
+                    CurrentAutoStarts.Remove(autostart);
+                    CurrentAutoStarts.Add(autostartCopy);
+                    HistoryAutoStarts.Add(autostartCopy);
+                    Enable?.Invoke(autostartCopy);
+                    CurrentAutoStartChange?.Invoke(autostartCopy);
+                    HistoryAutoStartChange?.Invoke(autostartCopy);
+                    Logger.LogTrace("EnableHandler finished");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Enable handler failed");
+                }
+            });
         }
 
-        private void DisableHandler(AutoStartEntry autostart) {
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    try {
-            //        Logger.LogInformation("Auto start disabled: {@value}", autostart);
-            //        ResetAllDynamicFields(autostart);
-            //        var autostartCopy = autostart.DeepCopy();
-            //        autostartCopy.Date = DateTime.Now;
-            //        autostartCopy.Change = Change.Disabled;
-            //        CurrentAutoStarts.Remove(autostart);
-            //        CurrentAutoStarts.Add(autostartCopy);
-            //        HistoryAutoStarts.Add(autostartCopy);
-            //        Disable?.Invoke(autostartCopy);
-            //        CurrentAutoStartChange?.Invoke(autostartCopy);
-            //        HistoryAutoStartChange?.Invoke(autostartCopy);
-            //        Logger.LogTrace("DisableHandler finished");
-            //    } catch (Exception e) {
-            //        Logger.LogError(e, "Disable handler failed");
-            //    }
-            //});
+        private void DisableHandler(AutoStartEntry autostart)
+        {
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    Logger.LogInformation("Auto start disabled: {@value}", autostart);
+                    ResetAllDynamicFields(autostart);
+                    var autostartCopy = autostart.DeepCopy();
+                    autostartCopy.Date = DateTime.Now;
+                    autostartCopy.Change = Change.Disabled;
+                    CurrentAutoStarts.Remove(autostart);
+                    CurrentAutoStarts.Add(autostartCopy);
+                    HistoryAutoStarts.Add(autostartCopy);
+                    Disable?.Invoke(autostartCopy);
+                    CurrentAutoStartChange?.Invoke(autostartCopy);
+                    HistoryAutoStartChange?.Invoke(autostartCopy);
+                    Logger.LogTrace("DisableHandler finished");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Disable handler failed");
+                }
+            });
         }
 
-        private void RemoveHandler(AutoStartEntry autostart) {
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    try {
-            //        Logger.LogInformation("Auto start removed: {@value}", autostart);
-            //        CurrentAutoStarts.Remove(autostart);
-            //        AllCurrentAutoStarts.Remove(autostart);
-            //        ResetAllDynamicFields(autostart);
-            //        var autostartCopy = autostart.DeepCopy();
-            //        autostartCopy.Date = DateTime.Now;
-            //        autostartCopy.Change = Change.Removed;
-            //        HistoryAutoStarts.Add(autostartCopy);
-            //        AllHistoryAutoStarts.Add(autostartCopy);
-            //        Remove?.Invoke(autostart);
-            //        CurrentAutoStartChange?.Invoke(autostart);
-            //        HistoryAutoStartChange?.Invoke(autostartCopy);
-            //        Logger.LogTrace("RemoveHandler finished");
-            //    } catch (Exception e) {
-            //        Logger.LogError(e, "Remove handler failed");
-            //    }
-            //});
+        private void RemoveHandler(AutoStartEntry autostart)
+        {
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    Logger.LogInformation("Auto start removed: {@value}", autostart);
+                    CurrentAutoStarts.Remove(autostart);
+                    AllCurrentAutoStarts.Remove(autostart);
+                    ResetAllDynamicFields(autostart);
+                    var autostartCopy = autostart.DeepCopy();
+                    autostartCopy.Date = DateTime.Now;
+                    autostartCopy.Change = Change.Removed;
+                    HistoryAutoStarts.Add(autostartCopy);
+                    AllHistoryAutoStarts.Add(autostartCopy);
+                    Remove?.Invoke(autostart);
+                    CurrentAutoStartChange?.Invoke(autostart);
+                    HistoryAutoStartChange?.Invoke(autostartCopy);
+                    Logger.LogTrace("RemoveHandler finished");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Remove handler failed");
+                }
+            });
         }
         #endregion
 

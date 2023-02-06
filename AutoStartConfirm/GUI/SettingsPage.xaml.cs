@@ -166,13 +166,17 @@ namespace AutoStartConfirm.GUI
             });
         }
 
-        private void OwnAutoStartCheckbox_Checked(object sender, RoutedEventArgs e)
+        private void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
         {
-            ToggleOwnAutoStart();
-        }
-
-        private void OwnAutoStartCheckbox_Unchecked(object sender, RoutedEventArgs e)
-        {
+            ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+            if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
+            {
+                return;
+            }
+            if (AppStatus.HasOwnAutoStart == toggleSwitch.IsOn)
+            {
+                return;
+            }
             ToggleOwnAutoStart();
         }
 
