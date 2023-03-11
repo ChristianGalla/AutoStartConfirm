@@ -31,19 +31,6 @@ namespace AutoStartConfirm.GUI
             Logger.LogTrace("Window opened");
         }
 
-        //protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        //{
-        //    Hide();
-        //    e.Cancel = true;
-        //}
-
-        //protected override void OnClosed(EventArgs e)
-        //{
-        //    Logger.LogTrace("Window closed");
-        //    base.OnClosed(e);
-        //    IsClosed = true;
-        //}
-
         #region Click handlers
         private void MainNavigation_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {

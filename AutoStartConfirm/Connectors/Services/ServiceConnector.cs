@@ -71,8 +71,8 @@ namespace AutoStartConfirm.Connectors.Services
                 Category = Category,
                 Value = sc.DisplayName,
                 Path = sc.ServiceName,
+                IsEnabled = IsEnabled(sc),
             };
-            newAutoStart.IsEnabled = IsEnabled(sc);
             if (sc.StartType != ServiceStartMode.Disabled)
             {
                 newAutoStart.EnabledStartMode = sc.StartType;

@@ -2,11 +2,13 @@
 using AutoStartConfirm.Helpers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
@@ -16,13 +18,13 @@ namespace AutoStartConfirm.Models
     [XmlInclude(typeof(FolderAutoStartEntry)), XmlInclude(typeof(RegistryAutoStartEntry)), XmlInclude(typeof(ScheduledTaskAutoStartEntry)), XmlInclude(typeof(ServiceAutoStartEntry))]
     [Serializable]
     public abstract class AutoStartEntry : INotifyPropertyChanged {
-        private Guid id;
+        private Guid id = Guid.NewGuid();
         private string value;
         private string path;
         private Category category;
         private DateTime? date;
         private Change? change;
-        private ConfirmStatus confirmStatus;
+        private ConfirmStatus confirmStatus = ConfirmStatus.New;
         private bool? isEnabled;
 
         [field: NonSerialized]
@@ -38,103 +40,173 @@ namespace AutoStartConfirm.Models
         private bool? canBeRemoved;
 
         [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        public Guid Id {
+        public Guid Id
+        {
             get => id;
-            set {
-                id = value;
-                NotifyPropertyChanged();
+            set
+            {
+                if (id != value)
+                {
+                    id = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public string Value {
             get => value;
             set {
-                this.value = value;
-                NotifyPropertyChanged();
+                if (this.value != value)
+                {
+                    this.value = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public string Path {
             get => path;
             set {
-                path = value;
-                NotifyPropertyChanged();
+                if (path != value)
+                {
+                    path = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public Category Category {
             get => category;
             set {
-                category = value;
-                NotifyPropertyChanged();
+                if (category != value)
+                {
+                    category = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public DateTime? Date {
             get => date;
             set {
-                date = value;
-                NotifyPropertyChanged();
+                if (date != value)
+                {
+                    date = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public Change? Change {
             get => change;
             set {
-                change = value;
-                NotifyPropertyChanged();
+                if (change != value)
+                {
+                    change = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public ConfirmStatus ConfirmStatus {
             get => confirmStatus;
             set {
-                confirmStatus = value;
-                NotifyPropertyChanged();
+                if (confirmStatus != value)
+                {
+                    confirmStatus = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public bool? IsEnabled {
             get => isEnabled;
             set {
-                isEnabled = value;
-                NotifyPropertyChanged();
+                if (isEnabled != value)
+                {
+                    isEnabled = value;
+                    NotifyPropertyChanged();
+                }
             }
         }
 
         public bool? CanBeEnabled {
             get => canBeEnabled;
             set {
-                canBeEnabled = value;
-                NotifyPropertyChanged();
+                if (canBeEnabled != value)
+                {
+                    canBeEnabled = value;
+                    NotifyPropertyChanged();
+                }
             }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore] // needed, because otherwise log serialization can hang
+        public Task<bool>? CanBeEnabledLoader
+        {
+            get;
+            set;
         }
 
         public bool? CanBeDisabled {
             get => canBeDisabled;
             set {
-                canBeDisabled = value;
-                NotifyPropertyChanged();
+                if (canBeDisabled != value)
+                {
+                    canBeDisabled = value;
+                    NotifyPropertyChanged();
+                }
             }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Task<bool>? CanBeDisabledLoader
+        {
+            get;
+            set;
         }
 
         public bool? CanBeAdded {
             get => canBeAdded;
             set {
-                canBeAdded = value;
-                NotifyPropertyChanged();
+                if (canBeAdded != value)
+                {
+                    canBeAdded = value;
+                    NotifyPropertyChanged();
+                }
             }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Task<bool>? CanBeAddedLoader
+        {
+            get;
+            set;
         }
 
 
         public bool? CanBeRemoved {
             get => canBeRemoved;
             set {
-                canBeRemoved = value;
-                NotifyPropertyChanged();
+                if (canBeRemoved != value)
+                {
+                    canBeRemoved = value;
+                    NotifyPropertyChanged();
+                }
             }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Task<bool>? CanBeRemovedLoader
+        {
+            get;
+            set;
         }
 
         public string CategoryAsString {
@@ -144,9 +216,8 @@ namespace AutoStartConfirm.Models
         }
 
         public AutoStartEntry() {
-            Id = Guid.NewGuid();
-            ConfirmStatus = ConfirmStatus.New;
         }
+
 
         public override bool Equals(Object obj) {
             // Check for null and compare run-time types.

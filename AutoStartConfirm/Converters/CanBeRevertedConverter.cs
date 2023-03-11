@@ -18,36 +18,40 @@ namespace AutoStartConfirm.Converters
                     {
                         return autoStart.CanBeRemoved.Value;
                     }
-                    Task.Run(() => {
+                    if (autoStart.CanBeRemovedLoader == null)
+                    {
                         AutoStartService.LoadCanBeRemoved(autoStart);
-                    });
+                    }
                     break;
                 case Change.Removed:
                     if (autoStart.CanBeAdded.HasValue)
                     {
                         return autoStart.CanBeAdded.Value;
                     }
-                    Task.Run(() => {
+                    if (autoStart.CanBeAddedLoader == null)
+                    {
                         AutoStartService.LoadCanBeAdded(autoStart);
-                    });
+                    }
                     break;
                 case Change.Enabled:
                     if (autoStart.CanBeDisabled.HasValue)
                     {
                         return autoStart.CanBeDisabled.Value;
                     }
-                    Task.Run(() => {
+                    if (autoStart.CanBeDisabledLoader == null)
+                    {
                         AutoStartService.LoadCanBeDisabled(autoStart);
-                    });
+                    }
                     break;
                 case Change.Disabled:
                     if (autoStart.CanBeEnabled.HasValue)
                     {
                         return autoStart.CanBeEnabled.Value;
                     }
-                    Task.Run(() => {
+                    if (autoStart.CanBeEnabledLoader == null)
+                    {
                         AutoStartService.LoadCanBeEnabled(autoStart);
-                    });
+                    }
                     break;
             }
             return false;

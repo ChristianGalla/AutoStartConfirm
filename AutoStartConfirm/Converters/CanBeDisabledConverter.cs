@@ -16,9 +16,10 @@ namespace AutoStartConfirm.Converters
             {
                 return autoStart.CanBeDisabled.Value;
             }
-            Task.Run(() => {
+            if (autoStart.CanBeDisabledLoader == null)
+            {
                 AutoStartService.LoadCanBeDisabled(autoStart);
-            });
+            }
             return false;
         }
 

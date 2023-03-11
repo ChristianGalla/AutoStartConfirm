@@ -15,9 +15,10 @@ namespace AutoStartConfirm.Converters
             {
                 return autoStart.CanBeRemoved.Value;
             }
-            Task.Run(() => {
+            if (autoStart.CanBeRemovedLoader == null)
+            {
                 AutoStartService.LoadCanBeRemoved(autoStart);
-            });
+            }
             return false;
         }
 

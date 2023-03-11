@@ -93,6 +93,18 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
+            AutoStartService.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged; ;
+            AutoStartCollectionView.PropertyChanged += AutoStartCollectionView_PropertyChanged;
+        }
+
+        private void CurrentAutoStarts_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Logger.LogDebug("CurrentAutoStarts_CollectionChanged invoked");
+        }
+
+        private void AutoStartCollectionView_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Logger.LogDebug("AutoStartCollectionView_PropertyChanged invoked");
         }
 
         private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)

@@ -104,6 +104,7 @@ namespace AutoStartConfirm
             InitializeComponent();
 
             Window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
+            Window.Closed += WindowClosed;
             Window.ConfirmAdd += ConfirmAddHandler;
             Window.RevertAdd += RevertAddHandler;
             Window.RevertAddId += RevertAddIdHandler;
@@ -681,7 +682,7 @@ namespace AutoStartConfirm
             Process.Start("https://github.com/ChristianGalla/AutoStartConfirm/releases");
         }
 
-        public void InstallUpdate(string msiUrl = null)
+        public void InstallUpdate(string? msiUrl = null)
         {
             if (msiUrl == null || msiUrl.Length == 0)
             {
@@ -812,6 +813,12 @@ namespace AutoStartConfirm
         {
             Logger.LogTrace("EnableHandler called");
             NotificationService.ShowEnabledAutoStartEntryNotification(enabledAutostart);
+        }
+
+        private void WindowClosed(object sender, WindowEventArgs args)
+        {
+            args.Handled = true;
+            Window?.Hide();
         }
 
         private void DisableHandler(AutoStartEntry disabledAutostart)

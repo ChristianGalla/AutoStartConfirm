@@ -49,7 +49,6 @@ namespace AutoStartConfirm.Connectors {
         void ConfirmRemove(Guid Id);
         void DisableAutoStart(AutoStartEntry autoStart);
         void DisableAutoStart(Guid Id);
-        void Dispose();
         void EnableAutoStart(AutoStartEntry autoStart);
         void EnableAutoStart(Guid Id);
 
@@ -61,10 +60,10 @@ namespace AutoStartConfirm.Connectors {
         IList<AutoStartEntry> GetCurrentAutoStarts();
         ObservableCollection<AutoStartEntry> GetSavedAutoStarts(string path);
         bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
-        Task LoadCanBeAdded(AutoStartEntry autoStart);
-        Task LoadCanBeDisabled(AutoStartEntry autoStart);
-        Task LoadCanBeEnabled(AutoStartEntry autoStart);
-        Task LoadCanBeRemoved(AutoStartEntry autoStart);
+        Task<bool> LoadCanBeAdded(AutoStartEntry autoStart);
+        Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart);
+        Task<bool> LoadCanBeEnabled(AutoStartEntry autoStart);
+        Task<bool> LoadCanBeRemoved(AutoStartEntry autoStart);
         void LoadCurrentAutoStarts();
         void RemoveAutoStart(AutoStartEntry autoStart);
         void RemoveAutoStart(Guid Id);

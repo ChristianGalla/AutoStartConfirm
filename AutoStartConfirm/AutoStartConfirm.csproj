@@ -14,6 +14,7 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<Nullable>enable</Nullable>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<PublishSingleFile>true</PublishSingleFile>
@@ -97,6 +98,7 @@
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221209.1" />
 		<Manifest Include="$(ApplicationManifest)" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="NLog">
 			<Version>5.1.1</Version>
 		</PackageReference>

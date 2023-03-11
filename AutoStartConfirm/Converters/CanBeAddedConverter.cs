@@ -16,9 +16,10 @@ namespace AutoStartConfirm.Converters
             {
                 return autoStart.CanBeAdded.Value;
             }
-            Task.Run(() => {
+            if (autoStart.CanBeAddedLoader == null)
+            {
                 AutoStartService.LoadCanBeAdded(autoStart);
-            });
+            }
             return false;
         }
 

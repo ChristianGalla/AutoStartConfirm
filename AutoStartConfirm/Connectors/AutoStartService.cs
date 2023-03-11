@@ -137,7 +137,7 @@ namespace AutoStartConfirm.Connectors
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
-            Logger.LogTrace("TryGetCurrentAutoStart called");
+            Logger.LogTrace("TryGetCurrentAutoStart called for {AutoStartId}", Id);
             value = null;
             foreach (var autoStart in AllCurrentAutoStarts) {
                 if (autoStart.Id == Id) {
@@ -149,7 +149,7 @@ namespace AutoStartConfirm.Connectors
         }
 
         public bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value) {
-            Logger.LogTrace("TryGetHistoryAutoStart called");
+            Logger.LogTrace("TryGetHistoryAutoStart called for {AutoStartId}", Id);
             value = null;
             foreach (var autoStart in AllHistoryAutoStarts) {
                 if (autoStart.Id == Id) {
@@ -162,21 +162,21 @@ namespace AutoStartConfirm.Connectors
 
 
         public void ConfirmAdd(Guid Id) {
-            Logger.LogTrace("ConfirmAdd called");
+            Logger.LogTrace("ConfirmAdd called for {AutoStartId}", Id);
             if (TryGetHistoryAutoStart(Id, out AutoStartEntry addedAutoStart)) {
                 addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 HistoryAutoStartChange?.Invoke(addedAutoStart);
-                Logger.LogInformation("Confirmed add of {@addedAutoStart}", addedAutoStart);
             }
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry currentAutoStart)) {
                 currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 Confirm?.Invoke(currentAutoStart);
                 CurrentAutoStartChange?.Invoke(currentAutoStart);
+                Logger.LogInformation("Confirmed add of {@addedAutoStart}", addedAutoStart);
             }
         }
 
         public void ConfirmRemove(Guid Id) {
-            Logger.LogTrace("ConfirmRemove called");
+            Logger.LogTrace("ConfirmRemove called for {AutoStartId}", Id);
             if (TryGetHistoryAutoStart(Id, out AutoStartEntry autoStart)) {
                 autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 HistoryAutoStartChange?.Invoke(autoStart);
@@ -195,14 +195,14 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void RemoveAutoStart(Guid Id) {
-            Logger.LogTrace("RemoveAutoStart called");
+            Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", Id);
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
                 RemoveAutoStart(autoStart);
             }
         }
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("RemoveAutoStart called");
+            Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", autoStart.Id);
             if (ConnectorService.CanBeEnabled(autoStart)) {
                 // remove disabled status to allow new entries for example at the same registry key in the future
                 ConnectorService.EnableAutoStart(autoStart);
@@ -213,28 +213,28 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void DisableAutoStart(Guid Id) {
-            Logger.LogTrace("DisableAutoStart called");
+            Logger.LogTrace("DisableAutoStart called for {AutoStartId}", Id);
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
                 DisableAutoStart(autoStart);
             }
         }
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("DisableAutoStart called");
+            Logger.LogTrace("DisableAutoStart called for {AutoStartId}", autoStart.Id);
             ConnectorService.DisableAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Disabled;
             Logger.LogInformation("Disabled {@autoStart}", autoStart);
         }
 
         public void AddAutoStart(Guid Id) {
-            Logger.LogTrace("AddAutoStart called");
+            Logger.LogTrace("AddAutoStart called for {AutoStartId}", Id);
             if (TryGetHistoryAutoStart(Id, out AutoStartEntry autoStart)) {
                 AddAutoStart(autoStart);
             }
         }
 
         public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("AddAutoStart called");
+            Logger.LogTrace("AddAutoStart called for {AutoStartId}", autoStart.Id);
             ConnectorService.AddAutoStart(autoStart);
             try {
                 ConnectorService.EnableAutoStart(autoStart);
@@ -253,62 +253,89 @@ namespace AutoStartConfirm.Connectors
         }
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("EnableAutoStart called");
+            Logger.LogTrace("EnableAutoStart called for {AutoStartId}", autoStart.Id);
             ConnectorService.EnableAutoStart(autoStart);
             autoStart.ConfirmStatus = ConfirmStatus.Enabled;
             Logger.LogInformation("Enabled {@autoStart}", autoStart);
         }
 
         public bool CanAutoStartBeEnabled(AutoStartEntry autoStart) {
-            Logger.LogTrace("CanAutoStartBeEnabled called");
             return ConnectorService.CanBeEnabled(autoStart);
         }
 
         public bool CanAutoStartBeDisabled(AutoStartEntry autoStart) {
-            Logger.LogTrace("CanAutoStartBeDisabled called");
             return ConnectorService.CanBeDisabled(autoStart);
         }
 
         public bool CanAutoStartBeAdded(AutoStartEntry autoStart) {
-            Logger.LogTrace("CanAutoStartBeAdded called");
             return ConnectorService.CanBeAdded(autoStart);
         }
 
         public bool CanAutoStartBeRemoved(AutoStartEntry autoStart) {
-            Logger.LogTrace("CanAutoStartBeRemoved called");
             return ConnectorService.CanBeRemoved(autoStart);
         }
 
-        public async Task LoadCanBeAdded(AutoStartEntry autoStart) {
-            await Task.Run(() => {
-                autoStart.CanBeAdded = CanAutoStartBeAdded(autoStart);
-                CurrentAutoStartChange?.Invoke(autoStart);
-                HistoryAutoStartChange?.Invoke(autoStart);
+        public async Task<bool> LoadCanBeAdded(AutoStartEntry autoStart) {
+            autoStart.CanBeAddedLoader = Task<bool>.Run(() => {
+                var oldValue = autoStart.CanBeAdded;
+                var newValue = CanAutoStartBeAdded(autoStart);
+                if (oldValue != newValue)
+                {
+                    autoStart.CanBeAdded = newValue;
+                    CurrentAutoStartChange?.Invoke(autoStart);
+                    HistoryAutoStartChange?.Invoke(autoStart);
+                }
+                return newValue;
             });
+            return await autoStart.CanBeAddedLoader;
         }
 
-        public async Task LoadCanBeRemoved(AutoStartEntry autoStart) {
-            await Task.Run(() => {
-                autoStart.CanBeRemoved = CanAutoStartBeRemoved(autoStart);
-                CurrentAutoStartChange?.Invoke(autoStart);
-                HistoryAutoStartChange?.Invoke(autoStart);
+        public async Task<bool> LoadCanBeRemoved(AutoStartEntry autoStart)
+        {
+            autoStart.CanBeRemovedLoader = Task<bool>.Run(() => {
+                var oldValue = autoStart.CanBeRemoved;
+                var newValue = CanAutoStartBeRemoved(autoStart);
+                if (oldValue != newValue)
+                {
+                    autoStart.CanBeRemoved = newValue;
+                    CurrentAutoStartChange?.Invoke(autoStart);
+                    HistoryAutoStartChange?.Invoke(autoStart);
+                }
+                return newValue;
             });
+            return await autoStart.CanBeRemovedLoader;
         }
 
-        public async Task LoadCanBeEnabled(AutoStartEntry autoStart) {
-            await Task.Run(() => {
-                autoStart.CanBeEnabled = CanAutoStartBeEnabled(autoStart);
-                CurrentAutoStartChange?.Invoke(autoStart);
-                HistoryAutoStartChange?.Invoke(autoStart);
+        public async Task<bool> LoadCanBeEnabled(AutoStartEntry autoStart)
+        {
+            autoStart.CanBeEnabledLoader = Task<bool>.Run(() => {
+                var oldValue = autoStart.CanBeEnabled;
+                var newValue = CanAutoStartBeEnabled(autoStart);
+                if (oldValue != newValue)
+                {
+                    autoStart.CanBeEnabled = newValue;
+                    CurrentAutoStartChange?.Invoke(autoStart);
+                    HistoryAutoStartChange?.Invoke(autoStart);
+                }
+                return newValue;
             });
+            return await autoStart.CanBeEnabledLoader;
         }
 
-        public async Task LoadCanBeDisabled(AutoStartEntry autoStart) {
-            await Task.Run(() => {
-                autoStart.CanBeDisabled = CanAutoStartBeDisabled(autoStart);
-                CurrentAutoStartChange?.Invoke(autoStart);
-                HistoryAutoStartChange?.Invoke(autoStart);
+        public async Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart)
+        {
+            autoStart.CanBeDisabledLoader = Task<bool>.Run(() => {
+                var oldValue = autoStart.CanBeDisabled;
+                var newValue = CanAutoStartBeDisabled(autoStart);
+                if (oldValue != newValue)
+                {
+                    autoStart.CanBeDisabled = newValue;
+                    CurrentAutoStartChange?.Invoke(autoStart);
+                    HistoryAutoStartChange?.Invoke(autoStart);
+                }
+                return newValue;
             });
+            return await autoStart.CanBeDisabledLoader;
         }
 
         /// <summary>
@@ -375,6 +402,10 @@ namespace AutoStartConfirm.Connectors
             autoStartValue.CanBeRemoved = null;
             autoStartValue.CanBeEnabled = null;
             autoStartValue.CanBeDisabled = null;
+            autoStartValue.CanBeAddedLoader = null;
+            autoStartValue.CanBeRemovedLoader = null;
+            autoStartValue.CanBeEnabledLoader = null;
+            autoStartValue.CanBeDisabledLoader = null;
         }
 
         public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
