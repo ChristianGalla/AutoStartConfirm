@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -16,11 +17,13 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -102,7 +105,7 @@ namespace AutoStartConfirm.GUI
             Logger.LogDebug("CurrentAutoStarts_CollectionChanged invoked");
         }
 
-        private void AutoStartCollectionView_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public void AutoStartCollectionView_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Logger.LogDebug("AutoStartCollectionView_PropertyChanged invoked");
         }
@@ -229,6 +232,155 @@ namespace AutoStartConfirm.GUI
                     dgColumn.SortDirection = null;
                 }
             }
+        }
+
+        public static bool CanBeConfirmedConverter(AutoStartEntry autoStart)
+        {
+            var status = autoStart.ConfirmStatus;
+            return status == ConfirmStatus.New;
+        }
+
+        public static bool CanBeAddedConverter(AutoStartEntry autoStart)
+        {
+            if (autoStart.CanBeAdded.HasValue)
+            {
+                return autoStart.CanBeAdded.Value;
+            }
+            if (autoStart.CanBeAddedLoader == null)
+            {
+                using var ServiceScope = Ioc.Default.CreateScope();
+                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+                AutoStartService.LoadCanBeAdded(autoStart);
+            }
+            return false;
+        }
+
+        public static bool CanBeDisabledConverter(AutoStartEntry autoStart)
+        {
+            if (autoStart.CanBeDisabled.HasValue)
+            {
+                return autoStart.CanBeDisabled.Value;
+            }
+            if (autoStart.CanBeDisabledLoader == null)
+            {
+                using var ServiceScope = Ioc.Default.CreateScope();
+                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+                AutoStartService.LoadCanBeDisabled(autoStart);
+            }
+            return false;
+        }
+
+        public static bool CanBeEnabledConverter(AutoStartEntry autoStart)
+        {
+            if (autoStart.CanBeEnabled.HasValue)
+            {
+                return autoStart.CanBeEnabled.Value;
+            }
+            if (autoStart.CanBeEnabledLoader == null)
+            {
+                using var ServiceScope = Ioc.Default.CreateScope();
+                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+                AutoStartService.LoadCanBeEnabled(autoStart);
+            }
+            return false;
+        }
+
+        public static bool CanBeRemovedConverter(AutoStartEntry autoStart)
+        {
+            if (autoStart.CanBeRemoved.HasValue)
+            {
+                return autoStart.CanBeRemoved.Value;
+            }
+            if (autoStart.CanBeRemovedLoader == null)
+            {
+                using var ServiceScope = Ioc.Default.CreateScope();
+                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+                AutoStartService.LoadCanBeRemoved(autoStart);
+            }
+            return false;
+        }
+
+        public static bool CanBeRevertedConverter(AutoStartEntry autoStart)
+        {
+            using var ServiceScope = Ioc.Default.CreateScope();
+            var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+            switch (autoStart.Change)
+            {
+                case Change.Added:
+                    if (autoStart.CanBeRemoved.HasValue)
+                    {
+                        return autoStart.CanBeRemoved.Value;
+                    }
+                    if (autoStart.CanBeRemovedLoader == null)
+                    {
+                        AutoStartService.LoadCanBeRemoved(autoStart);
+                    }
+                    break;
+                case Change.Removed:
+                    if (autoStart.CanBeAdded.HasValue)
+                    {
+                        return autoStart.CanBeAdded.Value;
+                    }
+                    if (autoStart.CanBeAddedLoader == null)
+                    {
+                        AutoStartService.LoadCanBeAdded(autoStart);
+                    }
+                    break;
+                case Change.Enabled:
+                    if (autoStart.CanBeDisabled.HasValue)
+                    {
+                        return autoStart.CanBeDisabled.Value;
+                    }
+                    if (autoStart.CanBeDisabledLoader == null)
+                    {
+                        AutoStartService.LoadCanBeDisabled(autoStart);
+                    }
+                    break;
+                case Change.Disabled:
+                    if (autoStart.CanBeEnabled.HasValue)
+                    {
+                        return autoStart.CanBeEnabled.Value;
+                    }
+                    if (autoStart.CanBeEnabledLoader == null)
+                    {
+                        AutoStartService.LoadCanBeEnabled(autoStart);
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        public static bool CanBeToggledConverter(AutoStartEntry autoStart)
+        {
+            if (!autoStart.IsEnabled.HasValue)
+            {
+                return false;
+            }
+            using var ServiceScope = Ioc.Default.CreateScope();
+            var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+            if (autoStart.IsEnabled.Value)
+            {
+                if (!autoStart.CanBeDisabled.HasValue)
+                {
+                    AutoStartService.LoadCanBeDisabled(autoStart);
+                }
+                else
+                {
+                    return autoStart.CanBeDisabled.Value;
+                }
+            }
+            else
+            {
+                if (!autoStart.CanBeEnabled.HasValue)
+                {
+                    AutoStartService.LoadCanBeEnabled(autoStart);
+                }
+                else
+                {
+                    return autoStart.CanBeEnabled.Value;
+                }
+            }
+            return false;
         }
 
 

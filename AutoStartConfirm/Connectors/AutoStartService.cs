@@ -275,67 +275,84 @@ namespace AutoStartConfirm.Connectors
             return ConnectorService.CanBeRemoved(autoStart);
         }
 
-        public async Task<bool> LoadCanBeAdded(AutoStartEntry autoStart) {
-            autoStart.CanBeAddedLoader = Task<bool>.Run(() => {
-                var oldValue = autoStart.CanBeAdded;
-                var newValue = CanAutoStartBeAdded(autoStart);
-                if (oldValue != newValue)
-                {
-                    autoStart.CanBeAdded = newValue;
-                    CurrentAutoStartChange?.Invoke(autoStart);
-                    HistoryAutoStartChange?.Invoke(autoStart);
-                }
-                return newValue;
-            });
-            return await autoStart.CanBeAddedLoader;
+        public async Task<bool> LoadCanBeAdded(AutoStartEntry autoStart)
+        {
+            lock (autoStart.LoaderLock)
+            {
+                autoStart.CanBeAddedLoader ??= Task<bool>.Run(() => {
+                    var oldValue = autoStart.CanBeAdded;
+                    var newValue = CanAutoStartBeAdded(autoStart);
+                    if (oldValue != newValue)
+                    {
+                        autoStart.CanBeAdded = newValue;
+                        CurrentAutoStartChange?.Invoke(autoStart);
+                        HistoryAutoStartChange?.Invoke(autoStart);
+                    }
+                    return newValue;
+                });
+            }
+            var newValue = await autoStart.CanBeAddedLoader;
+            return newValue;
         }
 
         public async Task<bool> LoadCanBeRemoved(AutoStartEntry autoStart)
         {
-            autoStart.CanBeRemovedLoader = Task<bool>.Run(() => {
-                var oldValue = autoStart.CanBeRemoved;
-                var newValue = CanAutoStartBeRemoved(autoStart);
-                if (oldValue != newValue)
-                {
-                    autoStart.CanBeRemoved = newValue;
-                    CurrentAutoStartChange?.Invoke(autoStart);
-                    HistoryAutoStartChange?.Invoke(autoStart);
-                }
-                return newValue;
-            });
-            return await autoStart.CanBeRemovedLoader;
+            lock (autoStart.LoaderLock)
+            {
+                autoStart.CanBeRemovedLoader ??= Task<bool>.Run(() => {
+                    var oldValue = autoStart.CanBeRemoved;
+                    var newValue = CanAutoStartBeRemoved(autoStart);
+                    if (oldValue != newValue)
+                    {
+                        autoStart.CanBeRemoved = newValue;
+                        CurrentAutoStartChange?.Invoke(autoStart);
+                        HistoryAutoStartChange?.Invoke(autoStart);
+                    }
+                    return newValue;
+                });
+            }
+            var newValue = await autoStart.CanBeRemovedLoader;
+            return newValue;
         }
 
         public async Task<bool> LoadCanBeEnabled(AutoStartEntry autoStart)
         {
-            autoStart.CanBeEnabledLoader = Task<bool>.Run(() => {
-                var oldValue = autoStart.CanBeEnabled;
-                var newValue = CanAutoStartBeEnabled(autoStart);
-                if (oldValue != newValue)
-                {
-                    autoStart.CanBeEnabled = newValue;
-                    CurrentAutoStartChange?.Invoke(autoStart);
-                    HistoryAutoStartChange?.Invoke(autoStart);
-                }
-                return newValue;
-            });
-            return await autoStart.CanBeEnabledLoader;
+            lock (autoStart.LoaderLock)
+            {
+                autoStart.CanBeEnabledLoader ??= Task<bool>.Run(() => {
+                    var oldValue = autoStart.CanBeEnabled;
+                    var newValue = CanAutoStartBeEnabled(autoStart);
+                    if (oldValue != newValue)
+                    {
+                        autoStart.CanBeEnabled = newValue;
+                        CurrentAutoStartChange?.Invoke(autoStart);
+                        HistoryAutoStartChange?.Invoke(autoStart);
+                    }
+                    return newValue;
+                });
+            }
+            var newValue = await autoStart.CanBeEnabledLoader;
+            return newValue;
         }
 
         public async Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart)
         {
-            autoStart.CanBeDisabledLoader = Task<bool>.Run(() => {
-                var oldValue = autoStart.CanBeDisabled;
-                var newValue = CanAutoStartBeDisabled(autoStart);
-                if (oldValue != newValue)
-                {
-                    autoStart.CanBeDisabled = newValue;
-                    CurrentAutoStartChange?.Invoke(autoStart);
-                    HistoryAutoStartChange?.Invoke(autoStart);
-                }
-                return newValue;
-            });
-            return await autoStart.CanBeDisabledLoader;
+            lock(autoStart.LoaderLock)
+            {
+                autoStart.CanBeDisabledLoader ??= Task<bool>.Run(() => {
+                    var oldValue = autoStart.CanBeDisabled;
+                    var newValue = CanAutoStartBeDisabled(autoStart);
+                    if (oldValue != newValue)
+                    {
+                        autoStart.CanBeDisabled = newValue;
+                        CurrentAutoStartChange?.Invoke(autoStart);
+                        HistoryAutoStartChange?.Invoke(autoStart);
+                    }
+                    return newValue;
+                });
+            }
+            var newValue = await autoStart.CanBeDisabledLoader;
+            return newValue;
         }
 
         /// <summary>

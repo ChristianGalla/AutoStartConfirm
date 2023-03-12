@@ -180,22 +180,28 @@ namespace AutoStartConfirm.Connectors.Registry
                 var ret = new List<AutoStartEntry>();
                 using (RegistryKey baseRegistryKey = GetBaseRegistry()) {
                     var subKeyPath = BasePath.Substring(BasePath.IndexOf('\\') + 1);
-                    using (RegistryKey rootKey = baseRegistryKey.OpenSubKey(subKeyPath)) {
-                        if (rootKey != null) {
-                            if (SubKeyNames != null) {
-                                foreach (var subKeyName in SubKeyNames) {
-                                    using (var subKey = rootKey.OpenSubKey(subKeyName)) {
-                                        if (subKey == null) {
-                                            continue;
-                                        }
-                                        var currentAutoStarts = GetCurrentAutoStarts(subKey, MonitorSubkeys);
-                                        ret.AddRange(currentAutoStarts);
+                    using RegistryKey rootKey = baseRegistryKey.OpenSubKey(subKeyPath);
+                    if (rootKey != null)
+                    {
+                        if (SubKeyNames != null)
+                        {
+                            foreach (var subKeyName in SubKeyNames)
+                            {
+                                using (var subKey = rootKey.OpenSubKey(subKeyName))
+                                {
+                                    if (subKey == null)
+                                    {
+                                        continue;
                                     }
+                                    var currentAutoStarts = GetCurrentAutoStarts(subKey, MonitorSubkeys);
+                                    ret.AddRange(currentAutoStarts);
                                 }
-                            } else {
-                                var currentAutoStarts = GetCurrentAutoStarts(rootKey, MonitorSubkeys);
-                                ret.AddRange(currentAutoStarts);
                             }
+                        }
+                        else
+                        {
+                            var currentAutoStarts = GetCurrentAutoStarts(rootKey, MonitorSubkeys);
+                            ret.AddRange(currentAutoStarts);
                         }
                     }
                 }

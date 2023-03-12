@@ -132,6 +132,10 @@ namespace AutoStartConfirm.Models
             }
         }
 
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal readonly object LoaderLock = new();
+
         public bool? CanBeEnabled {
             get => canBeEnabled;
             set {

@@ -16,13 +16,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <myConverters:CanBeConfirmedConverter x:Key="CanBeConfirmedConverter" />
-        <myConverters:CanBeAddedConverter x:Key="CanBeAddedConverter" />
-        <myConverters:CanBeRemovedConverter x:Key="CanBeRemovedConverter" />
-        <myConverters:CanBeEnabledConverter x:Key="CanBeEnabledConverter" />
-        <myConverters:CanBeDisabledConverter x:Key="CanBeDisabledConverter" />
-        <myConverters:CanBeToggledConverter x:Key="CanBeToggledConverter" />
-        <myConverters:CanBeRevertedConverter x:Key="CanBeRevertedConverter" />
         <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
         <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
     </Page.Resources>
@@ -49,14 +42,14 @@
                                             Click="CurrentConfirmButton_Click"
                                             ToolTipService.ToolTip="Confirm"
                                             Foreground="Green"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeConfirmedConverter}, Mode=OneWay}">
+                                            IsEnabled="{x:Bind local:MainPage.CanBeConfirmedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF13E;"/>
                                             </Button.Content>
                                         </Button>
                                         <ToggleSwitch
-                                            IsEnabled="{Binding Converter={StaticResource CanBeToggledConverter}, Mode=OneWay}"
-                                            IsOn="{Binding Converter={StaticResource CanBeDisabledConverter}, Mode=OneWay}"
+                                            IsEnabled="{x:Bind local:MainPage.CanBeToggledConverter((models:AutoStartEntry)), Mode=OneWay}"
+                                            IsOn="{x:Bind local:MainPage.CanBeDisabledConverter((models:AutoStartEntry)), Mode=OneWay}"
                                             Name="EnableToggle"
                                             Toggled="Enable_Toggled"
                                             ToolTipService.ToolTip="Enable"/>
@@ -64,7 +57,7 @@
                                             Name="CurrentRemoveButton"
                                             Click="CurrentRemoveButton_Click"
                                             ToolTipService.ToolTip="Remove"
-                                            IsEnabled="{Binding Converter={StaticResource CanBeRemovedConverter}, Mode=OneWay}">
+                                            IsEnabled="{x:Bind local:MainPage.CanBeRemovedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
                                             </Button.Content>

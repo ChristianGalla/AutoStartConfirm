@@ -291,21 +291,29 @@ namespace AutoStartConfirm.Connectors
         #region Event handlers
         private void AddHandler(AutoStartEntry addedAutostart) {
             Logger.LogTrace("AddHandler called");
+            if (addedAutostart.IsEnabled == null)
+            {
+                var nowEnabled = IsEnabled(addedAutostart);
+                addedAutostart.IsEnabled = nowEnabled;
+            }
             Add?.Invoke(addedAutostart);
         }
 
         private void RemoveHandler(AutoStartEntry removedAutostart) {
             Logger.LogTrace("RemoveHandler called");
+            removedAutostart.IsEnabled = null;
             Remove?.Invoke(removedAutostart);
         }
 
         private void EnableHandler(AutoStartEntry enabledAutostart) {
             Logger.LogTrace("EnableHandler called");
+            enabledAutostart.IsEnabled = true;
             Enable?.Invoke(enabledAutostart);
         }
 
         private void DisableHandler(AutoStartEntry disabledAutostart) {
             Logger.LogTrace("DisableHandler called");
+            disabledAutostart.IsEnabled = false;
             Disable?.Invoke(disabledAutostart);
         }
 
