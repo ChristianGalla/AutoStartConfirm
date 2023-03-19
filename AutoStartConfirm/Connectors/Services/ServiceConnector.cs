@@ -251,7 +251,7 @@ namespace AutoStartConfirm.Connectors.Services
             var autoStartsToRemove = new List<AutoStartEntry>();
             foreach (var oldAutoStart in LastAutoStartEntries)
             {
-                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out AutoStartEntry newAutoStartEntry);
+                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out AutoStartEntry? newAutoStartEntry);
                 if (!found)
                 {
                     autoStartsToRemove.Add(oldAutoStart.Value);
@@ -259,7 +259,7 @@ namespace AutoStartConfirm.Connectors.Services
             }
             foreach (AutoStartEntry autoStartToRemove in autoStartsToRemove)
             {
-                bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry removedAutoStartEntry);
+                bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry? removedAutoStartEntry);
                 if (removed)
                 {
                     RemoveHandler(removedAutoStartEntry);
@@ -267,7 +267,7 @@ namespace AutoStartConfirm.Connectors.Services
             }
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
             {
-                bool found = LastAutoStartEntries.TryGetValue(currentAutoStart.Path, out AutoStartEntry oldAutoStart);
+                bool found = LastAutoStartEntries.TryGetValue(currentAutoStart.Path, out AutoStartEntry? oldAutoStart);
                 if (!found)
                 {
                     bool added = LastAutoStartEntries.TryAdd(currentAutoStart.Path, currentAutoStart);

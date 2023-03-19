@@ -339,7 +339,7 @@ namespace AutoStartConfirm
         public void RevertAdd(Guid id)
         {
             Logger.LogInformation("Addition of {id} should be reverted", id);
-            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart))
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry? autoStart))
             {
                 RevertAdd(autoStart);
             }
@@ -428,7 +428,7 @@ namespace AutoStartConfirm
         public void RevertRemove(Guid id)
         {
             Logger.LogInformation("Removal of {id} should be reverted", id);
-            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry autoStart))
+            if (AutoStartService.TryGetHistoryAutoStart(id, out AutoStartEntry? autoStart))
             {
                 RevertRemove(autoStart);
             }
@@ -481,7 +481,7 @@ namespace AutoStartConfirm
             Task.Run(() =>
             {
                 Logger.LogInformation("{id} should be enabled", id);
-                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart))
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry? autoStart))
                 {
                     Enable(autoStart);
                 }
@@ -535,7 +535,7 @@ namespace AutoStartConfirm
             Task.Run(() =>
             {
                 Logger.LogInformation("{id} should be disabled", id);
-                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry autoStart))
+                if (AutoStartService.TryGetCurrentAutoStart(id, out AutoStartEntry? autoStart))
                 {
                     Disable(autoStart);
                 }
@@ -729,7 +729,7 @@ namespace AutoStartConfirm
                 // Need to dispatch to UI thread if performing UI operations
                 DispatchService.DispatcherQueue.TryEnqueue(() => {
                     Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
-                    if (args.TryGetValue("action", out string action))
+                    if (args.TryGetValue("action", out string? action))
                     {
                         switch (action)
                         {

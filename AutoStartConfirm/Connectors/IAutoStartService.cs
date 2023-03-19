@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Connectors {
@@ -75,8 +76,8 @@ namespace AutoStartConfirm.Connectors {
         void SaveAutoStarts();
         void StartWatcher();
         void StopWatcher();
-        bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value);
-        bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value);
+        bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
+        bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool IsOwnAutoStart(AutoStartEntry autoStart);
         void ToggleOwnAutoStart();
     }

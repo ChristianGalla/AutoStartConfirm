@@ -161,7 +161,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             }
             foreach (AutoStartEntry autoStartToRemove in autoStartsToRemove)
             {
-                bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry removedAutoStartEntry);
+                bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry? removedAutoStartEntry);
                 if (removed)
                 {
                     RemoveHandler(removedAutoStartEntry);
@@ -169,7 +169,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             }
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
             {
-                bool found = LastAutoStartEntries.TryGetValue(currentAutoStart.Path, out AutoStartEntry oldAutoStart);
+                bool found = LastAutoStartEntries.TryGetValue(currentAutoStart.Path, out AutoStartEntry? oldAutoStart);
                 if (!found)
                 {
                     bool added = LastAutoStartEntries.TryAdd(currentAutoStart.Path, currentAutoStart);
@@ -294,7 +294,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     }
                     task.Folder.DeleteTask(task.Name);
                     Logger.LogInformation("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
-                    bool removed = lastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry removedAutoStart);
+                    bool removed = lastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart);
                     if (removed)
                     {
                         RemoveHandler(removedAutoStart);

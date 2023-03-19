@@ -45,7 +45,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void TryGetCurrentAutoStart_ReturnsFalseIfNotFound() {
-            var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry retAutoStart);
+            var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsFalse(ret);
             Assert.IsNull(retAutoStart);
@@ -55,7 +55,7 @@ namespace AutoStartConfirm.Connectors.Tests
         public void TryGetCurrentAutoStart_ReturnsTrueAndAutoStartIfFound() {
             Service.AllCurrentAutoStarts.Add(AutoStartEntry);
 
-            var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry retAutoStart);
+            var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsTrue(ret);
             Assert.AreEqual(AutoStartEntry, retAutoStart);
@@ -63,7 +63,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void TryGetHistoryAutoStart_ReturnsFalseIfNotFound() {
-            var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry retAutoStart);
+            var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsFalse(ret);
             Assert.IsNull(retAutoStart);
@@ -73,7 +73,7 @@ namespace AutoStartConfirm.Connectors.Tests
         public void TryGetHistoryAutoStart_ReturnsTrueAndAutoStartIfFound() {
             Service.AllHistoryAutoStarts.Add(AutoStartEntry);
 
-            var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry retAutoStart);
+            var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsTrue(ret);
             Assert.AreEqual(AutoStartEntry, retAutoStart);

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -136,7 +137,7 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        public bool TryGetCurrentAutoStart(Guid Id, out AutoStartEntry value) {
+        public bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value) {
             Logger.LogTrace("TryGetCurrentAutoStart called for {AutoStartId}", Id);
             value = null;
             foreach (var autoStart in AllCurrentAutoStarts) {
@@ -148,7 +149,7 @@ namespace AutoStartConfirm.Connectors
             return false;
         }
 
-        public bool TryGetHistoryAutoStart(Guid Id, out AutoStartEntry value) {
+        public bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value) {
             Logger.LogTrace("TryGetHistoryAutoStart called for {AutoStartId}", Id);
             value = null;
             foreach (var autoStart in AllHistoryAutoStarts) {
@@ -163,11 +164,11 @@ namespace AutoStartConfirm.Connectors
 
         public void ConfirmAdd(Guid Id) {
             Logger.LogTrace("ConfirmAdd called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry addedAutoStart)) {
+            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? addedAutoStart)) {
                 addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 HistoryAutoStartChange?.Invoke(addedAutoStart);
             }
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry currentAutoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? currentAutoStart)) {
                 currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 Confirm?.Invoke(currentAutoStart);
                 CurrentAutoStartChange?.Invoke(currentAutoStart);
@@ -177,7 +178,7 @@ namespace AutoStartConfirm.Connectors
 
         public void ConfirmRemove(Guid Id) {
             Logger.LogTrace("ConfirmRemove called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
                 autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                 HistoryAutoStartChange?.Invoke(autoStart);
                 Logger.LogInformation("Confirmed remove of {@autoStart}", autoStart);
@@ -196,7 +197,7 @@ namespace AutoStartConfirm.Connectors
 
         public void RemoveAutoStart(Guid Id) {
             Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", Id);
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
                 RemoveAutoStart(autoStart);
             }
         }
@@ -214,7 +215,7 @@ namespace AutoStartConfirm.Connectors
 
         public void DisableAutoStart(Guid Id) {
             Logger.LogTrace("DisableAutoStart called for {AutoStartId}", Id);
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
                 DisableAutoStart(autoStart);
             }
         }
@@ -228,7 +229,7 @@ namespace AutoStartConfirm.Connectors
 
         public void AddAutoStart(Guid Id) {
             Logger.LogTrace("AddAutoStart called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
                 AddAutoStart(autoStart);
             }
         }
@@ -247,7 +248,7 @@ namespace AutoStartConfirm.Connectors
 
         public void EnableAutoStart(Guid Id) {
             Logger.LogTrace("EnableAutoStart called");
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
                 EnableAutoStart(autoStart);
             }
         }
@@ -382,7 +383,9 @@ namespace AutoStartConfirm.Connectors
         public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart) {
             foreach (var currentAutoStart in AllCurrentAutoStarts) {
                 var autoStartValue = currentAutoStart;
-                if (!autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
+                if (autoStartValue.Category != autoStart.Category ||
+                    !autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase) ||
+                    !autoStartValue.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
                 ResetAllDynamicFields(autoStartValue);
@@ -406,7 +409,9 @@ namespace AutoStartConfirm.Connectors
         /// <param name="autoStart"></param>
         public void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart) {
             foreach (var historyAutoStart in AllHistoryAutoStarts) {
-                if (!historyAutoStart.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase)) {
+                if (historyAutoStart.Category != autoStart.Category || 
+                    !historyAutoStart.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase) ||
+                    !historyAutoStart.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
                 ResetAllDynamicFields(historyAutoStart);
@@ -454,43 +459,39 @@ namespace AutoStartConfirm.Connectors
                 if (File.Exists($"{path}.xml"))
                 {
                     var file = $"{path}.xml";
-                    Logger.LogInformation($"Loading new xml serialized file \"{file}\"");
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    Logger.LogInformation("Loading new xml serialized file {file}", file);
+                    using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    XmlSerializer serializer = new(typeof(ObservableCollection<AutoStartEntry>));
+                    try
                     {
-                        XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
-                        try
-                        {
-                            var ret = (ObservableCollection<AutoStartEntry>)serializer.Deserialize(stream);
-                            Logger.LogTrace($"Loaded last saved auto starts from file \"{file}\"");
-                            return ret;
-                        }
-                        catch (Exception ex)
-                        {
-                            var err = new Exception($"Failed to deserialize from file \"{file}\"", ex);
-                            throw err;
-                        }
+                        var ret = (ObservableCollection<AutoStartEntry>)serializer.Deserialize(stream);
+                        Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
+                        return ret;
+                    }
+                    catch (Exception ex)
+                    {
+                        var err = new Exception($"Failed to deserialize from file {file}", ex);
+                        throw err;
                     }
                 }
                 else if (File.Exists($"{path}.bin"))
                 {
                     var file = $"{path}.bin";
-                    Logger.LogInformation($"Loading old binary serialized file \"{file}\"");
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    Logger.LogInformation("Loading old binary serialized file {file}", file);
+                    using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    IFormatter formatter = new BinaryFormatter();
+                    try
                     {
-                        IFormatter formatter = new BinaryFormatter();
-                        try
-                        {
 #pragma warning disable SYSLIB0011 // Type or member is obsolete
-                            var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
+                        var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
 #pragma warning restore SYSLIB0011 // Type or member is obsolete
-                            Logger.LogTrace($"Loaded last saved auto starts from file \"{file}\"");
-                            return ret;
-                        }
-                        catch (Exception ex)
-                        {
-                            var err = new Exception($"Failed to deserialize from file \"{file}\"", ex);
-                            throw err;
-                        }
+                        Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
+                        return ret;
+                    }
+                    catch (Exception ex)
+                    {
+                        var err = new Exception($"Failed to deserialize from file {file}", ex);
+                        throw err;
                     }
                 }
                 else
@@ -528,7 +529,7 @@ namespace AutoStartConfirm.Connectors
                     var folderPath = PathToLastAutoStarts.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
                     Directory.CreateDirectory(folderPath);
                 } catch (Exception ex) {
-                    var err = new Exception($"Failed to create folder for file \"{path}\"", ex);
+                    var err = new Exception($"Failed to create folder for file {path}", ex);
                     throw err;
                 }
                 try {
@@ -537,14 +538,14 @@ namespace AutoStartConfirm.Connectors
                         serializer.Serialize(stream, dictionary);
                     }
                 } catch (Exception ex) {
-                    var err = new Exception($"Failed to write file \"{path}\"", ex);
+                    var err = new Exception($"Failed to write file {path}", ex);
                     throw err;
                 }
-                Logger.LogTrace($"Saved auto starts to file \"{path}\"");
+                Logger.LogTrace("Saved auto starts to file {path}", path);
             } catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to save auto starts to file {path}", path);
-                throw new Exception($"Failed to save auto starts to file \"{path}\"", ex);
+                throw new Exception($"Failed to save auto starts to file {path}", ex);
             }
         }
 
@@ -621,7 +622,7 @@ namespace AutoStartConfirm.Connectors
                 var autoStartsToAdd = new List<AutoStartEntry>();
                 CurrentAutoStarts.Clear();
                 foreach (var currentAutoStart in currentAutoStarts) {
-                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry lastAutoStartEntry)) {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? lastAutoStartEntry)) {
                         CurrentAutoStarts.Add(lastAutoStartEntry);
                         AllCurrentAutoStarts.Add(lastAutoStartEntry);
                     } else {
@@ -643,7 +644,7 @@ namespace AutoStartConfirm.Connectors
                 // call enable / disable handlers
                 foreach (var currentAutoStart in currentAutoStarts) {
                     bool wasEnabled = true;
-                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry oldAutoStart)) {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? oldAutoStart)) {
                         wasEnabled = oldAutoStart.IsEnabled.GetValueOrDefault(true);
                     }
                     var nowEnabled = ConnectorService.IsEnabled(currentAutoStart);

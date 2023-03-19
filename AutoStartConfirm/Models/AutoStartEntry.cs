@@ -222,8 +222,7 @@ namespace AutoStartConfirm.Models
         public AutoStartEntry() {
         }
 
-
-        public override bool Equals(Object obj) {
+        public override bool Equals(object? obj) {
             // Check for null and compare run-time types.
             if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
                 return false;
@@ -239,13 +238,12 @@ namespace AutoStartConfirm.Models
         }
 
         public AutoStartEntry DeepCopy() {
-            using (var ms = new MemoryStream()) {
-                XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
-                serializer.Serialize(ms, this);
-                ms.Position = 0;
+            using var ms = new MemoryStream();
+            XmlSerializer serializer = new(typeof(AutoStartEntry));
+            serializer.Serialize(ms, this);
+            ms.Position = 0;
 
-                return (AutoStartEntry)serializer.Deserialize(ms);
-            }
+            return (AutoStartEntry)serializer.Deserialize(ms);
         }
 
         // This method is called by the Set accessor of each property.  
@@ -253,6 +251,10 @@ namespace AutoStartConfirm.Models
         // parameter causes the property name of the caller to be substituted as an argument.  
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
+            if (PropertyChanged == null)
+            {
+                return;
+            }
             // Directly calling invoke throws an exception if not called from main thread when binded to ui element
             using var ServiceScope = Ioc.Default.CreateScope();
             var dispatchService = ServiceScope.ServiceProvider.GetRequiredService<IDispatchService>();
