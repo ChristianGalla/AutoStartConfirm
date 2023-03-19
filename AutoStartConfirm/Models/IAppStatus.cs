@@ -2,7 +2,7 @@
 
 namespace AutoStartConfirm.Models
 {
-    public interface IAppStatus
+    public interface IAppStatus: INotifyPropertyChanged
     {
         bool HasOwnAutoStart { get; set; }
         int RunningActionCount { get; }

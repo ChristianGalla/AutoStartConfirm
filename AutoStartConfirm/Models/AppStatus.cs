@@ -1,11 +1,14 @@
-﻿using System;
+﻿using AutoStartConfirm.Helpers;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace AutoStartConfirm.Models
 {
-    public class AppStatus : INotifyPropertyChanged, IAppStatus
+    public class AppStatus : IAppStatus
     {
 
         protected bool hasOwnAutoStart;
@@ -58,7 +61,19 @@ namespace AutoStartConfirm.Models
         // parameter causes the property name of the caller to be substituted as an argument.  
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (PropertyChanged == null)
+            {
+                return;
+            }
+            // Directly calling invoke throws an exception if not called from main thread when binded to ui element
+            using var ServiceScope = Ioc.Default.CreateScope();
+            var dispatchService = ServiceScope.ServiceProvider.GetRequiredService<IDispatchService>();
+            dispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                // string.Empty calls are needed for bindings to the whole object
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+            });
         }
     }
 }
