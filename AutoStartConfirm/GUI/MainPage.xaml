@@ -30,7 +30,7 @@
                         MinWidth="200"
                         AutoGenerateColumns="False"
                         CanUserSortColumns="True"
-                        Sorting="Sorting"
+                        Sorting="CurrentSorting"
                         ItemsSource="{x:Bind AutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
@@ -75,82 +75,51 @@
                 </controls:DataGrid>
             </PivotItem>
             <PivotItem Header="History">
-                <!--<DataGrid x:Name="HistoryAutoStartGrid"
-                              MinHeight="50"
-                              MinWidth="200"
-                              IsReadOnly="True"
-                              AutoGenerateColumns="False"
-                              SelectionUnit="CellOrRowHeader"
-                              ItemsSource="{Binding Source={StaticResource historyAutoStartCollectionViewSource}}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Actions">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
+                <controls:DataGrid
+                        x:Name="HistoryAutoStartGrid"
+                        MinHeight="50"
+                        MinWidth="200"
+                        AutoGenerateColumns="False"
+                        CanUserSortColumns="True"
+                        Sorting="HistorySorting"
+                        ItemsSource="{x:Bind HistoryAutoStartCollectionView, Mode=OneWay}">
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:AutoStartEntry">
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Name="HistoryConfirmButton" Click="HistoryConfirmButton_Click" ToolTip="Confirm" Foreground="Green">
-                                            <Button.Content>?</Button.Content>
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{StaticResource CanBeConfirmedConverter}">
-                                                    <Binding />
-                                                    <Binding Path="ConfirmStatus" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
+                                        <Button
+                                            Name="HistoryConfirmButton"
+                                            Click="HistoryConfirmButton_Click"
+                                            ToolTipService.ToolTip="Confirm"
+                                            Foreground="Green"
+                                            IsEnabled="{x:Bind local:MainPage.CanBeConfirmedConverter((models:AutoStartEntry)), Mode=OneWay}">
+                                            <Button.Content>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF13E;"/>
+                                            </Button.Content>
                                         </Button>
-                                        <Button Name="HistoryRevertButton" Click="HistoryRevertButton_Click" ToolTip="Revert" Foreground="Black">
-                                            <Button.Content>?</Button.Content>
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{StaticResource CanBeRevertedConverter}">
-                                                    <Binding />
-                                                    <Binding Path="CanBeAdded" />
-                                                    <Binding Path="CanBeRemoved" />
-                                                    <Binding Path="CanBeEnabled" />
-                                                    <Binding Path="CanBeDisabled" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
+                                        <Button
+                                            Name="HistoryRevertButton"
+                                            Click="HistoryRevertButton_Click"
+                                            ToolTipService.ToolTip="Revert"
+                                            IsEnabled="{x:Bind local:MainPage.CanBeRevertedConverter((models:AutoStartEntry)), Mode=OneWay}">
+                                            <Button.Content>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7A7;"/>
+                                            </Button.Content>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Path=ConfirmStatus}" />
-                        <DataGridTextColumn Header="Date" Binding="{Binding Path=Date,StringFormat=yyyy-MM-dd HH:mm:ss}" SortDirection="Descending" />
-                        <DataGridTextColumn Header="Change" Binding="{Binding Path=Change}" />
-                        <DataGridTextColumn Header="Category" Binding="{Binding Path=CategoryAsString}" />
-                        <DataGridTextColumn Header="Value" Binding="{Binding Path=Value}" />
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path=Path}" />
-                    </DataGrid.Columns>
-                </DataGrid>-->
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Header="Status" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn Header="Date" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
+                        <controls:DataGridTextColumn Header="Change" Binding="{Binding Change, Mode=OneWay}" Tag="Change" />
+                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
+                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
+                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
             </PivotItem>
         </Pivot>
-
-        <!--
-        <Window.Cursor>
-            <Binding Path="AppStatus.RunningActionCount" Mode="OneWay" ElementName="window" Converter="{StaticResource BusyCursorConverter}" />
-        </Window.Cursor>
-        <DockPanel>
-            <StatusBar DockPanel.Dock="Bottom" >
-                <StatusBarItem HorizontalAlignment="Right">
-                    <ProgressBar Minimum="0" Maximum="100" Name="pbStatus" IsIndeterminate="True" Height="15" Width="100"
-                                 Visibility="{Binding ElementName=window, Path=AppStatus.RunningActionCount, Mode=OneWay, Converter={StaticResource ProgressBarVisibilityConverter}}">
-                    </ProgressBar>
-                </StatusBarItem>
-            </StatusBar>
-            <TabControl x:Name="tabControl" Padding="5" Grid.Row="1">
-                <TabItem Header="Current" VerticalAlignment="Top">
-                </TabItem>
-                <TabItem Header="History" VerticalAlignment="Top">
-                    <TabItem.Resources>
-                        <CollectionViewSource
-                            x:Key="historyAutoStartCollectionViewSource"
-                            Source="{Binding ElementName=window, Path=HistoryAutoStarts, Mode=OneWay}">
-                            <CollectionViewSource.SortDescriptions>
-                                <scm:SortDescription PropertyName="Date" Direction="Descending" />
-                            </CollectionViewSource.SortDescriptions>
-                        </CollectionViewSource>
-                    </TabItem.Resources>
-                    
-                </TabItem>
-            </TabControl>
-        </DockPanel>-->
     </Grid>
 </Page>

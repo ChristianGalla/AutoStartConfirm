@@ -70,9 +70,15 @@ namespace AutoStartConfirm.Models
             var dispatchService = ServiceScope.ServiceProvider.GetRequiredService<IDispatchService>();
             dispatchService.DispatcherQueue.TryEnqueue(() =>
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                // string.Empty calls are needed for bindings to the whole object
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+                try
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                    // string.Empty calls are needed for bindings to the whole object
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+                }
+                catch
+                {
+                }
             });
         }
     }

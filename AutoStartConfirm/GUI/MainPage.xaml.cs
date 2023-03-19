@@ -92,6 +92,21 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private AdvancedCollectionView historyAutoStartCollectionView;
+
+        public AdvancedCollectionView HistoryAutoStartCollectionView
+        {
+            get
+            {
+                if (historyAutoStartCollectionView == null)
+                {
+                    historyAutoStartCollectionView = new AdvancedCollectionView(AutoStartService.HistoryAutoStarts, true);
+                    historyAutoStartCollectionView.SortDescriptions.Add(new SortDescription("Date", SortDirection.Descending));
+                }
+                return historyAutoStartCollectionView;
+            }
+        }
+
         public MainPage()
         {
             InitializeComponent();
@@ -142,28 +157,37 @@ namespace AutoStartConfirm.GUI
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //if (autoStartEntry.Change == Change.Added)
-            //{
-            //    ConfirmAdd?.Invoke(autoStartEntry);
-            //}
-            //else if (autoStartEntry.Change == Change.Removed)
-            //{
-            //    ConfirmRemove?.Invoke(autoStartEntry);
-            //}
+            if (autoStartEntry.Change == Change.Added)
+            {
+                AutoStartService.ConfirmAdd(autoStartEntry);
+            }
+            else if (autoStartEntry.Change == Change.Removed)
+            {
+                AutoStartService.ConfirmRemove(autoStartEntry);
+            }
         }
 
         private void HistoryRevertButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
             var autoStartEntry = (AutoStartEntry)button.DataContext;
-            //if (autoStartEntry.Change == Change.Added)
-            //{
-            //    RevertAddId?.Invoke(autoStartEntry.Id);
-            //}
-            //else if (autoStartEntry.Change == Change.Removed)
-            //{
-            //    RevertRemoveId?.Invoke(autoStartEntry.Id);
-            //}
+            switch (autoStartEntry.Change)
+            {
+                case Change.Added:
+                    AutoStartService.RemoveAutoStart(autoStartEntry);
+                    break;
+                case Change.Removed:
+                    AutoStartService.AddAutoStart(autoStartEntry);
+                    break;
+                case Change.Enabled:
+                    AutoStartService.DisableAutoStart(autoStartEntry);
+                    break;
+                case Change.Disabled:
+                    AutoStartService.EnableAutoStart(autoStartEntry);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private async void Enable_Toggled(object sender, RoutedEventArgs e)
@@ -204,18 +228,18 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        private void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
         {
             var newSortColumn = e.Column.Tag.ToString();
-            AutoStartCollectionView.SortDescriptions.Clear();
+            collectionView.SortDescriptions.Clear();
             switch (e.Column.SortDirection)
             {
                 case null:
-                    AutoStartCollectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Ascending));
+                    collectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Ascending));
                     e.Column.SortDirection = DataGridSortDirection.Ascending;
                     break;
                 case DataGridSortDirection.Ascending:
-                    AutoStartCollectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Descending));
+                    collectionView.SortDescriptions.Add(new SortDescription(newSortColumn, SortDirection.Descending));
                     e.Column.SortDirection = DataGridSortDirection.Descending;
                     break;
                 case DataGridSortDirection.Descending:
@@ -225,13 +249,23 @@ namespace AutoStartConfirm.GUI
             }
 
             // Remove sorting indicators from other columns
-            foreach (var dgColumn in CurrentAutoStartGrid.Columns)
+            foreach (var dgColumn in dataGrid.Columns)
             {
                 if (dgColumn.Tag.ToString() != newSortColumn)
                 {
                     dgColumn.SortDirection = null;
                 }
             }
+        }
+
+        private void CurrentSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        {
+            Sorting(sender, e, AutoStartCollectionView, CurrentAutoStartGrid);
+        }
+
+        private void HistorySorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        {
+            Sorting(sender, e, HistoryAutoStartCollectionView, HistoryAutoStartGrid);
         }
 
         public static bool CanBeConfirmedConverter(AutoStartEntry autoStart)

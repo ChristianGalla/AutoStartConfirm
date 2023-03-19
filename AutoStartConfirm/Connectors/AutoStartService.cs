@@ -759,7 +759,7 @@ namespace AutoStartConfirm.Connectors
                 try
                 {
                     Logger.LogInformation("Auto start enabled: {@value}", autostart);
-                    ResetAllDynamicFields(autostart);
+                    ResetEditablePropertiesOfAutoStarts(autostart);
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Enabled;
@@ -785,7 +785,7 @@ namespace AutoStartConfirm.Connectors
                 try
                 {
                     Logger.LogInformation("Auto start disabled: {@value}", autostart);
-                    ResetAllDynamicFields(autostart);
+                    ResetEditablePropertiesOfAutoStarts(autostart);
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Disabled;
@@ -813,7 +813,7 @@ namespace AutoStartConfirm.Connectors
                     Logger.LogInformation("Auto start removed: {@value}", autostart);
                     CurrentAutoStarts.Remove(autostart);
                     AllCurrentAutoStarts.Remove(autostart);
-                    ResetAllDynamicFields(autostart);
+                    ResetEditablePropertiesOfAutoStarts(autostart);
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Removed;

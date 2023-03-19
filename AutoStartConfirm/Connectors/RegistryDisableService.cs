@@ -127,53 +127,51 @@ namespace AutoStartConfirm.Connectors
             {
                 throw new NotImplementedException();
             }
-            using (var registry = GetBaseRegistry(DisableBasePath))
-            using (var key = registry.OpenSubKey(subKeyPath, !dryRun))
+            using var registry = GetBaseRegistry(DisableBasePath);
+            using var key = registry.OpenSubKey(subKeyPath, !dryRun);
+            if (key == null)
             {
-                if (key == null && dryRun)
-                {
-                    return;
-                }
-                object currentValue = key.GetValue(valueName, null);
-                byte[] currentValueByteArray = null;
-                if (currentValue == null)
-                {
-                    if (enable)
-                    {
-                        throw new AlreadySetException($"Auto start already enabled");
-                    }
-                    currentValueByteArray = defaultEnabledByteArray;
-                }
-                else if (currentValue != null)
-                {
-                    var currentValueKind = key.GetValueKind(valueName);
-                    if (currentValueKind != RegistryValueKind.Binary)
-                    {
-                        throw new ArgumentException($"Registry value has the wrong type \"{currentValueKind}\"");
-                    }
-                    currentValueByteArray = (byte[])currentValue;
-                    var isEnabled = GetIsEnabled(currentValueByteArray);
-                    if (enable && isEnabled)
-                    {
-                        throw new AlreadySetException($"Auto start already enabled");
-                    }
-                    else if (!enable && !isEnabled)
-                    {
-                        throw new AlreadySetException($"Auto start already disabled");
-                    }
-                }
-                if (dryRun)
-                {
-                    return;
-                }
+                throw new ArgumentException($"Failed to get key \"{subKeyPath}\"");
+            }
+            object currentValue = key.GetValue(valueName, null);
+            byte[] currentValueByteArray = null;
+            if (currentValue == null)
+            {
                 if (enable)
                 {
-                    Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
+                    throw new AlreadySetException($"Auto start already enabled");
                 }
-                else
+                currentValueByteArray = defaultEnabledByteArray;
+            }
+            else if (currentValue != null)
+            {
+                var currentValueKind = key.GetValueKind(valueName);
+                if (currentValueKind != RegistryValueKind.Binary)
                 {
-                    Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
+                    throw new ArgumentException($"Registry value has the wrong type \"{currentValueKind}\"");
                 }
+                currentValueByteArray = (byte[])currentValue;
+                var isEnabled = GetIsEnabled(currentValueByteArray);
+                if (enable && isEnabled)
+                {
+                    throw new AlreadySetException($"Auto start already enabled");
+                }
+                else if (!enable && !isEnabled)
+                {
+                    throw new AlreadySetException($"Auto start already disabled");
+                }
+            }
+            if (dryRun)
+            {
+                return;
+            }
+            if (enable)
+            {
+                Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetEnabledValue(currentValueByteArray), RegistryValueKind.Binary);
+            }
+            else
+            {
+                Microsoft.Win32.Registry.SetValue(DisableBasePath, valueName, GetDisabledValue(currentValueByteArray), RegistryValueKind.Binary);
             }
         }
 
