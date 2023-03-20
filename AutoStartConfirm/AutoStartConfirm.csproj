@@ -87,7 +87,7 @@
     <PackageReference Include="TaskScheduler">
       <Version>2.10.1</Version>
     </PackageReference>
-    <PackageReference Include="System.ServiceModel.Federation" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.Federation" Version="4.10.1" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
