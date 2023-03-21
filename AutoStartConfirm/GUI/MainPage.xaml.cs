@@ -50,7 +50,7 @@ namespace AutoStartConfirm.GUI
         {
             get
             {
-                autoStartService ??= ServiceScope.ServiceProvider.GetService<IAutoStartService>();
+                autoStartService ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
                 return autoStartService;
             }
         }
@@ -61,7 +61,7 @@ namespace AutoStartConfirm.GUI
         {
             get
             {
-                logger ??= ServiceScope.ServiceProvider.GetService<ILogger<MainPage>>();
+                logger ??= ServiceScope.ServiceProvider.GetRequiredService<ILogger<MainPage>>();
                 return logger;
             }
         }
@@ -72,7 +72,7 @@ namespace AutoStartConfirm.GUI
         {
             get
             {
-                appStatus ??= ServiceScope.ServiceProvider.GetService<IAppStatus>();
+                appStatus ??= ServiceScope.ServiceProvider.GetRequiredService<IAppStatus>();
                 return appStatus;
             }
         }

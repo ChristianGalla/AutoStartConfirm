@@ -25,7 +25,7 @@ namespace AutoStartConfirm.Converters {
         {
             get
             {
-                settingsService ??= ServiceScope.ServiceProvider.GetService<ISettingsService>();
+                settingsService ??= ServiceScope.ServiceProvider.GetRequiredService<ISettingsService>();
                 return settingsService;
             }
         }
@@ -36,7 +36,7 @@ namespace AutoStartConfirm.Converters {
         {
             get
             {
-                autoStartService ??= ServiceScope.ServiceProvider.GetService<IAutoStartService>();
+                autoStartService ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
                 return autoStartService;
             }
         }

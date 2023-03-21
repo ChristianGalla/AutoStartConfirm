@@ -59,7 +59,7 @@ namespace AutoStartConfirm.Connectors {
         /// <returns></returns>
         bool GetValidAutoStartFileExists();
         IList<AutoStartEntry> GetCurrentAutoStarts();
-        ObservableCollection<AutoStartEntry> GetSavedAutoStarts(string path);
+        ObservableCollection<AutoStartEntry>? GetSavedAutoStarts(string path);
         bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
         Task<bool> LoadCanBeAdded(AutoStartEntry autoStart);
         Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart);

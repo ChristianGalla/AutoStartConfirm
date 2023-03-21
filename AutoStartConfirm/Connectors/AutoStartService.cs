@@ -14,7 +14,9 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Xml.Serialization;
 
@@ -81,6 +83,8 @@ namespace AutoStartConfirm.Connectors
                 return false;
             }
         }
+
+        private readonly System.Timers.Timer SettingSaveTimer;
         #endregion
 
         #region Methods
@@ -97,6 +101,11 @@ namespace AutoStartConfirm.Connectors
             SettingsService = settingsService;
             CurrentUserRun64Connector = currentUserRun64Connector;
             DispatchService = dispatchService;
+            SettingSaveTimer = new(1000)
+            {
+                AutoReset = false
+            };
+            SettingSaveTimer.Elapsed += SettingSaveTimer_Elapsed;
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var basePath = $"{appDataPath}{Path.DirectorySeparatorChar}AutoStartConfirm{Path.DirectorySeparatorChar}";
             ConnectorService.Add += AddHandler;
@@ -109,6 +118,12 @@ namespace AutoStartConfirm.Connectors
             SettingsService.SettingsLoaded += SettingsLoadedHandler;
         }
 
+        private void SettingSaveTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            SaveAutoStarts();
+            SettingsService.Save();
+        }
+
         private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
             HandleSettingChanges();
         }
@@ -119,18 +134,31 @@ namespace AutoStartConfirm.Connectors
 
         private void HandleSettingChanges()
         {
-            CurrentAutoStarts.Clear();
+            foreach (var autoStart in CurrentAutoStarts)
+            {
+                if (SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                {
+                    CurrentAutoStarts.Remove(autoStart);
+                }
+            }
             foreach (var autoStart in AllCurrentAutoStarts)
             {
-                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()) && !CurrentAutoStarts.Contains(autoStart))
                 {
                     CurrentAutoStarts.Add(autoStart);
                 }
             }
-            HistoryAutoStarts.Clear();
+
+            foreach (var autoStart in HistoryAutoStarts)
+            {
+                if (SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                {
+                    HistoryAutoStarts.Remove(autoStart);
+                }
+            }
             foreach (var autoStart in AllHistoryAutoStarts)
             {
-                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
+                if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()) && !HistoryAutoStarts.Contains(autoStart))
                 {
                     HistoryAutoStarts.Add(autoStart);
                 }
@@ -453,7 +481,7 @@ namespace AutoStartConfirm.Connectors
             return true;
         }
 
-        public ObservableCollection<AutoStartEntry> GetSavedAutoStarts(string path) {
+        public ObservableCollection<AutoStartEntry>? GetSavedAutoStarts(string path) {
             try {
                 Logger.LogTrace("Loading auto starts from file {path}", path);
                 if (File.Exists($"{path}.xml"))
@@ -464,7 +492,7 @@ namespace AutoStartConfirm.Connectors
                     XmlSerializer serializer = new(typeof(ObservableCollection<AutoStartEntry>));
                     try
                     {
-                        var ret = (ObservableCollection<AutoStartEntry>)serializer.Deserialize(stream);
+                        var ret = (ObservableCollection<AutoStartEntry>?)serializer.Deserialize(stream);
                         Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
                         return ret;
                     }
@@ -483,7 +511,7 @@ namespace AutoStartConfirm.Connectors
                     try
                     {
 #pragma warning disable SYSLIB0011 // Type or member is obsolete
-                        var ret = (ObservableCollection<AutoStartEntry>)formatter.Deserialize(stream);
+                        var ret = (ObservableCollection<AutoStartEntry>?)formatter.Deserialize(stream);
 #pragma warning restore SYSLIB0011 // Type or member is obsolete
                         Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
                         return ret;
@@ -500,7 +528,9 @@ namespace AutoStartConfirm.Connectors
                 }
             } catch (Exception ex) {
                 var message = "Failed to load last auto starts";
+#pragma warning disable CA2254 // Template should be a static expression
                 Logger.LogError(ex, message);
+#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, ex); ;
             }
         }
@@ -533,10 +563,9 @@ namespace AutoStartConfirm.Connectors
                     throw err;
                 }
                 try {
-                    using (Stream stream = new FileStream($"{path}.xml", FileMode.Create, FileAccess.Write, FileShare.None)) {
-                        XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
-                        serializer.Serialize(stream, dictionary);
-                    }
+                    using Stream stream = new FileStream($"{path}.xml", FileMode.Create, FileAccess.Write, FileShare.None);
+                    XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
+                    serializer.Serialize(stream, dictionary);
                 } catch (Exception ex) {
                     var err = new Exception($"Failed to write file {path}", ex);
                     throw err;
@@ -743,6 +772,7 @@ namespace AutoStartConfirm.Connectors
                     Add?.Invoke(autostart);
                     CurrentAutoStartChange?.Invoke(autostart);
                     HistoryAutoStartChange?.Invoke(autostart);
+                    SettingSaveTimer.Start();
                     Logger.LogTrace("AddHandler finished");
                 }
                 catch (Exception e)
@@ -763,9 +793,13 @@ namespace AutoStartConfirm.Connectors
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Enabled;
+                    AllCurrentAutoStarts.Remove(autostart);
                     CurrentAutoStarts.Remove(autostart);
+                    AllCurrentAutoStarts.Add(autostartCopy);
                     CurrentAutoStarts.Add(autostartCopy);
+                    AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
+                    SettingSaveTimer.Start();
                     Enable?.Invoke(autostartCopy);
                     CurrentAutoStartChange?.Invoke(autostartCopy);
                     HistoryAutoStartChange?.Invoke(autostartCopy);
@@ -789,12 +823,16 @@ namespace AutoStartConfirm.Connectors
                     var autostartCopy = autostart.DeepCopy();
                     autostartCopy.Date = DateTime.Now;
                     autostartCopy.Change = Change.Disabled;
+                    AllCurrentAutoStarts.Remove(autostart);
                     CurrentAutoStarts.Remove(autostart);
+                    AllCurrentAutoStarts.Add(autostartCopy);
                     CurrentAutoStarts.Add(autostartCopy);
+                    AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
                     Disable?.Invoke(autostartCopy);
                     CurrentAutoStartChange?.Invoke(autostartCopy);
                     HistoryAutoStartChange?.Invoke(autostartCopy);
+                    SettingSaveTimer.Start();
                     Logger.LogTrace("DisableHandler finished");
                 }
                 catch (Exception e)
@@ -822,6 +860,7 @@ namespace AutoStartConfirm.Connectors
                     Remove?.Invoke(autostart);
                     CurrentAutoStartChange?.Invoke(autostart);
                     HistoryAutoStartChange?.Invoke(autostartCopy);
+                    SettingSaveTimer.Start();
                     Logger.LogTrace("RemoveHandler finished");
                 }
                 catch (Exception e)
@@ -838,6 +877,11 @@ namespace AutoStartConfirm.Connectors
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
                 if (disposing) {
+                    if (SettingSaveTimer.Enabled)
+                    {
+                        SettingsService.Save();
+                    }
+                    SettingSaveTimer.Close();
                     ConnectorService.Add -= AddHandler;
                     ConnectorService.Remove -= RemoveHandler;
                     ConnectorService.Enable -= EnableHandler;
