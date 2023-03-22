@@ -21,6 +21,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -74,6 +75,17 @@ namespace AutoStartConfirm.GUI
             {
                 appStatus ??= ServiceScope.ServiceProvider.GetRequiredService<IAppStatus>();
                 return appStatus;
+            }
+        }
+
+        private IMessageService messageService;
+
+        public IMessageService MessageService
+        {
+            get
+            {
+                messageService ??= ServiceScope.ServiceProvider.GetRequiredService<IMessageService>();
+                return messageService;
             }
         }
 
@@ -132,11 +144,14 @@ namespace AutoStartConfirm.GUI
             AutoStartService.ConfirmAdd(autoStartEntry);
         }
 
-        private void CurrentRemoveButton_Click(object sender, RoutedEventArgs e)
+        private async void CurrentRemoveButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            AutoStartService.RemoveAutoStart(autoStartEntry);
+            var autoStart = (AutoStartEntry)button.DataContext;
+            if (!await MessageService.ShowConfirm(autoStart, "remove")) {
+                return;
+            }
+            AutoStartService.RemoveAutoStart(autoStart);
         }
 
         private void CurrentEnableButton_Click(object sender, RoutedEventArgs e)
@@ -167,23 +182,39 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private void HistoryRevertButton_Click(object sender, RoutedEventArgs e)
+        private async void HistoryRevertButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            switch (autoStartEntry.Change)
+            var autoStart = (AutoStartEntry)button.DataContext;
+            switch (autoStart.Change)
             {
                 case Change.Added:
-                    AutoStartService.RemoveAutoStart(autoStartEntry);
+                    if (!await MessageService.ShowConfirm(autoStart, "remove"))
+                    {
+                        return;
+                    }
+                    AutoStartService.RemoveAutoStart(autoStart);
                     break;
                 case Change.Removed:
-                    AutoStartService.AddAutoStart(autoStartEntry);
+                    if (!await MessageService.ShowConfirm(autoStart, "add"))
+                    {
+                        return;
+                    }
+                    AutoStartService.AddAutoStart(autoStart);
                     break;
                 case Change.Enabled:
-                    AutoStartService.DisableAutoStart(autoStartEntry);
+                    if (!await MessageService.ShowConfirm(autoStart, "disable"))
+                    {
+                        return;
+                    }
+                    AutoStartService.DisableAutoStart(autoStart);
                     break;
                 case Change.Disabled:
-                    AutoStartService.EnableAutoStart(autoStartEntry);
+                    if (!await MessageService.ShowConfirm(autoStart, "enable"))
+                    {
+                        return;
+                    }
+                    AutoStartService.EnableAutoStart(autoStart);
                     break;
                 default:
                     break;
@@ -198,7 +229,7 @@ namespace AutoStartConfirm.GUI
                 return;
             }
             var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
-            if (toggleSwitch.IsOn == autoStart.IsEnabled.Value)
+            if (!autoStart.IsEnabled.HasValue || toggleSwitch.IsOn == autoStart.IsEnabled.Value)
             {
                 return;
             }
@@ -208,8 +239,16 @@ namespace AutoStartConfirm.GUI
                 {
                     await AutoStartService.LoadCanBeDisabled(autoStart);
                 }
+#pragma warning disable CS8629 // Nullable value type may be null.
                 if (!autoStart.CanBeEnabled.Value)
                 {
+                    return;
+                }
+#pragma warning restore CS8629 // Nullable value type may be null.
+                if (!await MessageService.ShowConfirm(autoStart, "enable"))
+                {
+                    // reset toggle
+                    autoStart.NotifyPropertyChanged("IsEnabled");
                     return;
                 }
                 AutoStartService.EnableAutoStart(autoStart);
@@ -220,15 +259,23 @@ namespace AutoStartConfirm.GUI
                 {
                     await AutoStartService.LoadCanBeEnabled(autoStart);
                 }
+#pragma warning disable CS8629 // Nullable value type may be null.
                 if (!autoStart.CanBeDisabled.Value)
                 {
+                    return;
+                }
+#pragma warning restore CS8629 // Nullable value type may be null.
+                if (!await MessageService.ShowConfirm(autoStart, "disable"))
+                {
+                    // reset toggle
+                    autoStart.NotifyPropertyChanged("IsEnabled");
                     return;
                 }
                 AutoStartService.DisableAutoStart(autoStart);
             }
         }
 
-        private void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
+        private static void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
         {
             var newSortColumn = e.Column.Tag.ToString();
             collectionView.SortDescriptions.Clear();

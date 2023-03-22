@@ -351,40 +351,37 @@ namespace AutoStartConfirm
             }
         }
 
-        public void RevertAdd(AutoStartEntry autoStart)
+        public async void RevertAdd(AutoStartEntry autoStart)
         {
-            Task.Run(() =>
+            Logger.LogInformation("Should add {@autoStart}", autoStart);
+            try
             {
-                Logger.LogInformation("Should add {@autoStart}", autoStart);
-                try
+                AppStatus.IncrementRunningActionCount();
+                if (!await MessageService.ShowConfirm(autoStart, "remove"))
                 {
-                    AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm remove", $"Are you sure you want to remove \"{autoStart.Value}\" from auto starts?"))
-                    {
-                        return;
-                    }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                    {
-                        StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    }
-                    else
-                    {
-                        AutoStartService.RemoveAutoStart(autoStart);
-                    }
-                    MessageService.ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
+                    return;
                 }
-                catch (Exception e)
+                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
                 {
-                    var message = "Failed to revert add";
-                    Logger.LogError(e, "Failed to revert add of {@autoStart}", autoStart);
-                    MessageService.ShowError(message, e);
+                    StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 }
-                finally
+                else
                 {
-                    AppStatus.DecrementRunningActionCount();
+                    AutoStartService.RemoveAutoStart(autoStart);
                 }
-            });
+                await MessageService.ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
+            }
+            catch (Exception e)
+            {
+                var message = "Failed to revert add";
+                Logger.LogError(e, "Failed to revert add of {@autoStart}", autoStart);
+                await MessageService.ShowError(message, e);
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
         }
 
         private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
@@ -440,40 +437,37 @@ namespace AutoStartConfirm
             }
         }
 
-        public void RevertRemove(AutoStartEntry autoStart)
+        public async void RevertRemove(AutoStartEntry autoStart)
         {
-            Task.Run(() =>
+            Logger.LogInformation("Should remove {@autoStart}", autoStart);
+            try
             {
-                Logger.LogInformation("Should remove {@autoStart}", autoStart);
-                try
+                AppStatus.IncrementRunningActionCount();
+                if (!await MessageService.ShowConfirm(autoStart, "add"))
                 {
-                    AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm add", $"Are you sure you want to add \"{autoStart.Value}\" as auto start?"))
-                    {
-                        return;
-                    }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                    {
-                        StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                    }
-                    else
-                    {
-                        AutoStartService.AddAutoStart(autoStart);
-                    }
-                    MessageService.ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
+                    return;
                 }
-                catch (Exception e)
+                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
                 {
-                    var message = "Failed to revert remove";
-                    Logger.LogError(e, "Failed to revert remove of {@autoStart}", autoStart);
-                    MessageService.ShowError(message, e);
+                    StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
                 }
-                finally
+                else
                 {
-                    AppStatus.DecrementRunningActionCount();
+                    AutoStartService.AddAutoStart(autoStart);
                 }
-            });
+                await MessageService.ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
+            }
+            catch (Exception e)
+            {
+                var message = "Failed to revert remove";
+                Logger.LogError(e, "Failed to revert remove of {@autoStart}", autoStart);
+                await MessageService.ShowError(message, e);
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
         }
 
         public void Enable(Guid id)
@@ -494,40 +488,37 @@ namespace AutoStartConfirm
             });
         }
 
-        public void Enable(AutoStartEntry autoStart)
+        public async void Enable(AutoStartEntry autoStart)
         {
-            Task.Run(() =>
+            Logger.LogInformation("Should enable {@autoStart}", autoStart);
+            try
             {
-                Logger.LogInformation("Should enable {@autoStart}", autoStart);
-                try
+                AppStatus.IncrementRunningActionCount();
+                if (!await MessageService.ShowConfirm(autoStart, "enable"))
                 {
-                    AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm enable", $"Are you sure you want to enable auto start \"{autoStart.Value}\"?"))
-                    {
-                        return;
-                    }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                    {
-                        StartSubProcessAsAdmin(autoStart, EnableParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Enabled;
-                    }
-                    else
-                    {
-                        AutoStartService.EnableAutoStart(autoStart);
-                    }
-                    MessageService.ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
+                    return;
                 }
-                catch (Exception e)
+                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
                 {
-                    var message = "Failed to enable";
-                    Logger.LogError(e, "Failed to enable {@autoStart}", autoStart);
-                    MessageService.ShowError(message, e);
+                    StartSubProcessAsAdmin(autoStart, EnableParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Enabled;
                 }
-                finally
+                else
                 {
-                    AppStatus.DecrementRunningActionCount();
+                    AutoStartService.EnableAutoStart(autoStart);
                 }
-            });
+                await MessageService.ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
+            }
+            catch (Exception e)
+            {
+                var message = "Failed to enable";
+                Logger.LogError(e, "Failed to enable {@autoStart}", autoStart);
+                await MessageService.ShowError(message, e);
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
         }
 
         public void Disable(Guid id)
@@ -548,40 +539,37 @@ namespace AutoStartConfirm
             });
         }
 
-        public void Disable(AutoStartEntry autoStart)
+        public async void Disable(AutoStartEntry autoStart)
         {
-            Task.Run(() =>
+            Logger.LogInformation("Should disable {@autoStart}", autoStart);
+            try
             {
-                Logger.LogInformation("Should disable {@autoStart}", autoStart);
-                try
+                AppStatus.IncrementRunningActionCount();
+                if (!await MessageService.ShowConfirm(autoStart, "disable"))
                 {
-                    AppStatus.IncrementRunningActionCount();
-                    if (!MessageService.ShowConfirm("Confirm disable", $"Are you sure you want to disable auto start \"{autoStart.Value}\"?"))
-                    {
-                        return;
-                    }
-                    if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                    {
-                        StartSubProcessAsAdmin(autoStart, DisableParameterName);
-                        autoStart.ConfirmStatus = ConfirmStatus.Disabled;
-                    }
-                    else
-                    {
-                        AutoStartService.DisableAutoStart(autoStart);
-                    }
-                    MessageService.ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
+                    return;
                 }
-                catch (Exception e)
+                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
                 {
-                    var message = "Failed to disable";
-                    Logger.LogError(e, "Failed to disable {@autoStart}", autoStart);
-                    MessageService.ShowError(message, e);
+                    StartSubProcessAsAdmin(autoStart, DisableParameterName);
+                    autoStart.ConfirmStatus = ConfirmStatus.Disabled;
                 }
-                finally
+                else
                 {
-                    AppStatus.DecrementRunningActionCount();
+                    AutoStartService.DisableAutoStart(autoStart);
                 }
-            });
+                await MessageService.ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
+            }
+            catch (Exception e)
+            {
+                var message = "Failed to disable";
+                Logger.LogError(e, "Failed to disable {@autoStart}", autoStart);
+                await MessageService.ShowError(message, e);
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
         }
 
         public void ConfirmAdd(Guid id)
