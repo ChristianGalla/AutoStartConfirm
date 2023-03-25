@@ -137,141 +137,187 @@ namespace AutoStartConfirm.GUI
             Logger.LogDebug("AutoStartCollectionView_PropertyChanged invoked");
         }
 
-        private void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)
+        private async void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            AutoStartService.ConfirmAdd(autoStartEntry);
+            try {
+                var button = (Button)sender;
+                var autoStartEntry = (AutoStartEntry)button.DataContext;
+                AutoStartService.ConfirmAdd(autoStartEntry);
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to confirm";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
+            }
         }
 
         private async void CurrentRemoveButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (Button)sender;
-            var autoStart = (AutoStartEntry)button.DataContext;
-            if (!await MessageService.ShowConfirm(autoStart, "remove")) {
-                return;
+            try {
+                var button = (Button)sender;
+                var autoStart = (AutoStartEntry)button.DataContext;
+                if (!await MessageService.ShowConfirm(autoStart, "remove"))
+                {
+                    return;
+                }
+                AutoStartService.RemoveAutoStart(autoStart);
+                await MessageService.ShowSuccess("Removed auto start");
             }
-            AutoStartService.RemoveAutoStart(autoStart);
-        }
-
-        private void CurrentEnableButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            AutoStartService.EnableAutoStart(autoStartEntry);
-        }
-
-        private void CurrentDisableButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            AutoStartService.DisableAutoStart(autoStartEntry);
-        }
-
-        private void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = (Button)sender;
-            var autoStartEntry = (AutoStartEntry)button.DataContext;
-            if (autoStartEntry.Change == Change.Added)
+            catch (Exception ex)
             {
-                AutoStartService.ConfirmAdd(autoStartEntry);
+                const string errmsg = "Failed to remove auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
-            else if (autoStartEntry.Change == Change.Removed)
+        }
+
+        private async void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
             {
-                AutoStartService.ConfirmRemove(autoStartEntry);
+                var button = (Button)sender;
+                var autoStartEntry = (AutoStartEntry)button.DataContext;
+                if (autoStartEntry.Change == Change.Added)
+                {
+                    AutoStartService.ConfirmAdd(autoStartEntry);
+                }
+                else if (autoStartEntry.Change == Change.Removed)
+                {
+                    AutoStartService.ConfirmRemove(autoStartEntry);
+                }
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to confirm";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
         }
 
         private async void HistoryRevertButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (Button)sender;
-            var autoStart = (AutoStartEntry)button.DataContext;
-            switch (autoStart.Change)
+            try
             {
-                case Change.Added:
-                    if (!await MessageService.ShowConfirm(autoStart, "remove"))
-                    {
-                        return;
-                    }
-                    AutoStartService.RemoveAutoStart(autoStart);
-                    break;
-                case Change.Removed:
-                    if (!await MessageService.ShowConfirm(autoStart, "add"))
-                    {
-                        return;
-                    }
-                    AutoStartService.AddAutoStart(autoStart);
-                    break;
-                case Change.Enabled:
-                    if (!await MessageService.ShowConfirm(autoStart, "disable"))
-                    {
-                        return;
-                    }
-                    AutoStartService.DisableAutoStart(autoStart);
-                    break;
-                case Change.Disabled:
-                    if (!await MessageService.ShowConfirm(autoStart, "enable"))
-                    {
-                        return;
-                    }
-                    AutoStartService.EnableAutoStart(autoStart);
-                    break;
-                default:
-                    break;
+                var button = (Button)sender;
+                var autoStart = (AutoStartEntry)button.DataContext;
+                switch (autoStart.Change)
+                {
+                    case Change.Added:
+                        if (!await MessageService.ShowConfirm(autoStart, "remove"))
+                        {
+                            return;
+                        }
+                        AutoStartService.RemoveAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Removed auto start");
+                        break;
+                    case Change.Removed:
+                        if (!await MessageService.ShowConfirm(autoStart, "add"))
+                        {
+                            return;
+                        }
+                        AutoStartService.AddAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Added auto start");
+                        break;
+                    case Change.Enabled:
+                        if (!await MessageService.ShowConfirm(autoStart, "disable"))
+                        {
+                            return;
+                        }
+                        AutoStartService.DisableAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Disabled auto start");
+                        break;
+                    case Change.Disabled:
+                        if (!await MessageService.ShowConfirm(autoStart, "enable"))
+                        {
+                            return;
+                        }
+                        AutoStartService.EnableAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Enabled auto start");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to revert";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
         }
 
         private async void Enable_Toggled(object sender, RoutedEventArgs e)
         {
-            ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
-            if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
+            try
             {
-                return;
-            }
-            var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
-            if (!autoStart.IsEnabled.HasValue || toggleSwitch.IsOn == autoStart.IsEnabled.Value)
-            {
-                return;
-            }
-            if (toggleSwitch.IsOn && !autoStart.IsEnabled.Value)
-            {
-                if (!autoStart.CanBeEnabled.HasValue)
-                {
-                    await AutoStartService.LoadCanBeDisabled(autoStart);
-                }
-#pragma warning disable CS8629 // Nullable value type may be null.
-                if (!autoStart.CanBeEnabled.Value)
+                ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+                if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
                 {
                     return;
                 }
+                var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
+                try
+                {
+                    if (!autoStart.IsEnabled.HasValue || toggleSwitch.IsOn == autoStart.IsEnabled.Value)
+                    {
+                        return;
+                    }
+                    if (toggleSwitch.IsOn && !autoStart.IsEnabled.Value)
+                    {
+                        if (!autoStart.CanBeEnabled.HasValue)
+                        {
+                            await AutoStartService.LoadCanBeDisabled(autoStart);
+                        }
+#pragma warning disable CS8629 // Nullable value type may be null.
+                        if (!autoStart.CanBeEnabled.Value)
+                        {
+                            return;
+                        }
 #pragma warning restore CS8629 // Nullable value type may be null.
-                if (!await MessageService.ShowConfirm(autoStart, "enable"))
+                        if (!await MessageService.ShowConfirm(autoStart, "enable"))
+                        {
+                            // reset toggle
+                            autoStart.NotifyPropertyChanged("IsEnabled");
+                            return;
+                        }
+                        AutoStartService.EnableAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Enabled auto start");
+                    }
+                    else if (!toggleSwitch.IsOn && autoStart.IsEnabled.Value)
+                    {
+                        if (!autoStart.CanBeDisabled.HasValue)
+                        {
+                            await AutoStartService.LoadCanBeEnabled(autoStart);
+                        }
+#pragma warning disable CS8629 // Nullable value type may be null.
+                        if (!autoStart.CanBeDisabled.Value)
+                        {
+                            return;
+                        }
+#pragma warning restore CS8629 // Nullable value type may be null.
+                        if (!await MessageService.ShowConfirm(autoStart, "disable"))
+                        {
+                            // reset toggle
+                            autoStart.NotifyPropertyChanged("IsEnabled");
+                            return;
+                        }
+                        AutoStartService.DisableAutoStart(autoStart);
+                        await MessageService.ShowSuccess("Disabled auto start");
+                    }
+                }
+                catch (Exception)
                 {
                     // reset toggle
                     autoStart.NotifyPropertyChanged("IsEnabled");
-                    return;
+                    throw;
                 }
-                AutoStartService.EnableAutoStart(autoStart);
             }
-            else if (!toggleSwitch.IsOn && autoStart.IsEnabled.Value)
+            catch (Exception ex)
             {
-                if (!autoStart.CanBeDisabled.HasValue)
-                {
-                    await AutoStartService.LoadCanBeEnabled(autoStart);
-                }
-#pragma warning disable CS8629 // Nullable value type may be null.
-                if (!autoStart.CanBeDisabled.Value)
-                {
-                    return;
-                }
-#pragma warning restore CS8629 // Nullable value type may be null.
-                if (!await MessageService.ShowConfirm(autoStart, "disable"))
-                {
-                    // reset toggle
-                    autoStart.NotifyPropertyChanged("IsEnabled");
-                    return;
-                }
-                AutoStartService.DisableAutoStart(autoStart);
+                const string errmsg = "Failed to toggle enable status of auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
         }
 
