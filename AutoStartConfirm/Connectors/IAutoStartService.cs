@@ -27,6 +27,14 @@ namespace AutoStartConfirm.Connectors {
         /// </summary>
         ObservableCollection<AutoStartEntry> AllHistoryAutoStarts { get; }
 
+        string RevertAddParameterName { get; }
+
+        string RevertRemoveParameterName { get; }
+
+        string EnableParameterName { get; }
+
+        string DisableParameterName { get; }
+
         bool HasOwnAutoStart { get; }
         string CurrentExePath { get; set; }
 

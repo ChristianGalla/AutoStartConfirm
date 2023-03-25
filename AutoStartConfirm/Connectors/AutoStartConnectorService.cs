@@ -11,7 +11,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace AutoStartConfirm.Connectors
 {

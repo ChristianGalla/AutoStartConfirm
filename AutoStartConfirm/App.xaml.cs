@@ -69,14 +69,6 @@ namespace AutoStartConfirm
 
         private readonly IDispatchService DispatchService;
 
-        private static readonly string RevertAddParameterName = "--revertAdd";
-
-        private static readonly string RevertRemoveParameterName = "--revertRemove";
-
-        private static readonly string EnableParameterName = "--enable";
-
-        private static readonly string DisableParameterName = "--disable";
-
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
         private bool disposedValue;
@@ -220,7 +212,7 @@ namespace AutoStartConfirm
             for (int i = 0; i < args.Length; i++)
             {
                 var arg = args[i];
-                if (string.Equals(arg, RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(arg, AutoStartService.RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
                 {
                     Logger.LogInformation("Adding should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
@@ -228,7 +220,7 @@ namespace AutoStartConfirm
                     Logger.LogInformation("Finished");
                     return true;
                 }
-                else if (string.Equals(arg, RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(arg, AutoStartService.RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
                 {
                     Logger.LogInformation("Removing should be reverted");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
@@ -236,7 +228,7 @@ namespace AutoStartConfirm
                     Logger.LogInformation("Finished");
                     return true;
                 }
-                else if (string.Equals(arg, EnableParameterName, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(arg, AutoStartService.EnableParameterName, StringComparison.OrdinalIgnoreCase))
                 {
                     Logger.LogInformation("Auto start should be enabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
@@ -244,7 +236,7 @@ namespace AutoStartConfirm
                     Logger.LogInformation("Finished");
                     return true;
                 }
-                else if (string.Equals(arg, DisableParameterName, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(arg, AutoStartService.DisableParameterName, StringComparison.OrdinalIgnoreCase))
                 {
                     Logger.LogInformation("Auto start should be disabled");
                     AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
@@ -361,15 +353,7 @@ namespace AutoStartConfirm
                 {
                     return;
                 }
-                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                {
-                    StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                }
-                else
-                {
-                    AutoStartService.RemoveAutoStart(autoStart);
-                }
+                AutoStartService.RemoveAutoStart(autoStart);
                 await MessageService.ShowSuccess("Auto start removed", $"\"{autoStart.Value}\" has been removed from auto starts.");
             }
             catch (Exception e)
@@ -381,44 +365,6 @@ namespace AutoStartConfirm
             finally
             {
                 AppStatus.DecrementRunningActionCount();
-            }
-        }
-
-        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
-        {
-            Logger.LogTrace("StartSubProcessAsAdmin called");
-            string path = Path.GetTempFileName();
-            try
-            {
-                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
-                    serializer.Serialize(stream, autoStart);
-                }
-
-                var info = new ProcessStartInfo(
-                    AutoStartService.CurrentExePath,
-                    $"{parameterName} {path}")
-                {
-                    Verb = "runas", // indicates to elevate privileges
-                };
-
-                var process = new Process
-                {
-                    EnableRaisingEvents = true, // enable WaitForExit()
-                    StartInfo = info
-                };
-
-                process.Start();
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                {
-                    throw new Exception("Sub process failed to execute");
-                }
-            }
-            finally
-            {
-                File.Delete(path);
             }
         }
 
@@ -447,15 +393,7 @@ namespace AutoStartConfirm
                 {
                     return;
                 }
-                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                {
-                    StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-                }
-                else
-                {
-                    AutoStartService.AddAutoStart(autoStart);
-                }
+                AutoStartService.AddAutoStart(autoStart);
                 await MessageService.ShowSuccess("Auto start added", $"\"{autoStart.Value}\" has been added to auto starts.");
             }
             catch (Exception e)
@@ -498,15 +436,7 @@ namespace AutoStartConfirm
                 {
                     return;
                 }
-                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                {
-                    StartSubProcessAsAdmin(autoStart, EnableParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Enabled;
-                }
-                else
-                {
-                    AutoStartService.EnableAutoStart(autoStart);
-                }
+                AutoStartService.EnableAutoStart(autoStart);
                 await MessageService.ShowSuccess("Auto start enabled", $"\"{autoStart.Value}\" has been enabled.");
             }
             catch (Exception e)
@@ -549,15 +479,7 @@ namespace AutoStartConfirm
                 {
                     return;
                 }
-                if (AutoStartService.IsAdminRequiredForChanges(autoStart))
-                {
-                    StartSubProcessAsAdmin(autoStart, DisableParameterName);
-                    autoStart.ConfirmStatus = ConfirmStatus.Disabled;
-                }
-                else
-                {
-                    AutoStartService.DisableAutoStart(autoStart);
-                }
+                AutoStartService.DisableAutoStart(autoStart);
                 await MessageService.ShowSuccess("Auto start disabled", $"\"{autoStart.Value}\" has been disabled.");
             }
             catch (Exception e)

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -84,7 +85,42 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
+        private readonly IUacService UacService;
+
         private readonly System.Timers.Timer SettingSaveTimer;
+
+        public string RevertAddParameterName
+        {
+            get
+            {
+                return "--revertAdd";
+            }
+        }
+
+        public string RevertRemoveParameterName
+        {
+            get
+            {
+                return "--revertRemove";
+            }
+        }
+
+        public string EnableParameterName
+        {
+            get
+            {
+                return "--enable";
+            }
+        }
+
+        public string DisableParameterName
+        {
+            get
+            {
+                return "--disable";
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -94,13 +130,15 @@ namespace AutoStartConfirm.Connectors
             IAutoStartConnectorService connectorService,
             ISettingsService settingsService,
             ICurrentUserRun64Connector currentUserRun64Connector,
-            IDispatchService dispatchService
+            IDispatchService dispatchService,
+            IUacService uacCervice
         ) {
             Logger = logger;
             ConnectorService = connectorService;
             SettingsService = settingsService;
             CurrentUserRun64Connector = currentUserRun64Connector;
             DispatchService = dispatchService;
+            UacService = uacCervice;
             SettingSaveTimer = new(1000)
             {
                 AutoReset = false
@@ -232,11 +270,19 @@ namespace AutoStartConfirm.Connectors
 
         public void RemoveAutoStart(AutoStartEntry autoStart) {
             Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", autoStart.Id);
-            if (ConnectorService.CanBeEnabled(autoStart)) {
-                // remove disabled status to allow new entries for example at the same registry key in the future
-                ConnectorService.EnableAutoStart(autoStart);
+            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+            {
+                StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
             }
-            ConnectorService.RemoveAutoStart(autoStart);
+            else
+            {
+                if (ConnectorService.CanBeEnabled(autoStart))
+                {
+                    // remove disabled status to allow new entries for example at the same registry key in the future
+                    ConnectorService.EnableAutoStart(autoStart);
+                }
+                ConnectorService.RemoveAutoStart(autoStart);
+            }
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.LogInformation("Removed {@autoStart}", autoStart);
         }
@@ -250,7 +296,14 @@ namespace AutoStartConfirm.Connectors
 
         public void DisableAutoStart(AutoStartEntry autoStart) {
             Logger.LogTrace("DisableAutoStart called for {AutoStartId}", autoStart.Id);
-            ConnectorService.DisableAutoStart(autoStart);
+            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+            {
+                StartSubProcessAsAdmin(autoStart, DisableParameterName);
+            }
+            else
+            {
+                ConnectorService.DisableAutoStart(autoStart);
+            }
             autoStart.ConfirmStatus = ConfirmStatus.Disabled;
             Logger.LogInformation("Disabled {@autoStart}", autoStart);
         }
@@ -264,11 +317,21 @@ namespace AutoStartConfirm.Connectors
 
         public void AddAutoStart(AutoStartEntry autoStart) {
             Logger.LogTrace("AddAutoStart called for {AutoStartId}", autoStart.Id);
-            ConnectorService.AddAutoStart(autoStart);
-            try {
-                ConnectorService.EnableAutoStart(autoStart);
-            } catch (AlreadySetException) {
+            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+            {
+                StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+            }
+            else
+            {
+                ConnectorService.AddAutoStart(autoStart);
+                try
+                {
+                    ConnectorService.EnableAutoStart(autoStart);
+                }
+                catch (AlreadySetException)
+                {
 
+                }
             }
             autoStart.ConfirmStatus = ConfirmStatus.Reverted;
             Logger.LogInformation("Added {@autoStart}", autoStart);
@@ -283,7 +346,14 @@ namespace AutoStartConfirm.Connectors
 
         public void EnableAutoStart(AutoStartEntry autoStart) {
             Logger.LogTrace("EnableAutoStart called for {AutoStartId}", autoStart.Id);
-            ConnectorService.EnableAutoStart(autoStart);
+            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+            {
+                StartSubProcessAsAdmin(autoStart, EnableParameterName);
+            }
+            else
+            {
+                ConnectorService.EnableAutoStart(autoStart);
+            }
             autoStart.ConfirmStatus = ConfirmStatus.Enabled;
             Logger.LogInformation("Enabled {@autoStart}", autoStart);
         }
@@ -735,6 +805,45 @@ namespace AutoStartConfirm.Connectors
                 Logger.LogTrace("Own auto start toggled");
             } catch (Exception e) {
                 Logger.LogError(e, "Failed to toggle own auto start");
+            }
+        }
+
+
+        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
+        {
+            Logger.LogInformation("Starting elevated sub process");
+            string path = Path.GetTempFileName();
+            try
+            {
+                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
+                    serializer.Serialize(stream, autoStart);
+                }
+
+                var info = new ProcessStartInfo(
+                    CurrentExePath,
+                    $"{parameterName} {path}")
+                {
+                    Verb = "runas", // indicates to elevate privileges
+                };
+
+                var process = new Process
+                {
+                    EnableRaisingEvents = true, // enable WaitForExit()
+                    StartInfo = info
+                };
+
+                process.Start();
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception("Sub process failed to execute");
+                }
+            }
+            finally
+            {
+                File.Delete(path);
             }
         }
         #endregion

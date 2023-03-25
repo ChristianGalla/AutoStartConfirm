@@ -102,6 +102,7 @@ namespace AutoStartConfirm
                         return logFactory;
                     });
                 })
+                .AddSingleton<IUacService, UacService>()
                 .AddSingleton<IDispatchService, DispatchService>()
                 .AddSingleton<App>()
                 .AddSingleton<MainWindow>()
