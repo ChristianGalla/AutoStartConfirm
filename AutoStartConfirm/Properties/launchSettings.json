@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AutoStartConfirm": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

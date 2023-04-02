@@ -240,13 +240,18 @@ namespace AutoStartConfirm.Connectors.Registry
         /// </remarks>
         public void StartWatcher() {
             Logger.LogTrace("StartWatcher called for {BasePath}", BasePath);
+            if (RegistryChangeMonitor.Monitoring)
+            {
+                Logger.LogTrace("Already running");
+            }
             if (DisableBasePath != null)
             {
                 RegistryDisableService.StartWatcher();
             }
             var currentAutoStarts = (List<AutoStartEntry>)GetCurrentAutoStarts();
             lastAutostarts = new List<RegistryAutoStartEntry>();
-            foreach (var currentAutoStart in currentAutoStarts) {
+            foreach (var currentAutoStart in currentAutoStarts)
+            {
                 lastAutostarts.Add((RegistryAutoStartEntry)currentAutoStart);
             }
             RegistryChangeMonitor.Start();

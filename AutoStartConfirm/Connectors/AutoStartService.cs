@@ -12,6 +12,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -172,14 +173,14 @@ namespace AutoStartConfirm.Connectors
 
         private void HandleSettingChanges()
         {
-            foreach (var autoStart in CurrentAutoStarts)
+            foreach (var autoStart in CurrentAutoStarts.ToList())
             {
                 if (SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
                 {
                     CurrentAutoStarts.Remove(autoStart);
                 }
             }
-            foreach (var autoStart in AllCurrentAutoStarts)
+            foreach (var autoStart in AllCurrentAutoStarts.ToList())
             {
                 if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()) && !CurrentAutoStarts.Contains(autoStart))
                 {
@@ -187,14 +188,14 @@ namespace AutoStartConfirm.Connectors
                 }
             }
 
-            foreach (var autoStart in HistoryAutoStarts)
+            foreach (var autoStart in HistoryAutoStarts.ToList())
             {
                 if (SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
                 {
                     HistoryAutoStarts.Remove(autoStart);
                 }
             }
-            foreach (var autoStart in AllHistoryAutoStarts)
+            foreach (var autoStart in AllHistoryAutoStarts.ToList())
             {
                 if (!SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()) && !HistoryAutoStarts.Contains(autoStart))
                 {
@@ -826,6 +827,7 @@ namespace AutoStartConfirm.Connectors
                     $"{parameterName} {path}")
                 {
                     Verb = "runas", // indicates to elevate privileges
+                    UseShellExecute = true, // needed if running in newer .NET version as 4 to elevate process
                 };
 
                 var process = new Process

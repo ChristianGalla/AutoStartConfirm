@@ -65,9 +65,10 @@ namespace AutoStartConfirm
                             logger.LogInformation("Parameters: {args}", args);
                             if (app.HandleCommandLineParameters(args))
                             {
-                                return;
+                                app.Exit();
                             }
                             logger.LogInformation("Normal start");
+                            app.Run();
                         }
                         catch (Exception e)
                         {

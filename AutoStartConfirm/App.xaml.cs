@@ -35,11 +35,11 @@ namespace AutoStartConfirm
     {
         private readonly ILogger<App> Logger;
 
-        // delay Window creation until App.InitializeComponent has been called
-        private MainWindow Window = null;
+        // delay creation until App.InitializeComponent has been called
+        private MainWindow? Window = null;
 
-        // delay Window creation until App.InitializeComponent has been called
-        private NotifyIcon notifyIcon = null;
+        // delay creation until App.InitializeComponent has been called
+        private NotifyIcon? notifyIcon = null;
 
         private NotifyIcon NotifyIcon
         {
@@ -53,7 +53,7 @@ namespace AutoStartConfirm
             }
         }
 
-        private TaskbarIcon TrayIcon;
+        private TaskbarIcon? TrayIcon;
 
         public IAppStatus AppStatus;
 
@@ -93,8 +93,19 @@ namespace AutoStartConfirm
             UpdateService = updateService;
             DispatchService = dispatchService;
 
+            UnhandledException += UnhandledExceptionHandler;
+
             InitializeComponent();
 
+        }
+
+        private void UnhandledExceptionHandler(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            Logger.LogCritical("Unhandled exception occurred: {eventArgs}", e);
+        }
+
+        public void Run()
+        {
             Window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
             Window.Closed += WindowClosed;
             Window.ConfirmAdd += ConfirmAddHandler;
@@ -140,7 +151,6 @@ namespace AutoStartConfirm
             {
                 UpdateService.CheckUpdateAndShowNotification();
             }
-
         }
 
         private void RevertRemoveIdHandler(Guid e)
@@ -173,7 +183,7 @@ namespace AutoStartConfirm
             ConfirmAdd(e);
         }
 
-        private void ToggleOwnAutoStartHandler(object sender, EventArgs e)
+        private void ToggleOwnAutoStartHandler(object? sender, EventArgs e)
         {
             ToggleOwnAutoStart();
         }
@@ -209,43 +219,51 @@ namespace AutoStartConfirm
         /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
         public bool HandleCommandLineParameters(string[] args)
         {
-            for (int i = 0; i < args.Length; i++)
+            try
             {
-                var arg = args[i];
-                if (string.Equals(arg, AutoStartService.RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
+                for (int i = 0; i < args.Length; i++)
                 {
-                    Logger.LogInformation("Adding should be reverted");
-                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    AutoStartService.RemoveAutoStart(autoStartEntry);
-                    Logger.LogInformation("Finished");
-                    return true;
+                    var arg = args[i];
+                    if (string.Equals(arg, AutoStartService.RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.LogInformation("Adding should be reverted");
+                        AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                        AutoStartService.RemoveAutoStart(autoStartEntry);
+                        Logger.LogInformation("Finished");
+                        return true;
+                    }
+                    else if (string.Equals(arg, AutoStartService.RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.LogInformation("Removing should be reverted");
+                        AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                        AutoStartService.AddAutoStart(autoStartEntry);
+                        Logger.LogInformation("Finished");
+                        return true;
+                    }
+                    else if (string.Equals(arg, AutoStartService.EnableParameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.LogInformation("Auto start should be enabled");
+                        AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                        AutoStartService.EnableAutoStart(autoStartEntry);
+                        Logger.LogInformation("Finished");
+                        return true;
+                    }
+                    else if (string.Equals(arg, AutoStartService.DisableParameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.LogInformation("Auto start should be disabled");
+                        AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
+                        AutoStartService.DisableAutoStart(autoStartEntry);
+                        Logger.LogInformation("Finished");
+                        return true;
+                    }
                 }
-                else if (string.Equals(arg, AutoStartService.RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
-                {
-                    Logger.LogInformation("Removing should be reverted");
-                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    AutoStartService.AddAutoStart(autoStartEntry);
-                    Logger.LogInformation("Finished");
-                    return true;
-                }
-                else if (string.Equals(arg, AutoStartService.EnableParameterName, StringComparison.OrdinalIgnoreCase))
-                {
-                    Logger.LogInformation("Auto start should be enabled");
-                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    AutoStartService.EnableAutoStart(autoStartEntry);
-                    Logger.LogInformation("Finished");
-                    return true;
-                }
-                else if (string.Equals(arg, AutoStartService.DisableParameterName, StringComparison.OrdinalIgnoreCase))
-                {
-                    Logger.LogInformation("Auto start should be disabled");
-                    AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                    AutoStartService.DisableAutoStart(autoStartEntry);
-                    Logger.LogInformation("Finished");
-                    return true;
-                }
+                return false;
             }
-            return false;
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to handle command line parameters");
+                throw;
+            }
         }
 
         private AutoStartEntry LoadAutoStartFromParameter(string[] args, int i)
@@ -278,13 +296,20 @@ namespace AutoStartConfirm
             }
         }
 
-        private void ExitHandler(object sender, EventArgs args)
+        private void ExitHandler(object? sender, EventArgs args)
         {
-            // Window.Activate();
-            // ServiceScope.Dispose();
-            ShutdownGui();
-            // ServiceScope.Dispose();
             Exit();
+        }
+
+        public void Exit(int errorCode = 0)
+        {
+            TrayIcon?.Dispose();
+            TrayIcon = null;
+            AutoStartService.StopWatcher();
+            ServiceScope.Dispose();
+            base.Exit();
+            Dispose();
+            System.Environment.Exit(errorCode);
         }
 
         private void OwnAutoStartToggleHandler(object sender, EventArgs e)
@@ -300,6 +325,10 @@ namespace AutoStartConfirm
         public void ToggleMainWindow()
         {
             Logger.LogTrace("Toggling main window");
+            if (Window == null)
+            {
+                return;
+            }
             if (Window.Visible)
             {
                 Logger.LogTrace("Hiding main window");
@@ -692,7 +721,7 @@ namespace AutoStartConfirm
             };
         }
 
-        private void ToggleMainWindowHandler(object sender, EventArgs e)
+        private void ToggleMainWindowHandler(object? sender, EventArgs e)
         {
             ToggleMainWindow();
         }
@@ -750,14 +779,6 @@ namespace AutoStartConfirm
                 // TODO: set large fields to null
                 disposedValue = true;
             }
-        }
-
-        private void ShutdownGui()
-        {
-            Window.Close();
-            Window = null;
-            TrayIcon?.Dispose();
-            TrayIcon = null;
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
