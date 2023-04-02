@@ -132,14 +132,14 @@ namespace AutoStartConfirm.Connectors
             ISettingsService settingsService,
             ICurrentUserRun64Connector currentUserRun64Connector,
             IDispatchService dispatchService,
-            IUacService uacCervice
+            IUacService uacService
         ) {
             Logger = logger;
             ConnectorService = connectorService;
             SettingsService = settingsService;
             CurrentUserRun64Connector = currentUserRun64Connector;
             DispatchService = dispatchService;
-            UacService = uacCervice;
+            UacService = uacService;
             SettingSaveTimer = new(1000)
             {
                 AutoReset = false

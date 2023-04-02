@@ -8,44 +8,97 @@ using AutoStartConfirm.Models;
 using AutoStartConfirm.Exceptions;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Connectors.Registry;
+using AutoStartConfirm.GUI;
+using AutoStartConfirm.Helpers;
+using AutoStartConfirm.Notifications;
+using AutoStartConfirm.Update;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Windows.Services.Maps;
+using Octokit;
 
 namespace AutoStartConfirm.Connectors.Tests
 {
     [TestClass()]
-    public class AutoStartServiceTests {
+    public class AutoStartServiceTests
+    {
+        private readonly ILogger<AutoStartService> LogService = A.Fake<ILogger<AutoStartService>>();
+        private readonly IAutoStartConnectorService ConnectorService = A.Fake<IAutoStartConnectorService>();
+        private readonly ISettingsService SettingsService = A.Fake<ISettingsService>();
+        private readonly ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
+        private readonly IDispatchService DispatchService = A.Fake<IDispatchService>();
+        private readonly IUacService UacService = A.Fake<IUacService>();
+        private readonly IServiceProvider ServiceProvider = A.Fake<IServiceProvider>();
 
-        private AutoStartService Service = new AutoStartService();
-        private IAutoStartConnectorService ConnectorService = A.Fake<IAutoStartConnectorService>();
-        private ISettingsService SettingsService = A.Fake<ISettingsService>();
-        private static string CurrentExePath = "C:\\test.exe";
+
+        private AutoStartService? Service;
+
+        private readonly static string CurrentExePath = "C:\\test.exe";
         private Guid Guid;
-        private RegistryAutoStartEntry AutoStartEntry;
-        private CurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<CurrentUserRun64Connector>();
+        private RegistryAutoStartEntry? AutoStartEntry;
 
-        private AutoStartEntry OwnAutoStartEntry = new RegistryAutoStartEntry() {
+        private readonly AutoStartEntry OwnAutoStartEntry = new RegistryAutoStartEntry() {
             Category = Category.CurrentUserRun64,
             Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
             Value = CurrentExePath
         };
 
-        [TestInitialize]
-        public void TestInitialize() {
-            Service.ConnectorService = ConnectorService;
-            Service.SettingsService = SettingsService;
-            Service.CurrentExePath = CurrentExePath;
-            Service.CurrentUserRun64Connector = CurrentUserRun64Connector;
+
+        [ClassInitialize()]
+        public static void ClassInitialize(TestContext context)
+        {
+        }
+
+        [TestInitialize()]
+        public void TestInitialize()
+        {
             Guid = new Guid();
-            AutoStartEntry = new RegistryAutoStartEntry() {
+            AutoStartEntry = new RegistryAutoStartEntry()
+            {
                 Id = Guid,
                 Category = Category.CurrentUserRun64,
                 Path = "",
                 Value = ""
             };
+
+            // A.CallTo(() => ServiceProvider.GetService()).Returns();
+
+            Ioc.Default.ConfigureServices(ServiceProvider);
+            Service = new AutoStartService(
+                logger: LogService,
+                connectorService: ConnectorService,
+                settingsService: SettingsService,
+                currentUserRun64Connector: CurrentUserRun64Connector,
+                dispatchService: DispatchService,
+                uacService: UacService
+            );
         }
+
+        [TestCleanup()]
+        public void TestCleanup()
+        {
+            Fake.ClearRecordedCalls(LogService);
+            Fake.ClearRecordedCalls(ConnectorService);
+            Fake.ClearRecordedCalls(SettingsService);
+            Fake.ClearRecordedCalls(CurrentUserRun64Connector);
+            Fake.ClearRecordedCalls(DispatchService);
+            Fake.ClearRecordedCalls(UacService);
+            Fake.ClearRecordedCalls(ServiceProvider);
+            Service?.Dispose();
+            Service = null;
+
+        }
+
+        [ClassCleanup()]
+        public static void ClassCleanup()
+        {
+        }
+
 
         [TestMethod()]
         public void TryGetCurrentAutoStart_ReturnsFalseIfNotFound() {
-            var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry? retAutoStart);
+            var ret = Service!.TryGetCurrentAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsFalse(ret);
             Assert.IsNull(retAutoStart);
@@ -53,7 +106,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void TryGetCurrentAutoStart_ReturnsTrueAndAutoStartIfFound() {
-            Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
 
             var ret = Service.TryGetCurrentAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
@@ -63,7 +116,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void TryGetHistoryAutoStart_ReturnsFalseIfNotFound() {
-            var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry? retAutoStart);
+            var ret = Service!.TryGetHistoryAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
             Assert.IsFalse(ret);
             Assert.IsNull(retAutoStart);
@@ -71,7 +124,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void TryGetHistoryAutoStart_ReturnsTrueAndAutoStartIfFound() {
-            Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
 
             var ret = Service.TryGetHistoryAutoStart(Guid, out AutoStartEntry? retAutoStart);
 
@@ -81,7 +134,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmAdd_ConfirmsCurrentAutoStart() {
-            Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
 
             Service.ConfirmAdd(Guid);
 
@@ -90,7 +143,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmAdd_RaisesCurrentAutoStartEvents() {
-            Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
             var confirmEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.Confirm += confirmEventHandler;
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
@@ -106,7 +159,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmAdd_ConfirmsHistoryAutoStart() {
-            Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
 
             Service.ConfirmAdd(Guid);
 
@@ -115,7 +168,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmAdd_RaisesHistoryAutoStartEvents() {
-            Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += changeEventHandler;
 
@@ -127,7 +180,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmRemove_ConfirmsHistoryAutoStart() {
-            Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
 
             Service.ConfirmRemove(Guid);
 
@@ -136,7 +189,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ConfirmRemove_RaisesHistoryAutoStartEvents() {
-            Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += changeEventHandler;
 
@@ -152,7 +205,7 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false, true)]
         [DataRow(true, true)]
         public void RemoveAutoStart_RemovesAutoStart_SetStatusToReverted_AndRevertsDisabling(bool useGuid, bool canBeEnabled) {
-            Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
             A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).Returns(canBeEnabled);
 
             if (useGuid) {
@@ -175,7 +228,7 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void DisableAutoStart_DisablesAutoStart_AndSetsStatusToDisabled(bool useGuid) {
-            Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
 
             if (useGuid) {
                 Service.DisableAutoStart(Guid);
@@ -192,13 +245,13 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(true)]
         public void AddAutoStart_AddsAndEnablesAutoStart(bool useGuid) {
             if (useGuid) {
-                Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
                 Service.AddAutoStart(Guid);
             } else {
-                Service.AddAutoStart(AutoStartEntry);
+                Service!.AddAutoStart(AutoStartEntry!);
             }
 
-            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -207,15 +260,15 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void AddAutoStart_CatchesAlreadyExistExceptions(bool useGuid) {
-            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).Throws(new AlreadySetException());
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).Throws(new AlreadySetException());
             if (useGuid) {
-                Service.AllHistoryAutoStarts.Add(AutoStartEntry);
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
                 Service.AddAutoStart(Guid);
             } else {
-                Service.AddAutoStart(AutoStartEntry);
+                Service!.AddAutoStart(AutoStartEntry!);
             }
 
-            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -225,13 +278,13 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(true)]
         public void EnableAutoStart_EnablesAutoStart(bool useGuid) {
             if (useGuid) {
-                Service.AllCurrentAutoStarts.Add(AutoStartEntry);
+                Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
                 Service.EnableAutoStart(Guid);
             } else {
-                Service.EnableAutoStart(AutoStartEntry);
+                Service!.EnableAutoStart(AutoStartEntry!);
             }
 
-            Assert.AreEqual(ConfirmStatus.Enabled, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Enabled, AutoStartEntry!.ConfirmStatus);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
@@ -239,8 +292,8 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void CanAutoStartBeEnabled_ReturnsEnableStatus(bool canBeEnabled) {
-            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).Returns(canBeEnabled);
-            var ret = Service.CanAutoStartBeEnabled(AutoStartEntry);
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
+            var ret = Service!.CanAutoStartBeEnabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeEnabled, ret);
             A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).MustHaveHappenedOnceExactly();
@@ -250,8 +303,8 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void CanAutoStartBeDisabled_ReturnsDisableStatus(bool canBeDisabled) {
-            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry)).Returns(canBeDisabled);
-            var ret = Service.CanAutoStartBeDisabled(AutoStartEntry);
+            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry!)).Returns(canBeDisabled);
+            var ret = Service!.CanAutoStartBeDisabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeDisabled, ret);
             A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry)).MustHaveHappenedOnceExactly();
@@ -261,8 +314,8 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void CanAutoStartBeAdded_ReturnsAddStatus(bool canBeAdded) {
-            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry)).Returns(canBeAdded);
-            var ret = Service.CanAutoStartBeAdded(AutoStartEntry);
+            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry!)).Returns(canBeAdded);
+            var ret = Service!.CanAutoStartBeAdded(AutoStartEntry!);
 
             Assert.AreEqual(canBeAdded, ret);
             A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry)).MustHaveHappenedOnceExactly();
@@ -272,26 +325,26 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public void CanAutoStartBeRemoved_ReturnsRemoveStatus(bool canBeRemoved) {
-            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry)).Returns(canBeRemoved);
-            var ret = Service.CanAutoStartBeRemoved(AutoStartEntry);
+            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry!)).Returns(canBeRemoved);
+            var ret = Service!.CanAutoStartBeRemoved(AutoStartEntry!);
 
             Assert.AreEqual(canBeRemoved, ret);
-            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry!)).MustHaveHappenedOnceExactly();
         }
 
         [DataTestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public async Task LoadCanBeAdded_UpdatesAutoStartEntryAndRaisesEvents(bool canBeAdded) {
-            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry)).Returns(canBeAdded);
+            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry!)).Returns(canBeAdded);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.CurrentAutoStartChange += changeEventHandler;
+            Service!.CurrentAutoStartChange += changeEventHandler;
             var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeAdded(AutoStartEntry);
+            await Service.LoadCanBeAdded(AutoStartEntry!);
 
-            Assert.AreEqual(canBeAdded, AutoStartEntry.CanBeAdded.Value);
+            Assert.AreEqual(canBeAdded, AutoStartEntry!.CanBeAdded!.Value);
             A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -300,15 +353,15 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public async Task LoadCanBeRemoved_UpdatesAutoStartEntryAndRaisesEvents(bool canBeRemoved) {
-            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry)).Returns(canBeRemoved);
+            A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry!)).Returns(canBeRemoved);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.CurrentAutoStartChange += changeEventHandler;
+            Service!.CurrentAutoStartChange += changeEventHandler;
             var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeRemoved(AutoStartEntry);
+            await Service.LoadCanBeRemoved(AutoStartEntry!);
 
-            Assert.AreEqual(canBeRemoved, AutoStartEntry.CanBeRemoved.Value);
+            Assert.AreEqual(canBeRemoved, AutoStartEntry!.CanBeRemoved!.Value);
             A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -317,15 +370,15 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public async Task LoadCanBeEnabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeEnabled) {
-            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).Returns(canBeEnabled);
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.CurrentAutoStartChange += changeEventHandler;
+            Service!.CurrentAutoStartChange += changeEventHandler;
             var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeEnabled(AutoStartEntry);
+            await Service.LoadCanBeEnabled(AutoStartEntry!);
 
-            Assert.AreEqual(canBeEnabled, AutoStartEntry.CanBeEnabled.Value);
+            Assert.AreEqual(canBeEnabled, AutoStartEntry!.CanBeEnabled!.Value);
             A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -334,15 +387,15 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(false)]
         [DataRow(true)]
         public async Task LoadCanBeDisabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeDisabled) {
-            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry)).Returns(canBeDisabled);
+            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry!)).Returns(canBeDisabled);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.CurrentAutoStartChange += changeEventHandler;
+            Service!.CurrentAutoStartChange += changeEventHandler;
             var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeDisabled(AutoStartEntry);
+            await Service.LoadCanBeDisabled(AutoStartEntry!);
 
-            Assert.AreEqual(canBeDisabled, AutoStartEntry.CanBeDisabled.Value);
+            Assert.AreEqual(canBeDisabled, AutoStartEntry!.CanBeDisabled!.Value);
             A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
@@ -350,7 +403,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         [TestMethod()]
         public void ToggleOwnAutoStart_AddsOwnAutoStart_If_NotSet() {
-            Service.ToggleOwnAutoStart();
+            Service!.ToggleOwnAutoStart();
             A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
                 (AutoStartEntry autoStart) =>
                     autoStart.Category == Category.CurrentUserRun64 &&
@@ -365,7 +418,7 @@ namespace AutoStartConfirm.Connectors.Tests
                 OwnAutoStartEntry
             };
             A.CallTo(() => CurrentUserRun64Connector.GetCurrentAutoStarts()).Returns(collection);
-            Service.ToggleOwnAutoStart();
+            Service!.ToggleOwnAutoStart();
             A.CallTo(() => ConnectorService.RemoveAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
                 (AutoStartEntry autoStart) =>
                     autoStart.Category == Category.CurrentUserRun64 &&

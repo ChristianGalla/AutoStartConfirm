@@ -21,6 +21,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using AutoStartConfirm.Helpers;
 using NLog.Config;
 using NLog;
+using Octokit;
 
 namespace AutoStartConfirm
 {
@@ -113,7 +114,10 @@ namespace AutoStartConfirm
                 .AddSingleton<INotificationService, NotificationService>()
                 .AddSingleton<IMessageService, MessageService>()
                 .AddSingleton<ISettingsService, SettingsService>()
-                .AddSingleton<IUpdateService, UpdateService>();
+                .AddSingleton<IUpdateService, UpdateService>()
+                .AddSingleton<IGitHubClient>(ServiceProvider => {
+                    return new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
+                });
             AutoStartConnectorService.ConfigureServices(services);
         }
 

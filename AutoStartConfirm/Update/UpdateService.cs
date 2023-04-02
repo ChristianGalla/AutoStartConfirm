@@ -14,7 +14,7 @@ namespace AutoStartConfirm.Update
     {
         private readonly ILogger<UpdateService> Logger;
 
-        private SemVersion currentVersion;
+        private SemVersion? currentVersion;
 
         public SemVersion CurrentVersion
         {
@@ -36,12 +36,13 @@ namespace AutoStartConfirm.Update
         private readonly ISettingsService SettingsService;
         private readonly INotificationService NotificationService;
 
-        private readonly IGitHubClient GitHubClient = new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
+        private readonly IGitHubClient GitHubClient;
 
-        public UpdateService(ILogger<UpdateService> logger, ISettingsService settingsService, INotificationService notificationService) {
+        public UpdateService(ILogger<UpdateService> logger, ISettingsService settingsService, INotificationService notificationService, IGitHubClient gitHubClient) {
             Logger = logger;
             SettingsService = settingsService;
             NotificationService = notificationService;
+            GitHubClient = gitHubClient;
         }
 
         public async Task<Release> GetNewestRelease()
