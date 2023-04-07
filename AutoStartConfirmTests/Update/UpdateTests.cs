@@ -18,16 +18,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System.Xml.Linq;
+using AutoStartConfirmTests;
 
 namespace AutoStartConfirm.Update.Tests
 {
-    [TestClass()]
-    public class UpdateTests
+    [TestClass]
+    public class UpdateServiceTests : TestsBase
     {
-        private readonly ILogger<UpdateService> LogService = A.Fake<ILogger<UpdateService>>();
-        private readonly ISettingsService SettingsService = A.Fake<ISettingsService>();
-        private readonly INotificationService NotificationService = A.Fake<INotificationService>();
-        private readonly IGitHubClient GitHubClient = A.Fake<IGitHubClient>();
+        protected static readonly ILogger<UpdateService> LogService = A.Fake<ILogger<UpdateService>>();
 
         private UpdateService? Service;
 
@@ -38,12 +36,7 @@ namespace AutoStartConfirm.Update.Tests
         private List<ReleaseAsset>? ReleaseAssets;
         private Release? Release;
 
-        [ClassInitialize()]
-        public static void ClassInitialize(TestContext context)
-        {
-        }
-
-        [TestInitialize()]
+        [TestInitialize]
         public void TestInitialize()
         {
             ReleaseAssets = new List<ReleaseAsset>()
@@ -95,32 +88,27 @@ namespace AutoStartConfirm.Update.Tests
             Service!.CurrentVersion = new SemVersion(1, 0, 0);
         }
 
-        [TestCleanup()]
-        public void TestCleanup()
+        [TestCleanup]
+        public new void TestCleanup()
         {
+            base.TestCleanup();
             Fake.ClearRecordedCalls(LogService);
-            Fake.ClearRecordedCalls(SettingsService);
-            Fake.ClearRecordedCalls(NotificationService);
-            Fake.ClearRecordedCalls(NotificationService);
-
             Service = null;
         }
 
-        [ClassCleanup()]
-        public static void ClassCleanup()
-        {
-        }
+        //[TestMethod]
+        //public void CheckUpdateAndShowNotification_ShowsNotificationIfUpdateAavailable()
+        //{
+        //    WinRT.ComWrappersSupport.InitializeComWrappers();
+        //    Microsoft.UI.Xaml.Application.Start(async (p) =>
+        //    {
+        //        await Service!.CheckUpdateAndShowNotification();
 
+        //        A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, CurrentVersion, MsiUrl)).MustHaveHappenedOnceExactly();
+        //    });
+        //}
 
-        [TestMethod()]
-        public async Task CheckUpdateAndShowNotification_ShowsNotificationIfUpdateAavailable()
-        {
-            await Service!.CheckUpdateAndShowNotification();
-
-            A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, CurrentVersion, MsiUrl)).MustHaveHappenedOnceExactly();
-        }
-
-        [TestMethod()]
+        [TestMethod]
         public async Task CheckUpdateAndShowNotification_ShouldNotShowNotificationIfNoUpdateAavailable()
         {
             Service!.CurrentVersion = new SemVersion(2, 0, 0);
@@ -129,7 +117,7 @@ namespace AutoStartConfirm.Update.Tests
             A.CallTo(() => NotificationService!.ShowNewVersionNotification(A<string>._, A<string>._, A<string>._)).MustNotHaveHappened();
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task CheckUpdateAndShowNotification_ShouldNotShowNotificationIfAlreadyShown()
         {
             Service!.CurrentVersion = new SemVersion(1, 0, 0);

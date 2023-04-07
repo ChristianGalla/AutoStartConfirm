@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Helpers
 {
-    internal class JsonNetSerializer : NLog.IJsonConverter
+    public class JsonNetSerializer : NLog.IJsonConverter
     {
         private readonly DefaultContractResolver contractResolver;
 

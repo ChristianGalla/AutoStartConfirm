@@ -33,7 +33,7 @@ namespace AutoStartConfirm.GUI
         {
             get
             {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                return Assembly.GetEntryAssembly().GetName().Version.ToString();
             }
         }
 
@@ -41,7 +41,7 @@ namespace AutoStartConfirm.GUI
         {
             get
             {
-                var attribute = (AssemblyCopyrightAttribute)Assembly.GetExecutingAssembly().GetCustomAttribute(typeof(AssemblyCopyrightAttribute));
+                var attribute = (AssemblyCopyrightAttribute)Assembly.GetEntryAssembly().GetCustomAttribute(typeof(AssemblyCopyrightAttribute));
                 return attribute.Copyright;
             }
         }
