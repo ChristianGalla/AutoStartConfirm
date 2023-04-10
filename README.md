@@ -39,7 +39,7 @@ There are two versions:
 
 Usually, you should download and install **AutoStartConfirmSetup_Standalone.msi**. This version includes all dependencies and can easily be installed on any computer.
 
-The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) and is therefore much smaller.
+The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) and is therefore much smaller.
 If multiple programs are using this runtime, it is possible to save disk space having only one central runtime installation.
 When using this installer, you are responsible for installing the runtime. If it is not installed, the program cannot run.
 
