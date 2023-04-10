@@ -42,10 +42,12 @@ namespace AutoStartConfirm.GUI
             {
                 // find NavigationViewItem with Content that equals InvokedItem
                 var item = sender.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(x => (string)x.Content == (string)args.InvokedItem);
+#pragma warning disable IDE0270 // Use coalesce expression
                 if (item == null)
                 {
                     item = sender.FooterMenuItems.OfType<NavigationViewItem>().FirstOrDefault(x => (string)x.Content == (string)args.InvokedItem);
                 }
+#pragma warning restore IDE0270 // Use coalesce expression
                 if (item == null)
                 {
                     return;
@@ -57,7 +59,7 @@ namespace AutoStartConfirm.GUI
         private void MainNavigation_Loaded(object sender, RoutedEventArgs e)
         {
             // set the initial SelectedItem 
-            foreach (NavigationViewItemBase item in MainNavigation.MenuItems)
+            foreach (NavigationViewItemBase item in MainNavigation.MenuItems.Cast<NavigationViewItemBase>())
             {
                 if (item is NavigationViewItem navItem && item.Tag.ToString() == "Home")
                 {
@@ -86,15 +88,15 @@ namespace AutoStartConfirm.GUI
 
         #region events
 
-        public event AutoStartsActionHandler ConfirmAdd;
-        public event AutoStartsActionHandler RevertAdd;
-        public event AutoStartsActionIdHandler RevertAddId;
-        public event AutoStartsActionHandler Enable;
-        public event AutoStartsActionHandler Disable;
-        public event AutoStartsActionHandler ConfirmRemove;
-        public event AutoStartsActionHandler RevertRemove;
-        public event AutoStartsActionIdHandler RevertRemoveId;
-        public event EventHandler ToggleOwnAutoStart;
+        public event AutoStartsActionHandler? ConfirmAdd;
+        public event AutoStartsActionHandler? RevertAdd;
+        public event AutoStartsActionIdHandler? RevertAddId;
+        public event AutoStartsActionHandler? Enable;
+        public event AutoStartsActionHandler? Disable;
+        public event AutoStartsActionHandler? ConfirmRemove;
+        public event AutoStartsActionHandler? RevertRemove;
+        public event AutoStartsActionIdHandler? RevertRemoveId;
+        public event EventHandler? ToggleOwnAutoStart;
         #endregion
 
     }

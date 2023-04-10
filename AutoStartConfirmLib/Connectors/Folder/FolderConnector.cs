@@ -10,7 +10,7 @@ namespace AutoStartConfirm.Connectors.Folder
     {
         private readonly ILogger<FolderConnector> Logger;
 
-        private IRegistryDisableService RegistryDisableService;
+        private readonly IRegistryDisableService RegistryDisableService;
 
         public abstract string BasePath { get; }
 
@@ -18,7 +18,7 @@ namespace AutoStartConfirm.Connectors.Folder
 
         public abstract bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
 
-        private IFolderChangeMonitor FolderChangeMonitor;
+        private readonly IFolderChangeMonitor FolderChangeMonitor;
 
         // todo: read target of links?
         // read sub directories?
@@ -240,10 +240,10 @@ namespace AutoStartConfirm.Connectors.Folder
         #endregion
 
         #region Events
-        public event AutoStartChangeHandler Add;
-        public event AutoStartChangeHandler Remove;
-        public event AutoStartChangeHandler Enable;
-        public event AutoStartChangeHandler Disable;
+        public event AutoStartChangeHandler? Add;
+        public event AutoStartChangeHandler? Remove;
+        public event AutoStartChangeHandler? Enable;
+        public event AutoStartChangeHandler? Disable;
         #endregion
     }
 }

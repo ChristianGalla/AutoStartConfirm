@@ -37,7 +37,7 @@ namespace AutoStartConfirm.Connectors
 
         public string CurrentExePath {
             get {
-                currentExePath ??= Environment.ProcessPath;
+                currentExePath ??= Environment.ProcessPath!;
                 return currentExePath;
             }
             set {
@@ -552,9 +552,10 @@ namespace AutoStartConfirm.Connectors
             return true;
         }
 
-        public ObservableCollection<AutoStartEntry>? GetSavedAutoStarts(string path) {
+        public ObservableCollection<AutoStartEntry> GetSavedAutoStarts(string path) {
             try {
                 Logger.LogTrace("Loading auto starts from file {path}", path);
+                ObservableCollection<AutoStartEntry>? ret = null;
                 if (File.Exists($"{path}.xml"))
                 {
                     var file = $"{path}.xml";
@@ -563,9 +564,8 @@ namespace AutoStartConfirm.Connectors
                     XmlSerializer serializer = new(typeof(ObservableCollection<AutoStartEntry>));
                     try
                     {
-                        var ret = (ObservableCollection<AutoStartEntry>?)serializer.Deserialize(stream);
+                        ret = (ObservableCollection<AutoStartEntry>?)serializer.Deserialize(stream);
                         Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
-                        return ret;
                     }
                     catch (Exception ex)
                     {
@@ -582,10 +582,9 @@ namespace AutoStartConfirm.Connectors
                     try
                     {
 #pragma warning disable SYSLIB0011 // Type or member is obsolete
-                        var ret = (ObservableCollection<AutoStartEntry>?)formatter.Deserialize(stream);
+                        ret = (ObservableCollection<AutoStartEntry>?)formatter.Deserialize(stream);
 #pragma warning restore SYSLIB0011 // Type or member is obsolete
                         Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
-                        return ret;
                     }
                     catch (Exception ex)
                     {
@@ -593,10 +592,7 @@ namespace AutoStartConfirm.Connectors
                         throw err;
                     }
                 }
-                else
-                {
-                    return new ObservableCollection<AutoStartEntry>();
-                }
+                return ret ?? new ObservableCollection<AutoStartEntry>();
             } catch (Exception ex) {
                 var message = "Failed to load last auto starts";
 #pragma warning disable CA2254 // Template should be a static expression
@@ -627,7 +623,7 @@ namespace AutoStartConfirm.Connectors
             Logger.LogTrace("Saving auto starts to file {path}", path);
             try {
                 try {
-                    var folderPath = PathToLastAutoStarts.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
+                    var folderPath = PathToLastAutoStarts[..path.LastIndexOf(Path.DirectorySeparatorChar)];
                     Directory.CreateDirectory(folderPath);
                 } catch (Exception ex) {
                     var err = new Exception($"Failed to create folder for file {path}", ex);
@@ -635,7 +631,7 @@ namespace AutoStartConfirm.Connectors
                 }
                 try {
                     using Stream stream = new FileStream($"{path}.xml", FileMode.Create, FileAccess.Write, FileShare.None);
-                    XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<AutoStartEntry>));
+                    XmlSerializer serializer = new(typeof(ObservableCollection<AutoStartEntry>));
                     serializer.Serialize(stream, dictionary);
                 } catch (Exception ex) {
                     var err = new Exception($"Failed to write file {path}", ex);
@@ -818,7 +814,7 @@ namespace AutoStartConfirm.Connectors
             {
                 using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
+                    XmlSerializer serializer = new(typeof(AutoStartEntry));
                     serializer.Serialize(stream, autoStart);
                 }
 
@@ -851,19 +847,19 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Events
-        public event AutoStartChangeHandler Add;
+        public event AutoStartChangeHandler? Add;
 
-        public event AutoStartChangeHandler Remove;
+        public event AutoStartChangeHandler? Remove;
 
-        public event AutoStartChangeHandler Enable;
+        public event AutoStartChangeHandler? Enable;
 
-        public event AutoStartChangeHandler Disable;
+        public event AutoStartChangeHandler? Disable;
 
-        public event AutoStartChangeHandler Confirm;
+        public event AutoStartChangeHandler? Confirm;
 
-        public event AutoStartChangeHandler CurrentAutoStartChange;
+        public event AutoStartChangeHandler? CurrentAutoStartChange;
 
-        public event AutoStartChangeHandler HistoryAutoStartChange;
+        public event AutoStartChangeHandler? HistoryAutoStartChange;
         #endregion
 
         #region Event handlers

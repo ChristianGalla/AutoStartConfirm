@@ -419,10 +419,10 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
         #endregion
 
         #region Events
-        public event AutoStartChangeHandler Add;
-        public event AutoStartChangeHandler Remove;
-        public event AutoStartChangeHandler Enable;
-        public event AutoStartChangeHandler Disable;
+        public event AutoStartChangeHandler? Add;
+        public event AutoStartChangeHandler? Remove;
+        public event AutoStartChangeHandler? Enable;
+        public event AutoStartChangeHandler? Disable;
         #endregion
     }
 }

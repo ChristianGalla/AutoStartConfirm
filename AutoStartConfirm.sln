@@ -17,11 +17,27 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FCDFE959-5861-4E5D-83C2-C0C257344ADA}"
 	ProjectSection(SolutionItems) = preProject
 		build\Daily.targets = build\Daily.targets
+		Build\Daily_Debug.bat = Build\Daily_Debug.bat
+		Build\Daily_Release.bat = Build\Daily_Release.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStartConfirmTests", "AutoStartConfirmTests\AutoStartConfirmTests.csproj", "{B4992E06-39F6-4DE8-9AEB-35510CD5FFFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStartConfirmLib", "AutoStartConfirmLib\AutoStartConfirmLib.csproj", "{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStartConfirmLib", "AutoStartConfirmLib\AutoStartConfirmLib.csproj", "{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{5099C6BA-3F25-48BC-9CF3-947980E26377}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+		.github\FUNDING.yml = .github\FUNDING.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{23C1DB5B-3CC3-4F6F-9D8C-18204E7E904E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci-fallback.yml = .github\workflows\ci-fallback.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\create-release.yml = .github\workflows\create-release.yml
+		.github\workflows\security.yml = .github\workflows\security.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,16 +111,16 @@ Global
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|ARM64.ActiveCfg = Debug|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x64.Build.0 = Debug|Any CPU
+		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x64.ActiveCfg = Debug|x64
+		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x64.Build.0 = Debug|x64
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Debug|x86.Build.0 = Debug|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|ARM64.Build.0 = Release|Any CPU
-		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x64.ActiveCfg = Release|Any CPU
-		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x64.Build.0 = Release|Any CPU
+		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x64.ActiveCfg = Release|x64
+		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x64.Build.0 = Release|x64
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x86.ActiveCfg = Release|Any CPU
 		{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
@@ -113,6 +129,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FCDFE959-5861-4E5D-83C2-C0C257344ADA} = {0F4D0F66-AF46-493D-9FE6-D80C2BEAB943}
+		{5099C6BA-3F25-48BC-9CF3-947980E26377} = {0F4D0F66-AF46-493D-9FE6-D80C2BEAB943}
+		{23C1DB5B-3CC3-4F6F-9D8C-18204E7E904E} = {5099C6BA-3F25-48BC-9CF3-947980E26377}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A9BE096-3598-4A35-8B4A-FDD35CC04541}

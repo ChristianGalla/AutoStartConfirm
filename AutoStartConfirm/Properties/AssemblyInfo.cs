@@ -13,8 +13,8 @@ using System.Runtime.Versioning;
 [assembly: AssemblyCopyright("Copyright © 2020 Christian Galla")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: TargetPlatform("Windows10.0.19041.0")]
-[assembly: SupportedOSPlatform("Windows10.0.19041.0")]
+[assembly: TargetPlatform("Windows10.0.18362.0")]
+[assembly: SupportedOSPlatform("Windows10.0.18362.0")]
 
 // Durch Festlegen von ComVisible auf FALSE werden die Typen in dieser Assembly
 // für COM-Komponenten unsichtbar.  Wenn Sie auf einen Typ in dieser Assembly von

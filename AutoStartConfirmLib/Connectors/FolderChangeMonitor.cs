@@ -13,9 +13,9 @@ namespace AutoStartConfirm.Connectors
 
         private bool disposedValue;
 
-        private FileSystemWatcher watcher;
+        private FileSystemWatcher? watcher;
 
-        public string BasePath { get; set; }
+        public required string BasePath { get; set; }
         public Category Category { get; set; }
         #endregion
 
@@ -62,6 +62,7 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
+        // todo: migrate
         // todo: filter duplicate calls (rename etc.)
         private void OnChanged(object sender, FileSystemEventArgs e) {
             if (e.ChangeType != WatcherChangeTypes.Changed ||
@@ -154,8 +155,8 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Events
-        public event AutoStartChangeHandler Add;
-        public event AutoStartChangeHandler Remove;
+        public event AutoStartChangeHandler? Add;
+        public event AutoStartChangeHandler? Remove;
         #endregion
 
         #region Dispose

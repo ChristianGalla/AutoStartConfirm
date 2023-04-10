@@ -24,7 +24,7 @@ namespace AutoStartConfirm.Connectors
 
         private readonly ILogger<AutoStartConnectorService> Logger;
 
-        private Dictionary<Category, IAutoStartConnector> AllConnectors = new Dictionary<Category, IAutoStartConnector>();
+        private readonly Dictionary<Category, IAutoStartConnector> AllConnectors = new();
 
         private Dictionary<Category, IAutoStartConnector> enabledConnectors;
 
@@ -33,7 +33,7 @@ namespace AutoStartConfirm.Connectors
                 if (enabledConnectors == null) {
                     CreateOrUpdateEnabledConnectors();
                 }
-                return enabledConnectors;
+                return enabledConnectors!;
             }
         }
 
@@ -282,13 +282,13 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Events
-        public event AutoStartChangeHandler Add;
+        public event AutoStartChangeHandler? Add;
 
-        public event AutoStartChangeHandler Remove;
+        public event AutoStartChangeHandler? Remove;
 
-        public event AutoStartChangeHandler Enable;
+        public event AutoStartChangeHandler? Enable;
 
-        public event AutoStartChangeHandler Disable;
+        public event AutoStartChangeHandler? Disable;
         #endregion
 
         #region Event handlers
@@ -332,9 +332,7 @@ namespace AutoStartConfirm.Connectors
 
         #region IAutoStartConnector implementation
 
-#pragma warning disable CA1065
         public Category Category => throw new NotImplementedException();
-#pragma warning restore CA1065
 
         public bool CanBeAdded(AutoStartEntry autoStart) {
             Logger.LogTrace("Checking if auto start {@autoStart} can be added", autoStart);

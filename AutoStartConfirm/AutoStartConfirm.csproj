@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<TargetFramework>net7.0-windows10.0.18362.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
 		<RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
@@ -15,11 +15,13 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+		<AssemblyTitle>Auto Start Confirm</AssemblyTitle>
+		<Product>Auto Start Confirm</Product>
+		<Copyright>Copyright © 2020 Christian Galla</Copyright>
+		<Authors>Christian Galla</Authors>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
@@ -32,11 +34,11 @@
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Remove="Assets\Icon.xcf" />
-	  <Content Remove="Assets\NotificationIcons.xcf" />
+		<Content Remove="Assets\Icon.xcf" />
+		<Content Remove="Assets\NotificationIcons.xcf" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Page Remove="TrayIconResources.xaml" />
+		<Page Remove="TrayIconResources.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -65,30 +67,30 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Properties\Settings.settings">
-		  <Generator>SettingsSingleFileGenerator</Generator>
-		  <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj">
-	    <Private>True</Private>
-	    <CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
-	  </ProjectReference>
+		<ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj">
+			<Private>True</Private>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Properties\Settings.Designer.cs">
-	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Settings.settings</DependentUpon>
-	  </Compile>
+		<Compile Update="Properties\Settings.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Update="Assets\Icon.ico">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+		<Content Update="Assets\Icon.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 	<PropertyGroup>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>

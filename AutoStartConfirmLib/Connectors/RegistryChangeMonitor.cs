@@ -24,7 +24,7 @@ namespace AutoStartConfirm.Connectors
     {
         private readonly ILogger<RegistryChangeMonitor> Logger;
 
-        public string RegistryPath { get; set; }
+        public required string RegistryPath { get; set; }
 
         private ManagementEventWatcher watcher;
         private bool disposedValue;
