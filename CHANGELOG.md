@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Runtime environment from .NET Framework 4 to .NET 6
+- Switched from .NET 4 / WPF to WinUI 3 / .NET 7
+  - New modern looking graphical user interface (GUI)
+  - Auto light or dark mode depending on the central operating system settings
+  - Now two installers (with and without .NET framework)
+  - Significant code refactoring for better maintainability
+  - Updated many dependencies to the newest version
 
 
 ## [1.1.8368] (2022-11-29)
