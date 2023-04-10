@@ -71,7 +71,7 @@ jobs:
       run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false
       
     - name: Test solution
-      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\Release\net7.0-windows10.0.18362\win10-x64\AutoStartConfirmTests.dll"
+      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\Release\x64\net7.0-windows10.0.18362.0\win10-x64\AutoStartConfirmTests.dll"
     
     - uses: actions/upload-artifact@v2
       name: Upload artifacts
