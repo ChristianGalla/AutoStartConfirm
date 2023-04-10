@@ -58,7 +58,7 @@ jobs:
       
     - name: Get version number
       id: get-version-number
-      working-directory: .\build\publish\Release_win10-x64
+      working-directory: .\build\publish\Release_FrameworkDependent_win10-x64
       run: |
         $versionNumber=(Get-Item ".\AutoStartConfirm.exe" | Select-Object -ExpandProperty VersionInfo).FileVersion
         "version_number=$versionNumber" >> $env:GITHUB_OUTPUT
