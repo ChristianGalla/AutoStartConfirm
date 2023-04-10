@@ -26,7 +26,7 @@ jobs:
         run: |
           $v = "${{needs.build.outputs.version_number}}" -split "\."
           $semver = ($v | Select-Object -SkipLast 1) -join "."
-          gh release create "v${{needs.build.outputs.version_number}}" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup.msi AutoStartConfirmSetup_Standalone.msi
+          gh release create "v${{needs.build.outputs.version_number}}" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup_Standalone.msi AutoStartConfirmSetup_FrameworkDependent.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh        
