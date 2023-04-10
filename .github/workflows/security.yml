@@ -77,4 +77,4 @@ jobs:
       run: msbuild AutoStartConfirm.sln -property:Configuration=Release -p:UseSharedCompilation=false 
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
