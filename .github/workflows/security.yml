@@ -74,7 +74,7 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
     
     - name: Build solution
-      run: msbuild AutoStartConfirm.sln -property:Configuration=Release -p:UseSharedCompilation=false 
+      run: msbuild AutoStartConfirm.sln -p:UseSharedCompilation=false -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
