@@ -68,7 +68,7 @@ jobs:
       run: dotnet restore AutoStartConfirmTests\AutoStartConfirmTests.csproj
     
     - name: Build tests
-      run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -property:Configuration=Release
+      run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false
       
     - name: Test solution
       run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\Release\net7.0-windows10.0.18362\AutoStartConfirmTests.dll"
