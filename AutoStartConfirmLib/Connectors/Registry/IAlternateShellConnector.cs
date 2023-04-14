@@ -2,12 +2,7 @@
 
 namespace AutoStartConfirm.Connectors.Registry
 {
-    public interface IAlternateShellConnector : IAutoStartConnector
+    public interface IAlternateShellConnector : IAutoStartConnector, IRegistryConnector
     {
-        string BasePath { get; }
-        string DisableBasePath { get; }
-        bool MonitorSubkeys { get; }
-        string[] SubKeyNames { get; }
-        string[] ValueNames { get; }
     }
 }

@@ -24,9 +24,9 @@ namespace AutoStartConfirm.Connectors.Services
             return true;
         }
 
-        protected Thread watcher = null;
+        protected Thread? watcher = null;
 
-        private ConcurrentDictionary<string, AutoStartEntry> lastAutoStartEntries;
+        private ConcurrentDictionary<string, AutoStartEntry>? lastAutoStartEntries;
 
         protected ConcurrentDictionary<string, AutoStartEntry> LastAutoStartEntries
         {
@@ -81,7 +81,7 @@ namespace AutoStartConfirm.Connectors.Services
             return newAutoStart;
         }
 
-        protected bool IsEnabled(ServiceController sc)
+        protected static bool IsEnabled(ServiceController sc)
         {
             return sc.StartType == ServiceStartMode.Automatic ||
                 sc.StartType == ServiceStartMode.Boot ||
@@ -90,7 +90,7 @@ namespace AutoStartConfirm.Connectors.Services
 
         public bool IsEnabled(AutoStartEntry autoStart)
         {
-            if (!(autoStart is ServiceAutoStartEntry))
+            if (autoStart is not ServiceAutoStartEntry)
             {
                 throw new ArgumentException("AutoStartEntry has invalid type");
             }
@@ -180,23 +180,21 @@ namespace AutoStartConfirm.Connectors.Services
         public void EnableAutoStart(AutoStartEntry autoStart)
         {
             Logger.LogTrace("EnableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
-            if (!(autoStart is ServiceAutoStartEntry))
+            if (autoStart is not ServiceAutoStartEntry)
             {
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
             }
             var serviceAutoStart = (ServiceAutoStartEntry)autoStart;
             var targetMode = serviceAutoStart.EnabledStartMode.Value.ToString();
-            using (var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path)))
+            using var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path));
+            uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { targetMode });
+            if (returnCode != 0)
             {
-                uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { targetMode });
-                if (returnCode != 0)
-                {
-                    throw new Exception($"Failed to disable auto start (Return code: {returnCode})");
-                }
+                throw new Exception($"Failed to disable auto start (Return code: {returnCode})");
             }
         }
 
-        private CancellationTokenSource cancellationTokenSource;
+        private CancellationTokenSource? cancellationTokenSource;
 
         public void StartWatcher()
         {
@@ -262,7 +260,7 @@ namespace AutoStartConfirm.Connectors.Services
                 bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry? removedAutoStartEntry);
                 if (removed)
                 {
-                    RemoveHandler(removedAutoStartEntry);
+                    RemoveHandler(removedAutoStartEntry!);
                 }
             }
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
@@ -277,7 +275,7 @@ namespace AutoStartConfirm.Connectors.Services
                     }
                     continue;
                 }
-                if (oldAutoStart.Value != currentAutoStart.Value)
+                if (oldAutoStart!.Value != currentAutoStart.Value)
                 {
                     bool updated = LastAutoStartEntries.TryUpdate(currentAutoStart.Path, currentAutoStart, oldAutoStart);
                     if (updated)
@@ -337,7 +335,7 @@ namespace AutoStartConfirm.Connectors.Services
                 return;
             }
             Logger.LogTrace("Stopping watcher");
-            cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Cancel();
             watcher.Join();
             watcher = null;
             Logger.LogTrace("Stopped watcher");

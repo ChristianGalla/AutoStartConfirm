@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace AutoStartConfirm.Connectors {
     public interface IRegistryDisableService {
-        string DisableBasePath { get; set; }
+        string? DisableBasePath { get; set; }
 
-        event EnableChangeHandler Disable;
-        event EnableChangeHandler Enable;
+        event EnableChangeHandler? Disable;
+        event EnableChangeHandler? Enable;
 
         bool CanBeDisabled(AutoStartEntry autoStart);
         bool CanBeEnabled(AutoStartEntry autoStart);

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -55,8 +56,9 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public string Value {
+        public required string Value {
             get => value;
+            [MemberNotNull(nameof(value))]
             set {
                 if (this.value != value)
                 {
@@ -66,8 +68,9 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public string Path {
+        public required string Path {
             get => path;
+            [MemberNotNull(nameof(path))]
             set {
                 if (path != value)
                 {
@@ -77,7 +80,7 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public Category Category {
+        public required Category Category {
             get => category;
             set {
                 if (category != value)
@@ -243,7 +246,7 @@ namespace AutoStartConfirm.Models
             serializer.Serialize(ms, this);
             ms.Position = 0;
 
-            return (AutoStartEntry)serializer.Deserialize(ms);
+            return (AutoStartEntry)serializer.Deserialize(ms)!;
         }
 
         // This method is called by the Set accessor of each property.  

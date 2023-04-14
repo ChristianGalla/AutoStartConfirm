@@ -36,7 +36,7 @@ namespace AutoStartConfirm.GUI
     /// </summary>
     public sealed partial class SettingsPage : Page, ISubPage, IDisposable
     {
-        private bool disposedValue;
+        private bool disposedValue = false;
 
         public string NavTitile => "Settings";
 
@@ -46,7 +46,7 @@ namespace AutoStartConfirm.GUI
 
 #pragma warning disable CA2213 // Disposable fields should be disposed
         // Disposed by ServiceProvider
-        private ISettingsService settingsService;
+        private ISettingsService? settingsService;
 #pragma warning restore CA2213 // Disposable fields should be disposed
 
         public ISettingsService SettingsService {
@@ -56,7 +56,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private IAutoStartService autoStartService;
+        private IAutoStartService? autoStartService;
 
         public IAutoStartService AutoStartService
         {
@@ -67,7 +67,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private ILogger logger;
+        private ILogger? logger;
 
         public ILogger Logger
         {
@@ -78,7 +78,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private IAppStatus appStatus;
+        private IAppStatus? appStatus;
 
         public IAppStatus AppStatus
         {
@@ -153,10 +153,8 @@ namespace AutoStartConfirm.GUI
                 }
                 catch (Exception e)
                 {
-                    var message = "Failed to change own auto start";
-#pragma warning disable CA2254 // Template should be a static expression
+                    const string message = "Failed to change own auto start";
                     Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                     // MessageService.ShowError(message, e);
                 }
                 finally

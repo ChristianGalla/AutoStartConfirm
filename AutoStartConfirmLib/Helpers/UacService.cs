@@ -75,8 +75,8 @@ namespace AutoStartConfirm.Helpers
             {
                 if (isUacEnabled == null)
                 {
-                    using RegistryKey uacKey = Registry.LocalMachine.OpenSubKey(uacRegistryKey, false);
-                    isUacEnabled = uacKey.GetValue(uacRegistryValue).Equals(1);
+                    using RegistryKey uacKey = Registry.LocalMachine.OpenSubKey(uacRegistryKey, false)!;
+                    isUacEnabled = uacKey.GetValue(uacRegistryValue)?.Equals(1) ?? false;
                 }
                 return isUacEnabled.Value;
             }

@@ -8,9 +8,9 @@ namespace AutoStartConfirm.Connectors.Registry
 
         private readonly Category category = Category.AlternateShell;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot";
+        public const string basePath = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot";
 
-        private readonly string[] subKeys = null;
+        public const string[]? subKeys = null;
 
         private readonly string[] valueNames = new string[] { "AlternateShell" };
 
@@ -20,7 +20,7 @@ namespace AutoStartConfirm.Connectors.Registry
         {
         }
 
-        public override string DisableBasePath
+        public override string? DisableBasePath
         {
             get
             {
@@ -36,7 +36,7 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        public override string[] SubKeyNames
+        public override string[]? SubKeyNames
         {
             get
             {
@@ -44,7 +44,7 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        public override string[] ValueNames
+        public override string[]? ValueNames
         {
             get
             {

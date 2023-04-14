@@ -65,6 +65,10 @@ namespace AutoStartConfirm.Connectors
         // todo: migrate
         // todo: filter duplicate calls (rename etc.)
         private void OnChanged(object sender, FileSystemEventArgs e) {
+            if (e.Name == null)
+            {
+                return;
+            }
             if (e.ChangeType != WatcherChangeTypes.Changed ||
                 e.Name.ToLower() == "desktop.ini") {
                 return;
@@ -89,7 +93,12 @@ namespace AutoStartConfirm.Connectors
             //});
         }
 
-        private void OnCreated(object sender, FileSystemEventArgs e) {
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            if (e.Name == null)
+            {
+                return;
+            }
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }
@@ -106,7 +115,12 @@ namespace AutoStartConfirm.Connectors
             //});
         }
 
-        private void OnDeleted(object sender, FileSystemEventArgs e) {
+        private void OnDeleted(object sender, FileSystemEventArgs e)
+        {
+            if (e.Name == null)
+            {
+                return;
+            }
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }
@@ -123,7 +137,12 @@ namespace AutoStartConfirm.Connectors
             //});
         }
 
-        private void OnRenamed(object sender, RenamedEventArgs e) {
+        private void OnRenamed(object sender, RenamedEventArgs e)
+        {
+            if (e.Name == null)
+            {
+                return;
+            }
             if (e.Name.ToLower() == "desktop.ini") {
                 return;
             }

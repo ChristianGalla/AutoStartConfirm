@@ -47,10 +47,10 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Events
-        event AutoStartChangeHandler Add;
-        event AutoStartChangeHandler Remove;
-        event AutoStartChangeHandler Enable;
-        event AutoStartChangeHandler Disable;
+        event AutoStartChangeHandler? Add;
+        event AutoStartChangeHandler? Remove;
+        event AutoStartChangeHandler? Enable;
+        event AutoStartChangeHandler? Disable;
 
         #endregion
     }

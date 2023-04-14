@@ -47,15 +47,6 @@
                 <MenuFlyoutItem Command="{StaticResource ShowHideWindowCommand}" />
                 <MenuFlyoutItem Command="{StaticResource ExitApplicationCommand}" />
             </MenuFlyout>
-            <!--<controls:ContextMenu>
-                <controls:MenuItem
-                    Name="OwnAutoStartTaskbarMenuItem"
-                    IsCheckable="True"
-                    Click="OwnAutoStartClicked"
-                    Header="Start 'Auto Start Confirm' on logon of current user"
-                    IsChecked="{Binding Path=AppStatus.HasOwnAutoStart, Mode=OneWay}" />
-                <controls:MenuItem Header="Exit" Click="ExitClicked" />
-            </controls:ContextMenu>-->
         </tb:TaskbarIcon.ContextFlyout>
     </tb:TaskbarIcon>
 </ResourceDictionary>

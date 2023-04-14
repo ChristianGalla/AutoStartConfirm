@@ -8,13 +8,13 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         private readonly Category category = Category.ActiveSetup64;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components";
+        public const string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components";
 
-        private readonly string[] subKeys = null;
+        public const string[]? subKeys = null;
 
-        private readonly string[] valueNames = null;
+        public const string[]? valueNames = null;
 
-        public override string DisableBasePath
+        public override string? DisableBasePath
         {
             get
             {
@@ -41,7 +41,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] SubKeyNames
+        public override string[]? SubKeyNames
         {
             get
             {
@@ -49,7 +49,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] ValueNames
+        public override string[]? ValueNames
         {
             get
             {

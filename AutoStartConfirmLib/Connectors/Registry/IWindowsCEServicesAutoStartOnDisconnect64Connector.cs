@@ -2,12 +2,7 @@
 
 namespace AutoStartConfirm.Connectors.Registry
 {
-    public interface IWindowsCEServicesAutoStartOnDisconnect64Connector : IAutoStartConnector
+    public interface IWindowsCEServicesAutoStartOnDisconnect64Connector : IAutoStartConnector, IRegistryConnector
     {
-        string BasePath { get; }
-        string DisableBasePath { get; }
-        bool MonitorSubkeys { get; }
-        string[] SubKeyNames { get; }
-        string[] ValueNames { get; }
     }
 }

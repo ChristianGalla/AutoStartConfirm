@@ -24,10 +24,10 @@ namespace AutoStartConfirm.Connectors
     {
         private readonly ILogger<RegistryChangeMonitor> Logger;
 
-        public required string RegistryPath { get; set; }
+        public string? RegistryPath { get; set; }
 
-        private ManagementEventWatcher watcher;
-        private bool disposedValue;
+        private ManagementEventWatcher? watcher;
+        private bool disposedValue = false;
 
         public RegistryChangeMonitor(ILogger<RegistryChangeMonitor> logger)
         {
@@ -36,6 +36,10 @@ namespace AutoStartConfirm.Connectors
 
         private string GetQuery()
         {
+            if (RegistryPath == null)
+            {
+                throw new InvalidOperationException("RegistryPath not set");
+            }
             var splitted = RegistryPath.Split('\\', 2);
             var hive = splitted[0];
             var rootPath = splitted[1].Replace(@"\", @"\\");
@@ -46,7 +50,7 @@ namespace AutoStartConfirm.Connectors
                 // => Monitor current user in HKEY_USERS instead
                 hive = "HKEY_USERS";
                 var currentUser = WindowsIdentity.GetCurrent();
-                rootPath = $"{currentUser.User.Value}\\\\{rootPath}";
+                rootPath = $"{currentUser.User!.Value}\\\\{rootPath}";
             }
 
             return $"SELECT * FROM RegistryTreeChangeEvent " +
@@ -56,7 +60,7 @@ namespace AutoStartConfirm.Connectors
 
         public bool Monitoring => watcher != null;
 
-        public event RegistryChangeHandler Changed;
+        public event RegistryChangeHandler? Changed;
 
 
         public void Start()
@@ -81,8 +85,7 @@ namespace AutoStartConfirm.Connectors
             }
             catch (Exception ex)
             {
-                var message = "Failed to start watcher for {RegistryPath}";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to start watcher for {RegistryPath}";
                 if (ex is ManagementException manEx)
                 {
                     if (manEx.ErrorCode == ManagementStatus.NotFound)
@@ -96,7 +99,6 @@ namespace AutoStartConfirm.Connectors
                     return;
                 }
                 Logger.LogError(ex, message, RegistryPath);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception($"Failed to start watcher for {RegistryPath}");
             }
         }

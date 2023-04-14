@@ -39,13 +39,13 @@ namespace AutoStartConfirm.GUI
     /// </summary>
     public sealed partial class MainPage : Page, ISubPage, IDisposable
     {
-        private bool disposedValue;
+        private bool disposedValue = false;
 
         public string NavTitile => "Auto Start Confirm";
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
-        private IAutoStartService autoStartService;
+        private IAutoStartService? autoStartService;
 
         public IAutoStartService AutoStartService
         {
@@ -56,7 +56,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private ILogger logger;
+        private ILogger? logger;
 
         public ILogger Logger
         {
@@ -67,7 +67,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private IAppStatus appStatus;
+        private IAppStatus? appStatus;
 
         public IAppStatus AppStatus
         {
@@ -78,7 +78,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private IMessageService messageService;
+        private IMessageService? messageService;
 
         public IMessageService MessageService
         {
@@ -89,7 +89,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private AdvancedCollectionView autoStartCollectionView;
+        private AdvancedCollectionView? autoStartCollectionView;
 
         public AdvancedCollectionView AutoStartCollectionView
         {
@@ -104,7 +104,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private AdvancedCollectionView historyAutoStartCollectionView;
+        private AdvancedCollectionView? historyAutoStartCollectionView;
 
         public AdvancedCollectionView HistoryAutoStartCollectionView
         {
@@ -127,12 +127,12 @@ namespace AutoStartConfirm.GUI
             AutoStartCollectionView.PropertyChanged += AutoStartCollectionView_PropertyChanged;
         }
 
-        private void CurrentAutoStarts_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void CurrentAutoStarts_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             Logger.LogDebug("CurrentAutoStarts_CollectionChanged invoked");
         }
 
-        public void AutoStartCollectionView_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public void AutoStartCollectionView_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Logger.LogDebug("AutoStartCollectionView_PropertyChanged invoked");
         }

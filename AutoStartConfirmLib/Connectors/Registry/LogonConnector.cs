@@ -7,9 +7,9 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         private readonly Category category = Category.Winlogon;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon";
+        public const string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon";
 
-        private readonly string[] subKeys = null;
+        public const string[]? subKeys = null;
 
         private readonly string[] valueNames = new string[] { "VmApplet", "Userinit", "Shell", "TaskMan", "AppSetup" };
 
@@ -19,7 +19,7 @@ namespace AutoStartConfirm.Connectors.Registry {
         {
         }
 
-        public override string DisableBasePath
+        public override string? DisableBasePath
         {
             get
             {
@@ -35,7 +35,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] SubKeyNames
+        public override string[]? SubKeyNames
         {
             get
             {
@@ -43,7 +43,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] ValueNames
+        public override string[]? ValueNames
         {
             get
             {

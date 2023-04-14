@@ -15,9 +15,9 @@ namespace AutoStartConfirm.Connectors
     public class RegistryDisableService : IDisposable, IRegistryDisableService
     {
 
-        private string disableBasePath;
+        private string? disableBasePath;
 
-        public string DisableBasePath {
+        public string? DisableBasePath {
             get => disableBasePath;
             set {
                 disableBasePath = value;
@@ -30,8 +30,8 @@ namespace AutoStartConfirm.Connectors
         protected static readonly byte[] defaultEnabledByteArray = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         protected static readonly byte[] defaultDisabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
-        private Dictionary<string, bool> lastEnableStatus;
-        protected IRegistryChangeMonitor RegistryChangeMonitor;
+        private Dictionary<string, bool>? lastEnableStatus;
+        protected IRegistryChangeMonitor? RegistryChangeMonitor;
 
         public RegistryDisableService(ILogger<RegistryDisableService> logger, IRegistryChangeMonitor registryChangeMonitor)
         {
@@ -40,7 +40,7 @@ namespace AutoStartConfirm.Connectors
             RegistryChangeMonitor.Changed += ChangeHandler;
         }
 
-        private RegistryKey GetBaseRegistry(string basePath)
+        private static RegistryKey GetBaseRegistry(string basePath)
         {
             RegistryKey registryKey;
             if (basePath.StartsWith("HKEY_LOCAL_MACHINE"))
@@ -75,7 +75,6 @@ namespace AutoStartConfirm.Connectors
         {
             try
             {
-
                 DisableAutoStart(autoStart, true);
                 return true;
             }
@@ -133,8 +132,8 @@ namespace AutoStartConfirm.Connectors
             {
                 throw new ArgumentException($"Failed to get key \"{subKeyPath}\"");
             }
-            object currentValue = key.GetValue(valueName, null);
-            byte[] currentValueByteArray = null;
+            object? currentValue = key.GetValue(valueName, null);
+            byte[]? currentValueByteArray = null;
             if (currentValue == null)
             {
                 if (enable)
@@ -143,7 +142,7 @@ namespace AutoStartConfirm.Connectors
                 }
                 currentValueByteArray = defaultEnabledByteArray;
             }
-            else if (currentValue != null)
+            else
             {
                 var currentValueKind = key.GetValueKind(valueName);
                 if (currentValueKind != RegistryValueKind.Binary)
@@ -184,7 +183,7 @@ namespace AutoStartConfirm.Connectors
                 var name = newStatus.Key;
                 var nowEnabled = newStatus.Value;
                 var wasEnabled = true;
-                if (lastEnableStatus.ContainsKey(name))
+                if (lastEnableStatus!.ContainsKey(name))
                 {
                     wasEnabled = lastEnableStatus[name];
                 }
@@ -200,7 +199,7 @@ namespace AutoStartConfirm.Connectors
                     }
                 }
             }
-            foreach (var lastStatus in lastEnableStatus)
+            foreach (var lastStatus in lastEnableStatus!)
             {
                 var name = lastStatus.Key;
                 var wasEnabled = lastStatus.Value;
@@ -335,8 +334,8 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Events
-        public event EnableChangeHandler Enable;
-        public event EnableChangeHandler Disable;
+        public event EnableChangeHandler? Enable;
+        public event EnableChangeHandler? Disable;
         #endregion
     }
 }

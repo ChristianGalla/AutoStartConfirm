@@ -35,8 +35,8 @@ namespace AutoStartConfirm.GUI
             ToggleMainWindow?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler Exit;
+        public event EventHandler? Exit;
 
-        public event EventHandler ToggleMainWindow;
+        public event EventHandler? ToggleMainWindow;
     }
 }

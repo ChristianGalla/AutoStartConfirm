@@ -86,18 +86,5 @@ namespace AutoStartConfirm.GUI
 
         #endregion
 
-        #region events
-
-        public event AutoStartsActionHandler? ConfirmAdd;
-        public event AutoStartsActionHandler? RevertAdd;
-        public event AutoStartsActionIdHandler? RevertAddId;
-        public event AutoStartsActionHandler? Enable;
-        public event AutoStartsActionHandler? Disable;
-        public event AutoStartsActionHandler? ConfirmRemove;
-        public event AutoStartsActionHandler? RevertRemove;
-        public event AutoStartsActionIdHandler? RevertRemoveId;
-        public event EventHandler? ToggleOwnAutoStart;
-        #endregion
-
     }
 }

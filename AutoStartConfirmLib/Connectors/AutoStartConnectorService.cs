@@ -26,7 +26,7 @@ namespace AutoStartConfirm.Connectors
 
         private readonly Dictionary<Category, IAutoStartConnector> AllConnectors = new();
 
-        private Dictionary<Category, IAutoStartConnector> enabledConnectors;
+        private Dictionary<Category, IAutoStartConnector>? enabledConnectors;
 
         public Dictionary<Category, IAutoStartConnector> EnabledConnectors {
             get {

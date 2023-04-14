@@ -2,9 +2,7 @@
 
 namespace AutoStartConfirm.Connectors.Folder
 {
-    public interface IStartMenuAutoStartFolderConnector: IAutoStartConnector
+    public interface IStartMenuAutoStartFolderConnector: IAutoStartConnector, IFolderConnector
     {
-        string BasePath { get; }
-        string DisableBasePath { get; }
     }
 }

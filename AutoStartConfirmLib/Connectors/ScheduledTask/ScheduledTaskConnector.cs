@@ -19,9 +19,9 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             return true;
         }
 
-        protected Thread watcher = null;
+        protected Thread? watcher = null;
 
-        private ConcurrentDictionary<string, AutoStartEntry> lastAutoStartEntries;
+        private ConcurrentDictionary<string, AutoStartEntry>? lastAutoStartEntries;
 
         protected ConcurrentDictionary<string, AutoStartEntry> LastAutoStartEntries
         {
@@ -98,7 +98,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             }
         }
 
-        private CancellationTokenSource cancellationTokenSource;
+        private CancellationTokenSource? cancellationTokenSource;
 
         public void StartWatcher()
         {
@@ -164,7 +164,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 bool removed = LastAutoStartEntries.TryRemove(autoStartToRemove.Path, out AutoStartEntry? removedAutoStartEntry);
                 if (removed)
                 {
-                    RemoveHandler(removedAutoStartEntry);
+                    RemoveHandler(removedAutoStartEntry!);
                 }
             }
             foreach (AutoStartEntry currentAutoStart in currentAutoStarts)
@@ -179,7 +179,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     }
                     continue;
                 }
-                if (oldAutoStart.Value != currentAutoStart.Value)
+                if (oldAutoStart!.Value != currentAutoStart.Value)
                 {
                     bool updated = LastAutoStartEntries.TryUpdate(currentAutoStart.Path, currentAutoStart, oldAutoStart);
                     if (updated)
@@ -239,7 +239,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                 return;
             }
             Logger.LogTrace("Stopping watcher");
-            cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Cancel();
             watcher.Join();
             watcher = null;
             Logger.LogTrace("Stopped watcher");

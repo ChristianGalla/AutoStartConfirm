@@ -23,7 +23,7 @@ namespace AutoStartConfirm.GUI
 
         private readonly IDispatchService DispatchService;
 
-        private MainWindow window = null;
+        private MainWindow? window = null;
 
         private MainWindow Window
         {

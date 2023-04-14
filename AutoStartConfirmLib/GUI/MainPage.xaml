@@ -10,15 +10,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:AutoStartConfirm.Models"
-    xmlns:myConverters="using:AutoStartConfirm.Converters"
     d:DataContext="{d:DesignInstance Type=models:AutoStartEntry}"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Page.Resources>
-        <myConverters:ProgressBarVisibilityConverter x:Key="ProgressBarVisibilityConverter" />
-        <myConverters:BusyCursorConverter x:Key="BusyCursorConverter" />
-    </Page.Resources>
 
     <Grid Margin="24">
 

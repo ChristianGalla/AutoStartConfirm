@@ -199,10 +199,8 @@ namespace AutoStartConfirm
                 }
                 catch (Exception e)
                 {
-                    var message = "Failed to change own auto start";
-#pragma warning disable CA2254 // Template should be a static expression
+                    const string message = "Failed to change own auto start";
                     Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                     MessageService.ShowError(message, e);
                 }
                 finally
@@ -280,19 +278,17 @@ namespace AutoStartConfirm
         private AutoStartEntry LoadAutoStartFromFile(string path)
         {
             Logger.LogTrace("LoadAutoStartFromFile called");
-            using (Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read))
+            using Stream stream = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read);
+            try
             {
-                try
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(AutoStartEntry));
-                    var ret = (AutoStartEntry)serializer.Deserialize(stream);
-                    return ret;
-                }
-                catch (Exception ex)
-                {
-                    var err = new Exception("Failed to deserialize", ex);
-                    throw err;
-                }
+                XmlSerializer serializer = new(typeof(AutoStartEntry));
+                var ret = (AutoStartEntry?)serializer.Deserialize(stream) ?? throw new InvalidDataException("File is empty");
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                var err = new Exception("Failed to deserialize", ex);
+                throw err;
             }
         }
 
@@ -341,17 +337,13 @@ namespace AutoStartConfirm
             }
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
-        public void ShowAdd(Guid id)
-#pragma warning restore IDE0060 // Remove unused parameter
+        public void ShowAdd(Guid _)
         {
             // todo: jump to added
             Logger.LogTrace("ShowAdd called");
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
-        public void ShowRemoved(Guid id)
-#pragma warning restore IDE0060 // Remove unused parameter
+        public void ShowRemoved(Guid _)
         {
             // todo: jump to removed
             Logger.LogTrace("ShowRemoved called");
@@ -642,13 +634,13 @@ namespace AutoStartConfirm
             ToggleOwnAutoStart();
         }
 
-        private void IconDoubleClicked(object sender, ExecuteRequestedEventArgs args)
-        {
-            ToggleMainWindow();
-        }
+        //private void IconDoubleClicked(object sender, ExecuteRequestedEventArgs args)
+        //{
+        //    ToggleMainWindow();
+        //}
 
         #region Event handlers
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             NotifyIcon.Exit += ExitHandler;
             NotifyIcon.ToggleMainWindow += ToggleMainWindowHandler;

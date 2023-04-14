@@ -29,19 +29,23 @@ namespace AutoStartConfirm.GUI
     {
         public string NavTitile => "About";
 
+#pragma warning disable CA1822 // Mark members as static
         public string Version
+#pragma warning restore CA1822 // Mark members as static
         {
             get
             {
-                return Assembly.GetEntryAssembly().GetName().Version.ToString();
+                return Assembly.GetEntryAssembly()!.GetName().Version!.ToString();
             }
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public string Copyright
+#pragma warning restore CA1822 // Mark members as static
         {
             get
             {
-                var attribute = (AssemblyCopyrightAttribute)Assembly.GetEntryAssembly().GetCustomAttribute(typeof(AssemblyCopyrightAttribute));
+                var attribute = (AssemblyCopyrightAttribute)Assembly.GetEntryAssembly()!.GetCustomAttribute(typeof(AssemblyCopyrightAttribute))!;
                 return attribute.Copyright;
             }
         }

@@ -28,9 +28,9 @@ namespace AutoStartConfirm
     public static class Program
     {
         private static int activationCount = 1;
-        public static List<string> OutputStack { get; private set; }
+        public static List<string> OutputStack { get; private set; } = new();
 
-        private static ServiceProvider ServiceProvider;
+        private static ServiceProvider? ServiceProvider;
 
         // Replaces the standard App.g.i.cs.
         // Note: We can't declare Main to be async because in a WinUI app
@@ -41,8 +41,6 @@ namespace AutoStartConfirm
             try
             {
                 WinRT.ComWrappersSupport.InitializeComWrappers();
-
-                OutputStack = new();
 
                 bool isRedirect = DecideRedirection();
                 if (!isRedirect)
@@ -123,7 +121,7 @@ namespace AutoStartConfirm
 
         #region Report helpers
 
-        public static void ReportInfo(string message)
+        public static void ReportInfo(string _)
         {
             // If we already have a form, display the message now.
             // Otherwise, add it to the collection for displaying later.
@@ -143,7 +141,7 @@ namespace AutoStartConfirm
             ReportInfo($"called from {callSite}");
             if (args.Data is IFileActivatedEventArgs fileArgs)
             {
-                IStorageItem item = fileArgs.Files.FirstOrDefault();
+                IStorageItem? item = fileArgs.Files.ElementAtOrDefault(0);
                 if (item is StorageFile file)
                 {
                     ReportInfo($"file: {file.Name}");
@@ -168,7 +166,7 @@ namespace AutoStartConfirm
             }
         }
 
-        private static void OnActivated(object sender, AppActivationArguments args)
+        private static void OnActivated(object? sender, AppActivationArguments args)
         {
             ExtendedActivationKind kind = args.Kind;
             if (kind == ExtendedActivationKind.Launch)
@@ -206,7 +204,7 @@ namespace AutoStartConfirm
             {
                 if (args.Data is IFileActivatedEventArgs fileArgs)
                 {
-                    IStorageItem file = fileArgs.Files.FirstOrDefault();
+                    IStorageItem? file = fileArgs.Files.ElementAtOrDefault(0);
                     if (file != null)
                     {
                         ReportInfo(file.Name);
@@ -274,8 +272,6 @@ namespace AutoStartConfirm
 
             return isRedirect;
         }
-
-        private static IntPtr redirectEventHandle = IntPtr.Zero;
 
         // Do the redirection on another thread, and use a non-blocking
         // wait method to wait for the redirection to complete.

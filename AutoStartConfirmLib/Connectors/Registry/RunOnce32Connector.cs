@@ -7,11 +7,11 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         private readonly Category category = Category.RunOnce32;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce";
+        public const string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce";
 
-        private readonly string[] subKeys = null;
+        public const string[]? subKeys = null;
 
-        private readonly string[] valueNames = null;
+        public const string[]? valueNames = null;
 
         private readonly bool monitorSubkeys = true;
 
@@ -19,7 +19,7 @@ namespace AutoStartConfirm.Connectors.Registry {
         {
         }
 
-        public override string DisableBasePath
+        public override string? DisableBasePath
         {
             get
             {
@@ -35,7 +35,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] SubKeyNames
+        public override string[]? SubKeyNames
         {
             get
             {
@@ -43,7 +43,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] ValueNames
+        public override string[]? ValueNames
         {
             get
             {

@@ -57,10 +57,8 @@ namespace AutoStartConfirm.Update
             }
             catch (Exception e)
             {
-                var message = "Failed to get newest release from GitHub";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to get newest release from GitHub";
                 Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, e);
             }
         }
@@ -77,10 +75,8 @@ namespace AutoStartConfirm.Update
             }
             catch (Exception e)
             {
-                var message = "Failed to parse release tag version";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to parse release tag version";
                 Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, e);
             }
         }
@@ -90,7 +86,7 @@ namespace AutoStartConfirm.Update
             try
             {
                 Logger.LogTrace("GetCurrentVersion called");
-                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                var version = Assembly.GetExecutingAssembly().GetName().Version!;
                 var semverVersionString = $"{version.Major}.{version.Minor}.{version.Build}";
                 var semverVersion = SemVersion.Parse(semverVersionString, SemVersionStyles.Strict);
                 Logger.LogTrace("GetCurrentVersion finished");
@@ -98,10 +94,8 @@ namespace AutoStartConfirm.Update
             }
             catch (Exception e)
             {
-                var message = "Failed to get current version";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to get current version";
                 Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, e);
             }
         }
@@ -141,7 +135,7 @@ namespace AutoStartConfirm.Update
                     Logger.LogInformation("There is a new patch version {version} available", newestSemverVersion);
                 }
 
-                string msiUrl = null;
+                string? msiUrl = null;
                 foreach (var asset in newestRelease.Assets)
                 {
                     if (asset.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase))
@@ -156,10 +150,8 @@ namespace AutoStartConfirm.Update
             }
             catch (Exception e)
             {
-                var message = "Failed to check for updates";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to check for updates";
                 Logger.LogError(e, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, e); ;
             }
         }

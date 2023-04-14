@@ -74,22 +74,22 @@ namespace AutoStartConfirm.Properties
         /// <summary>
         /// Occurs before the value of an application settings property is changed.
         /// </summary>
-        public event SettingChangingEventHandler SettingChanging;
+        public event SettingChangingEventHandler? SettingChanging;
 
         /// <summary>
         /// Occurs after the value of an application settings property is changed.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Occurs before values are saved to the data store.
         /// </summary>
-        public event SettingsSavingEventHandler SettingsSaving;
+        public event SettingsSavingEventHandler? SettingsSaving;
 
         /// <summary>
         /// Occurs after the application settings are retrieved from storage.
         /// </summary>
-        public event SettingsLoadedEventHandler SettingsLoaded;
+        public event SettingsLoadedEventHandler? SettingsLoaded;
 
         /// <summary>
         /// Stores the current values of the application settings properties.
@@ -109,7 +109,7 @@ namespace AutoStartConfirm.Properties
             SettingChanging?.Invoke(sender, e);
         }
 
-        private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e) {
+        private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e) {
             PropertyChanged?.Invoke(sender, e);
         }
 

@@ -33,7 +33,7 @@ namespace AutoStartConfirm.Connectors
 
         private readonly IAutoStartConnectorService ConnectorService;
 
-        private string currentExePath;
+        private string? currentExePath;
 
         public string CurrentExePath {
             get {
@@ -594,10 +594,8 @@ namespace AutoStartConfirm.Connectors
                 }
                 return ret ?? new ObservableCollection<AutoStartEntry>();
             } catch (Exception ex) {
-                var message = "Failed to load last auto starts";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to load last auto starts";
                 Logger.LogError(ex, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, ex); ;
             }
         }
@@ -611,10 +609,8 @@ namespace AutoStartConfirm.Connectors
                 SaveAutoStarts(PathToHistoryAutoStarts, AllHistoryAutoStarts);
                 Logger.LogInformation("Saved all auto starts");
             } catch (Exception ex) {
-                var message = "Failed to save current auto starts";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to save current auto starts";
                 Logger.LogError(ex, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, ex); ;
             }
         }
@@ -753,10 +749,8 @@ namespace AutoStartConfirm.Connectors
                 }
                 Logger.LogTrace("LoadCurrentAutoStarts finished");
             } catch (Exception ex) {
-                var message = "Failed to compare current auto starts to last saved";
-#pragma warning disable CA2254 // Template should be a static expression
+                const string message = "Failed to compare current auto starts to last saved";
                 Logger.LogError(ex, message);
-#pragma warning restore CA2254 // Template should be a static expression
                 throw new Exception(message, ex);
             }
         }
@@ -976,14 +970,18 @@ namespace AutoStartConfirm.Connectors
                 }
             });
         }
+
         #endregion
 
         #region IDisposable Support
         private bool disposedValue = false;
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     if (SettingSaveTimer.Enabled)
                     {
                         SettingsService.Save();
@@ -1000,11 +998,13 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose() {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

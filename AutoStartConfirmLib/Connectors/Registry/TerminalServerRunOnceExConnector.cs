@@ -7,10 +7,10 @@ namespace AutoStartConfirm.Connectors.Registry {
 
         private readonly Category category = Category.TerminalServerRunOnceEx;
 
-        private readonly string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx";
-        private readonly string[] subKeys = null;
+        public const string basePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx";
+        public const string[]? subKeys = null;
 
-        private readonly string[] valueNames = null;
+        public const string[]? valueNames = null;
 
         private readonly bool monitorSubkeys = true;
 
@@ -18,7 +18,7 @@ namespace AutoStartConfirm.Connectors.Registry {
         {
         }
 
-        public override string DisableBasePath
+        public override string? DisableBasePath
         {
             get
             {
@@ -34,7 +34,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] SubKeyNames
+        public override string[]? SubKeyNames
         {
             get
             {
@@ -42,7 +42,7 @@ namespace AutoStartConfirm.Connectors.Registry {
             }
         }
 
-        public override string[] ValueNames
+        public override string[]? ValueNames
         {
             get
             {
