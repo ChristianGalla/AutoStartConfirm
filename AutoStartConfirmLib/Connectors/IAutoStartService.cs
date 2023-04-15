@@ -45,21 +45,27 @@ namespace AutoStartConfirm.Connectors {
         event AutoStartChangeHandler Disable;
         event AutoStartChangeHandler Enable;
         event AutoStartChangeHandler Remove;
-
-        void AddAutoStart(AutoStartEntry autoStart);
-        void AddAutoStart(Guid Id);
         bool CanAutoStartBeAdded(AutoStartEntry autoStart);
         bool CanAutoStartBeDisabled(AutoStartEntry autoStart);
         bool CanAutoStartBeEnabled(AutoStartEntry autoStart);
         bool CanAutoStartBeRemoved(AutoStartEntry autoStart);
-        void ConfirmAdd(AutoStartEntry autoStart);
-        void ConfirmAdd(Guid Id);
-        void ConfirmRemove(AutoStartEntry autoStart);
-        void ConfirmRemove(Guid Id);
-        void DisableAutoStart(AutoStartEntry autoStart);
-        void DisableAutoStart(Guid Id);
-        void EnableAutoStart(AutoStartEntry autoStart);
-        void EnableAutoStart(Guid Id);
+
+        #region AutoStart changes
+        // todo: set default values
+        Task AddAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
+        Task AddAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
+        Task ConfirmAdd(AutoStartEntry autoStart);
+        Task ConfirmAdd(Guid Id);
+        Task ConfirmRemove(AutoStartEntry autoStart);
+        Task ConfirmRemove(Guid Id);
+        Task DisableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
+        Task DisableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
+        Task EnableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
+        Task EnableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
+        Task RemoveAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
+        Task RemoveAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
+        Task ToggleOwnAutoStart(bool showDialogsAndCatchErrors = true);
+        #endregion
 
         /// <summary>
         /// Checks if a valid file containing auto starts of a previous run exists.
@@ -74,8 +80,6 @@ namespace AutoStartConfirm.Connectors {
         Task<bool> LoadCanBeEnabled(AutoStartEntry autoStart);
         Task<bool> LoadCanBeRemoved(AutoStartEntry autoStart);
         void LoadCurrentAutoStarts();
-        void RemoveAutoStart(AutoStartEntry autoStart);
-        void RemoveAutoStart(Guid Id);
         void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart);
         void ResetEditablePropertiesOfAllHistoryAutoStarts();
         void ResetEditablePropertiesOfAllCurrentAutoStarts();
@@ -87,6 +91,5 @@ namespace AutoStartConfirm.Connectors {
         bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool IsOwnAutoStart(AutoStartEntry autoStart);
-        void ToggleOwnAutoStart();
     }
 }

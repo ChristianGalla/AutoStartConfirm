@@ -1,5 +1,6 @@
 ﻿using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.GUI;
 using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Xml.Serialization;
+using static AutoStartConfirm.GUI.IMessageService;
 
 namespace AutoStartConfirm.Connectors
 {
@@ -32,6 +34,10 @@ namespace AutoStartConfirm.Connectors
         private readonly ILogger<AutoStartService> Logger;
 
         private readonly IAutoStartConnectorService ConnectorService;
+
+        private readonly IMessageService MessageService;
+
+        public readonly IAppStatus AppStatus;
 
         private string? currentExePath;
 
@@ -132,14 +138,18 @@ namespace AutoStartConfirm.Connectors
             ISettingsService settingsService,
             ICurrentUserRun64Connector currentUserRun64Connector,
             IDispatchService dispatchService,
-            IUacService uacService
+            IUacService uacService,
+            IMessageService messageService,
+            IAppStatus appStatus
         ) {
             Logger = logger;
             ConnectorService = connectorService;
             SettingsService = settingsService;
+            MessageService = messageService;
             CurrentUserRun64Connector = currentUserRun64Connector;
             DispatchService = dispatchService;
             UacService = uacService;
+            AppStatus = appStatus;
             SettingSaveTimer = new(1000)
             {
                 AutoReset = false
@@ -228,136 +238,378 @@ namespace AutoStartConfirm.Connectors
             return false;
         }
 
+        #region AutoStart changes
 
-        public void ConfirmAdd(Guid Id) {
-            Logger.LogTrace("ConfirmAdd called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? addedAutoStart)) {
-                addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
-                HistoryAutoStartChange?.Invoke(addedAutoStart);
-            }
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? currentAutoStart)) {
-                currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
-                Confirm?.Invoke(currentAutoStart);
-                CurrentAutoStartChange?.Invoke(currentAutoStart);
-                Logger.LogInformation("Confirmed add of {@addedAutoStart}", addedAutoStart);
-            }
+        public async Task ConfirmAdd(Guid Id) {
+            await Task.Run(() => {
+                Logger.LogTrace("ConfirmAdd called for {AutoStartId}", Id);
+                if (TryGetHistoryAutoStart(Id, out AutoStartEntry? addedAutoStart))
+                {
+                    addedAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                    HistoryAutoStartChange?.Invoke(addedAutoStart);
+                }
+                if (TryGetCurrentAutoStart(Id, out AutoStartEntry? currentAutoStart))
+                {
+                    currentAutoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                    Confirm?.Invoke(currentAutoStart);
+                    CurrentAutoStartChange?.Invoke(currentAutoStart);
+                    Logger.LogInformation("Confirmed add of {@addedAutoStart}", addedAutoStart);
+                }
+            });
         }
 
-        public void ConfirmRemove(Guid Id) {
-            Logger.LogTrace("ConfirmRemove called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
-                autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
-                HistoryAutoStartChange?.Invoke(autoStart);
-                Logger.LogInformation("Confirmed remove of {@autoStart}", autoStart);
-            }
+        public async Task ConfirmRemove(Guid Id)
+        {
+            await Task.Run(() => {
+                Logger.LogTrace("ConfirmRemove called for {AutoStartId}", Id);
+                if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
+                    autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
+                    HistoryAutoStartChange?.Invoke(autoStart);
+                    Logger.LogInformation("Confirmed remove of {@autoStart}", autoStart);
+                }
+            });
         }
 
-        public void ConfirmAdd(AutoStartEntry autoStart) {
+        public async Task ConfirmAdd(AutoStartEntry autoStart) {
             autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
-            ConfirmAdd(autoStart.Id);
+            await ConfirmAdd(autoStart.Id);
         }
 
-        public void ConfirmRemove(AutoStartEntry autoStart) {
+        public async Task ConfirmRemove(AutoStartEntry autoStart) {
             autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
-            ConfirmRemove(autoStart.Id);
+            await ConfirmRemove(autoStart.Id);
         }
 
-        public void RemoveAutoStart(Guid Id) {
+        public async Task RemoveAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
             Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", Id);
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
-                RemoveAutoStart(autoStart);
-            }
-        }
-
-        public void RemoveAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", autoStart.Id);
-            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
-            {
-                StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                await RemoveAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
             {
-                if (ConnectorService.CanBeEnabled(autoStart))
+                const string message = "AutoStart not found";
+                Logger.LogError("AutoStart {id} not found", Id);
+                if (showDialogsAndCatchErrors)
                 {
-                    // remove disabled status to allow new entries for example at the same registry key in the future
-                    ConnectorService.EnableAutoStart(autoStart);
+                    await MessageService.ShowError(message);
                 }
-                ConnectorService.RemoveAutoStart(autoStart);
+                else
+                {
+                    throw new Exception(message);
+                }
             }
-            autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-            Logger.LogInformation("Removed {@autoStart}", autoStart);
         }
 
-        public void DisableAutoStart(Guid Id) {
+        public async Task RemoveAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true)
+        {
+            try
+            {
+                AppStatus.IncrementRunningActionCount();
+                Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", autoStart.Id);
+                if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(autoStart, AutoStartAction.Remove))
+                {
+                    return;
+                }
+                if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+                {
+                    await StartSubProcessAsAdmin(autoStart, RevertAddParameterName);
+                }
+                else
+                {
+                    if (ConnectorService.CanBeEnabled(autoStart))
+                    {
+                        // remove disabled status to allow new entries for example at the same registry key in the future
+                        ConnectorService.EnableAutoStart(autoStart);
+                    }
+                    ConnectorService.RemoveAutoStart(autoStart);
+                }
+                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.LogInformation("Removed {@autoStart}", autoStart);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowSuccess(autoStart, AutoStartAction.Remove);
+                }
+            }
+            catch (Exception e)
+            {
+                const string message = "Failed to remove auto start";
+                Logger.LogError(e, message);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message, e);
+                }
+                else
+                {
+                    throw new Exception(message, e);
+                }
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
+        }
+
+        public async Task DisableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
             Logger.LogTrace("DisableAutoStart called for {AutoStartId}", Id);
             if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
-                DisableAutoStart(autoStart);
-            }
-        }
-
-        public void DisableAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("DisableAutoStart called for {AutoStartId}", autoStart.Id);
-            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
-            {
-                StartSubProcessAsAdmin(autoStart, DisableParameterName);
+                await DisableAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
             {
-                ConnectorService.DisableAutoStart(autoStart);
+                const string message = "AutoStart not found";
+                Logger.LogError("AutoStart {id} not found", Id);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message);
+                }
+                else
+                {
+                    throw new Exception(message);
+                }
             }
-            autoStart.ConfirmStatus = ConfirmStatus.Disabled;
-            Logger.LogInformation("Disabled {@autoStart}", autoStart);
         }
 
-        public void AddAutoStart(Guid Id) {
+        public async Task DisableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true)
+        {
+            try
+            {
+                AppStatus.IncrementRunningActionCount();
+                Logger.LogTrace("DisableAutoStart called for {AutoStartId}", autoStart.Id);
+                if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(autoStart, AutoStartAction.Disable))
+                {
+                    return;
+                }
+                if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+                {
+                    await StartSubProcessAsAdmin(autoStart, DisableParameterName);
+                }
+                else
+                {
+                    ConnectorService.DisableAutoStart(autoStart);
+                }
+                autoStart.ConfirmStatus = ConfirmStatus.Disabled;
+                Logger.LogInformation("Disabled {@autoStart}", autoStart);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowSuccess(autoStart, AutoStartAction.Disable);
+                }
+            }
+            catch (Exception e)
+            {
+                const string message = "Failed to disable auto start";
+                Logger.LogError(e, message);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message, e);
+                }
+                else
+                {
+                    throw new Exception(message, e);
+                }
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
+        }
+
+        public async Task AddAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
             Logger.LogTrace("AddAutoStart called for {AutoStartId}", Id);
             if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
-                AddAutoStart(autoStart);
-            }
-        }
-
-        public void AddAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("AddAutoStart called for {AutoStartId}", autoStart.Id);
-            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
-            {
-                StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                await AddAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
             {
-                ConnectorService.AddAutoStart(autoStart);
-                try
+                const string message = "AutoStart not found";
+                Logger.LogError("AutoStart {id} not found", Id);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message);
+                }
+                else
+                {
+                    throw new Exception(message);
+                }
+            }
+        }
+
+        public async Task AddAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true)
+        {
+            try
+            {
+                AppStatus.IncrementRunningActionCount();
+                Logger.LogTrace("AddAutoStart called for {AutoStartId}", autoStart.Id);
+                if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(autoStart, AutoStartAction.Add))
+                {
+                    return;
+                }
+                if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+                {
+                    await StartSubProcessAsAdmin(autoStart, RevertRemoveParameterName);
+                }
+                else
+                {
+                    ConnectorService.AddAutoStart(autoStart);
+                    try
+                    {
+                        ConnectorService.EnableAutoStart(autoStart);
+                    }
+                    catch (AlreadySetException)
+                    {
+
+                    }
+                }
+                autoStart.ConfirmStatus = ConfirmStatus.Reverted;
+                Logger.LogInformation("Added {@autoStart}", autoStart);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowSuccess(autoStart, AutoStartAction.Add);
+                }
+            }
+            catch (Exception e)
+            {
+                const string message = "Failed to add auto start";
+                Logger.LogError(e, message);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message, e);
+                }
+                else
+                {
+                    throw new Exception(message, e);
+                }
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
+        }
+
+        public async Task EnableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
+            Logger.LogTrace("EnableAutoStart called for {AutoStartId}", Id);
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
+                await EnableAutoStart(autoStart, showDialogsAndCatchErrors);
+            }
+            else
+            {
+                const string message = "AutoStart not found";
+                Logger.LogError("AutoStart {id} not found", Id);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message);
+                }
+                else
+                {
+                    throw new Exception(message);
+                }
+            }
+        }
+
+        public async Task EnableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true)
+        {
+            try
+            {
+                AppStatus.IncrementRunningActionCount();
+                Logger.LogTrace("EnableAutoStart called for {AutoStartId}", autoStart.Id);
+                if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(autoStart, AutoStartAction.Enable))
+                {
+                    return;
+                }
+                if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
+                {
+                    await StartSubProcessAsAdmin(autoStart, EnableParameterName);
+                }
+                else
                 {
                     ConnectorService.EnableAutoStart(autoStart);
                 }
-                catch (AlreadySetException)
+                autoStart.ConfirmStatus = ConfirmStatus.Enabled;
+                Logger.LogInformation("Enabled {@autoStart}", autoStart);
+                if (showDialogsAndCatchErrors)
                 {
-
+                    await MessageService.ShowSuccess(autoStart, AutoStartAction.Enable);
                 }
             }
-            autoStart.ConfirmStatus = ConfirmStatus.Reverted;
-            Logger.LogInformation("Added {@autoStart}", autoStart);
+            catch (Exception e)
+            {
+                const string message = "Failed to enable auto start";
+                Logger.LogError(e, message);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message, e);
+                }
+                else
+                {
+                    throw new Exception(message, e);
+                }
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
+            }
         }
 
-        public void EnableAutoStart(Guid Id) {
-            Logger.LogTrace("EnableAutoStart called");
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
-                EnableAutoStart(autoStart);
+        public async Task ToggleOwnAutoStart(bool showDialogsAndCatchErrors = true)
+        {
+            try
+            {
+                AppStatus.IncrementRunningActionCount();
+                Logger.LogInformation("ToggleOwnAutoStart called");
+                var ownAutoStart = new RegistryAutoStartEntry()
+                {
+                    Category = Category.CurrentUserRun64,
+                    Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
+                    Value = CurrentExePath,
+                    RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
+                    ConfirmStatus = ConfirmStatus.New,
+                };
+
+                AutoStartAction action = HasOwnAutoStart ? AutoStartAction.Remove : AutoStartAction.Add;
+                if (HasOwnAutoStart)
+                {
+                    if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(ownAutoStart, action))
+                    {
+                        return;
+                    }
+                    Logger.LogInformation("Shall remove own auto start");
+                    await RemoveAutoStart(ownAutoStart, false);
+                }
+                else
+                {
+                    if (showDialogsAndCatchErrors && !await MessageService.ShowConfirm(ownAutoStart, action))
+                    {
+                        return;
+                    }
+                    Logger.LogInformation("Shall add own auto start");
+                    await AddAutoStart(ownAutoStart, false);
+                }
+                ownAutoStart.ConfirmStatus = ConfirmStatus.New;
+                Logger.LogTrace("Own auto start toggled");
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowSuccess(ownAutoStart, action);
+                }
+            }
+            catch (Exception e)
+            {
+                const string message = "Failed to change own auto start";
+                Logger.LogError(e, message);
+                if (showDialogsAndCatchErrors)
+                {
+                    await MessageService.ShowError(message, e);
+                }
+                else
+                {
+                    throw new Exception(message, e);
+                }
+            }
+            finally
+            {
+                AppStatus.DecrementRunningActionCount();
             }
         }
 
-        public void EnableAutoStart(AutoStartEntry autoStart) {
-            Logger.LogTrace("EnableAutoStart called for {AutoStartId}", autoStart.Id);
-            if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
-            {
-                StartSubProcessAsAdmin(autoStart, EnableParameterName);
-            }
-            else
-            {
-                ConnectorService.EnableAutoStart(autoStart);
-            }
-            autoStart.ConfirmStatus = ConfirmStatus.Enabled;
-            Logger.LogInformation("Enabled {@autoStart}", autoStart);
-        }
+        #endregion
 
         public bool CanAutoStartBeEnabled(AutoStartEntry autoStart) {
             return ConnectorService.CanBeEnabled(autoStart);
@@ -773,40 +1025,14 @@ namespace AutoStartConfirm.Connectors
             autoStart.Value == CurrentExePath;
         }
 
-
-        public void ToggleOwnAutoStart() {
-            try {
-                Logger.LogInformation("ToggleOwnAutoStart called");
-                var ownAutoStart = new RegistryAutoStartEntry() {
-                    Category = Category.CurrentUserRun64,
-                    Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm",
-                    Value = CurrentExePath,
-                    RegistryValueKind = Microsoft.Win32.RegistryValueKind.String,
-                    ConfirmStatus = ConfirmStatus.New,
-                };
-
-                if (HasOwnAutoStart) {
-                    Logger.LogInformation("Shall remove own auto start");
-                    RemoveAutoStart(ownAutoStart);
-                } else {
-                    Logger.LogInformation("Shall add own auto start");
-                    AddAutoStart(ownAutoStart);
-                }
-                ownAutoStart.ConfirmStatus = ConfirmStatus.New;
-                Logger.LogTrace("Own auto start toggled");
-            } catch (Exception e) {
-                Logger.LogError(e, "Failed to toggle own auto start");
-            }
-        }
-
-
-        private void StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
+        // todo: write tests for calls
+        private async Task StartSubProcessAsAdmin(AutoStartEntry autoStart, string parameterName)
         {
             Logger.LogInformation("Starting elevated sub process");
             string path = Path.GetTempFileName();
             try
             {
-                using (Stream stream = new FileStream($"{path}", System.IO.FileMode.Create, FileAccess.Write, FileShare.None))
+                using (Stream stream = new FileStream($"{path}", FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     XmlSerializer serializer = new(typeof(AutoStartEntry));
                     serializer.Serialize(stream, autoStart);
@@ -827,7 +1053,7 @@ namespace AutoStartConfirm.Connectors
                 };
 
                 process.Start();
-                process.WaitForExit();
+                await process.WaitForExitAsync();
                 if (process.ExitCode != 0)
                 {
                     throw new Exception("Sub process failed to execute");

@@ -9,19 +9,23 @@ using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using AutoStartConfirm.Notifications;
 using Octokit;
+using AutoStartConfirm.Models;
+using AutoStartConfirm.GUI;
 
 namespace AutoStartConfirmTests
 {
     public class TestsBase
     {
-        protected static readonly IAutoStartConnectorService ConnectorService = A.Fake<IAutoStartConnectorService>();
-        protected static readonly ISettingsService SettingsService = A.Fake<ISettingsService>();
-        protected static readonly ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
-        protected static readonly IDispatchService DispatchService = A.Fake<IDispatchService>();
-        protected static readonly IUacService UacService = A.Fake<IUacService>();
         protected static readonly IServiceProvider ServiceProvider = A.Fake<IServiceProvider>();
-        protected static readonly INotificationService NotificationService = A.Fake<INotificationService>();
-        protected static readonly IGitHubClient GitHubClient = A.Fake<IGitHubClient>();
+        protected IAutoStartConnectorService ConnectorService = A.Fake<IAutoStartConnectorService>();
+        protected ISettingsService SettingsService = A.Fake<ISettingsService>();
+        protected ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
+        protected IDispatchService DispatchService = A.Fake<IDispatchService>();
+        protected IUacService UacService = A.Fake<IUacService>();
+        protected INotificationService NotificationService = A.Fake<INotificationService>();
+        protected IGitHubClient GitHubClient = A.Fake<IGitHubClient>();
+        protected IAppStatus AppStatus = A.Fake<IAppStatus>();
+        protected IMessageService MessageService = A.Fake<IMessageService>();
 
 
         [AssemblyInitialize]
@@ -33,14 +37,17 @@ namespace AutoStartConfirmTests
         [TestCleanup]
         public void TestCleanup()
         {
-            Fake.ClearRecordedCalls(ConnectorService);
-            Fake.ClearRecordedCalls(SettingsService);
-            Fake.ClearRecordedCalls(CurrentUserRun64Connector);
-            Fake.ClearRecordedCalls(DispatchService);
-            Fake.ClearRecordedCalls(UacService);
             Fake.ClearRecordedCalls(ServiceProvider);
-            Fake.ClearRecordedCalls(NotificationService);
-            Fake.ClearRecordedCalls(GitHubClient);
+
+            ConnectorService = A.Fake<IAutoStartConnectorService>();
+            SettingsService = A.Fake<ISettingsService>();
+            CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
+            DispatchService = A.Fake<IDispatchService>();
+            UacService = A.Fake<IUacService>();
+            NotificationService = A.Fake<INotificationService>();
+            GitHubClient = A.Fake<IGitHubClient>();
+            AppStatus = A.Fake<IAppStatus>();
+            MessageService = A.Fake<IMessageService>();
         }
     }
 }

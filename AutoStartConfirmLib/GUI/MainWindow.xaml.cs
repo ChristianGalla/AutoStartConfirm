@@ -21,7 +21,8 @@ namespace AutoStartConfirm.GUI
         private readonly ILogger<MainWindow> Logger;
 
         public MainWindow(
-            ILogger<MainWindow> logger
+            ILogger<MainWindow> logger,
+            IAutoStartService autoStartService
         ) {
             Logger = logger;
             InitializeComponent();

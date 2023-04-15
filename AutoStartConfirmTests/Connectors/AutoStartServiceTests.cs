@@ -58,7 +58,9 @@ namespace AutoStartConfirm.Connectors.Tests
                 settingsService: SettingsService,
                 currentUserRun64Connector: CurrentUserRun64Connector,
                 dispatchService: DispatchService,
-                uacService: UacService
+                uacService: UacService,
+                appStatus: AppStatus,
+                messageService: MessageService
             );
         }
 
@@ -109,23 +111,23 @@ namespace AutoStartConfirm.Connectors.Tests
         }
 
         [TestMethod]
-        public void ConfirmAdd_ConfirmsCurrentAutoStart() {
+        public async Task ConfirmAdd_ConfirmsCurrentAutoStart() {
             Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
 
-            Service.ConfirmAdd(Guid);
+            await Service.ConfirmAdd(Guid);
 
-            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry!.ConfirmStatus);
         }
 
         [TestMethod]
-        public void ConfirmAdd_RaisesCurrentAutoStartEvents() {
+        public async Task ConfirmAdd_RaisesCurrentAutoStartEvents() {
             Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
             var confirmEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.Confirm += confirmEventHandler;
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.CurrentAutoStartChange += changeEventHandler;
 
-            Service.ConfirmAdd(Guid);
+            await Service.ConfirmAdd(Guid);
 
             A.CallTo(() => confirmEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
             Assert.AreEqual(AutoStartEntry, Fake.GetCalls(confirmEventHandler).ToList()[0].Arguments[0]);
@@ -134,42 +136,42 @@ namespace AutoStartConfirm.Connectors.Tests
         }
 
         [TestMethod]
-        public void ConfirmAdd_ConfirmsHistoryAutoStart() {
+        public async Task ConfirmAdd_ConfirmsHistoryAutoStart() {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
 
-            Service.ConfirmAdd(Guid);
+            await Service.ConfirmAdd(Guid);
 
-            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry!.ConfirmStatus);
         }
 
         [TestMethod]
-        public void ConfirmAdd_RaisesHistoryAutoStartEvents() {
+        public async Task ConfirmAdd_RaisesHistoryAutoStartEvents() {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += changeEventHandler;
 
-            Service.ConfirmAdd(Guid);
+            await Service.ConfirmAdd(Guid);
 
             A.CallTo(() => changeEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
             Assert.AreEqual(AutoStartEntry, Fake.GetCalls(changeEventHandler).ToList()[0].Arguments[0]);
         }
 
         [TestMethod]
-        public void ConfirmRemove_ConfirmsHistoryAutoStart() {
+        public async Task ConfirmRemove_ConfirmsHistoryAutoStart() {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
 
-            Service.ConfirmRemove(Guid);
+            await Service.ConfirmRemove(Guid);
 
-            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry.ConfirmStatus);
+            Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry!.ConfirmStatus);
         }
 
         [TestMethod]
-        public void ConfirmRemove_RaisesHistoryAutoStartEvents() {
+        public async Task ConfirmRemove_RaisesHistoryAutoStartEvents() {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
             var changeEventHandler = A.Fake<AutoStartChangeHandler>();
             Service.HistoryAutoStartChange += changeEventHandler;
 
-            Service.ConfirmRemove(Guid);
+            await Service.ConfirmRemove(Guid);
 
             A.CallTo(() => changeEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
             Assert.AreEqual(AutoStartEntry, Fake.GetCalls(changeEventHandler).ToList()[0].Arguments[0]);
@@ -180,18 +182,23 @@ namespace AutoStartConfirm.Connectors.Tests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(true, true)]
-        public void RemoveAutoStart_RemovesAutoStart_SetStatusToReverted_AndRevertsDisabling(bool useGuid, bool canBeEnabled) {
+        public async Task RemoveAutoStart_RemovesAutoStart_SetStatusToReverted_AndRevertsDisabling(bool useGuid, bool canBeEnabled) {
             Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
-            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).Returns(canBeEnabled);
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).Returns(true);
 
             if (useGuid) {
-                Service.RemoveAutoStart(Guid);
+                await Service.RemoveAutoStart(Guid);
             } else {
-                Service.RemoveAutoStart(AutoStartEntry);
+                await Service.RemoveAutoStart(AutoStartEntry!);
             }
 
-            A.CallTo(() => ConnectorService.RemoveAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry.ConfirmStatus);
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.RemoveAutoStart(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
 
             if (canBeEnabled) {
                 A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
@@ -201,32 +208,252 @@ namespace AutoStartConfirm.Connectors.Tests
         }
 
         [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
+        public async Task RemoveAutoStart_DoesntShowDialogsIfFlagIsNotSet(bool useGuid, bool canBeEnabled)
+        {
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
+
+            if (useGuid)
+            {
+                await Service.RemoveAutoStart(Guid, false);
+            }
+            else
+            {
+                await Service.RemoveAutoStart(AutoStartEntry!, false);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.RemoveAutoStart(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
+
+            if (canBeEnabled)
+            {
+                A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            }
+            else
+            {
+                A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustNotHaveHappened();
+            }
+        }
+
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void DisableAutoStart_DisablesAutoStart_AndSetsStatusToDisabled(bool useGuid) {
+        public async Task RemoveAutoStart_ShowsDialogOnError(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).Returns(true);
+            A.CallTo(() => ConnectorService.RemoveAutoStart(AutoStartEntry!)).Throws(new Exception());
+
+            if (useGuid)
+            {
+                Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+                await Service.RemoveAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.RemoveAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task RemoveAutoStart_ThrowsErrorIfFlagIsNotSet(bool useGuid)
+        {
+            A.CallTo(() => ConnectorService.RemoveAutoStart(AutoStartEntry!)).Throws(new Exception());
+
+            try
+            {
+                if (useGuid)
+                {
+                    Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                    await Service.RemoveAutoStart(Guid, false);
+                }
+                else
+                {
+                    await Service!.RemoveAutoStart(AutoStartEntry!, false);
+                }
+                Assert.Fail("Expected exception");
+            }
+            catch (Exception)
+            {
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
+        public async Task RemoveAutoStart_DoesNothingIfNotConfirmed(bool useGuid, bool canBeEnabled)
+        {
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).Returns(false);
+
+            if (useGuid)
+            {
+                await Service.RemoveAutoStart(Guid);
+            }
+            else
+            {
+                await Service.RemoveAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Remove)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.RemoveAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.EnableAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DisableAutoStart_DisablesAutoStart_AndSetsStatusToDisabled(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).Returns(true);
             Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
 
             if (useGuid) {
-                Service.DisableAutoStart(Guid);
+                await Service.DisableAutoStart(Guid);
             } else {
-                Service.DisableAutoStart(AutoStartEntry);
+                await Service.DisableAutoStart(AutoStartEntry!);
             }
 
-            A.CallTo(() => ConnectorService.DisableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(ConfirmStatus.Disabled, AutoStartEntry.ConfirmStatus);
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.DisableAutoStart(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(ConfirmStatus.Disabled, AutoStartEntry!.ConfirmStatus);
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void AddAutoStart_AddsAndEnablesAutoStart(bool useGuid) {
-            if (useGuid) {
-                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
-                Service.AddAutoStart(Guid);
-            } else {
-                Service!.AddAutoStart(AutoStartEntry!);
+        public async Task DisableAutoStart_ShowsDialogOnError(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).Returns(true);
+            A.CallTo(() => ConnectorService.DisableAutoStart(AutoStartEntry!)).Throws(new Exception());
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            if (useGuid)
+            {
+                await Service.DisableAutoStart(Guid);
+            }
+            else
+            {
+                await Service.DisableAutoStart(AutoStartEntry!);
             }
 
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DisableAutoStart_ThrowsOnErrorIfFlagIsNotSet(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).Returns(true);
+            A.CallTo(() => ConnectorService.DisableAutoStart(AutoStartEntry!)).Throws(new Exception());
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            try
+            {
+                if (useGuid)
+                {
+                    await Service.DisableAutoStart(Guid, false);
+                }
+                else
+                {
+                    await Service.DisableAutoStart(AutoStartEntry!, false);
+                }
+                Assert.Fail("Expected exception");
+            } catch (Exception) {
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DisableAutoStart_DoesntShowDialogsIfFlagIsNotSet(bool useGuid)
+        {
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            if (useGuid)
+            {
+                await Service.DisableAutoStart(Guid, false);
+            }
+            else
+            {
+                await Service.DisableAutoStart(AutoStartEntry!, false);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.DisableAutoStart(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(ConfirmStatus.Disabled, AutoStartEntry!.ConfirmStatus);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DisableAutoStart_DoesNothingIfNotConfirmed(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).Returns(false);
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            if (useGuid)
+            {
+                await Service.DisableAutoStart(Guid);
+            }
+            else
+            {
+                await Service.DisableAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Disable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.DisableAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AddAutoStart_AddsAndEnablesAutoStart(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).Returns(true);
+
+            if (useGuid) {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.AddAutoStart(Guid);
+            } else {
+                await Service!.AddAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
             A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
@@ -235,13 +462,112 @@ namespace AutoStartConfirm.Connectors.Tests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void AddAutoStart_CatchesAlreadyExistExceptions(bool useGuid) {
+        public async Task AddAutoStart_ShowsDialogOnError(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).Returns(true);
+            A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry!)).Throws(new Exception());
+
+            if (useGuid)
+            {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.AddAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.AddAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AddAutoStart_ThrowsErrorIfFlagIsNotSet(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).Returns(true);
+            A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry!)).Throws(new Exception());
+
+            try
+            {
+                if (useGuid)
+                {
+                    Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                    await Service.AddAutoStart(Guid, false);
+                }
+                else
+                {
+                    await Service!.AddAutoStart(AutoStartEntry!, false);
+                }
+                Assert.Fail("Expected exception");
+            } catch (Exception)
+            {
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AddAutoStart_DoesntShowDialogsIfFlagIsNotSet(bool useGuid)
+        {
+            if (useGuid)
+            {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.AddAutoStart(Guid, false);
+            }
+            else
+            {
+                await Service!.AddAutoStart(AutoStartEntry!, false);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => ConnectorService.AddAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AddAutoStart_DoesNothingIfNotConfirmed(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).Returns(false);
+
+            if (useGuid)
+            {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.AddAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.AddAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.EnableAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AddAutoStart_CatchesAlreadyExistExceptions(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Add)).Returns(true);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).Throws(new AlreadySetException());
             if (useGuid) {
                 Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
-                Service.AddAutoStart(Guid);
+                await Service.AddAutoStart(Guid);
             } else {
-                Service!.AddAutoStart(AutoStartEntry!);
+                await Service!.AddAutoStart(AutoStartEntry!);
             }
 
             Assert.AreEqual(ConfirmStatus.Reverted, AutoStartEntry!.ConfirmStatus);
@@ -252,17 +578,120 @@ namespace AutoStartConfirm.Connectors.Tests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void EnableAutoStart_EnablesAutoStart(bool useGuid) {
+        public async Task EnableAutoStart_EnablesAutoStart(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).Returns(true);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).DoesNothing();
             if (useGuid) {
                 Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
-                Service.EnableAutoStart(Guid);
+                await Service.EnableAutoStart(Guid);
             } else {
-                Service!.EnableAutoStart(AutoStartEntry!);
+                await Service!.EnableAutoStart(AutoStartEntry!);
             }
 
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             Assert.AreEqual(ConfirmStatus.Enabled, AutoStartEntry!.ConfirmStatus);
             A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task EnableAutoStart_DoesntShowDialogsIfFlagIsNotSet(bool useGuid)
+        {
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).DoesNothing();
+            if (useGuid)
+            {
+                Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+                await Service.EnableAutoStart(Guid, false);
+            }
+            else
+            {
+                await Service!.EnableAutoStart(AutoStartEntry!, false);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(ConfirmStatus.Enabled, AutoStartEntry!.ConfirmStatus);
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry)).MustHaveHappenedOnceExactly();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task EnableAutoStart_ShowsDialogOnError(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).Returns(true);
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).Throws(new Exception());
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            if (useGuid)
+            {
+                await Service.EnableAutoStart(Guid);
+            }
+            else
+            {
+                await Service.EnableAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task EnableAutoStart_ThrowsOnErrorIfFlagIsNotSet(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).Returns(true);
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).Throws(new Exception());
+            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+
+            try
+            {
+                if (useGuid)
+                {
+                    await Service.EnableAutoStart(Guid, false);
+                }
+                else
+                {
+                    await Service.EnableAutoStart(AutoStartEntry!, false);
+                }
+                Assert.Fail("Expected exception");
+            }
+            catch (Exception)
+            {
+            }
+
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task EnableAutoStart_DoesNothingIfNotConfirmed(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).Returns(false);
+            A.CallTo(() => ConnectorService.EnableAutoStart(AutoStartEntry!)).DoesNothing();
+            if (useGuid)
+            {
+                Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
+                await Service.EnableAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.EnableAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Enable)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.EnableAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
         }
 
         [TestMethod]
@@ -377,11 +806,16 @@ namespace AutoStartConfirm.Connectors.Tests
             A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
-
         [TestMethod]
-        public void ToggleOwnAutoStart_AddsOwnAutoStart_If_NotSet() {
+        public async Task ToggleOwnAutoStart_AddsOwnAutoStart_If_NotSet()
+        {
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Add)).Returns(true);
             A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).DoesNothing();
-            Service!.ToggleOwnAutoStart();
+            await Service!.ToggleOwnAutoStart();
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
                 (AutoStartEntry autoStart) =>
                     autoStart.Category == Category.CurrentUserRun64 &&
@@ -397,12 +831,55 @@ namespace AutoStartConfirm.Connectors.Tests
         }
 
         [TestMethod]
-        public void ToggleOwnAutoStart_RemovesOwnAutoStart_If_Set() {
+        public async Task ToggleOwnAutoStart_DoesntShowDialogsIfFlagIsNotSeet()
+        {
+            A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).DoesNothing();
+            await Service!.ToggleOwnAutoStart(false);
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
+                (AutoStartEntry autoStart) =>
+                    autoStart.Category == Category.CurrentUserRun64 &&
+                    autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
+                    autoStart.Value == CurrentExePath
+            ).MustHaveHappened();
+            A.CallTo(() => ConnectorService.EnableAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
+                (AutoStartEntry autoStart) =>
+                    autoStart.Category == Category.CurrentUserRun64 &&
+                    autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
+                    autoStart.Value == CurrentExePath
+            ).MustHaveHappened();
+        }
+
+        [TestMethod]
+        public async Task ToggleOwnAutoStart_DoesNothingIfNotConfirmed()
+        {
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Add)).Returns(false);
+            A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).DoesNothing();
+            await Service!.ToggleOwnAutoStart();
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Add)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.AddAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ConnectorService.EnableAutoStart(A<AutoStartEntry>.Ignored)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        public async Task ToggleOwnAutoStart_RemovesOwnAutoStart_If_Set()
+        {
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Remove)).Returns(true);
             var collection = new List<AutoStartEntry>() {
                 OwnAutoStartEntry
             };
             A.CallTo(() => CurrentUserRun64Connector.GetCurrentAutoStarts()).Returns(collection);
-            Service!.ToggleOwnAutoStart();
+            await Service!.ToggleOwnAutoStart();
+            A.CallTo(() => MessageService.ShowConfirm(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Remove)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, IMessageService.AutoStartAction.Remove)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => ConnectorService.RemoveAutoStart(A<AutoStartEntry>.Ignored)).WhenArgumentsMatch(
                 (AutoStartEntry autoStart) =>
                     autoStart.Category == Category.CurrentUserRun64 &&

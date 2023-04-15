@@ -5,16 +5,28 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.GUI {
     public interface IMessageService {
-        SemaphoreSlim DialogSemaphore {
+        public enum AutoStartAction
+        {
+            Add,
+            Remove,
+            Enable,
+            Disable,
+        }
+
+        public SemaphoreSlim DialogSemaphore {
             get;
         }
 
-        Task<bool> ShowConfirm(string caption, string message = "");
+        public Task<bool> ShowConfirm(string caption, string message = "");
 
-        Task<bool> ShowConfirm(AutoStartEntry autoStart, string action);
+        public Task<bool> ShowConfirm(AutoStartEntry autoStart, AutoStartAction action);
 
-        Task ShowError(string caption, string message = "");
-        Task ShowError(string caption, Exception error);
-        Task ShowSuccess(string caption, string message = "");
+        public Task ShowError(string caption, string message = "");
+
+        public Task ShowError(string caption, Exception error);
+
+        public Task ShowSuccess(string caption, string message = "");
+
+        public Task ShowSuccess(AutoStartEntry autoStart, AutoStartAction action);
     }
 }

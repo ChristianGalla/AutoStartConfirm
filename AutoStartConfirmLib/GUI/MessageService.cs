@@ -10,6 +10,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using static AutoStartConfirm.GUI.IMessageService;
 
 namespace AutoStartConfirm.GUI
 {
@@ -109,10 +110,19 @@ namespace AutoStartConfirm.GUI
             await tcs.Task;
         }
 
-        public async Task<bool> ShowConfirm(AutoStartEntry autoStart, string action)
+        private static string GetPastTenseAction(AutoStartAction action)
+        {
+            return action switch
+            {
+                AutoStartAction.Remove or AutoStartAction.Enable or AutoStartAction.Disable => $"{action.ToString().ToLower()}d",
+                _ => $"{action.ToString().ToLower()}ed",
+            };
+        }
+
+        public async Task<bool> ShowConfirm(AutoStartEntry autoStart, AutoStartAction action)
         {
             return await ShowConfirm(
-                $"Are you sure you want to {action} this auto start?",
+                $"Are you sure you want to {action.ToString().ToLower()} this auto start?",
                 @$"Type:
 {autoStart.Category}
 
@@ -221,6 +231,20 @@ Path:
                 throw new Exception("Failed to enqueue success dialog in main thread");
             }
             await tcs.Task;
+        }
+
+        public async Task ShowSuccess(AutoStartEntry autoStart, AutoStartAction action)
+        {
+            await ShowSuccess(
+                $"Successfully {GetPastTenseAction(action)}ed auto start",
+                @$"Type:
+{autoStart.Category}
+
+Value:
+{autoStart.Value}
+
+Path:
+{autoStart.Path}");
         }
 
 
