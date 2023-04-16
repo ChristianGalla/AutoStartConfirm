@@ -136,19 +136,17 @@ namespace AutoStartConfirm.Connectors.Services
         public void DisableAutoStart(AutoStartEntry autoStart)
         {
             Logger.LogTrace("DisableAutoStart called for AutoStartEntry {AutoStartEntry}", autoStart);
-            if (!(autoStart is ServiceAutoStartEntry))
+            if (autoStart is not ServiceAutoStartEntry)
             {
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
             }
             // https://stackoverflow.com/a/35063366
             // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/changestartmode-method-in-class-win32-service?redirectedfrom=MSDN
-            using (var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path)))
+            using var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path));
+            uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { "Disabled" });
+            if (returnCode != 0)
             {
-                uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { "Disabled" });
-                if (returnCode != 0)
-                {
-                    throw new Exception($"Failed to disable auto start (return code: {returnCode})");
-                }
+                throw new Exception($"Failed to disable auto start (return code: {returnCode})");
             }
         }
 
@@ -185,7 +183,7 @@ namespace AutoStartConfirm.Connectors.Services
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
             }
             var serviceAutoStart = (ServiceAutoStartEntry)autoStart;
-            var targetMode = serviceAutoStart.EnabledStartMode.Value.ToString();
+            var targetMode = serviceAutoStart.EnabledStartMode.ToString();
             using var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path));
             uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { targetMode });
             if (returnCode != 0)
@@ -249,7 +247,7 @@ namespace AutoStartConfirm.Connectors.Services
             var autoStartsToRemove = new List<AutoStartEntry>();
             foreach (var oldAutoStart in LastAutoStartEntries)
             {
-                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out AutoStartEntry? newAutoStartEntry);
+                bool found = currentAutoStartsDictionary.TryGetValue(oldAutoStart.Key, out AutoStartEntry? _);
                 if (!found)
                 {
                     autoStartsToRemove.Add(oldAutoStart.Value);
@@ -351,10 +349,7 @@ namespace AutoStartConfirm.Connectors.Services
                 if (disposing)
                 {
                     StopWatcher();
-                    if (cancellationTokenSource != null)
-                    {
-                        cancellationTokenSource.Dispose();
-                    }
+                    cancellationTokenSource?.Dispose();
                 }
 
                 disposedValue = true;
@@ -364,6 +359,7 @@ namespace AutoStartConfirm.Connectors.Services
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace AutoStartConfirm.Connectors.Folder
 
         private readonly static string basePath = $"{programmDataPath}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
 
-        private readonly static string disableBasePath = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
+        private const string disableBasePath = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
 
         public CurrentUserStartMenuAutoStartFolderConnector(
             ILogger<FolderConnector> logger,

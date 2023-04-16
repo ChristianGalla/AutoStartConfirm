@@ -29,7 +29,6 @@ namespace AutoStartConfirm.Update.Tests
 
         private UpdateService? Service;
 
-        private readonly string CurrentVersion = "1.0.0";
         private readonly string NewestVersion = "2.0.0";
         private readonly string Url = "https://www.example.org";
         private readonly string MsiUrl = "https://www.example.org/AutoStartConfirm.msi";

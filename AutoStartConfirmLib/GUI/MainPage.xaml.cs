@@ -204,12 +204,12 @@ namespace AutoStartConfirm.GUI
                 return;
             }
             var autoStart = (AutoStartEntry)toggleSwitch.DataContext;
+            if (!autoStart.IsEnabled.HasValue || toggleSwitch.IsOn == autoStart.IsEnabled.Value)
+            {
+                return;
+            }
             try
             {
-                if (!autoStart.IsEnabled.HasValue || toggleSwitch.IsOn == autoStart.IsEnabled.Value)
-                {
-                    return;
-                }
                 if (toggleSwitch.IsOn && !autoStart.IsEnabled.Value)
                 {
                     if (!autoStart.CanBeEnabled.HasValue)
@@ -242,7 +242,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public static void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
+        public static void Sorting(object? _, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
         {
             var newSortColumn = e.Column.Tag.ToString();
             collectionView.SortDescriptions.Clear();

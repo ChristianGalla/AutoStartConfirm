@@ -28,7 +28,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
         private AutoStartService? Service;
 
-        private readonly static string CurrentExePath = Environment.ProcessPath;
+        private readonly static string CurrentExePath = Environment.ProcessPath!;
         private Guid Guid;
         private RegistryAutoStartEntry? AutoStartEntry;
 
@@ -702,7 +702,7 @@ namespace AutoStartConfirm.Connectors.Tests
             var ret = Service!.CanAutoStartBeEnabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeEnabled, ret);
-            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
@@ -713,7 +713,7 @@ namespace AutoStartConfirm.Connectors.Tests
             var ret = Service!.CanAutoStartBeDisabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeDisabled, ret);
-            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry!)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
@@ -724,7 +724,7 @@ namespace AutoStartConfirm.Connectors.Tests
             var ret = Service!.CanAutoStartBeAdded(AutoStartEntry!);
 
             Assert.AreEqual(canBeAdded, ret);
-            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry!)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]

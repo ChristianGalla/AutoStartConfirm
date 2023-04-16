@@ -31,7 +31,7 @@ namespace AutoStartConfirm.Connectors
 
         protected static readonly byte[] defaultDisabledByteArray = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
         private Dictionary<string, bool>? lastEnableStatus;
-        protected IRegistryChangeMonitor? RegistryChangeMonitor;
+        protected IRegistryChangeMonitor RegistryChangeMonitor;
 
         public RegistryDisableService(ILogger<RegistryDisableService> logger, IRegistryChangeMonitor registryChangeMonitor)
         {
@@ -112,7 +112,7 @@ namespace AutoStartConfirm.Connectors
                 throw new InvalidOperationException("DisableBasePath not set");
             }
             var firstDelimiterPos = DisableBasePath.IndexOf('\\');
-            var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
+            var subKeyPath = DisableBasePath[(firstDelimiterPos + 1)..];
             string valueName;
             if (autoStart is FolderAutoStartEntry)
             {
@@ -120,18 +120,14 @@ namespace AutoStartConfirm.Connectors
             }
             else if (autoStart is RegistryAutoStartEntry)
             {
-                valueName = autoStart.Path.Substring(autoStart.Path.LastIndexOf('\\') + 1);
+                valueName = autoStart.Path[(autoStart.Path.LastIndexOf('\\') + 1)..];
             }
             else
             {
                 throw new NotImplementedException();
             }
             using var registry = GetBaseRegistry(DisableBasePath);
-            using var key = registry.OpenSubKey(subKeyPath, !dryRun);
-            if (key == null)
-            {
-                throw new ArgumentException($"Failed to get key \"{subKeyPath}\"");
-            }
+            using var key = registry.OpenSubKey(subKeyPath, !dryRun) ?? throw new ArgumentException($"Failed to get key \"{subKeyPath}\"");
             object? currentValue = key.GetValue(valueName, null);
             byte[]? currentValueByteArray = null;
             if (currentValue == null)
@@ -218,8 +214,12 @@ namespace AutoStartConfirm.Connectors
         public Dictionary<string, bool> GetCurrentEnableStatus()
         {
             Logger.LogTrace("GetCurrentEnableStatus called");
+            if (DisableBasePath == null)
+            {
+                throw new InvalidOperationException("DisableBasePath not set");
+            }
             var firstDelimiterPos = DisableBasePath.IndexOf('\\');
-            var subKeyPath = DisableBasePath.Substring(firstDelimiterPos + 1);
+            var subKeyPath = DisableBasePath[(firstDelimiterPos + 1)..];
             var ret = new Dictionary<string, bool>();
             using (var registry = GetBaseRegistry(DisableBasePath))
             using (var key = registry.OpenSubKey(subKeyPath, false))
@@ -231,7 +231,7 @@ namespace AutoStartConfirm.Connectors
                 var valueNames = key.GetValueNames();
                 foreach (var valueName in valueNames)
                 {
-                    object currentValue = key.GetValue(valueName, null);
+                    object? currentValue = key.GetValue(valueName, null);
                     if (currentValue == null)
                     {
                         continue;
@@ -258,7 +258,7 @@ namespace AutoStartConfirm.Connectors
 
         private static bool GetIsEnabled(byte[] currentValueByteArray)
         {
-            // enabled if most and least significant bytes are even
+            // enabled if most and least significant bits are even
             return (currentValueByteArray[0] & 0b1) == 0 && (currentValueByteArray[11] & 0b1) == 0;
         }
 
@@ -288,13 +288,17 @@ namespace AutoStartConfirm.Connectors
         /// Watches the assigned registry keys
         /// </summary>
         /// <remarks>
-        /// Because of API limitations no all changes are monitored.
+        /// Because of API limitations not all changes are monitored.
         /// See https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regnotifychangekeyvalue
         /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
         /// </remarks>
         public void StartWatcher()
         {
             Logger.LogTrace("StartWatcher called for {DisableBasePath}", DisableBasePath);
+            if (DisableBasePath == null)
+            {
+                throw new InvalidOperationException("DisableBasePath not set");
+            }
             lastEnableStatus = GetCurrentEnableStatus();
             RegistryChangeMonitor.Start();
             Logger.LogTrace("Watcher started");
@@ -303,7 +307,10 @@ namespace AutoStartConfirm.Connectors
         public void StopWatcher()
         {
             Logger.LogTrace("StopWatcher called for {DisableBasePath}", DisableBasePath);
-            RegistryChangeMonitor.Stop();
+            if (DisableBasePath != null)
+            {
+                RegistryChangeMonitor.Stop();
+            }
             Logger.LogTrace("Watcher stopped");
         }
 
@@ -319,7 +326,6 @@ namespace AutoStartConfirm.Connectors
                     StopWatcher();
                     RegistryChangeMonitor.Changed -= ChangeHandler;
                     RegistryChangeMonitor.Dispose();
-                    RegistryChangeMonitor = null;
                 }
 
                 disposedValue = true;
@@ -329,6 +335,7 @@ namespace AutoStartConfirm.Connectors
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

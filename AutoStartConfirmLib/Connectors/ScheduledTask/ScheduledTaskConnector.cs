@@ -49,31 +49,29 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
         {
             Logger.LogTrace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
-            using (var taskService = TaskService.Instance)
+            using var taskService = TaskService.Instance;
+            var tasks = taskService.AllTasks;
+            foreach (var task in tasks)
             {
-                var tasks = taskService.AllTasks;
-                foreach (var task in tasks)
+                try
                 {
+                    ScheduledTaskAutoStartEntry entry = GetAutoStartEntry(task);
+                    ret.Add(entry);
+                }
+                catch (Exception ex)
+                {
+                    string path = "";
                     try
                     {
-                        ScheduledTaskAutoStartEntry entry = GetAutoStartEntry(task);
-                        ret.Add(entry);
+                        path = $" {task.Path}";
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        string path = "";
-                        try
-                        {
-                            path = $" {task.Path}";
-                        }
-                        catch (Exception)
-                        {
-                        }
-                        Logger.LogError(ex, "Failed to get details of scheduled task {path}", path);
                     }
+                    Logger.LogError(ex, "Failed to get details of scheduled task {path}", path);
                 }
-                return ret;
             }
+            return ret;
         }
 
         private ScheduledTaskAutoStartEntry GetAutoStartEntry(Microsoft.Win32.TaskScheduler.Task task)
@@ -294,8 +292,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     }
                     task.Folder.DeleteTask(task.Name);
                     Logger.LogInformation("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
-                    bool removed = lastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart);
-                    if (removed)
+                    if(LastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart))
                     {
                         RemoveHandler(removedAutoStart);
                     }
@@ -343,11 +340,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
 
         private void ToggleEnable(AutoStartEntry autoStart, bool enable)
         {
-            var task = TaskService.Instance.GetTask(autoStart.Path);
-            if (task == null)
-            {
-                throw new InvalidOperationException($"Task {autoStart.Path} not found");
-            }
+            var task = TaskService.Instance.GetTask(autoStart.Path) ?? throw new InvalidOperationException($"Task {autoStart.Path} not found");
             if (task.Enabled == enable)
             {
                 return;
