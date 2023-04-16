@@ -25,6 +25,7 @@ using Windows.UI.ViewManagement;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.UI.Dispatching;
 using AutoStartConfirm.Helpers;
+using AutoStartConfirm.Business;
 
 namespace AutoStartConfirm
 {
@@ -57,11 +58,9 @@ namespace AutoStartConfirm
 
         public IAppStatus AppStatus;
 
-        private readonly IAutoStartService AutoStartService;
+        private readonly IAutoStartBusiness AutoStartBusiness;
 
         private readonly INotificationService NotificationService;
-
-        private readonly IMessageService MessageService;
 
         private readonly ISettingsService SettingsService;
 
@@ -77,18 +76,16 @@ namespace AutoStartConfirm
         public App(
             ILogger<App> logger,
             IAppStatus appStatus,
-            IAutoStartService autoStartService,
+            IAutoStartBusiness autoStartService,
             INotificationService notificationService,
-            IMessageService messageService,
             ISettingsService settingsService,
             IUpdateService updateService,
             IDispatchService dispatchService)
         {
             Logger = logger;
             AppStatus = appStatus;
-            AutoStartService = autoStartService;
+            AutoStartBusiness = autoStartService;
             NotificationService = notificationService;
-            MessageService = messageService;
             SettingsService = settingsService;
             UpdateService = updateService;
             DispatchService = dispatchService;
@@ -111,19 +108,19 @@ namespace AutoStartConfirm
 
 
             // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            bool isFirstRun = !AutoStartService.GetValidAutoStartFileExists();
+            bool isFirstRun = !AutoStartBusiness.GetValidAutoStartFileExists();
             if (!isFirstRun)
             {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
+                AutoStartBusiness.Add += AddHandler;
+                AutoStartBusiness.Remove += RemoveHandler;
+                AutoStartBusiness.Enable += EnableHandler;
+                AutoStartBusiness.Disable += DisableHandler;
             }
 
             try
             {
-                AutoStartService.LoadCurrentAutoStarts();
-                AppStatus.HasOwnAutoStart = AutoStartService.HasOwnAutoStart;
+                AutoStartBusiness.LoadCurrentAutoStarts();
+                AppStatus.HasOwnAutoStart = AutoStartBusiness.HasOwnAutoStart;
             }
             catch (Exception)
             {
@@ -131,12 +128,12 @@ namespace AutoStartConfirm
 
             if (isFirstRun)
             {
-                AutoStartService.Add += AddHandler;
-                AutoStartService.Remove += RemoveHandler;
-                AutoStartService.Enable += EnableHandler;
-                AutoStartService.Disable += DisableHandler;
+                AutoStartBusiness.Add += AddHandler;
+                AutoStartBusiness.Remove += RemoveHandler;
+                AutoStartBusiness.Enable += EnableHandler;
+                AutoStartBusiness.Disable += DisableHandler;
             }
-            AutoStartService.StartWatcher();
+            AutoStartBusiness.StartWatcher();
 
             if (SettingsService.CheckForUpdatesOnStart)
             {
@@ -156,35 +153,35 @@ namespace AutoStartConfirm
                 for (int i = 0; i < args.Length; i++)
                 {
                     var arg = args[i];
-                    if (string.Equals(arg, AutoStartService.RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(arg, AutoStartBusiness.RevertAddParameterName, StringComparison.OrdinalIgnoreCase))
                     {
                         Logger.LogInformation("Adding should be reverted");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartService.RemoveAutoStart(autoStartEntry, false);
+                        AutoStartBusiness.RemoveAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
-                    else if (string.Equals(arg, AutoStartService.RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(arg, AutoStartBusiness.RevertRemoveParameterName, StringComparison.OrdinalIgnoreCase))
                     {
                         Logger.LogInformation("Removing should be reverted");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartService.AddAutoStart(autoStartEntry, false);
+                        AutoStartBusiness.AddAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
-                    else if (string.Equals(arg, AutoStartService.EnableParameterName, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(arg, AutoStartBusiness.EnableParameterName, StringComparison.OrdinalIgnoreCase))
                     {
                         Logger.LogInformation("Auto start should be enabled");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartService.EnableAutoStart(autoStartEntry, false);
+                        AutoStartBusiness.EnableAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
-                    else if (string.Equals(arg, AutoStartService.DisableParameterName, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(arg, AutoStartBusiness.DisableParameterName, StringComparison.OrdinalIgnoreCase))
                     {
                         Logger.LogInformation("Auto start should be disabled");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartService.DisableAutoStart(autoStartEntry, false);
+                        AutoStartBusiness.DisableAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
@@ -235,7 +232,7 @@ namespace AutoStartConfirm
         {
             TrayIcon?.Dispose();
             TrayIcon = null;
-            AutoStartService.StopWatcher();
+            AutoStartBusiness.StopWatcher();
             ServiceScope.Dispose();
             base.Exit();
             Dispose();
@@ -310,38 +307,38 @@ namespace AutoStartConfirm
                         {
                             case "viewRemove":
                                 // todo: implement ShowRemoved
-                                // AutoStartService.ShowRemoved(Guid.Parse(args["id"]));
+                                // AutoStartBusiness.ShowRemoved(Guid.Parse(args["id"]));
                                 break;
                             case "revertRemove":
-                                AutoStartService.AddAutoStart(Guid.Parse(args["id"]));
+                                AutoStartBusiness.AddAutoStart(Guid.Parse(args["id"]));
                                 break;
                             case "confirmRemove":
-                                AutoStartService.ConfirmRemove(Guid.Parse(args["id"]));
+                                AutoStartBusiness.ConfirmRemove(Guid.Parse(args["id"]));
                                 break;
                             case "viewAdd":
                                 // todo: implement ShowAdd
-                                // AutoStartService.ShowAdd(Guid.Parse(args["id"]));
+                                // AutoStartBusiness.ShowAdd(Guid.Parse(args["id"]));
                                 break;
                             case "revertAdd":
-                                AutoStartService.RemoveAutoStart(Guid.Parse(args["id"]));
+                                AutoStartBusiness.RemoveAutoStart(Guid.Parse(args["id"]));
                                 break;
                             case "confirmAdd":
-                                AutoStartService.ConfirmAdd(Guid.Parse(args["id"]));
+                                AutoStartBusiness.ConfirmAdd(Guid.Parse(args["id"]));
                                 break;
                             case "confirmEnable":
-                                AutoStartService.ConfirmAdd(Guid.Parse(args["id"]));
+                                AutoStartBusiness.ConfirmAdd(Guid.Parse(args["id"]));
                                 break;
                             case "confirmDisable":
-                                AutoStartService.ConfirmAdd(Guid.Parse(args["id"]));
+                                AutoStartBusiness.ConfirmAdd(Guid.Parse(args["id"]));
                                 break;
                             case "enable":
-                                AutoStartService.EnableAutoStart(Guid.Parse(args["id"]));
+                                AutoStartBusiness.EnableAutoStart(Guid.Parse(args["id"]));
                                 break;
                             case "viewUpdate":
                                 ViewUpdate();
                                 break;
                             case "disable":
-                                AutoStartService.DisableAutoStart(Guid.Parse(args["id"]));
+                                AutoStartBusiness.DisableAutoStart(Guid.Parse(args["id"]));
                                 break;
                             case "installUpdate":
                                 InstallUpdate(args["msiUrl"]);
@@ -367,7 +364,7 @@ namespace AutoStartConfirm
         private void AddHandler(AutoStartEntry addedAutostart)
         {
             Logger.LogTrace("AddHandler called");
-            if (AutoStartService.IsOwnAutoStart(addedAutostart))
+            if (AutoStartBusiness.IsOwnAutoStart(addedAutostart))
             {
                 Logger.LogInformation("Own auto start added");
                 AppStatus.HasOwnAutoStart = true;
@@ -378,7 +375,7 @@ namespace AutoStartConfirm
         private void RemoveHandler(AutoStartEntry removedAutostart)
         {
             Logger.LogTrace("RemoveHandler called");
-            if (AutoStartService.IsOwnAutoStart(removedAutostart))
+            if (AutoStartBusiness.IsOwnAutoStart(removedAutostart))
             {
                 Logger.LogInformation("Own auto start removed");
                 AppStatus.HasOwnAutoStart = false;

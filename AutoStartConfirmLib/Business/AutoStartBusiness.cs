@@ -1,4 +1,5 @@
-﻿using AutoStartConfirm.Connectors.Registry;
+﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Exceptions;
 using AutoStartConfirm.GUI;
 using AutoStartConfirm.Helpers;
@@ -24,14 +25,14 @@ using System.Windows;
 using System.Xml.Serialization;
 using static AutoStartConfirm.GUI.IMessageService;
 
-namespace AutoStartConfirm.Connectors
+namespace AutoStartConfirm.Business
 {
 
     public delegate void AutoStartsChangeHandler(AutoStartEntry e);
 
-    public class AutoStartService : IDisposable, IAutoStartService {
+    public class AutoStartBusiness : IDisposable, IAutoStartBusiness {
         #region Fields
-        private readonly ILogger<AutoStartService> Logger;
+        private readonly ILogger<AutoStartBusiness> Logger;
 
         private readonly IAutoStartConnectorService ConnectorService;
 
@@ -132,8 +133,8 @@ namespace AutoStartConfirm.Connectors
 
         #region Methods
 
-        public AutoStartService(
-            ILogger<AutoStartService> logger,
+        public AutoStartBusiness(
+            ILogger<AutoStartBusiness> logger,
             IAutoStartConnectorService connectorService,
             ISettingsService settingsService,
             ICurrentUserRun64Connector currentUserRun64Connector,

@@ -34,7 +34,7 @@ namespace AutoStartConfirmTests
     {
         //private readonly ILogger<AutoStartConfirm.App> LogService = A.Fake<ILogger<AutoStartConfirm.App>>();
         //private readonly IAppStatus AppStatus = A.Fake<IAppStatus>();
-        //private readonly IAutoStartService AutoStartService = A.Fake<IAutoStartService>();
+        //private readonly IAutoStartBusiness AutoStartBusiness = A.Fake<IAutoStartBusiness>();
         //private readonly INotificationService NotificationService = A.Fake<INotificationService>();
         //private readonly IMessageService MessageService = A.Fake<IMessageService>();
         //private readonly ISettingsService SettingsService = A.Fake<ISettingsService>();
@@ -58,7 +58,7 @@ namespace AutoStartConfirmTests
         {
             //Fake.ClearRecordedCalls(LogService);
             //Fake.ClearRecordedCalls(AppStatus);
-            //Fake.ClearRecordedCalls(AutoStartService);
+            //Fake.ClearRecordedCalls(AutoStartBusiness);
             //Fake.ClearRecordedCalls(NotificationService);
             //Fake.ClearRecordedCalls(MessageService);
             //Fake.ClearRecordedCalls(SettingsService);
@@ -85,7 +85,7 @@ namespace AutoStartConfirmTests
         //    //app = new AutoStartConfirm.App(
         //    //    logger: LogService,
         //    //    appStatus: AppStatus,
-        //    //    autoStartService: AutoStartService,
+        //    //    autoStartService: AutoStartBusiness,
         //    //    notificationService: NotificationService,
         //    //    messageService: MessageService,
         //    //    settingsService: SettingsService,
@@ -110,7 +110,7 @@ namespace AutoStartConfirmTests
         //        app = new App(
         //            logger: LogService,
         //            appStatus: AppStatus,
-        //            autoStartService: AutoStartService,
+        //            autoStartService: AutoStartBusiness,
         //            notificationService: NotificationService,
         //            messageService: MessageService,
         //            settingsService: SettingsService,
@@ -121,8 +121,8 @@ namespace AutoStartConfirmTests
         //        app!.Run();
         //    });
 
-        //    A.CallTo(() => AutoStartService.LoadCurrentAutoStarts()).MustHaveHappened();
-        //    A.CallTo(() => AutoStartService.StartWatcher()).MustHaveHappened();
+        //    A.CallTo(() => AutoStartBusiness.LoadCurrentAutoStarts()).MustHaveHappened();
+        //    A.CallTo(() => AutoStartBusiness.StartWatcher()).MustHaveHappened();
         //}
 
         //[TestMethod]
@@ -144,7 +144,7 @@ namespace AutoStartConfirmTests
         //[TestMethod]
         //public void ToggleOwnAutoStart_ShowsErrorMessageOnError()
         //{
-        //    A.CallTo(() => AutoStartService.ToggleOwnAutoStart()).Throws(new Exception());
+        //    A.CallTo(() => AutoStartBusiness.ToggleOwnAutoStart()).Throws(new Exception());
         //    app!.ToggleOwnAutoStart().Wait();
         //    A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustHaveHappened();
         //    Fake.ClearRecordedCalls(MessageService);

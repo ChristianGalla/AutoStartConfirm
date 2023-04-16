@@ -22,6 +22,7 @@ using AutoStartConfirm.Helpers;
 using NLog.Config;
 using NLog;
 using Octokit;
+using AutoStartConfirm.Business;
 
 namespace AutoStartConfirm
 {
@@ -108,7 +109,7 @@ namespace AutoStartConfirm
                 .AddSingleton<MainWindow>()
                 .AddSingleton<NotifyIcon>()
                 .AddSingleton<IAppStatus, AppStatus>()
-                .AddSingleton<IAutoStartService, AutoStartService>()
+                .AddSingleton<IAutoStartBusiness, AutoStartBusiness>()
                 .AddSingleton<INotificationService, NotificationService>()
                 .AddSingleton<IMessageService, MessageService>()
                 .AddSingleton<ISettingsService, SettingsService>()

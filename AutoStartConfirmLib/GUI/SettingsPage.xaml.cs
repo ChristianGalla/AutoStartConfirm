@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
+using AutoStartConfirm.Business;
 using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
@@ -56,14 +57,14 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private IAutoStartService? autoStartService;
+        private IAutoStartBusiness? autoStartBusiness;
 
-        public IAutoStartService AutoStartService
+        public IAutoStartBusiness AutoStartBusiness
         {
             get
             {
-                autoStartService ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                return autoStartService;
+                autoStartBusiness ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                return autoStartBusiness;
             }
         }
 
@@ -146,7 +147,7 @@ namespace AutoStartConfirm.GUI
                     AppStatus.IncrementRunningActionCount();
                     if (newStatus == null)
                     {
-                        AutoStartService.ToggleOwnAutoStart();
+                        AutoStartBusiness.ToggleOwnAutoStart();
                     } else
                     {
                     }

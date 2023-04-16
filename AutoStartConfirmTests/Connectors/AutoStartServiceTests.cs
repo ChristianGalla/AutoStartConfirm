@@ -18,15 +18,16 @@ using Microsoft.Extensions.Logging;
 using Windows.Services.Maps;
 using Octokit;
 using AutoStartConfirmTests;
+using AutoStartConfirm.Business;
 
 namespace AutoStartConfirm.Connectors.Tests
 {
     [TestClass]
     public class AutoStartServiceTests: TestsBase
     {
-        protected static readonly ILogger<AutoStartService> LogService = A.Fake<ILogger<AutoStartService>>();
+        protected static readonly ILogger<AutoStartBusiness> LogService = A.Fake<ILogger<AutoStartBusiness>>();
 
-        private AutoStartService? Service;
+        private AutoStartBusiness? Service;
 
         private readonly static string CurrentExePath = Environment.ProcessPath!;
         private Guid Guid;
@@ -52,7 +53,7 @@ namespace AutoStartConfirm.Connectors.Tests
 
             // A.CallTo(() => ServiceProvider.GetService()).Returns();
 
-            Service = new AutoStartService(
+            Service = new AutoStartBusiness(
                 logger: LogService,
                 connectorService: ConnectorService,
                 settingsService: SettingsService,

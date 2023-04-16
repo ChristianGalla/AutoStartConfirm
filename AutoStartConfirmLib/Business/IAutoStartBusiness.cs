@@ -1,12 +1,13 @@
-﻿using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.Connectors {
-    public interface IAutoStartService: IDisposable {
+namespace AutoStartConfirm.Business {
+    public interface IAutoStartBusiness: IDisposable {
         /// <summary>
         /// All current auto starts of all enabled connectors
         /// </summary>

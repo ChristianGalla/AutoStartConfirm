@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
+using AutoStartConfirm.Business;
 using AutoStartConfirm.Connectors;
 using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
@@ -45,14 +46,14 @@ namespace AutoStartConfirm.GUI
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
-        private IAutoStartService? autoStartService;
+        private IAutoStartBusiness? autoStartBusiness;
 
-        public IAutoStartService AutoStartService
+        public IAutoStartBusiness AutoStartBusiness
         {
             get
             {
-                autoStartService ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                return autoStartService;
+                autoStartBusiness ??= ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                return autoStartBusiness;
             }
         }
 
@@ -97,7 +98,7 @@ namespace AutoStartConfirm.GUI
             {
                 if (autoStartCollectionView == null)
                 {
-                    autoStartCollectionView = new AdvancedCollectionView(AutoStartService.CurrentAutoStarts, true);
+                    autoStartCollectionView = new AdvancedCollectionView(AutoStartBusiness.CurrentAutoStarts, true);
                     autoStartCollectionView.SortDescriptions.Add(new SortDescription("Date", SortDirection.Descending));
                 }
                 return autoStartCollectionView;
@@ -112,7 +113,7 @@ namespace AutoStartConfirm.GUI
             {
                 if (historyAutoStartCollectionView == null)
                 {
-                    historyAutoStartCollectionView = new AdvancedCollectionView(AutoStartService.HistoryAutoStarts, true);
+                    historyAutoStartCollectionView = new AdvancedCollectionView(AutoStartBusiness.HistoryAutoStarts, true);
                     historyAutoStartCollectionView.SortDescriptions.Add(new SortDescription("Date", SortDirection.Descending));
                 }
                 return historyAutoStartCollectionView;
@@ -123,7 +124,7 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
-            AutoStartService.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged; ;
+            AutoStartBusiness.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged; ;
             AutoStartCollectionView.PropertyChanged += AutoStartCollectionView_PropertyChanged;
         }
 
@@ -142,7 +143,7 @@ namespace AutoStartConfirm.GUI
             try {
                 var button = (Button)sender;
                 var autoStartEntry = (AutoStartEntry)button.DataContext;
-                await AutoStartService.ConfirmAdd(autoStartEntry);
+                await AutoStartBusiness.ConfirmAdd(autoStartEntry);
             }
             catch (Exception ex)
             {
@@ -156,7 +157,7 @@ namespace AutoStartConfirm.GUI
         {
             var button = (Button)sender;
             var autoStart = (AutoStartEntry)button.DataContext;
-            await AutoStartService.RemoveAutoStart(autoStart);
+            await AutoStartBusiness.RemoveAutoStart(autoStart);
         }
 
         public async void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -165,11 +166,11 @@ namespace AutoStartConfirm.GUI
             var autoStartEntry = (AutoStartEntry)button.DataContext;
             if (autoStartEntry.Change == Change.Added)
             {
-                await AutoStartService.ConfirmAdd(autoStartEntry);
+                await AutoStartBusiness.ConfirmAdd(autoStartEntry);
             }
             else if (autoStartEntry.Change == Change.Removed)
             {
-                await AutoStartService.ConfirmRemove(autoStartEntry);
+                await AutoStartBusiness.ConfirmRemove(autoStartEntry);
             }
         }
 
@@ -180,16 +181,16 @@ namespace AutoStartConfirm.GUI
             switch (autoStart.Change)
             {
                 case Change.Added:
-                    await AutoStartService.RemoveAutoStart(autoStart);
+                    await AutoStartBusiness.RemoveAutoStart(autoStart);
                     break;
                 case Change.Removed:
-                    await AutoStartService.AddAutoStart(autoStart);
+                    await AutoStartBusiness.AddAutoStart(autoStart);
                     break;
                 case Change.Enabled:
-                    await AutoStartService.DisableAutoStart(autoStart);
+                    await AutoStartBusiness.DisableAutoStart(autoStart);
                     break;
                 case Change.Disabled:
-                    await AutoStartService.EnableAutoStart(autoStart);
+                    await AutoStartBusiness.EnableAutoStart(autoStart);
                     break;
                 default:
                     break;
@@ -214,25 +215,25 @@ namespace AutoStartConfirm.GUI
                 {
                     if (!autoStart.CanBeEnabled.HasValue)
                     {
-                        await AutoStartService.LoadCanBeEnabled(autoStart);
+                        await AutoStartBusiness.LoadCanBeEnabled(autoStart);
                     }
                     if (!autoStart.CanBeEnabled!.Value)
                     {
                         return;
                     }
-                    await AutoStartService.EnableAutoStart(autoStart);
+                    await AutoStartBusiness.EnableAutoStart(autoStart);
                 }
                 else if (!toggleSwitch.IsOn && autoStart.IsEnabled.Value)
                 {
                     if (!autoStart.CanBeDisabled.HasValue)
                     {
-                        await AutoStartService.LoadCanBeEnabled(autoStart);
+                        await AutoStartBusiness.LoadCanBeEnabled(autoStart);
                     }
                     if (!autoStart.CanBeDisabled!.Value)
                     {
                         return;
                     }
-                    await AutoStartService.DisableAutoStart(autoStart);
+                    await AutoStartBusiness.DisableAutoStart(autoStart);
                 }
             }
             finally
@@ -297,8 +298,8 @@ namespace AutoStartConfirm.GUI
             if (autoStart.CanBeAddedLoader == null)
             {
                 using var ServiceScope = Ioc.Default.CreateScope();
-                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                AutoStartService.LoadCanBeAdded(autoStart);
+                var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                AutoStartBusiness.LoadCanBeAdded(autoStart);
             }
             return false;
         }
@@ -312,8 +313,8 @@ namespace AutoStartConfirm.GUI
             if (autoStart.CanBeDisabledLoader == null)
             {
                 using var ServiceScope = Ioc.Default.CreateScope();
-                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                AutoStartService.LoadCanBeDisabled(autoStart);
+                var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                AutoStartBusiness.LoadCanBeDisabled(autoStart);
             }
             return false;
         }
@@ -327,8 +328,8 @@ namespace AutoStartConfirm.GUI
             if (autoStart.CanBeEnabledLoader == null)
             {
                 using var ServiceScope = Ioc.Default.CreateScope();
-                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                AutoStartService.LoadCanBeEnabled(autoStart);
+                var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                AutoStartBusiness.LoadCanBeEnabled(autoStart);
             }
             return false;
         }
@@ -342,8 +343,8 @@ namespace AutoStartConfirm.GUI
             if (autoStart.CanBeRemovedLoader == null)
             {
                 using var ServiceScope = Ioc.Default.CreateScope();
-                var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
-                AutoStartService.LoadCanBeRemoved(autoStart);
+                var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                AutoStartBusiness.LoadCanBeRemoved(autoStart);
             }
             return false;
         }
@@ -351,7 +352,7 @@ namespace AutoStartConfirm.GUI
         public static bool CanBeRevertedConverter(AutoStartEntry autoStart)
         {
             using var ServiceScope = Ioc.Default.CreateScope();
-            var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+            var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
             switch (autoStart.Change)
             {
                 case Change.Added:
@@ -361,7 +362,7 @@ namespace AutoStartConfirm.GUI
                     }
                     if (autoStart.CanBeRemovedLoader == null)
                     {
-                        AutoStartService.LoadCanBeRemoved(autoStart);
+                        AutoStartBusiness.LoadCanBeRemoved(autoStart);
                     }
                     break;
                 case Change.Removed:
@@ -371,7 +372,7 @@ namespace AutoStartConfirm.GUI
                     }
                     if (autoStart.CanBeAddedLoader == null)
                     {
-                        AutoStartService.LoadCanBeAdded(autoStart);
+                        AutoStartBusiness.LoadCanBeAdded(autoStart);
                     }
                     break;
                 case Change.Enabled:
@@ -381,7 +382,7 @@ namespace AutoStartConfirm.GUI
                     }
                     if (autoStart.CanBeDisabledLoader == null)
                     {
-                        AutoStartService.LoadCanBeDisabled(autoStart);
+                        AutoStartBusiness.LoadCanBeDisabled(autoStart);
                     }
                     break;
                 case Change.Disabled:
@@ -391,7 +392,7 @@ namespace AutoStartConfirm.GUI
                     }
                     if (autoStart.CanBeEnabledLoader == null)
                     {
-                        AutoStartService.LoadCanBeEnabled(autoStart);
+                        AutoStartBusiness.LoadCanBeEnabled(autoStart);
                     }
                     break;
             }
@@ -405,12 +406,12 @@ namespace AutoStartConfirm.GUI
                 return false;
             }
             using var ServiceScope = Ioc.Default.CreateScope();
-            var AutoStartService = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartService>();
+            var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
             if (autoStart.IsEnabled.Value)
             {
                 if (!autoStart.CanBeDisabled.HasValue)
                 {
-                    AutoStartService.LoadCanBeDisabled(autoStart);
+                    AutoStartBusiness.LoadCanBeDisabled(autoStart);
                 }
                 else
                 {
@@ -421,7 +422,7 @@ namespace AutoStartConfirm.GUI
             {
                 if (!autoStart.CanBeEnabled.HasValue)
                 {
-                    AutoStartService.LoadCanBeEnabled(autoStart);
+                    AutoStartBusiness.LoadCanBeEnabled(autoStart);
                 }
                 else
                 {

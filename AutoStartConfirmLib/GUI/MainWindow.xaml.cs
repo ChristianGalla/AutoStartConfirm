@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Linq;
+using AutoStartConfirm.Business;
 
 namespace AutoStartConfirm.GUI
 {
@@ -22,7 +23,7 @@ namespace AutoStartConfirm.GUI
 
         public MainWindow(
             ILogger<MainWindow> logger,
-            IAutoStartService autoStartService
+            IAutoStartBusiness autoStartBusiness
         ) {
             Logger = logger;
             InitializeComponent();
