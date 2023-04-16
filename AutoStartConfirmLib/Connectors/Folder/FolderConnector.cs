@@ -208,7 +208,7 @@ namespace AutoStartConfirm.Connectors.Folder
         #endregion
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -230,6 +230,7 @@ namespace AutoStartConfirm.Connectors.Folder
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void Open(AutoStartEntry autoStart)

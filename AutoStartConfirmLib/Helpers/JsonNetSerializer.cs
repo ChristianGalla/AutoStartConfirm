@@ -16,7 +16,6 @@ namespace AutoStartConfirm.Helpers
         {
             contractResolver = new DefaultContractResolver
             {
-                // KEY CONFIG !!!
                 NamingStrategy = new CamelCaseNamingStrategy()
             };
         }

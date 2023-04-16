@@ -538,7 +538,7 @@ namespace AutoStartConfirm.Connectors.Registry
         #endregion
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {

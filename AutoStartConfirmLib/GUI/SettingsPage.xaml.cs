@@ -27,14 +27,8 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace AutoStartConfirm.GUI
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class SettingsPage : Page, ISubPage, IDisposable
     {
         private bool disposedValue = false;
@@ -138,34 +132,7 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public Task ToggleOwnAutoStart(bool? newStatus = null)
-        {
-            return Task.Run(() =>
-            {
-                try
-                {
-                    AppStatus.IncrementRunningActionCount();
-                    if (newStatus == null)
-                    {
-                        AutoStartBusiness.ToggleOwnAutoStart();
-                    } else
-                    {
-                    }
-                }
-                catch (Exception e)
-                {
-                    const string message = "Failed to change own auto start";
-                    Logger.LogError(e, message);
-                    // MessageService.ShowError(message, e);
-                }
-                finally
-                {
-                    AppStatus.DecrementRunningActionCount();
-                }
-            });
-        }
-
-        private void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
+        private async void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
             if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
@@ -176,7 +143,7 @@ namespace AutoStartConfirm.GUI
             {
                 return;
             }
-            ToggleOwnAutoStart();
+            await AutoStartBusiness.ToggleOwnAutoStart();
         }
 
 
@@ -195,7 +162,6 @@ namespace AutoStartConfirm.GUI
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

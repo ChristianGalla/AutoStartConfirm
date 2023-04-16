@@ -142,7 +142,7 @@ namespace AutoStartConfirm.Connectors.Services
             }
             // https://stackoverflow.com/a/35063366
             // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/changestartmode-method-in-class-win32-service?redirectedfrom=MSDN
-            using var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path));
+            using var m = new ManagementObject($"Win32_Service.Name=\"{autoStart.Path}\"");
             uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { "Disabled" });
             if (returnCode != 0)
             {
@@ -340,7 +340,7 @@ namespace AutoStartConfirm.Connectors.Services
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
