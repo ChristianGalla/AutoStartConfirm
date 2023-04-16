@@ -44,7 +44,7 @@
                     Header="Monitored auto start locations"
                     SelectionMode="Multiple"
                     SelectionChanged="ConnectorSelectionChanged"
-                    ItemsSource="{x:Bind Connectors.Values, Mode=OneWay}"
+                    ItemsSource="{x:Bind Connectors.Values, Mode=OneTime}"
                     ItemTemplate="{StaticResource ConnectorListViewTemplate}"/>
             </StackPanel>
         </ScrollViewer>

@@ -14,9 +14,9 @@
     <Grid Margin="24">
         <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
             Auto Start Confirm
-            <Run Text="{x:Bind Path=Version, Mode=OneWay}"></Run>
+            <Run Text="{x:Bind Path=Version, Mode=OneTime}"></Run>
             <LineBreak />
-            <Run Text="{x:Bind Path=Copyright, Mode=OneWay}"></Run>
+            <Run Text="{x:Bind Path=Copyright, Mode=OneTime}"></Run>
             <LineBreak />
             <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
         </TextBlock>
