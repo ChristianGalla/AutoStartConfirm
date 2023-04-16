@@ -38,8 +38,6 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private readonly IAppStatus AppStatus;
-
         private readonly SemaphoreSlim dialogSemaphore = new(1, 1);
 
         // only one dialog is allowed at the same time
@@ -49,11 +47,9 @@ namespace AutoStartConfirm.GUI
 
         public MessageService(
             ILogger<MessageService> logger,
-            IAppStatus appStatus,
             IDispatchService dispatchService)
         {
             Logger = logger;
-            AppStatus = appStatus;
             DispatchService = dispatchService;
         }
 
@@ -266,23 +262,13 @@ Path:
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
                     ServiceScope.Dispose();
                     DialogSemaphore.Dispose();
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~MessageService()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         void IDisposable.Dispose()
         {

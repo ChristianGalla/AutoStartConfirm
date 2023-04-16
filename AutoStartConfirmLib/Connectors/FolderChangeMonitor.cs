@@ -1,5 +1,8 @@
 ﻿using AutoStartConfirm.Connectors.Folder;
+using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -10,6 +13,7 @@ namespace AutoStartConfirm.Connectors
     public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor {
         #region Fields
         private readonly ILogger<FolderChangeMonitor> Logger;
+        private readonly IDispatchService DispatchService;
 
         private bool disposedValue;
 
@@ -21,9 +25,12 @@ namespace AutoStartConfirm.Connectors
 
         #region Methods
 
-        public FolderChangeMonitor(ILogger<FolderChangeMonitor> logger)
+        public FolderChangeMonitor(
+            ILogger<FolderChangeMonitor> logger,
+            IDispatchService dispatchService)
         {
             Logger = logger;
+            DispatchService = dispatchService;
         }
 
         public void Start() {
@@ -62,37 +69,6 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        // todo: migrate
-        // todo: filter duplicate calls (rename etc.)
-        private void OnChanged(object sender, FileSystemEventArgs e) {
-            if (e.Name == null)
-            {
-                return;
-            }
-            if (e.ChangeType != WatcherChangeTypes.Changed ||
-                e.Name.ToLower() == "desktop.ini") {
-                return;
-            }
-            Logger.LogTrace("Changed: {FullPath}", e.FullPath);
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-            //    var removedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.Name,
-            //        Path = parentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Remove?.Invoke(removedAutostart);
-            //    var addedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.Name,
-            //        Path = parentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Add?.Invoke(addedAutostart);
-            //});
-        }
-
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
             if (e.Name == null)
@@ -103,16 +79,18 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Created: {FullPath}", e.FullPath);
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-            //    var addedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.Name,
-            //        Path = parentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Add?.Invoke(addedAutostart);
-            //});
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+                var addedAutostart = new FolderAutoStartEntry()
+                {
+                    Category = Category,
+                    Value = e.Name,
+                    Path = parentDirectory,
+                    Date = DateTime.Now,
+                };
+                Add?.Invoke(addedAutostart);
+            });
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -125,16 +103,18 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Deleted: {FullPath}", e.FullPath);
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-            //    var removedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.Name,
-            //        Path = parentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Remove?.Invoke(removedAutostart);
-            //});
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+                var removedAutostart = new FolderAutoStartEntry()
+                {
+                    Category = Category,
+                    Value = e.Name,
+                    Path = parentDirectory,
+                    Date = DateTime.Now,
+                };
+                Remove?.Invoke(removedAutostart);
+            });
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
@@ -147,24 +127,30 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    var oldParentDirectory = e.OldFullPath[..e.OldFullPath.LastIndexOf("\\")];
-            //    var removedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.OldName,
-            //        Path = oldParentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Remove?.Invoke(removedAutostart);
-            //    var newParentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
-            //    var addedAutostart = new FolderAutoStartEntry() {
-            //        Category = Category,
-            //        Value = e.Name,
-            //        Path = newParentDirectory,
-            //        Date = DateTime.Now,
-            //    };
-            //    Add?.Invoke(addedAutostart);
-            //});
+            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (e.OldName != null)
+                {
+                    var oldParentDirectory = e.OldFullPath[..e.OldFullPath.LastIndexOf("\\")];
+                    var removedAutostart = new FolderAutoStartEntry()
+                    {
+                        Category = Category,
+                        Value = e.OldName,
+                        Path = oldParentDirectory,
+                        Date = DateTime.Now,
+                    };
+                    Remove?.Invoke(removedAutostart);
+                }
+                var newParentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
+                var addedAutostart = new FolderAutoStartEntry()
+                {
+                    Category = Category,
+                    Value = e.Name,
+                    Path = newParentDirectory,
+                    Date = DateTime.Now,
+                };
+                Add?.Invoke(addedAutostart);
+            });
         }
 
         private void OnError(object sender, ErrorEventArgs e) {
@@ -182,24 +168,14 @@ namespace AutoStartConfirm.Connectors
 
         protected virtual void Dispose(bool disposing) {
             if (!disposedValue) {
-                if (disposing) {
-                    // TODO: dispose managed state (managed objects)
+                if (disposing)
+                {
+                    Stop();
                 }
 
-                Stop();
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~IFolderChangeMonitor()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose() {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

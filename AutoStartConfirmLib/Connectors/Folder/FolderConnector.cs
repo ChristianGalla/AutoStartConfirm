@@ -21,7 +21,7 @@ namespace AutoStartConfirm.Connectors.Folder
         private readonly IFolderChangeMonitor FolderChangeMonitor;
 
         // todo: read target of links?
-        // read sub directories?
+        // todo: read sub directories?
         public IList<AutoStartEntry> GetCurrentAutoStarts()
         {
             Logger.LogTrace("GetCurrentAutoStarts called");

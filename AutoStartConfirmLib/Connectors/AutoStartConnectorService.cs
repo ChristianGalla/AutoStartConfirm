@@ -112,8 +112,6 @@ namespace AutoStartConfirm.Connectors
             SettingsService.SettingsSaving += SettingsSavingHandler;
             SettingsService.SettingsLoaded += SettingsLoadedHandler;
 
-
-
             // todo: filter for specifiy sub sub keys if needed
             // todo: User Shell Folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders)
             // todo: Shell folders key (HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders)

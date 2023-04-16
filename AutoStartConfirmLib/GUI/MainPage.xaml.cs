@@ -124,7 +124,7 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
-            AutoStartBusiness.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged; ;
+            AutoStartBusiness.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged;
             AutoStartCollectionView.PropertyChanged += AutoStartCollectionView_PropertyChanged;
         }
 
@@ -445,13 +445,6 @@ namespace AutoStartConfirm.GUI
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~SettingsPage()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

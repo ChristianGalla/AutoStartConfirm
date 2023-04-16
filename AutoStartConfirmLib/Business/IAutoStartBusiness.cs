@@ -52,7 +52,6 @@ namespace AutoStartConfirm.Business {
         bool CanAutoStartBeRemoved(AutoStartEntry autoStart);
 
         #region AutoStart changes
-        // todo: set default values
         Task AddAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
         Task AddAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
         Task ConfirmAdd(AutoStartEntry autoStart);
