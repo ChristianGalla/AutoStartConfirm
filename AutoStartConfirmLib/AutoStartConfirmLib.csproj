@@ -43,7 +43,7 @@
 	  </PackageReference>
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
 	  <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-	  <PackageReference Include="System.Management" Version="7.0.0" />
+	  <PackageReference Include="System.Management" Version="7.0.1" />
 	  <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.0" />
 	  <PackageReference Include="TaskScheduler">
 		  <Version>2.10.1</Version>
