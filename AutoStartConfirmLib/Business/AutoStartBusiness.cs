@@ -522,6 +522,7 @@ namespace AutoStartConfirm.Business
                 {
                     return;
                 }
+                // todo: ask for required parameters, like start type of services
                 if (IsAdminRequiredForChanges(autoStart) && !UacService.IsProcessElevated)
                 {
                     await StartSubProcessAsAdmin(autoStart, EnableParameterName);

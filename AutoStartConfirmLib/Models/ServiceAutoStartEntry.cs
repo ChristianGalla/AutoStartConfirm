@@ -5,6 +5,6 @@ namespace AutoStartConfirm.Models
 {
     [Serializable]
     public class ServiceAutoStartEntry: AutoStartEntry {
-        public ServiceStartMode EnabledStartMode;
+        public ServiceStartMode? EnabledStartMode;
     }
 }

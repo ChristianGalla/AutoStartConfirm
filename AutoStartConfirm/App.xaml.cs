@@ -146,7 +146,7 @@ namespace AutoStartConfirm
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>True, if parameters were set, correctly handled and the program can be closed</returns>
-        public bool HandleCommandLineParameters(string[] args)
+        public async Task<bool> HandleCommandLineParameters(string[] args)
         {
             try
             {
@@ -157,7 +157,7 @@ namespace AutoStartConfirm
                     {
                         Logger.LogInformation("Adding should be reverted");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartBusiness.RemoveAutoStart(autoStartEntry, false);
+                        await AutoStartBusiness.RemoveAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
@@ -165,7 +165,7 @@ namespace AutoStartConfirm
                     {
                         Logger.LogInformation("Removing should be reverted");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartBusiness.AddAutoStart(autoStartEntry, false);
+                        await AutoStartBusiness.AddAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
@@ -173,7 +173,7 @@ namespace AutoStartConfirm
                     {
                         Logger.LogInformation("Auto start should be enabled");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartBusiness.EnableAutoStart(autoStartEntry, false);
+                        await AutoStartBusiness.EnableAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }
@@ -181,7 +181,7 @@ namespace AutoStartConfirm
                     {
                         Logger.LogInformation("Auto start should be disabled");
                         AutoStartEntry autoStartEntry = LoadAutoStartFromParameter(args, i);
-                        AutoStartBusiness.DisableAutoStart(autoStartEntry, false);
+                        await AutoStartBusiness.DisableAutoStart(autoStartEntry, false);
                         Logger.LogInformation("Finished");
                         return true;
                     }

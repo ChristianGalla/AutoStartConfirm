@@ -15,7 +15,7 @@ namespace AutoStartConfirm.Connectors.Services
     {
         private readonly ILogger<ServiceConnector> Logger;
 
-        public int WatcherIntervalInMs = 1000 * 60;
+        public int WatcherIntervalInMs = 1000 * 10;
 
         public abstract Category Category { get; }
 
@@ -183,12 +183,13 @@ namespace AutoStartConfirm.Connectors.Services
                 throw new ArgumentException("AutoStartEntry must be of type ServiceAutoStartEntry");
             }
             var serviceAutoStart = (ServiceAutoStartEntry)autoStart;
-            var targetMode = serviceAutoStart.EnabledStartMode.ToString();
+            serviceAutoStart.EnabledStartMode ??= ServiceStartMode.Automatic;
+            var targetMode = serviceAutoStart.EnabledStartMode!.ToString();
             using var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", autoStart.Path));
-            uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { targetMode });
+            uint returnCode = (uint)m.InvokeMethod("ChangeStartMode", new object[] { targetMode! });
             if (returnCode != 0)
             {
-                throw new Exception($"Failed to disable auto start (Return code: {returnCode})");
+                throw new Exception($"Failed to enable auto start (Return code: {returnCode})");
             }
         }
 

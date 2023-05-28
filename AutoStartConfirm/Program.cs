@@ -46,7 +46,7 @@ namespace AutoStartConfirm
                 bool isRedirect = DecideRedirection();
                 if (!isRedirect)
                 {
-                    Microsoft.UI.Xaml.Application.Start((p) =>
+                    Microsoft.UI.Xaml.Application.Start(async (p) =>
                     {
                         var context = new DispatcherQueueSynchronizationContext(
                             DispatcherQueue.GetForCurrentThread());
@@ -63,7 +63,7 @@ namespace AutoStartConfirm
                             logger.LogInformation("Starting");
                             App app = serviceScope.ServiceProvider.GetRequiredService<App>();
                             logger.LogInformation("Parameters: {args}", args);
-                            if (app.HandleCommandLineParameters(args))
+                            if (await app.HandleCommandLineParameters(args))
                             {
                                 app.Exit();
                             }
