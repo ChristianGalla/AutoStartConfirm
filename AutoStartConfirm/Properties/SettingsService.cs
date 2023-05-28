@@ -114,10 +114,13 @@ namespace AutoStartConfirm.Properties
         }
 
         private void SettingsSavingHandler(object sender, CancelEventArgs e) {
+            Logger.LogInformation("Settings saving");
             SettingsSaving?.Invoke(sender, e);
         }
 
-        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
+        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e)
+        {
+            Logger.LogInformation("Settings loaded");
             SettingsLoaded?.Invoke(sender, e);
         }
 

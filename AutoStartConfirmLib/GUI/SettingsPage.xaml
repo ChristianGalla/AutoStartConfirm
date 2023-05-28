@@ -14,9 +14,12 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ConnectorListViewTemplate" x:Name="ConnectorListViewTemplate" x:DataType="models:ConnectorEnableRow">
-            <TextBlock Text="{x:Bind CategoryName}"
-                       Style="{ThemeResource BaseTextBlockStyle}"
-                       Margin="12,6,0,0"/>
+            <ToggleSwitch x:Name="CategoryToggle"
+                          Margin="0,25,0,0"
+                          IsOn="{x:Bind Enabled, Mode=TwoWay}"
+                          Toggled="ConnectorEnable_Toggled"
+                          Header="{x:Bind CategoryName}"
+                          ToolTipService.ToolTip="Enable"/>
         </DataTemplate>
     </Page.Resources>
 
@@ -42,10 +45,10 @@
                 <ListView
                     x:Name="EnabledConnectorList"
                     Header="Monitored auto start locations"
-                    SelectionMode="Multiple"
-                    SelectionChanged="ConnectorSelectionChanged"
+                    SelectionMode="None"
                     ItemsSource="{x:Bind Connectors.Values, Mode=OneTime}"
                     ItemTemplate="{StaticResource ConnectorListViewTemplate}"/>
+
             </StackPanel>
         </ScrollViewer>
 

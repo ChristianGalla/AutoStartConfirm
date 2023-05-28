@@ -16,5 +16,11 @@ namespace AutoStartConfirm.Models {
             get => category.ToString();
         }
 
+        public bool Enabled
+        {
+            get;
+            set;
+        }
+
     }
 }

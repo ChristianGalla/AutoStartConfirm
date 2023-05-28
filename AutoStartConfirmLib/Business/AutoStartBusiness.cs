@@ -174,16 +174,21 @@ namespace AutoStartConfirm.Business
             SettingsService.Save();
         }
 
-        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
+        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e)
+        {
+            Logger.LogTrace("SettingsLoadedHandler called");
             HandleSettingChanges();
         }
 
-        private void SettingsSavingHandler(object sender, CancelEventArgs e) {
+        private void SettingsSavingHandler(object sender, CancelEventArgs e)
+        {
+            Logger.LogTrace("SettingsSavingHandler called");
             HandleSettingChanges();
         }
 
         private void HandleSettingChanges()
         {
+            Logger.LogTrace("HandleSettingChanges called");
             foreach (var autoStart in CurrentAutoStarts.ToList())
             {
                 if (SettingsService.DisabledConnectors.Contains(autoStart.Category.ToString()))
@@ -213,6 +218,7 @@ namespace AutoStartConfirm.Business
                     HistoryAutoStarts.Add(autoStart);
                 }
             }
+            Logger.LogTrace("HandleSettingChanges completed");
         }
 
         public bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value) {

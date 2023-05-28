@@ -94,42 +94,38 @@ namespace AutoStartConfirm.GUI
                 var row = new ConnectorEnableRow()
                 {
                     Category = category,
+                    Enabled = !SettingsService.DisabledConnectors.Contains(category.ToString())
                 };
                 Connectors.Add(row.CategoryName, row);
             }
 
             InitializeComponent();
-            EnabledConnectorList.Loaded += EnabledConnectorList_Loaded;
             NavigationCacheMode = NavigationCacheMode.Enabled;
 
         }
 
-        // Setting selected items only works after list view has been rendered
-        private void EnabledConnectorList_Loaded(object sender, RoutedEventArgs e)
+        public void ConnectorEnable_Toggled(object sender, RoutedEventArgs e)
         {
-            foreach (var row in Connectors.Values)
+            ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+            if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
             {
-                if (!SettingsService.DisabledConnectors.Contains(row.CategoryName))
-                {
-                    EnabledConnectorList.SelectedItems.Add(row);
-                }
+                return;
             }
-        }
-
-        private void ConnectorSelectionChanged(object sender, SelectionChangedEventArgs args)
-        {
-            foreach (ConnectorEnableRow enabled in args.AddedItems)
+            var connectorRow = (ConnectorEnableRow)toggleSwitch.DataContext;
+            if (connectorRow == null)
             {
-                while (SettingsService.DisabledConnectors.Contains(enabled.CategoryName))
-                {
-                    SettingsService.DisabledConnectors.Remove(enabled.CategoryName);
-                }
+                return;
             }
-
-            foreach (ConnectorEnableRow disabled in args.RemovedItems)
+            connectorRow.Enabled = toggleSwitch.IsOn;
+            if (toggleSwitch.IsOn)
             {
-                SettingsService.DisabledConnectors.Add(disabled.CategoryName);
+                SettingsService.DisabledConnectors.Remove(connectorRow.CategoryName);
             }
+            else
+            {
+                SettingsService.DisabledConnectors.Add(connectorRow.CategoryName);
+            }
+            SettingsService.Save();
         }
 
         private async void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)

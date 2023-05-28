@@ -82,10 +82,7 @@ namespace AutoStartConfirm.GUI
                     {
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed error dialog {caption}: {message}", caption, message);
-                        if (tcs.TrySetResult())
-                        {
-                            Logger.LogError("Failed to set result");
-                        }
+                        tcs.TrySetResult();
                     }
                     finally
                     {
@@ -155,10 +152,7 @@ Path:
                     {
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed confirm dialog {caption}: {message}, Result: {result}", caption, message, result);
-                        if (tcs.TrySetResult(result == ContentDialogResult.Primary))
-                        {
-                            Logger.LogError("Failed to set result");
-                        }
+                        tcs.TrySetResult(result == ContentDialogResult.Primary);
                     }
                     finally
                     {
@@ -205,10 +199,7 @@ Path:
                     {
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed success dialog {caption}: {message}", caption, message);
-                        if (tcs.TrySetResult())
-                        {
-                            Logger.LogError("Failed to set result");
-                        }
+                        tcs.TrySetResult();
                     }
                     finally
                     {

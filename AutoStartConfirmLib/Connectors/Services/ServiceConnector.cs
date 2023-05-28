@@ -218,6 +218,7 @@ namespace AutoStartConfirm.Connectors.Services
             {
                 while (true)
                 {
+                    // todo: change to event based watcher
                     token.WaitHandle.WaitOne(WatcherIntervalInMs);
                     if (token.IsCancellationRequested)
                     {
