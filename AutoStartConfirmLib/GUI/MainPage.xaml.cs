@@ -36,7 +36,7 @@ namespace AutoStartConfirm.GUI
     {
         private bool disposedValue = false;
 
-        public string NavTitile => "Auto Start Confirm";
+        public string NavTitile => "Home";
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
@@ -118,18 +118,6 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
-            AutoStartBusiness.CurrentAutoStarts.CollectionChanged += CurrentAutoStarts_CollectionChanged;
-            AutoStartCollectionView.PropertyChanged += AutoStartCollectionView_PropertyChanged;
-        }
-
-        private void CurrentAutoStarts_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            Logger.LogDebug("CurrentAutoStarts_CollectionChanged invoked");
-        }
-
-        public void AutoStartCollectionView_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            Logger.LogDebug("AutoStartCollectionView_PropertyChanged invoked");
         }
 
         public async void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)

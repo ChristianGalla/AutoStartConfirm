@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Linq;
 using AutoStartConfirm.Business;
+using Microsoft.UI.Xaml.Media;
 
 namespace AutoStartConfirm.GUI
 {
@@ -29,8 +30,23 @@ namespace AutoStartConfirm.GUI
             InitializeComponent();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
+            Activated += MainWindow_Activated;
             Title = "Auto Start Confirm";
             Logger.LogTrace("Window opened");
+        }
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            if (args.WindowActivationState == WindowActivationState.Deactivated)
+            {
+                AppTitleTextBlock.Foreground =
+                    (SolidColorBrush)Application.Current.Resources["WindowCaptionForegroundDisabled"];
+            }
+            else
+            {
+                AppTitleTextBlock.Foreground =
+                    (SolidColorBrush)Application.Current.Resources["WindowCaptionForeground"];
+            }
         }
 
         #region Click handlers
