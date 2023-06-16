@@ -122,7 +122,8 @@ namespace AutoStartConfirm.GUI
 
         public async void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)
         {
-            try {
+            try
+            {
                 var button = (Button)sender;
                 var autoStartEntry = (AutoStartEntry)button.DataContext;
                 await AutoStartBusiness.ConfirmAdd(autoStartEntry);
@@ -432,6 +433,21 @@ namespace AutoStartConfirm.GUI
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs _)
+        {
+            string newText = ((TextBox)sender).Text;
+
+            // reset the filter
+            AutoStartCollectionView.Filter = _ => true;
+            HistoryAutoStartCollectionView.Filter = _ => true;
+
+            if (!string.IsNullOrWhiteSpace(newText))
+            {
+                AutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
+                HistoryAutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
+            }
         }
     }
 }
