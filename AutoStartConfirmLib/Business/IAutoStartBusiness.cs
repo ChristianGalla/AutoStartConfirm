@@ -91,5 +91,6 @@ namespace AutoStartConfirm.Business {
         bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool IsOwnAutoStart(AutoStartEntry autoStart);
+        Task ClearHistory();
     }
 }

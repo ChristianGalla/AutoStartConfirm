@@ -28,6 +28,9 @@
         <ScrollViewer>
 
             <StackPanel Orientation="Vertical" Margin="24">
+
+                <Button x:Name="ClearHistoryButton" Margin="0,0,0,25" Content="Clear history" Click="ClearHistoryButton_Click" />
+                
                 <ToggleSwitch 
                     Margin="0,0,0,25"
                     IsOn="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"

@@ -84,6 +84,17 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private IMessageService? messageService;
+
+        public IMessageService MessageService
+        {
+            get
+            {
+                messageService ??= ServiceScope.ServiceProvider.GetRequiredService<IMessageService>();
+                return messageService;
+            }
+        }
+
 
         public SettingsPage()
         {
@@ -128,7 +139,10 @@ namespace AutoStartConfirm.GUI
             SettingsService.Save();
         }
 
+
+#pragma warning disable IDE0060 // Remove unused parameter
         private async void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
             if (toggleSwitch == null || !toggleSwitch.IsEnabled || !toggleSwitch.IsLoaded)
@@ -140,6 +154,14 @@ namespace AutoStartConfirm.GUI
                 return;
             }
             await AutoStartBusiness.ToggleOwnAutoStart();
+        }
+
+
+#pragma warning disable IDE0060 // Remove unused parameter
+        private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)
+#pragma warning restore IDE0060 // Remove unused parameter
+        {
+            AutoStartBusiness.ClearHistory();
         }
 
 

@@ -1072,6 +1072,22 @@ namespace AutoStartConfirm.Business
                 File.Delete(path);
             }
         }
+
+        public async Task ClearHistory()
+        {
+            Logger.LogTrace("Clear history called");
+            if (!await MessageService.ShowConfirm("Clear history", "Are you sure to delete all recorded auto start changes?"))
+            {
+                Logger.LogTrace("Clear history aborted");
+                return;
+            }
+            Logger.LogInformation("Clearing history");
+            HistoryAutoStarts.Clear();
+            AllHistoryAutoStarts.Clear();
+            SaveAutoStarts(PathToHistoryAutoStarts, AllHistoryAutoStarts);
+            Logger.LogTrace("History cleared");
+        }
+
         #endregion
 
         #region Events

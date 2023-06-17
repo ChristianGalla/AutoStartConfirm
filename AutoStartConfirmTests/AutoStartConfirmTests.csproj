@@ -48,6 +48,9 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Connectors\" />
+	</ItemGroup>
 
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
