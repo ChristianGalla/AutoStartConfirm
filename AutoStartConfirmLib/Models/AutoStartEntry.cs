@@ -41,6 +41,9 @@ namespace AutoStartConfirm.Models
         private bool? canBeRemoved;
 
         [field: NonSerialized]
+        private bool? canBeIgnored;
+
+        [field: NonSerialized]
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public Guid Id
@@ -216,6 +219,28 @@ namespace AutoStartConfirm.Models
             set;
         }
 
+
+        public bool? CanBeIgnored
+        {
+            get => canBeIgnored;
+            set
+            {
+                if (canBeIgnored != value)
+                {
+                    canBeIgnored = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Task<bool>? CanBeIgnoredLoader
+        {
+            get;
+            set;
+        }
+
         public string CategoryAsString {
             get {
                 return Category.ToString();
@@ -261,7 +286,7 @@ namespace AutoStartConfirm.Models
             // Directly calling invoke throws an exception if not called from main thread when binded to ui element
             using var ServiceScope = Ioc.Default.CreateScope();
             var dispatchService = ServiceScope.ServiceProvider.GetRequiredService<IDispatchService>();
-            dispatchService.DispatcherQueue.TryEnqueue(() =>
+            dispatchService.TryEnqueue(() =>
             {
                 try
                 {

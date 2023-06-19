@@ -28,6 +28,11 @@ namespace AutoStartConfirm.Business {
         /// </summary>
         ObservableCollection<AutoStartEntry> AllHistoryAutoStarts { get; }
 
+        /// <summary>
+        /// All ignored auto starts
+        /// </summary>
+        ObservableCollection<IgnoredAutoStart> IgnoredAutoStarts { get; }
+
         string RevertAddParameterName { get; }
 
         string RevertRemoveParameterName { get; }
@@ -39,17 +44,11 @@ namespace AutoStartConfirm.Business {
         bool HasOwnAutoStart { get; }
         string CurrentExePath { get; set; }
 
-        event AutoStartChangeHandler Add;
-        event AutoStartChangeHandler HistoryAutoStartChange;
-        event AutoStartChangeHandler Confirm;
-        event AutoStartChangeHandler CurrentAutoStartChange;
-        event AutoStartChangeHandler Disable;
-        event AutoStartChangeHandler Enable;
-        event AutoStartChangeHandler Remove;
         bool CanAutoStartBeAdded(AutoStartEntry autoStart);
         bool CanAutoStartBeDisabled(AutoStartEntry autoStart);
         bool CanAutoStartBeEnabled(AutoStartEntry autoStart);
         bool CanAutoStartBeRemoved(AutoStartEntry autoStart);
+        bool CanAutoStartBeIgnored(AutoStartEntry autoStart);
 
         #region AutoStart changes
         Task AddAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
@@ -58,6 +57,9 @@ namespace AutoStartConfirm.Business {
         Task ConfirmAdd(Guid Id);
         Task ConfirmRemove(AutoStartEntry autoStart);
         Task ConfirmRemove(Guid Id);
+        Task IgnoreAutoStart(AutoStartEntry autoStart);
+        Task IgnoreAutoStart(Guid Id);
+        Task RemoveIgnoreAutoStart(IgnoredAutoStart autoStart);
         Task DisableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
         Task DisableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true);
         Task EnableAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
@@ -73,12 +75,13 @@ namespace AutoStartConfirm.Business {
         /// <returns></returns>
         bool GetValidAutoStartFileExists();
         IList<AutoStartEntry> GetCurrentAutoStarts();
-        ObservableCollection<AutoStartEntry>? GetSavedAutoStarts(string path);
+        ObservableCollection<T>? GetSavedAutoStarts<T>(string path);
         bool IsAdminRequiredForChanges(AutoStartEntry autoStart);
         Task<bool> LoadCanBeAdded(AutoStartEntry autoStart);
         Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart);
         Task<bool> LoadCanBeEnabled(AutoStartEntry autoStart);
         Task<bool> LoadCanBeRemoved(AutoStartEntry autoStart);
+        Task<bool> LoadCanBeIgnored(AutoStartEntry autoStart);
         void LoadCurrentAutoStarts();
         void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart);
         void ResetEditablePropertiesOfAllHistoryAutoStarts();
@@ -92,5 +95,6 @@ namespace AutoStartConfirm.Business {
         bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value);
         bool IsOwnAutoStart(AutoStartEntry autoStart);
         Task ClearHistory();
+        void Run();
     }
 }

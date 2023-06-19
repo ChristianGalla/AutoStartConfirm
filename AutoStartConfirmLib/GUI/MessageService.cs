@@ -61,7 +61,7 @@ namespace AutoStartConfirm.GUI
         {
             Logger.LogTrace("Showing error dialog {caption}: {message}", caption, message);
             var tcs = new TaskCompletionSource();
-            var queued = DispatchService.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, async () =>
+            var queued = DispatchService.TryEnqueue(DispatcherQueuePriority.High, async () =>
             {
                 try
                 {
@@ -126,11 +126,25 @@ Path:
 {autoStart.Path}");
         }
 
+        public async Task<bool> ShowRemoveConfirm(IgnoredAutoStart autoStart)
+        {
+            return await ShowConfirm(
+                $"Are you sure you want to remove this ignored auto start?",
+                @$"Type:
+{autoStart.Category}
+
+Value:
+{autoStart.Value}
+
+Path:
+{autoStart.Path}");
+        }
+
         public async Task<bool> ShowConfirm(string caption, string message = "")
         {
             Logger.LogTrace("Showing confirm dialog {caption}: {message}", caption, message);
             var tcs = new TaskCompletionSource<bool>();
-            var queued = DispatchService.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, async () =>
+            var queued = DispatchService.TryEnqueue(DispatcherQueuePriority.High, async () =>
             {
                 try
                 {
@@ -178,7 +192,7 @@ Path:
         {
             Logger.LogTrace("Showing success dialog {caption}: {message}", caption, message);
             var tcs = new TaskCompletionSource();
-            var queued = DispatchService.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, async () =>
+            var queued = DispatchService.TryEnqueue(DispatcherQueuePriority.High, async () =>
             {
                 try
                 {
@@ -234,17 +248,18 @@ Path:
 {autoStart.Path}");
         }
 
+        public async Task ShowRemoveSuccess(IgnoredAutoStart autoStart)
+        {
+            await ShowSuccess(
+                $"Successfully removed ignored auto start",
+                @$"Type:
+{autoStart.Category}
 
-        /// <summary>
-        /// Ensures that the main window is open.
-        /// A new hidden window is created if it not already exists.
-        /// </summary>
-        /// <returns>true if a new window has been created</returns>
-        private bool EnsureMainWindow() {
-            Logger.LogTrace("Showing main window");
-            bool newCreated = false;
-            // MainWindow.Show();
-            return newCreated;
+Value:
+{autoStart.Value}
+
+Path:
+{autoStart.Path}");
         }
 
         protected virtual void Dispose(bool disposing)

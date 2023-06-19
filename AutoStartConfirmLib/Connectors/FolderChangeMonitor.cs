@@ -79,7 +79,7 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Created: {FullPath}", e.FullPath);
-            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            DispatchService.TryEnqueue(() =>
             {
                 var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var addedAutostart = new FolderAutoStartEntry()
@@ -103,7 +103,7 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Deleted: {FullPath}", e.FullPath);
-            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            DispatchService.TryEnqueue(() =>
             {
                 var parentDirectory = e.FullPath[..e.FullPath.LastIndexOf("\\")];
                 var removedAutostart = new FolderAutoStartEntry()
@@ -127,7 +127,7 @@ namespace AutoStartConfirm.Connectors
                 return;
             }
             Logger.LogTrace("Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
-            DispatchService.DispatcherQueue.TryEnqueue(() =>
+            DispatchService.TryEnqueue(() =>
             {
                 if (e.OldName != null)
                 {

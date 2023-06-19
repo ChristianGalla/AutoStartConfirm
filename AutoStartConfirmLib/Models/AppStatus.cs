@@ -43,13 +43,13 @@ namespace AutoStartConfirm.Models
         public void IncrementRunningActionCount()
         {
             Interlocked.Increment(ref runningActionCount);
-            NotifyPropertyChanged("RunningActionCount");
+            NotifyPropertyChanged(nameof(RunningActionCount));
         }
 
         public void DecrementRunningActionCount()
         {
             Interlocked.Decrement(ref runningActionCount);
-            NotifyPropertyChanged("RunningActionCount");
+            NotifyPropertyChanged(nameof(RunningActionCount));
         }
 
 
@@ -68,7 +68,7 @@ namespace AutoStartConfirm.Models
             // Directly calling invoke throws an exception if not called from main thread when binded to ui element
             using var ServiceScope = Ioc.Default.CreateScope();
             var dispatchService = ServiceScope.ServiceProvider.GetRequiredService<IDispatchService>();
-            dispatchService.DispatcherQueue.TryEnqueue(() =>
+            dispatchService.TryEnqueue(() =>
             {
                 try
                 {

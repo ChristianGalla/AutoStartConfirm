@@ -86,7 +86,7 @@ namespace AutoStartConfirm.Update
             try
             {
                 Logger.LogTrace("GetCurrentVersion called");
-                var version = Assembly.GetEntryAssembly().GetName().Version!;
+                var version = Assembly.GetEntryAssembly()!.GetName().Version!;
                 var semverVersionString = $"{version.Major}.{version.Minor}.{version.Build}";
                 var semverVersion = SemVersion.Parse(semverVersionString, SemVersionStyles.Strict);
                 Logger.LogTrace("GetCurrentVersion finished");

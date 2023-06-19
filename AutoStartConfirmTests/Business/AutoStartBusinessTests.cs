@@ -20,8 +20,10 @@ using Octokit;
 using AutoStartConfirmTests;
 using AutoStartConfirm.Business;
 using AutoStartConfirm.Connectors;
+using CommunityToolkit.WinUI;
+using Microsoft.UI.Dispatching;
 
-namespace AutoStartConfirmTests.Business
+namespace AutoStartConfirm.Business
 {
     [TestClass]
     public class AutoStartBusinessTests : TestsBase
@@ -63,7 +65,9 @@ namespace AutoStartConfirmTests.Business
                 dispatchService: DispatchService,
                 uacService: UacService,
                 appStatus: AppStatus,
-                messageService: MessageService
+                messageService: MessageService,
+                updateService: UpdateService,
+                notificationService: NotificationService
             );
         }
 
@@ -128,23 +132,6 @@ namespace AutoStartConfirmTests.Business
         }
 
         [TestMethod]
-        public async Task ConfirmAdd_RaisesCurrentAutoStartEvents()
-        {
-            Service!.AllCurrentAutoStarts.Add(AutoStartEntry!);
-            var confirmEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.Confirm += confirmEventHandler;
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.CurrentAutoStartChange += changeEventHandler;
-
-            await Service.ConfirmAdd(Guid);
-
-            A.CallTo(() => confirmEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(AutoStartEntry, Fake.GetCalls(confirmEventHandler).ToList()[0].Arguments[0]);
-            A.CallTo(() => changeEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(AutoStartEntry, Fake.GetCalls(changeEventHandler).ToList()[0].Arguments[0]);
-        }
-
-        [TestMethod]
         public async Task ConfirmAdd_ConfirmsHistoryAutoStart()
         {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
@@ -155,19 +142,6 @@ namespace AutoStartConfirmTests.Business
         }
 
         [TestMethod]
-        public async Task ConfirmAdd_RaisesHistoryAutoStartEvents()
-        {
-            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += changeEventHandler;
-
-            await Service.ConfirmAdd(Guid);
-
-            A.CallTo(() => changeEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(AutoStartEntry, Fake.GetCalls(changeEventHandler).ToList()[0].Arguments[0]);
-        }
-
-        [TestMethod]
         public async Task ConfirmRemove_ConfirmsHistoryAutoStart()
         {
             Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
@@ -175,19 +149,6 @@ namespace AutoStartConfirmTests.Business
             await Service.ConfirmRemove(Guid);
 
             Assert.AreEqual(ConfirmStatus.Confirmed, AutoStartEntry!.ConfirmStatus);
-        }
-
-        [TestMethod]
-        public async Task ConfirmRemove_RaisesHistoryAutoStartEvents()
-        {
-            Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += changeEventHandler;
-
-            await Service.ConfirmRemove(Guid);
-
-            A.CallTo(() => changeEventHandler.Invoke(A<AutoStartEntry>._)).MustHaveHappenedOnceExactly();
-            Assert.AreEqual(AutoStartEntry, Fake.GetCalls(changeEventHandler).ToList()[0].Arguments[0]);
         }
 
         [TestMethod]
@@ -780,73 +741,49 @@ namespace AutoStartConfirmTests.Business
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task LoadCanBeAdded_UpdatesAutoStartEntryAndRaisesEvents(bool canBeAdded)
+        public async Task LoadCanBeAdded_UpdatesAutoStartEntry(bool canBeAdded)
         {
             A.CallTo(() => ConnectorService.CanBeAdded(AutoStartEntry!)).Returns(canBeAdded);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service!.CurrentAutoStartChange += changeEventHandler;
-            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeAdded(AutoStartEntry!);
+            await Service!.LoadCanBeAdded(AutoStartEntry!);
 
             Assert.AreEqual(canBeAdded, AutoStartEntry!.CanBeAdded!.Value);
-            A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task LoadCanBeRemoved_UpdatesAutoStartEntryAndRaisesEvents(bool canBeRemoved)
+        public async Task LoadCanBeRemoved_UpdatesAutoStartEntry(bool canBeRemoved)
         {
             A.CallTo(() => ConnectorService.CanBeRemoved(AutoStartEntry!)).Returns(canBeRemoved);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service!.CurrentAutoStartChange += changeEventHandler;
-            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeRemoved(AutoStartEntry!);
+            await Service!.LoadCanBeRemoved(AutoStartEntry!);
 
             Assert.AreEqual(canBeRemoved, AutoStartEntry!.CanBeRemoved!.Value);
-            A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task LoadCanBeEnabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeEnabled)
+        public async Task LoadCanBeEnabled_UpdatesAutoStartEntry(bool canBeEnabled)
         {
             A.CallTo(() => ConnectorService.CanBeEnabled(AutoStartEntry!)).Returns(canBeEnabled);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service!.CurrentAutoStartChange += changeEventHandler;
-            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeEnabled(AutoStartEntry!);
+            await Service!.LoadCanBeEnabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeEnabled, AutoStartEntry!.CanBeEnabled!.Value);
-            A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task LoadCanBeDisabled_UpdatesAutoStartEntryAndRaisesEvents(bool canBeDisabled)
+        public async Task LoadCanBeDisabled_UpdatesAutoStartEntry(bool canBeDisabled)
         {
             A.CallTo(() => ConnectorService.CanBeDisabled(AutoStartEntry!)).Returns(canBeDisabled);
-            var changeEventHandler = A.Fake<AutoStartChangeHandler>();
-            Service!.CurrentAutoStartChange += changeEventHandler;
-            var historyAutoStartChange = A.Fake<AutoStartChangeHandler>();
-            Service.HistoryAutoStartChange += historyAutoStartChange;
 
-            await Service.LoadCanBeDisabled(AutoStartEntry!);
+            await Service!.LoadCanBeDisabled(AutoStartEntry!);
 
             Assert.AreEqual(canBeDisabled, AutoStartEntry!.CanBeDisabled!.Value);
-            A.CallTo(() => changeEventHandler.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => historyAutoStartChange.Invoke(AutoStartEntry)).MustHaveHappenedOnceExactly();
         }
 
         [TestMethod]
@@ -951,6 +888,98 @@ namespace AutoStartConfirmTests.Business
             await Service!.ClearHistory();
             A.CallTo(() => MessageService.ShowConfirm(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
             Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+        }
+
+        [TestMethod]
+        public void AddHandler_AddsAutoStartToCollectionsAndShowsNotification()
+        {
+            Service!.NotificationsEnabled = true;
+            Service!.SettingSaveTimer = new(1);
+            Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+                callback();
+            }).Returns(true);
+            ConnectorService.Add += Raise.FreeForm.With(AutoStartEntry);
+
+            Assert.AreEqual(1, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
+            A.CallTo(() => NotificationService.ShowNewAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+        [TestMethod]
+        public void EnableHandler_AddsAutoStartToCollectionsAndShowsNotification()
+        {
+            Service!.NotificationsEnabled = true;
+            Service!.SettingSaveTimer = new(1);
+            Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+                callback();
+            }).Returns(true);
+            ConnectorService.Enable += Raise.FreeForm.With(AutoStartEntry);
+
+            Assert.AreEqual(1, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
+            A.CallTo(() => NotificationService.ShowEnabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+        [TestMethod]
+        public void DisableHandler_AddsAutoStartFromCollectionsAndShowsNotification()
+        {
+            Service!.NotificationsEnabled = true;
+            Service!.SettingSaveTimer = new(1);
+            Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+                callback();
+            }).Returns(true);
+            ConnectorService.Disable += Raise.FreeForm.With(AutoStartEntry);
+
+            Assert.AreEqual(1, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
+            A.CallTo(() => NotificationService.ShowDisabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+        [TestMethod]
+        public void RemoveHandler_AddsAutoStartFromCollectionsAndShowsNotification()
+        {
+            Service!.NotificationsEnabled = true;
+            Service!.SettingSaveTimer = new(1);
+            Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+                callback();
+            }).Returns(true);
+            ConnectorService.Remove += Raise.FreeForm.With(AutoStartEntry);
+
+            Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
+            Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
+            Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
+            Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
+            A.CallTo(() => NotificationService.ShowRemovedAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
         }
     }
 }

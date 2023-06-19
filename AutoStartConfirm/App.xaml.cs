@@ -60,12 +60,6 @@ namespace AutoStartConfirm
 
         private readonly IAutoStartBusiness AutoStartBusiness;
 
-        private readonly INotificationService NotificationService;
-
-        private readonly ISettingsService SettingsService;
-
-        private readonly IUpdateService UpdateService;
-
         private readonly IDispatchService DispatchService;
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
@@ -77,17 +71,11 @@ namespace AutoStartConfirm
             ILogger<App> logger,
             IAppStatus appStatus,
             IAutoStartBusiness autoStartService,
-            INotificationService notificationService,
-            ISettingsService settingsService,
-            IUpdateService updateService,
             IDispatchService dispatchService)
         {
             Logger = logger;
             AppStatus = appStatus;
             AutoStartBusiness = autoStartService;
-            NotificationService = notificationService;
-            SettingsService = settingsService;
-            UpdateService = updateService;
             DispatchService = dispatchService;
 
             UnhandledException += UnhandledExceptionHandler;
@@ -106,39 +94,7 @@ namespace AutoStartConfirm
             Window = ServiceScope.ServiceProvider.GetRequiredService<MainWindow>();
             Window.Closed += WindowClosed;
 
-
-            // disable notifications for new added auto starts on first start to avoid too many notifications at once
-            bool isFirstRun = !AutoStartBusiness.GetValidAutoStartFileExists();
-            if (!isFirstRun)
-            {
-                AutoStartBusiness.Add += AddHandler;
-                AutoStartBusiness.Remove += RemoveHandler;
-                AutoStartBusiness.Enable += EnableHandler;
-                AutoStartBusiness.Disable += DisableHandler;
-            }
-
-            try
-            {
-                AutoStartBusiness.LoadCurrentAutoStarts();
-                AppStatus.HasOwnAutoStart = AutoStartBusiness.HasOwnAutoStart;
-            }
-            catch (Exception)
-            {
-            }
-
-            if (isFirstRun)
-            {
-                AutoStartBusiness.Add += AddHandler;
-                AutoStartBusiness.Remove += RemoveHandler;
-                AutoStartBusiness.Enable += EnableHandler;
-                AutoStartBusiness.Disable += DisableHandler;
-            }
-            AutoStartBusiness.StartWatcher();
-
-            if (SettingsService.CheckForUpdatesOnStart)
-            {
-                UpdateService.CheckUpdateAndShowNotification();
-            }
+            AutoStartBusiness.Run();
         }
 
         /// <summary>
@@ -299,7 +255,7 @@ namespace AutoStartConfirm
                 ValueSet userInput = toastArgs.UserInput;
 
                 // Need to dispatch to UI thread if performing UI operations
-                DispatchService.DispatcherQueue.TryEnqueue(() => {
+                DispatchService.TryEnqueue(() => {
                     Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
                     if (args.TryGetValue("action", out string? action))
                     {
@@ -361,44 +317,10 @@ namespace AutoStartConfirm
             ToggleMainWindow();
         }
 
-        private void AddHandler(AutoStartEntry addedAutostart)
-        {
-            Logger.LogTrace("AddHandler called");
-            if (AutoStartBusiness.IsOwnAutoStart(addedAutostart))
-            {
-                Logger.LogInformation("Own auto start added");
-                AppStatus.HasOwnAutoStart = true;
-            }
-            NotificationService.ShowNewAutoStartEntryNotification(addedAutostart);
-        }
-
-        private void RemoveHandler(AutoStartEntry removedAutostart)
-        {
-            Logger.LogTrace("RemoveHandler called");
-            if (AutoStartBusiness.IsOwnAutoStart(removedAutostart))
-            {
-                Logger.LogInformation("Own auto start removed");
-                AppStatus.HasOwnAutoStart = false;
-            }
-            NotificationService.ShowRemovedAutoStartEntryNotification(removedAutostart);
-        }
-
-        private void EnableHandler(AutoStartEntry enabledAutostart)
-        {
-            Logger.LogTrace("EnableHandler called");
-            NotificationService.ShowEnabledAutoStartEntryNotification(enabledAutostart);
-        }
-
         private void WindowClosed(object sender, WindowEventArgs args)
         {
             args.Handled = true;
             Window?.Hide();
-        }
-
-        private void DisableHandler(AutoStartEntry disabledAutostart)
-        {
-            Logger.LogTrace("DisableHandler called");
-            NotificationService.ShowDisabledAutoStartEntryNotification(disabledAutostart);
         }
 
         protected virtual void Dispose(bool disposing)

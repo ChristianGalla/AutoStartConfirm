@@ -11,6 +11,8 @@ namespace AutoStartConfirm.GUI {
             Remove,
             Enable,
             Disable,
+            Ignore,
+            RemoveIgnore,
         }
 
         public SemaphoreSlim DialogSemaphore {
@@ -21,6 +23,8 @@ namespace AutoStartConfirm.GUI {
 
         public Task<bool> ShowConfirm(AutoStartEntry autoStart, AutoStartAction action);
 
+        public Task<bool> ShowRemoveConfirm(IgnoredAutoStart autoStartn);
+
         public Task ShowError(string caption, string message = "");
 
         public Task ShowError(string caption, Exception error);
@@ -28,5 +32,7 @@ namespace AutoStartConfirm.GUI {
         public Task ShowSuccess(string caption, string message = "");
 
         public Task ShowSuccess(AutoStartEntry autoStart, AutoStartAction action);
+
+        public Task ShowRemoveSuccess(IgnoredAutoStart autoStart);
     }
 }

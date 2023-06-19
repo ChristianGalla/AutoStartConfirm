@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System.Xml.Linq;
 using AutoStartConfirmTests;
 
-namespace AutoStartConfirm.Update.Tests
+namespace AutoStartConfirm.Update
 {
     [TestClass]
     public class UpdateServiceTests : TestsBase

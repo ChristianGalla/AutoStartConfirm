@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -114,6 +115,23 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private AdvancedCollectionView? ignoredCollectionView;
+
+        public AdvancedCollectionView IgnoredCollectionView
+        {
+            get
+            {
+                if (ignoredCollectionView == null)
+                {
+                    ignoredCollectionView = new AdvancedCollectionView(AutoStartBusiness.IgnoredAutoStarts, true);
+                    ignoredCollectionView.SortDescriptions.Add(new SortDescription("CategoryAsString", SortDirection.Descending));
+                    ignoredCollectionView.SortDescriptions.Add(new SortDescription("Path", SortDirection.Descending));
+                    ignoredCollectionView.SortDescriptions.Add(new SortDescription("Value", SortDirection.Descending));
+                }
+                return ignoredCollectionView;
+            }
+        }
+
         public MainPage()
         {
             InitializeComponent();
@@ -141,6 +159,13 @@ namespace AutoStartConfirm.GUI
             var button = (Button)sender;
             var autoStart = (AutoStartEntry)button.DataContext;
             await AutoStartBusiness.RemoveAutoStart(autoStart);
+        }
+
+        private async void IgnoreButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var autoStart = (AutoStartEntry)button.DataContext;
+            await AutoStartBusiness.IgnoreAutoStart(autoStart);
         }
 
         public async void HistoryConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -178,6 +203,12 @@ namespace AutoStartConfirm.GUI
                 default:
                     break;
             }
+        }
+        private async void IgnoredRemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var autoStart = (IgnoredAutoStart)button.DataContext;
+            await AutoStartBusiness.RemoveIgnoreAutoStart(autoStart);
         }
 
         public async void Enable_Toggled(object sender, RoutedEventArgs e)
@@ -264,6 +295,11 @@ namespace AutoStartConfirm.GUI
         public void HistorySorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
         {
             Sorting(sender, e, HistoryAutoStartCollectionView, HistoryAutoStartGrid);
+        }
+
+        public void IgnoredSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        {
+            Sorting(sender, e, IgnoredCollectionView, IgnoredAutoStartGrid);
         }
 
         public static bool CanBeConfirmedConverter(AutoStartEntry autoStart)
@@ -415,6 +451,38 @@ namespace AutoStartConfirm.GUI
             return false;
         }
 
+        public static bool CanBeIgnoredConverter(AutoStartEntry autoStart)
+        {
+            if (autoStart.CanBeIgnored.HasValue)
+            {
+                return autoStart.CanBeIgnored.Value;
+            }
+            if (autoStart.CanBeIgnoredLoader == null)
+            {
+                using var ServiceScope = Ioc.Default.CreateScope();
+                var AutoStartBusiness = ServiceScope.ServiceProvider.GetRequiredService<IAutoStartBusiness>();
+                AutoStartBusiness.LoadCanBeIgnored(autoStart);
+            }
+            return false;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs _)
+        {
+            string newText = ((TextBox)sender).Text;
+
+            // reset the filter
+            AutoStartCollectionView.Filter = _ => true;
+            HistoryAutoStartCollectionView.Filter = _ => true;
+            IgnoredCollectionView.Filter = _ => true;
+
+            if (!string.IsNullOrWhiteSpace(newText))
+            {
+                AutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
+                HistoryAutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
+                IgnoredCollectionView.Filter = x => ((IgnoredAutoStart)x).Value.Contains(newText) || ((IgnoredAutoStart)x).Path.Contains(newText) || ((IgnoredAutoStart)x).CategoryAsString.Contains(newText);
+            }
+        }
+
 
         private void Dispose(bool disposing)
         {
@@ -435,19 +503,5 @@ namespace AutoStartConfirm.GUI
             GC.SuppressFinalize(this);
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs _)
-        {
-            string newText = ((TextBox)sender).Text;
-
-            // reset the filter
-            AutoStartCollectionView.Filter = _ => true;
-            HistoryAutoStartCollectionView.Filter = _ => true;
-
-            if (!string.IsNullOrWhiteSpace(newText))
-            {
-                AutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
-                HistoryAutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
-            }
-        }
     }
 }

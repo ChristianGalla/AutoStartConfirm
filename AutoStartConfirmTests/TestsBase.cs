@@ -11,8 +11,9 @@ using AutoStartConfirm.Notifications;
 using Octokit;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.GUI;
+using AutoStartConfirm.Update;
 
-namespace AutoStartConfirmTests
+namespace AutoStartConfirm
 {
     public class TestsBase
     {
@@ -21,11 +22,13 @@ namespace AutoStartConfirmTests
         protected ISettingsService SettingsService = A.Fake<ISettingsService>();
         protected ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
         protected IDispatchService DispatchService = A.Fake<IDispatchService>();
+        
         protected IUacService UacService = A.Fake<IUacService>();
         protected INotificationService NotificationService = A.Fake<INotificationService>();
         protected IGitHubClient GitHubClient = A.Fake<IGitHubClient>();
         protected IAppStatus AppStatus = A.Fake<IAppStatus>();
         protected IMessageService MessageService = A.Fake<IMessageService>();
+        protected IUpdateService UpdateService = A.Fake<IUpdateService>();
 
 
         [AssemblyInitialize]
@@ -48,6 +51,7 @@ namespace AutoStartConfirmTests
             GitHubClient = A.Fake<IGitHubClient>();
             AppStatus = A.Fake<IAppStatus>();
             MessageService = A.Fake<IMessageService>();
+            UpdateService = A.Fake<IUpdateService>();
         }
     }
 }
