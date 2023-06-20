@@ -324,10 +324,13 @@ namespace AutoStartConfirm.Connectors.Registry
             else
             {
                 value = key.GetValue(valueName, null);
-                var currentValueKind = key.GetValueKind(valueName);
-                if (currentValueKind != regAutoStart.RegistryValueKind)
+                if (value != null)
                 {
-                    throw new ArgumentException($"Value \"{valueName}\" of key \"{keyPath}\" already exists with different type \"{currentValueKind}\"");
+                    var currentValueKind = key.GetValueKind(valueName);
+                    if (currentValueKind != regAutoStart.RegistryValueKind)
+                    {
+                        throw new ArgumentException($"Value \"{valueName}\" of key \"{keyPath}\" already exists with different type \"{currentValueKind}\"");
+                    }
                 }
             }
             switch (regAutoStart.RegistryValueKind)

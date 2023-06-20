@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Error on registry add
+
+
 ### Added
 - Ignore certain auto starts (https://github.com/ChristianGalla/AutoStartConfirm/issues/3)
 - Clear history (https://github.com/ChristianGalla/AutoStartConfirm/issues/12)
