@@ -1339,7 +1339,7 @@ namespace AutoStartConfirm.Business
                         Logger.LogInformation("Own auto start added");
                         AppStatus.HasOwnAutoStart = true;
                     }
-                    if (NotificationsEnabled && !CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
                     {
                         NotificationService.ShowNewAutoStartEntryNotification(autostart);
                     }
@@ -1370,7 +1370,7 @@ namespace AutoStartConfirm.Business
                     CurrentAutoStarts.Add(autostartCopy);
                     AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
-                    if (NotificationsEnabled && !CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
                     {
                         NotificationService.ShowEnabledAutoStartEntryNotification(autostart);
                     }
@@ -1401,7 +1401,7 @@ namespace AutoStartConfirm.Business
                     CurrentAutoStarts.Add(autostartCopy);
                     AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
-                    if (NotificationsEnabled && !CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
                     {
                         NotificationService.ShowDisabledAutoStartEntryNotification(autostart);
                     }
@@ -1435,7 +1435,7 @@ namespace AutoStartConfirm.Business
                         Logger.LogInformation("Own auto start removed");
                         AppStatus.HasOwnAutoStart = false;
                     }
-                    if (NotificationsEnabled && !CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
                     {
                         NotificationService.ShowRemovedAutoStartEntryNotification(autostart);
                     }

@@ -891,14 +891,22 @@ namespace AutoStartConfirm.Business
         }
 
         [TestMethod]
-        public void AddHandler_AddsAutoStartToCollectionsAndShowsNotification()
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public void AddHandler_AddsAutoStartToCollectionsAndShowsNotification(bool notificationsEnabled, bool isIgnored)
         {
-            Service!.NotificationsEnabled = true;
+            Service!.NotificationsEnabled = notificationsEnabled;
             Service!.SettingSaveTimer = new(1);
             Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+            if (isIgnored)
+            {
+                Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
+            }
 
             A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
                 callback();
@@ -909,19 +917,34 @@ namespace AutoStartConfirm.Business
             Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
-            A.CallTo(() => NotificationService.ShowNewAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            if (notificationsEnabled && !isIgnored)
+            {
+                A.CallTo(() => NotificationService.ShowNewAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            }
+            else
+            {
+                A.CallTo(() => NotificationService.ShowNewAutoStartEntryNotification(AutoStartEntry!)).MustNotHaveHappened();
+            }
             Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
         }
 
         [TestMethod]
-        public void EnableHandler_AddsAutoStartToCollectionsAndShowsNotification()
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public void EnableHandler_AddsAutoStartToCollectionsAndShowsNotification(bool notificationsEnabled, bool isIgnored)
         {
-            Service!.NotificationsEnabled = true;
+            Service!.NotificationsEnabled = notificationsEnabled;
             Service!.SettingSaveTimer = new(1);
             Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+            if (isIgnored)
+            {
+                Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
+            }
 
             A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
                 callback();
@@ -932,19 +955,34 @@ namespace AutoStartConfirm.Business
             Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
-            A.CallTo(() => NotificationService.ShowEnabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            if (notificationsEnabled && !isIgnored)
+            {
+                A.CallTo(() => NotificationService.ShowEnabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            }
+            else
+            {
+                A.CallTo(() => NotificationService.ShowEnabledAutoStartEntryNotification(AutoStartEntry!)).MustNotHaveHappened();
+            }
             Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
         }
 
         [TestMethod]
-        public void DisableHandler_AddsAutoStartFromCollectionsAndShowsNotification()
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public void DisableHandler_AddsAutoStartFromCollectionsAndNotShowsNotification(bool notificationsEnabled, bool isIgnored)
         {
-            Service!.NotificationsEnabled = true;
+            Service!.NotificationsEnabled = notificationsEnabled;
             Service!.SettingSaveTimer = new(1);
             Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+            if (isIgnored)
+            {
+                Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
+            }
 
             A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
                 callback();
@@ -955,19 +993,34 @@ namespace AutoStartConfirm.Business
             Assert.AreEqual(1, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
-            A.CallTo(() => NotificationService.ShowDisabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            if (notificationsEnabled && !isIgnored)
+            {
+                A.CallTo(() => NotificationService.ShowDisabledAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            }
+            else
+            {
+                A.CallTo(() => NotificationService.ShowDisabledAutoStartEntryNotification(AutoStartEntry!)).MustNotHaveHappened();
+            }
             Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
         }
 
         [TestMethod]
-        public void RemoveHandler_AddsAutoStartFromCollectionsAndShowsNotification()
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public void RemoveHandler_AddsAutoStartFromCollectionsAndShowsNotification(bool notificationsEnabled, bool isIgnored)
         {
-            Service!.NotificationsEnabled = true;
+            Service!.NotificationsEnabled = notificationsEnabled;
             Service!.SettingSaveTimer = new(1);
             Assert.AreEqual(0, Service!.CurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(0, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(0, Service!.AllHistoryAutoStarts.Count);
+            if (isIgnored)
+            {
+                Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
+            }
 
             A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
                 callback();
@@ -978,8 +1031,106 @@ namespace AutoStartConfirm.Business
             Assert.AreEqual(0, Service!.AllCurrentAutoStarts.Count);
             Assert.AreEqual(1, Service!.HistoryAutoStarts.Count);
             Assert.AreEqual(1, Service!.AllHistoryAutoStarts.Count);
-            A.CallTo(() => NotificationService.ShowRemovedAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            if (notificationsEnabled && !isIgnored)
+            {
+                A.CallTo(() => NotificationService.ShowRemovedAutoStartEntryNotification(AutoStartEntry!)).MustHaveHappenedOnceExactly();
+            }
+            else
+            {
+                A.CallTo(() => NotificationService.ShowRemovedAutoStartEntryNotification(AutoStartEntry!)).MustNotHaveHappened();
+            }
             Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task IgnoreAutoStart_AddsToIgnoredAutoStarts(bool useGuid)
+        {
+            Service!.SettingSaveTimer = new(1);
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Ignore)).Returns(true);
+
+            if (useGuid)
+            {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.IgnoreAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.IgnoreAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Ignore)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(AutoStartEntry!, IMessageService.AutoStartAction.Ignore)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(1, Service!.IgnoredAutoStarts.Count);
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task IgnoreAutoStart_DoesNothingIfNotConfirmed(bool useGuid)
+        {
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Ignore)).Returns(false);
+
+            if (useGuid)
+            {
+                Service!.AllHistoryAutoStarts.Add(AutoStartEntry!);
+                await Service.IgnoreAutoStart(Guid);
+            }
+            else
+            {
+                await Service!.IgnoreAutoStart(AutoStartEntry!);
+            }
+
+            A.CallTo(() => MessageService.ShowConfirm(AutoStartEntry!, IMessageService.AutoStartAction.Ignore)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<AutoStartEntry>.Ignored, A<IMessageService.AutoStartAction>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+        }
+
+        [TestMethod]
+        public async Task RemoveIgnoreAutoStart_RemovesFromIgnoredAutoStarts()
+        {
+            Service!.SettingSaveTimer = new(1);
+            IgnoredAutoStart ignoredAutoStart = new(AutoStartEntry!);
+            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).Returns(true);
+            A.CallTo(() => DispatchService.EnqueueAsync(A<Func<Task>>.Ignored, DispatcherQueuePriority.High)).Invokes(async (Func<Task> callback, DispatcherQueuePriority priority) =>
+                await callback()
+            );
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+            await Service!.RemoveIgnoreAutoStart(ignoredAutoStart);
+
+            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowRemoveSuccess(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            Assert.AreEqual(true, Service!.SettingSaveTimer.Enabled);
+        }
+
+        [TestMethod]
+        public async Task RemoveIgnoreAutoStart_DoesNothingIfNotConfirmed()
+        {
+            IgnoredAutoStart ignoredAutoStart = new(AutoStartEntry!);
+            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).Returns(false);
+            A.CallTo(() => DispatchService.EnqueueAsync(A<Func<Task>>.Ignored, DispatcherQueuePriority.High)).Invokes(async (Func<Task> callback, DispatcherQueuePriority priority) =>
+                await callback()
+            );
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+            await Service!.RemoveIgnoreAutoStart(ignoredAutoStart);
+
+            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowRemoveSuccess(A<IgnoredAutoStart>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
+            Assert.AreEqual(1, Service!.IgnoredAutoStarts.Count);
         }
     }
 }

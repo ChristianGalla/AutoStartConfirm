@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Ignore certain auto starts (https://github.com/ChristianGalla/AutoStartConfirm/issues/3)
+- Clear history (https://github.com/ChristianGalla/AutoStartConfirm/issues/12)
+
 ### Fixed
 - Update check using wrong local version
 
@@ -15,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.8548] (2023-05-28)
 
 ### Changed
-- Switched from .NET 4 / WPF to WinUI 3 / .NET 7
+- Switched from .NET 4 / WPF to WinUI 3 / .NET 7 (https://github.com/ChristianGalla/AutoStartConfirm/issues/13)
   - New modern looking graphical user interface (GUI)
   - Auto light or dark mode depending on the central operating system settings
   - Now two installers (with and without .NET framework)
