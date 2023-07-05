@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.1.8572] (2023-06-21)
+
 ### Fixed
 - Error on registry add
 
@@ -62,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base functionality
 
-[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8571...HEAD
+[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...HEAD
+[2.1.8572]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8571...v2.1.8572
 [2.1.8571]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.0.8548...v2.1.8571
 [2.0.8548]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.1.8368...v2.0.8548
 [1.1.8368]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.0...v1.1.8368
