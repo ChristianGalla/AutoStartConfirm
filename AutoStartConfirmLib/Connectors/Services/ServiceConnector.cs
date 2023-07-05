@@ -127,8 +127,11 @@ namespace AutoStartConfirm.Connectors.Services
             var ret = new List<AutoStartEntry>();
             foreach (var sc in serviceControllers)
             {
-                ServiceAutoStartEntry newAutoStart = GetAutoStartEntry(sc);
-                ret.Add(newAutoStart);
+                if (sc.StartType != ServiceStartMode.Manual)
+                {
+                    ServiceAutoStartEntry newAutoStart = GetAutoStartEntry(sc);
+                    ret.Add(newAutoStart);
+                }
             }
             return ret;
         }
