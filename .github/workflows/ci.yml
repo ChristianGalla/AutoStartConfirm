@@ -31,7 +31,7 @@ jobs:
       version_number: ${{ steps.get-version-number.outputs.version_number }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
