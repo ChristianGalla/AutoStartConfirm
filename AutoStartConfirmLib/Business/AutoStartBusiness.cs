@@ -1016,25 +1016,6 @@ namespace AutoStartConfirm.Business
                         throw err;
                     }
                 }
-                else if (File.Exists($"{path}.bin"))
-                {
-                    var file = $"{path}.bin";
-                    Logger.LogInformation("Loading old binary serialized file {file}", file);
-                    using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    IFormatter formatter = new BinaryFormatter();
-                    try
-                    {
-#pragma warning disable SYSLIB0011 // Type or member is obsolete
-                        ret = (ObservableCollection<T>?)formatter.Deserialize(stream);
-#pragma warning restore SYSLIB0011 // Type or member is obsolete
-                        Logger.LogTrace("Loaded last saved auto starts from file {file}", file);
-                    }
-                    catch (Exception ex)
-                    {
-                        var err = new Exception($"Failed to deserialize from file {file}", ex);
-                        throw err;
-                    }
-                }
                 return ret ?? new ObservableCollection<T>();
             } catch (Exception ex) {
                 const string message = "Failed to load last auto starts";

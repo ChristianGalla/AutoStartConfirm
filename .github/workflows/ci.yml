@@ -58,7 +58,7 @@ jobs:
       
     - name: Get version number
       id: get-version-number
-      working-directory: .\build\publish\Release_FrameworkDependent_win10-x64
+      working-directory: .\build\publish\Release_FrameworkDependent_win-x64
       run: |
         $versionNumber=(Get-Item ".\AutoStartConfirm.exe" | Select-Object -ExpandProperty VersionInfo).FileVersion
         "version_number=$versionNumber" >> $env:GITHUB_OUTPUT
@@ -71,7 +71,7 @@ jobs:
       run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false
       
     - name: Test solution
-      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\net7.0-windows10.0.18362.0\win10-x64\AutoStartConfirmTests.dll"
+      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\net8.0-windows10.0.18362.0\win-x64\AutoStartConfirmTests.dll"
     
     - uses: actions/upload-artifact@v3
       name: Upload artifacts

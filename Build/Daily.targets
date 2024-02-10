@@ -11,7 +11,7 @@
 			<PublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\$(PublishDir)'))</PublishDir>
 
 			<!-- Default to Windows 10 - x64. Full list can be found at: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog#windows-rids -->
-			<OSTarget Condition="'$(OSTarget)' == ''">win10</OSTarget>
+			<OSTarget Condition="'$(OSTarget)' == ''">win</OSTarget>
 			<Platform Condition="'$(Platform)' == ''">x64</Platform>
 			<Architecture Condition="'$(Architecture)' == ''">$(OSTarget)-$(Platform)</Architecture>
 

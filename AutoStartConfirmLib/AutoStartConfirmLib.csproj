@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows10.0.18362.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.18362.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
     <RootNamespace>AutoStartConfirm</RootNamespace>
 	<Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
 	<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
