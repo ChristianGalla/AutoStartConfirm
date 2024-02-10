@@ -466,23 +466,6 @@ namespace AutoStartConfirm.GUI
             return false;
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs _)
-        {
-            string newText = ((TextBox)sender).Text;
-
-            // reset the filter
-            AutoStartCollectionView.Filter = _ => true;
-            HistoryAutoStartCollectionView.Filter = _ => true;
-            IgnoredCollectionView.Filter = _ => true;
-
-            if (!string.IsNullOrWhiteSpace(newText))
-            {
-                AutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
-                HistoryAutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText) || ((AutoStartEntry)x).Path.Contains(newText) || ((AutoStartEntry)x).CategoryAsString.Contains(newText);
-                IgnoredCollectionView.Filter = x => ((IgnoredAutoStart)x).Value.Contains(newText) || ((IgnoredAutoStart)x).Path.Contains(newText) || ((IgnoredAutoStart)x).CategoryAsString.Contains(newText);
-            }
-        }
-
 
         private void Dispose(bool disposing)
         {
@@ -503,5 +486,43 @@ namespace AutoStartConfirm.GUI
             GC.SuppressFinalize(this);
         }
 
+        private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            string newText = sender.Text;
+
+            // reset the filter
+            AutoStartCollectionView.Filter = _ => true;
+            HistoryAutoStartCollectionView.Filter = _ => true;
+            IgnoredCollectionView.Filter = _ => true;
+
+            if (!string.IsNullOrWhiteSpace(newText))
+            {
+                // Because of a bug in AdvancedCollectionView, currently it is not possible to filter the last element
+                // If tired, ArgumentOutOfRangeException is thrown
+                // For now ignore ArgumentOutOfRangeException
+                // See https://github.com/CommunityToolkit/WindowsCommunityToolkit/issues/2913
+                try
+                {
+                    AutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((AutoStartEntry)x).Path.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((AutoStartEntry)x).CategoryAsString.Contains(newText, StringComparison.OrdinalIgnoreCase);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+                try
+                {
+                    HistoryAutoStartCollectionView.Filter = x => ((AutoStartEntry)x).Value.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((AutoStartEntry)x).Path.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((AutoStartEntry)x).CategoryAsString.Contains(newText, StringComparison.OrdinalIgnoreCase);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+                try
+                {
+                    IgnoredCollectionView.Filter = x => ((IgnoredAutoStart)x).Value.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((IgnoredAutoStart)x).Path.Contains(newText, StringComparison.OrdinalIgnoreCase) || ((IgnoredAutoStart)x).CategoryAsString.Contains(newText, StringComparison.OrdinalIgnoreCase);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+            }
+        }
     }
 }

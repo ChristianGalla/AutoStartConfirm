@@ -24,8 +24,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <!--Disabled until https://github.com/CommunityToolkit/WindowsCommunityToolkit/issues/2913 is fixed-->
-        <!--<TextBox x:Name="SearchBox" PlaceholderText="Filter" TextChanged="SearchBox_TextChanged" />-->
+        <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search" QuerySubmitted="SearchBox_QuerySubmitted" />
 
         <Pivot Grid.Row="1">
             <PivotItem Header="Current">
