@@ -222,56 +222,65 @@ namespace AutoStartConfirm
         // Decide if we want to redirect the incoming activation to another instance.
         private static bool DecideRedirection()
         {
-            bool isRedirect = false;
-
-            // Find out what kind of activation this is.
-            AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
-            ExtendedActivationKind kind = args.Kind;
-            ReportInfo($"ActivationKind={kind}");
-            if (kind == ExtendedActivationKind.Launch)
+            try
             {
-                // This is a launch activation.
-                ReportLaunchArgs("Main", args);
-            }
-            else if (kind == ExtendedActivationKind.File)
-            {
-                ReportFileArgs("Main", args);
+                bool isRedirect = false;
 
-                try
+                // Find out what kind of activation this is.
+                AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
+                ExtendedActivationKind kind = args.Kind;
+                ReportInfo($"ActivationKind={kind}");
+                if (kind == ExtendedActivationKind.Launch)
                 {
-                    // This is a file activation: here we'll get the file information,
-                    // and register the file name as our instance key.
-                    if (args.Data is IFileActivatedEventArgs fileArgs)
+                    // This is a launch activation.
+                    ReportLaunchArgs("Main", args);
+                }
+                else if (kind == ExtendedActivationKind.File)
+                {
+                    ReportFileArgs("Main", args);
+
+                    try
                     {
-                        IStorageItem file = fileArgs.Files[0];
-                        AppInstance keyInstance = AppInstance.FindOrRegisterForKey(file.Name);
-                        ReportInfo($"Registered key = {keyInstance.Key}");
-
-                        // If we successfully registered the file name, we must be the
-                        // only instance running that was activated for this file.
-                        if (keyInstance.IsCurrent)
+                        // This is a file activation: here we'll get the file information,
+                        // and register the file name as our instance key.
+                        if (args.Data is IFileActivatedEventArgs fileArgs)
                         {
-                            // Report successful file name key registration.
-                            ReportInfo($"IsCurrent=true; registered this instance for {file.Name}");
+                            IStorageItem file = fileArgs.Files[0];
+                            AppInstance keyInstance = AppInstance.FindOrRegisterForKey(file.Name);
+                            ReportInfo($"Registered key = {keyInstance.Key}");
 
-                            // Hook up the Activated event, to allow for this instance of the app
-                            // getting reactivated as a result of multi-instance redirection.
-                            keyInstance.Activated += OnActivated;
-                        }
-                        else
-                        {
-                            isRedirect = true;
-                            RedirectActivationTo(args, keyInstance);
+                            // If we successfully registered the file name, we must be the
+                            // only instance running that was activated for this file.
+                            if (keyInstance.IsCurrent)
+                            {
+                                // Report successful file name key registration.
+                                ReportInfo($"IsCurrent=true; registered this instance for {file.Name}");
+
+                                // Hook up the Activated event, to allow for this instance of the app
+                                // getting reactivated as a result of multi-instance redirection.
+                                keyInstance.Activated += OnActivated;
+                            }
+                            else
+                            {
+                                isRedirect = true;
+                                RedirectActivationTo(args, keyInstance);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        ReportInfo($"Error getting instance information: {ex.Message}");
+                        throw;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    ReportInfo($"Error getting instance information: {ex.Message}");
-                }
-            }
 
-            return isRedirect;
+                return isRedirect;
+            }
+            catch (Exception ex)
+            {
+                ReportInfo($"Error deciding redirection: {ex.Message}");
+                return false;
+            }
         }
 
         // Do the redirection on another thread, and use a non-blocking
