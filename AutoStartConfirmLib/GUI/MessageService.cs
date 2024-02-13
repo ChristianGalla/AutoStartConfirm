@@ -80,6 +80,7 @@ namespace AutoStartConfirm.GUI
                     await DialogSemaphore.WaitAsync();
                     try
                     {
+                        Window.AppWindow.Show();
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed error dialog {caption}: {message}", caption, message);
                         tcs.TrySetResult();
@@ -164,6 +165,7 @@ Path:
                     await DialogSemaphore.WaitAsync();
                     try
                     {
+                        Window.AppWindow.Show();
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed confirm dialog {caption}: {message}, Result: {result}", caption, message, result);
                         tcs.TrySetResult(result == ContentDialogResult.Primary);
@@ -211,6 +213,7 @@ Path:
                     await DialogSemaphore.WaitAsync();
                     try
                     {
+                        Window.AppWindow.Show();
                         var result = await dialog.ShowAsync();
                         Logger.LogTrace("Closed success dialog {caption}: {message}", caption, message);
                         tcs.TrySetResult();
