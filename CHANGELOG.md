@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [3.0.8811] (2024-02-15)
+
+### Added
+- Search (https://github.com/ChristianGalla/AutoStartConfirm/issues/11)
+- Removed services having manual start type from current auto starts
+
+### Breaking changes
+- Removed binary deserializer to improve security
+  Settings from Auto Start Confirm 1 cannot be imported anymore.
+  If Auto Start Confirm 1 is installed and migrating to a newer version is planned, first install and start an Auto Start Confirm 2 version to automatically migrate settings to the new XML format.
+- Framework dependent version now requires .NET 8
+
+### Fixed
+- Clicks on toast notification do not open the app window to show messages
+
+
 ## [2.1.8572] (2023-06-21)
 
 ### Fixed
@@ -65,7 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base functionality
 
-[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...HEAD
+[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.0.8811...HEAD
+[3.0.8811]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...v3.0.8811
 [2.1.8572]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8571...v2.1.8572
 [2.1.8571]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.0.8548...v2.1.8571
 [2.0.8548]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v1.1.8368...v2.0.8548
