@@ -1,44 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
+  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.4" />
   <PropertyGroup>
     <!-- Imported variables section. Default values should be set here for when the project is built from within VS. -->
     <!-- Logic to figure out if we're doing a FrameworkDependent or static build. Do FrameworkDependent by default -->
     <!-- Note that these must match the calling property values exactly -->
     <BuildType Condition="'$(BuildType)' == '' ">FrameworkDependent</BuildType>
     <BuildDirModifier Condition="'$(BuildType)' == 'Standalone'">_Standalone</BuildDirModifier>
-	<BuildDirModifier Condition="'$(BuildType)' == 'FrameworkDependent'">_FrameworkDependent</BuildDirModifier>
-    <OSTarget Condition="'$(OSTarget)' == ''">win10</OSTarget>
+    <BuildDirModifier Condition="'$(BuildType)' == 'FrameworkDependent'">_FrameworkDependent</BuildDirModifier>
+    <OSTarget Condition="'$(OSTarget)' == ''">win</OSTarget>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
     <Architecture Condition="'$(Architecture)' == ''">$(OSTarget)-$(Platform)</Architecture>
     <ProjectName Condition="'$(ProjectName)' == ''">AutoStartConfirm</ProjectName>
     <ProjectFullName Condition="'$(ProjectFullName)' == ''">Auto Start Confirm</ProjectFullName>
     <PublishDir Condition="'$(PublishDir)' == ''">..\..\$(ProjectName)\build\publish\</PublishDir>
     <!-- This line suppresses the warning messages you get from msbuild -->
-    <DefineSolutionProperties>false</DefineSolutionProperties>
     <!-- This will be the base name of the output file -->
     <OutputName>$(ProjectName)Setup</OutputName>
     <!-- Default to Debug|x64 if no configuration or platform was given -->
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <DebugDirModifier Condition="'$(Configuration)' == 'Debug'">_Debug</DebugDirModifier>
     <!-- Now we can finally determine the base path -->
     <MyBasePath>$(PublishDir)$(Configuration)$(BuildDirModifier)_$(Architecture)</MyBasePath>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <InstallerPlatform>x64</InstallerPlatform>
     <Platform>x64</Platform>
-    <ProductVersion>3.10</ProductVersion>
-    <ProjectGuid>c044a8d0-32f9-48cd-b9c8-3d47e58e14de</ProjectGuid>
-    <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>AutoStartConfirmSetup</OutputName>
-    <OutputType>Package</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug</DefineConstants>
@@ -50,28 +36,16 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(ProjectName).wxs" />
-    <Compile Include="Product.wxs" />
-  </ItemGroup>
-  <ItemGroup>
-    <WixExtension Include="WixUIExtension">
-      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
-      <Name>WixUIExtension</Name>
-    </WixExtension>
-    <WixExtension Include="WixUtilExtension">
-      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
-      <Name>WixUtilExtension</Name>
-    </WixExtension>
+    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.4" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.4" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.4" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.rtf" />
     <Content Include="SkipSpecialFiles.xslt" />
   </ItemGroup>
-  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
-  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
-    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
-  </Target>
+  <!-- Steps to execute after build, but only if called from the Daily.targets file -->
+  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="4.0.4" />
   <PropertyGroup>
     <PreBuildEvent />
   </PropertyGroup>
@@ -82,9 +56,8 @@
       <!-- Variables to pass into Product.wxs -->
       <DefineConstants>BasePath=$(MyBasePath);ProjectFullName=$(ProjectFullName)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" RunAsSeparateProcess="true" Transforms="$(ProjectDir)SkipSpecialFiles.xslt" />
+    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
   </Target>
-  <!-- Steps to execute after build, but only if called from the Daily.targets file -->
   <Target Name="AfterBuild">
     <Message Text="BuildType==$(BuildType)" />
     <Message Text="Executing AfterBuild Target. Configuration==$(Configuration)$(BuildDirModifier)" />

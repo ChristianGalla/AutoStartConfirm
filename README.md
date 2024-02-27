@@ -136,4 +136,4 @@ This program was created in Visual Studio.
 
 There are some NuGet dependencies that must be installed before it can be compiled.
 
-The installers are build using [WiX Toolset build tools v3](https://wixtoolset.org/docs/wix3/) and the WiX Toolset Visual Studio Extension.
+To build the installers using the [WiX Toolset](https://wixtoolset.org/) execute [Build/Daily_Debug.bat](Build/Daily_Debug.bat) for a debug or [Build/Daily_Release.bat](Build/Daily_Release.bat) for a release version build.
