@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.4" />
   <PropertyGroup>
     <!-- Imported variables section. Default values should be set here for when the project is built from within VS. -->

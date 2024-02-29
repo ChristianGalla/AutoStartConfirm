@@ -16,7 +16,6 @@
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
 		<PublishSingleFile>true</PublishSingleFile>
-		<SelfContained>true</SelfContained>
 		<ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
 		<AssemblyTitle>Auto Start Confirm</AssemblyTitle>
 		<Product>Auto Start Confirm</Product>
@@ -97,5 +96,17 @@
 	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="If Not Exist $(ProjectDir)nlog.config (Copy $(ProjectDir)nlog.sample.config $(ProjectDir)nlog.config)" />
+	</Target>
+
+	<ItemGroup>
+		<DataFiles Include="$(ProjectDir)\nlog.sample.config" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
+
+	<Target Name="AddPayloadsFolder" AfterTargets="Publish">
+		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 </Project>
