@@ -22,9 +22,7 @@
     <MyBasePath>$(PublishDir)$(Configuration)$(BuildDirModifier)_$(Architecture)</MyBasePath>
     <InstallerPlatform>x64</InstallerPlatform>
     <Platform>x64</Platform>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DefineConstants>Debug</DefineConstants>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug</DefineConstants>
