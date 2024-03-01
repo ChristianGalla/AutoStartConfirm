@@ -62,7 +62,7 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1
       
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       name: Restore NuGet cache
       with:
         path: ~/.nuget/packages
