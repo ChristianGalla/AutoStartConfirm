@@ -76,7 +76,7 @@ jobs:
     - name: Test solution
       run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\net8.0-windows10.0.18362.0\win-x64\AutoStartConfirmTests.dll"
     
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       name: Upload artifacts
       with:
         name: AutoStartConfirmSetup
