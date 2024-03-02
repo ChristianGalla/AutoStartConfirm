@@ -60,7 +60,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
       
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+      uses: NuGet/setup-nuget@v2
       
     - uses: actions/cache@v3
       name: Restore NuGet cache
