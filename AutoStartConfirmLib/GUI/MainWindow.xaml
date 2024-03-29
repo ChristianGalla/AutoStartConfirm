@@ -28,14 +28,14 @@
         <NavigationView 
              Grid.Row="1"
             x:Name="MainNavigation" 
-            Header="{Binding Path=Content.NavTitile, ElementName=ContentFrame}"
+            Header="{Binding Path=Content.NavTitle, ElementName=ContentFrame}"
             ItemInvoked="MainNavigation_ItemInvoked" 
             Loaded="MainNavigation_Loaded">
             <NavigationView.MenuItems>
-                <NavigationViewItem Icon="Home" Content="Home" Tag="Home" />
+                <NavigationViewItem Icon="Home" Tag="Home" x:Uid="NavigationHome" Name="HomeNavigation" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Icon="Help" Content="About" Tag="About" />
+                <NavigationViewItem Icon="Help" x:Uid="NavigationAbout" Tag="About" Name="AboutNavigation" />
             </NavigationView.FooterMenuItems>
             <Frame x:Name="ContentFrame" />
         </NavigationView>

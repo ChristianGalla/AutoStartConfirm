@@ -24,6 +24,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -33,7 +34,7 @@ namespace AutoStartConfirm.GUI
     {
         private bool disposedValue = false;
 
-        public string NavTitile => "Settings";
+        public string NavTitle { get; set; }
 
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
@@ -113,6 +114,8 @@ namespace AutoStartConfirm.GUI
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
 
+            var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
+            NavTitle = resourceLoader.GetString("NavigationSettings/Content");
         }
 
         public void ConnectorEnable_Toggled(object sender, RoutedEventArgs e)

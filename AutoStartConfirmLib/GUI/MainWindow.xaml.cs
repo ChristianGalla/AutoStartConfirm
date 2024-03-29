@@ -79,7 +79,7 @@ namespace AutoStartConfirm.GUI
             // set the initial SelectedItem 
             foreach (NavigationViewItemBase item in MainNavigation.MenuItems.Cast<NavigationViewItemBase>())
             {
-                if (item is NavigationViewItem navItem && item.Tag.ToString() == "Home")
+                if (item is NavigationViewItem navItem && item.Name == "HomeNavigation")
                 {
                     MainNavigation.SelectedItem = item;
                     MainNavigation_Navigate(navItem);
@@ -90,13 +90,13 @@ namespace AutoStartConfirm.GUI
 
         private void MainNavigation_Navigate(NavigationViewItem item)
         {
-            switch (item.Tag)
+            switch (item.Name)
             {
-                case "Home":
+                case "HomeNavigation":
                     ContentFrame.Navigate(typeof(MainPage));
                     break;
 
-                case "About":
+                case "AboutNavigation":
                     ContentFrame.Navigate(typeof(AboutPage));
                     break;
             }

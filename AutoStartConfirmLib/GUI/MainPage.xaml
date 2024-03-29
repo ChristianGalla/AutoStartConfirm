@@ -18,6 +18,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -26,7 +27,7 @@
 
         <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search" QuerySubmitted="SearchBox_QuerySubmitted" />
 
-        <Pivot Grid.Row="1">
+        <Pivot Grid.Row="2">
             <PivotItem Header="Current">
                 <controls:DataGrid
                         x:Name="CurrentAutoStartGrid"
