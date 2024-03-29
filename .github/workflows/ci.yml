@@ -55,6 +55,12 @@ jobs:
  
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
+ 
+    - name: Install 3rd party licenses downloader
+      run: dotnet tool install --global dotnet-project-licenses
+ 
+    - name: Download 3rd party licenses
+      run: dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release

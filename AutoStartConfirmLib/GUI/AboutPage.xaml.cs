@@ -44,6 +44,44 @@ namespace AutoStartConfirm.GUI
             }
         }
 
+        private string? _license;
+
+        public string? License
+        {
+            get
+            {
+                if (_license == null)
+                {
+                    string path = @"LICENSE";
+
+                    if (File.Exists(path))
+                    {
+                        _license = File.ReadAllText(path);
+                    }
+                }
+                return _license;
+            }
+        }
+
+        private string? _thirdPartyLicenses;
+
+        public string? ThirdPartyLicenses
+        {
+            get
+            {
+                if (_thirdPartyLicenses == null)
+                {
+                    string path = @"AutoStartConfirmLib\Licenses\Licenses.txt";
+
+                    if (File.Exists(path))
+                    {
+                        _thirdPartyLicenses = File.ReadAllText(path);
+                    }
+                }
+                return _thirdPartyLicenses;
+            }
+        }
+
         public AboutPage()
         {
             InitializeComponent();

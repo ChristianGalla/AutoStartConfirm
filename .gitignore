@@ -352,3 +352,4 @@ MigrationBackup/
 .ionide/
 /AutoStartConfirm/nlog.config
 /AutoStartConfirmSetup/AutoStartConfirm.wxs
+/AutoStartConfirmLib/Licenses

@@ -18,6 +18,11 @@
     <None Remove="GUI\NotifyIcon.xaml" />
     <None Remove="GUI\SettingsPage.xaml" />
   </ItemGroup>
+	<ItemGroup>
+	  <Content Include="Licenses\*.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
   <ItemGroup>
 	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
