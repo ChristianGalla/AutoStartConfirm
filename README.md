@@ -137,3 +137,10 @@ This program was created in Visual Studio.
 There are some NuGet dependencies that must be installed before it can be compiled.
 
 To build the installers using the [WiX Toolset](https://wixtoolset.org/) execute [Build/Daily_Debug.bat](Build/Daily_Debug.bat) for a debug or [Build/Daily_Release.bat](Build/Daily_Release.bat) for a release version build.
+
+To extract third party licenses run:
+
+```powershell
+dotnet tool install --global dotnet-project-licenses
+dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+```

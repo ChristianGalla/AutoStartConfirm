@@ -101,6 +101,12 @@
 	<ItemGroup>
 		<DataFiles Include="$(ProjectDir)\nlog.sample.config" />
 	</ItemGroup>
+	
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
