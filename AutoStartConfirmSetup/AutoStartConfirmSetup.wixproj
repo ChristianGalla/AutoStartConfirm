@@ -23,6 +23,7 @@
     <InstallerPlatform>x64</InstallerPlatform>
     <Platform>x64</Platform>
     <Platforms>x64</Platforms>
+	<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug</DefineConstants>

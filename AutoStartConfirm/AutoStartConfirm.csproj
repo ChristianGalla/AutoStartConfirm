@@ -21,6 +21,7 @@
 		<Product>Auto Start Confirm</Product>
 		<Copyright>Copyright © 2020 Christian Galla</Copyright>
 		<Authors>Christian Galla</Authors>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>

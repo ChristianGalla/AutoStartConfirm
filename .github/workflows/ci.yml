@@ -57,7 +57,7 @@ jobs:
       name: Restore Licenses cache
       with:
         path: AutoStartConfirmLib/Licenses
-        key: ${{ runner.os }}-nuget-${{ hashFiles('AutoStartConfirmLib/AutoStartConfirmLib.csproj') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('AutoStartConfirmLib/packages.lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
  

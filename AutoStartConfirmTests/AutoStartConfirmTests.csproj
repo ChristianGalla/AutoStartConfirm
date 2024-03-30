@@ -12,6 +12,7 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
 		<PublishReadyToRun>false</PublishReadyToRun>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
