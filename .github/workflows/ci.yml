@@ -57,9 +57,9 @@ jobs:
       name: Restore Licenses cache
       with:
         path: AutoStartConfirmLib/Licenses
-        key: ${{ runner.os }}-nuget-${{ hashFiles('AutoStartConfirmLib/packages.lock.json') }}
+        key: ${{ runner.os }}-licenses-${{ hashFiles('AutoStartConfirmLib/packages.lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-nuget-
+          ${{ runner.os }}-licenses-
  
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
@@ -68,7 +68,7 @@ jobs:
       run: dotnet tool install --global dotnet-project-licenses
  
     - name: Download 3rd party licenses
-      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt}
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt --log-level Verbose}
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
