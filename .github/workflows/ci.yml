@@ -68,7 +68,7 @@ jobs:
       run: dotnet tool install --global dotnet-project-licenses
  
     - name: Download 3rd party licenses
-      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt --log-level Verbose}
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt --log-level Verbose}
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
