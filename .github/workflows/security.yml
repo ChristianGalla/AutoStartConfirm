@@ -74,7 +74,7 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
     
     - name: Create Licenses dir
-      run: if (-not (Test-Path Licenses)) {New-Item -ItemType Directory -Path Licenses}
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {New-Item -ItemType Directory -Path AutoStartConfirmLib\Licenses}
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
