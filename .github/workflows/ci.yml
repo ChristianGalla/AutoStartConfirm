@@ -40,18 +40,26 @@ jobs:
       uses: darenm/Setup-VSTest@v1
       
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+      uses: NuGet/setup-nuget@v2
       
     - name: Setup Wix
       run: dotnet tool install --global wix
       
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       name: Restore NuGet cache
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
+      
+    - uses: actions/cache@v4
+      name: Restore Licenses cache
+      with:
+        path: AutoStartConfirmLib/Licenses
+        key: ${{ runner.os }}-licenses-${{ hashFiles('AutoStartConfirmLib/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-licenses-
  
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
@@ -60,7 +68,7 @@ jobs:
       run: dotnet tool install --global dotnet-project-licenses
  
     - name: Download 3rd party licenses
-      run: dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt --log-level Verbose}
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
@@ -82,7 +90,7 @@ jobs:
     - name: Test solution
       run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\net8.0-windows10.0.18362.0\win-x64\AutoStartConfirmTests.dll"
     
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       name: Upload artifacts
       with:
         name: AutoStartConfirmSetup

@@ -21,6 +21,7 @@
 		<Product>Auto Start Confirm</Product>
 		<Copyright>Copyright © 2020 Christian Galla</Copyright>
 		<Authors>Christian Galla</Authors>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
@@ -106,6 +107,11 @@
 		<None Include="..\LICENSE">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<DataFiles Include="..\LICENSE" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<LicenseFiles Include="$(OutDir)\Licenses\**" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -114,5 +120,6 @@
 
 	<Target Name="AddPayloadsFolder" AfterTargets="Publish">
 		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(PublishDir)\%(RecursiveDir)\Licenses\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 </Project>
