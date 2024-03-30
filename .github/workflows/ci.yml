@@ -60,7 +60,7 @@ jobs:
       run: dotnet tool install --global dotnet-project-licenses
  
     - name: Download 3rd party licenses
-      run: dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+      run: dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u --outfile Licenses.txt
     
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release

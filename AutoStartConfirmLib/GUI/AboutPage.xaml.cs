@@ -71,7 +71,7 @@ namespace AutoStartConfirm.GUI
             {
                 if (_thirdPartyLicenses == null)
                 {
-                    string path = @"AutoStartConfirmLib\Licenses\Licenses.txt";
+                    string path = @"Licenses\Licenses.txt";
 
                     if (File.Exists(path))
                     {
