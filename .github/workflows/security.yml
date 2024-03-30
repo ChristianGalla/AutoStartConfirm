@@ -73,6 +73,9 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
     
+    - name: Create Licenses dir
+      run: If Not Exist Licenses (mkdir Licenses)
+    
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
 
