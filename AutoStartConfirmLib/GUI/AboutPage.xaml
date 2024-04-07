@@ -12,13 +12,30 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid Margin="24">
-        <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
-            Auto Start Confirm
-            <Run Text="{x:Bind Path=Version, Mode=OneTime}"></Run>
-            <LineBreak />
-            <Run Text="{x:Bind Path=Copyright, Mode=OneTime}"></Run>
-            <LineBreak />
-            <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
-        </TextBlock>
+        <ScrollViewer>
+
+            <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap" Grid.Row="0">
+                <Bold>Auto Start Confirm</Bold>
+                <LineBreak />
+                Version <Run Text="{x:Bind Path=Version, Mode=OneTime}"></Run>
+                <LineBreak />
+                <Run Text="{x:Bind Path=Copyright, Mode=OneTime}"></Run>
+                <LineBreak />
+                <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
+                <LineBreak />
+                <LineBreak />
+                <LineBreak />
+                <Bold>License:</Bold>
+                <LineBreak />
+                <LineBreak />
+                <Run Text="{x:Bind Path=License, Mode=OneTime}"></Run>
+                <LineBreak />
+                <LineBreak />
+                <Bold>Third party licenses:</Bold>
+                <LineBreak />
+                <LineBreak />
+                <Run Text="{x:Bind Path=ThirdPartyLicenses, Mode=OneTime}"></Run>
+            </TextBlock>
+        </ScrollViewer>
     </Grid>
 </Page>

@@ -3,7 +3,8 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ChristianGalla/AutoStartConfirm?label=Latest%20release%20version)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
 [![GitHub Release Date](https://img.shields.io/github/release-date/ChristianGalla/AutoStartConfirm?label=Latest%20release%20date)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
 [![GitHub](https://img.shields.io/github/license/ChristianGalla/AutoStartConfirm?label=License)](https://github.com/ChristianGalla/AutoStartConfirm/blob/master/LICENSE)
-[![Build & Test](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml/badge.svg)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml)
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ChristianGalla/AutoStartConfirm/total?label=Downloads)](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ChristianGalla/AutoStartConfirm/ci.yml?label=Build%20%26%20Test)](https://github.com/ChristianGalla/AutoStartConfirm/actions/workflows/ci.yml)
 
 More and more programs want to start automatically when Windows starts, or a user logs on.
 
@@ -137,3 +138,10 @@ This program was created in Visual Studio.
 There are some NuGet dependencies that must be installed before it can be compiled.
 
 To build the installers using the [WiX Toolset](https://wixtoolset.org/) execute [Build/Daily_Debug.bat](Build/Daily_Debug.bat) for a debug or [Build/Daily_Release.bat](Build/Daily_Release.bat) for a release version build.
+
+To extract third party licenses run:
+
+```powershell
+dotnet tool install --global dotnet-project-licenses
+dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+```

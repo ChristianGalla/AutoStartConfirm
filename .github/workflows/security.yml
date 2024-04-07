@@ -48,7 +48,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -57,12 +57,12 @@ jobs:
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v2
       
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+      uses: NuGet/setup-nuget@v2
       
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       name: Restore NuGet cache
       with:
         path: ~/.nuget/packages
@@ -73,8 +73,11 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore AutoStartConfirm.sln
     
+    - name: Create Licenses dir
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {New-Item -ItemType Directory -Path AutoStartConfirmLib\Licenses}
+    
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
