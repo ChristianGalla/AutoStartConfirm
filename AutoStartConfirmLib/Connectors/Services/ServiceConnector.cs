@@ -127,10 +127,24 @@ namespace AutoStartConfirm.Connectors.Services
             var ret = new List<AutoStartEntry>();
             foreach (var sc in serviceControllers)
             {
-                if (sc.StartType != ServiceStartMode.Manual)
+                try
                 {
-                    ServiceAutoStartEntry newAutoStart = GetAutoStartEntry(sc);
-                    ret.Add(newAutoStart);
+                    if (sc.StartType != ServiceStartMode.Manual)
+                    {
+                        ServiceAutoStartEntry newAutoStart = GetAutoStartEntry(sc);
+                        ret.Add(newAutoStart);
+                    }
+                }
+                catch (Exception err)
+                {
+                    try
+                    {
+                        Logger.LogError(err, "Failed to check start mode of {DisplayName}", sc.DisplayName);
+                    }
+                    catch (Exception)
+                    {
+                        Logger.LogError(err, "Failed to check start mode and name");
+                    }
                 }
             }
             return ret;

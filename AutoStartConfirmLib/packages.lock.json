@@ -72,9 +72,9 @@
       },
       "Microsoft.WindowsAppSDK": {
         "type": "Direct",
-        "requested": "[1.5.240311000, )",
-        "resolved": "1.5.240311000",
-        "contentHash": "7AYbQt/XPSbsOwLWeyP+TquJGFwfDsxRRutWZJEKhoyj9pkGDI4VgtX+Uy030PzkuuKsCm1Fz8c8H7saRyAoPg==",
+        "requested": "[1.5.240404000, )",
+        "resolved": "1.5.240404000",
+        "contentHash": "B06pJv0nH31vf4Df72Qoa8A+i12LBUQ/3LhpyWVEQ83opd2a5U49XnqqYrK/T8J6Zf4JTxfLvKBSM5fgXb1YXg==",
         "dependencies": {
           "Microsoft.Windows.SDK.BuildTools": "10.0.22621.756"
         }
@@ -102,9 +102,9 @@
       },
       "Octokit": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "PHUXVZwE0C2wW9Slkfvw85YNr+uPvLKDgnmxVOzDds+jsv7TgTW9GiGNs4ENYKx1vHfZuH2/VmUlJ9W6GKfDSA=="
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "VrwqeriUcbM2Ziqi5/0k1ESwFzJJNDoxZ82iJqmnD9PXqiy54fpiBga17oxCSEri2Rk7jYd6TI4R7BZ/4V/2zA=="
       },
       "Semver": {
         "type": "Direct",
@@ -312,9 +312,9 @@
     "net8.0-windows10.0.18362/win-x64": {
       "Microsoft.WindowsAppSDK": {
         "type": "Direct",
-        "requested": "[1.5.240311000, )",
-        "resolved": "1.5.240311000",
-        "contentHash": "7AYbQt/XPSbsOwLWeyP+TquJGFwfDsxRRutWZJEKhoyj9pkGDI4VgtX+Uy030PzkuuKsCm1Fz8c8H7saRyAoPg==",
+        "requested": "[1.5.240404000, )",
+        "resolved": "1.5.240404000",
+        "contentHash": "B06pJv0nH31vf4Df72Qoa8A+i12LBUQ/3LhpyWVEQ83opd2a5U49XnqqYrK/T8J6Zf4JTxfLvKBSM5fgXb1YXg==",
         "dependencies": {
           "Microsoft.Windows.SDK.BuildTools": "10.0.22621.756"
         }
