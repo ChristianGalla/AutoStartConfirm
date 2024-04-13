@@ -25,10 +25,10 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search" QuerySubmitted="SearchBox_QuerySubmitted" />
+        <AutoSuggestBox x:Name="SearchBox" x:Uid="SearchBox" QuerySubmitted="SearchBox_QuerySubmitted" />
 
         <Pivot Grid.Row="2">
-            <PivotItem Header="Current">
+            <PivotItem x:Uid="PivotCurrent">
                 <controls:DataGrid
                         x:Name="CurrentAutoStartGrid"
                         MinHeight="50"
@@ -38,7 +38,7 @@
                         Sorting="CurrentSorting"
                         ItemsSource="{x:Bind AutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
+                        <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:AutoStartEntry">
                                     <StackPanel Orientation="Horizontal">
@@ -80,15 +80,15 @@
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn Header="Status" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
-                        <controls:DataGridTextColumn Header="Date added" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
-                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
-                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
-                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
+                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn x:Uid="ColumnDateAdd" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
+                        <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
+                        <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
+                        <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>
-            <PivotItem Header="History">
+            <PivotItem x:Uid="PivotHistory">
                 <controls:DataGrid
                         x:Name="HistoryAutoStartGrid"
                         MinHeight="50"
@@ -98,7 +98,7 @@
                         Sorting="HistorySorting"
                         ItemsSource="{x:Bind HistoryAutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
+                        <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:AutoStartEntry">
                                     <StackPanel Orientation="Horizontal">
@@ -134,16 +134,16 @@
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn Header="Status" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
-                        <controls:DataGridTextColumn Header="Date" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
-                        <controls:DataGridTextColumn Header="Change" Binding="{Binding Change, Mode=OneWay}" Tag="Change" />
-                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
-                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
-                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
+                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn x:Uid="ColumnDate" Header="Date" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
+                        <controls:DataGridTextColumn x:Uid="ColumnChange" Binding="{Binding Change, Mode=OneWay}" Tag="Change" />
+                        <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
+                        <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
+                        <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>
-            <PivotItem Header="Ignore">
+            <PivotItem x:Uid="PivotIgnore">
                 <controls:DataGrid
                         x:Name="IgnoredAutoStartGrid"
                         MinHeight="50"
@@ -153,7 +153,7 @@
                         Sorting="IgnoredSorting"
                         ItemsSource="{x:Bind IgnoredCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTemplateColumn Header="Actions" Tag="Actions" CanUserSort="False">
+                        <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:IgnoredAutoStart">
                                     <StackPanel Orientation="Horizontal">
@@ -169,9 +169,9 @@
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
-                        <controls:DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
-                        <controls:DataGridTextColumn Header="Path" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
+                        <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
+                        <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
+                        <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>

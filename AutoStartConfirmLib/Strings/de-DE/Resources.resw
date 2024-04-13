@@ -117,6 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ColumnActions.Header" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="ColumnCategory.Header" xml:space="preserve">
+    <value>Kategorie</value>
+  </data>
+  <data name="ColumnChange.Header" xml:space="preserve">
+    <value>Änderung</value>
+  </data>
+  <data name="ColumnDate.Header" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="ColumnDateAdd.Header" xml:space="preserve">
+    <value>Hinzugefügt am</value>
+  </data>
+  <data name="ColumnPath.Header" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="ColumnStatus.Header" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="ColumnValue.Header" xml:space="preserve">
+    <value>Wert</value>
+  </data>
   <data name="NavigationAbout.Content" xml:space="preserve">
     <value>Über</value>
   </data>
@@ -125,5 +149,17 @@
   </data>
   <data name="NavigationSettings.Content" xml:space="preserve">
     <value>Einstellungen</value>
+  </data>
+  <data name="PivotCurrent.Header" xml:space="preserve">
+    <value>Aktuell</value>
+  </data>
+  <data name="PivotHistory.Header" xml:space="preserve">
+    <value>Verlauf</value>
+  </data>
+  <data name="PivotIgnore.Header" xml:space="preserve">
+    <value>Ignoriert</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Suche</value>
   </data>
 </root>
