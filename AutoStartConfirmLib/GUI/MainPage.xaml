@@ -45,7 +45,7 @@
                                         <Button
                                             Name="CurrentConfirmButton"
                                             Click="CurrentConfirmButton_Click"
-                                            ToolTipService.ToolTip="Confirm"
+                                            x:Uid="ButtonConfirm"
                                             Foreground="Green"
                                             IsEnabled="{x:Bind local:MainPage.CanBeConfirmedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
@@ -56,12 +56,12 @@
                                             IsEnabled="{x:Bind local:MainPage.CanBeToggledConverter((models:AutoStartEntry)), Mode=OneWay}"
                                             IsOn="{x:Bind local:MainPage.CanBeDisabledConverter((models:AutoStartEntry)), Mode=OneWay}"
                                             Name="EnableToggle"
-                                            Toggled="Enable_Toggled"
-                                            ToolTipService.ToolTip="Enable"/>
+                                            x:Uid="ToggleEnable"
+                                            Toggled="Enable_Toggled"/>
                                         <Button
                                             Name="CurrentRemoveButton"
                                             Click="CurrentRemoveButton_Click"
-                                            ToolTipService.ToolTip="Remove"
+                                            x:Uid="ButtonRemove"
                                             IsEnabled="{x:Bind local:MainPage.CanBeRemovedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
@@ -70,17 +70,18 @@
                                         <Button
                                             Name="CurrentIgnoreButton"
                                             Click="IgnoreButton_Click"
+                                            x:Uid="ButtonIgnore"
                                             ToolTipService.ToolTip="Ignore changes"
                                             IsEnabled="{x:Bind local:MainPage.CanBeIgnoredConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
-                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;"/>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74F;"/>
                                             </Button.Content>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatusLocalized, Mode=OneWay}" Tag="ConfirmStatusLocalized" />
                         <controls:DataGridTextColumn x:Uid="ColumnDateAdd" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
                         <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
                         <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
@@ -105,7 +106,7 @@
                                         <Button
                                             Name="HistoryConfirmButton"
                                             Click="HistoryConfirmButton_Click"
-                                            ToolTipService.ToolTip="Confirm"
+                                            x:Uid="ButtonConfirm"
                                             Foreground="Green"
                                             IsEnabled="{x:Bind local:MainPage.CanBeConfirmedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
@@ -115,7 +116,7 @@
                                         <Button
                                             Name="HistoryRevertButton"
                                             Click="HistoryRevertButton_Click"
-                                            ToolTipService.ToolTip="Revert"
+                                            x:Uid="ButtonRevert"
                                             IsEnabled="{x:Bind local:MainPage.CanBeRevertedConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7A7;"/>
@@ -124,19 +125,19 @@
                                         <Button
                                             Name="HistoryIgnoreButton"
                                             Click="IgnoreButton_Click"
-                                            ToolTipService.ToolTip="Ignore changes"
+                                            x:Uid="ButtonIgnore"
                                             IsEnabled="{x:Bind local:MainPage.CanBeIgnoredConverter((models:AutoStartEntry)), Mode=OneWay}">
                                             <Button.Content>
-                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;"/>
+                                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74F;"/>
                                             </Button.Content>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
-                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatus, Mode=OneWay}" Tag="ConfirmStatus" />
+                        <controls:DataGridTextColumn x:Uid="ColumnStatus" Binding="{Binding ConfirmStatusLocalized, Mode=OneWay}" Tag="ConfirmStatusLocalized" />
                         <controls:DataGridTextColumn x:Uid="ColumnDate" Header="Date" Binding="{Binding Date}" SortDirection="Descending" Tag="Date" />
-                        <controls:DataGridTextColumn x:Uid="ColumnChange" Binding="{Binding Change, Mode=OneWay}" Tag="Change" />
+                        <controls:DataGridTextColumn x:Uid="ColumnChange" Binding="{Binding ChangeLocalized, Mode=OneWay}" Tag="ChangeLocalized" />
                         <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
                         <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
                         <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
@@ -160,7 +161,7 @@
                                         <Button
                                             Name="IgnoreRemoveButton"
                                             Click="IgnoredRemoveButton_Click"
-                                            ToolTipService.ToolTip="Remove">
+                                            x:Uid="ButtonRemove">
                                             <Button.Content>
                                                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
                                             </Button.Content>

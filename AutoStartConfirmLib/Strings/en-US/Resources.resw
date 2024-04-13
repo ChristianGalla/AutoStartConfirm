@@ -117,6 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ButtonConfirm.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ButtonIgnore.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ignore changes</value>
+  </data>
+  <data name="ButtonRemove.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ButtonRevert.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="ChangeValueAdded" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="ChangeValueDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="ChangeValueEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="ChangeValueRemoved" xml:space="preserve">
+    <value>Removed</value>
+  </data>
   <data name="ColumnActions.Header" xml:space="preserve">
     <value>Actions</value>
   </data>
@@ -141,6 +165,21 @@
   <data name="ColumnValue.Header" xml:space="preserve">
     <value>Value</value>
   </data>
+  <data name="ConfirmStatusValueConfirmed" xml:space="preserve">
+    <value>Confirmed</value>
+  </data>
+  <data name="ConfirmStatusValueDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="ConfirmStatusValueEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="ConfirmStatusValueNew" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="ConfirmStatusValueReverted" xml:space="preserve">
+    <value>Reverted</value>
+  </data>
   <data name="NavigationAbout.Content" xml:space="preserve">
     <value>About</value>
   </data>
@@ -161,5 +200,8 @@
   </data>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="ToggleEnable.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Enabled</value>
   </data>
 </root>
