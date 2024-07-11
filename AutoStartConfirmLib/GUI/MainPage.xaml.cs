@@ -503,7 +503,7 @@ namespace AutoStartConfirm.GUI
             if (!string.IsNullOrWhiteSpace(newText))
             {
                 // Because of a bug in AdvancedCollectionView, currently it is not possible to filter the last element
-                // If tired, ArgumentOutOfRangeException is thrown
+                // If tried, ArgumentOutOfRangeException is thrown
                 // For now ignore ArgumentOutOfRangeException
                 // See https://github.com/CommunityToolkit/WindowsCommunityToolkit/issues/2913
                 try

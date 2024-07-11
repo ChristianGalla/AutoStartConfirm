@@ -23,7 +23,7 @@ namespace AutoStartConfirm.GUI {
 
         public Task<bool> ShowConfirm(AutoStartEntry autoStart, AutoStartAction action);
 
-        public Task<bool> ShowRemoveConfirm(IgnoredAutoStart autoStart);
+        public Task<bool> ShowConfirm(IgnoredAutoStart autoStart);
 
         public Task ShowError(string caption, string message = "");
 
@@ -33,6 +33,8 @@ namespace AutoStartConfirm.GUI {
 
         public Task ShowSuccess(AutoStartEntry autoStart, AutoStartAction action);
 
-        public Task ShowRemoveSuccess(IgnoredAutoStart autoStart);
+        public Task ShowSuccess(IgnoredAutoStart autoStart);
+        Task<bool> ShowConfirm(Category autoStartCategory, string autoStartValue, string autoStartPath, AutoStartAction action);
+        Task ShowSuccess(Category autoStartCategory, string autoStartValue, string autoStartPath, AutoStartAction action);
     }
 }

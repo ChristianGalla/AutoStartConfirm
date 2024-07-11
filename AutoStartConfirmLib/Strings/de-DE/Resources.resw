@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ButtonClearHistory.Content" xml:space="preserve">
+    <value>Verlauf leeren</value>
+  </data>
   <data name="ButtonConfirm.ToolTipService.ToolTip" xml:space="preserve">
     <value>Bestätigen</value>
   </data>
@@ -180,6 +183,42 @@
   <data name="ConfirmStatusValueReverted" xml:space="preserve">
     <value>Umgekehrt</value>
   </data>
+  <data name="ListEnabledConnectors.Header" xml:space="preserve">
+    <value>Überwachte Orte automatisch startender Programme</value>
+  </data>
+  <data name="Message.Path" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="Message.Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="Message.Value" xml:space="preserve">
+    <value>Wert</value>
+  </data>
+  <data name="Message.Button.No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="Message.Button.Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="MessageConfirm.Title.Add" xml:space="preserve">
+    <value>Möchten Sie den Autostart wirklich hinzufügen?</value>
+  </data>
+  <data name="MessageConfirm.Title.Disable" xml:space="preserve">
+    <value>Möchten Sie den Autostart wirklich deaktivieren?</value>
+  </data>
+  <data name="MessageConfirm.Title.Enable" xml:space="preserve">
+    <value>Möchten Sie den Autostart wirklich aktivieren?</value>
+  </data>
+  <data name="MessageConfirm.Title.Ignore" xml:space="preserve">
+    <value>Möchten Sie wirklich Änderungen des Autostarts ignorieren?</value>
+  </data>
+  <data name="MessageConfirm.Title.Remove" xml:space="preserve">
+    <value>Möchten Sie den Autostart wirklich löschen?</value>
+  </data>
+  <data name="MessageConfirm.Title.RemoveIgnore" xml:space="preserve">
+    <value>Möchten Sie wirklich den Autostart von der Ignorierliste entfernen?</value>
+  </data>
   <data name="NavigationAbout.Content" xml:space="preserve">
     <value>Über</value>
   </data>
@@ -203,5 +242,38 @@
   </data>
   <data name="ToggleEnable.ToolTipService.ToolTip" xml:space="preserve">
     <value>Aktiviert</value>
+  </data>
+  <data name="ToggleOwnAutoStart.Header" xml:space="preserve">
+    <value>'Auto Start Confirm' beim Einloggen des aktuellen Benutzers automatisch starten</value>
+  </data>
+  <data name="ToggleOwnAutoStart.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Aktivieren</value>
+  </data>
+  <data name="ToggleUpdateCheck.Header" xml:space="preserve">
+    <value>Beim Start von 'Auto Start Confirm' auf eine neue Version prüfen</value>
+  </data>
+  <data name="ToggleUpdateCheck.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Aktivieren</value>
+  </data>
+  <data name="Message.Button.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="MessageSuccess.Title.Add" xml:space="preserve">
+    <value>Autostart erfolgreich hinzugefügt</value>
+  </data>
+  <data name="MessageSuccess.Title.Disable" xml:space="preserve">
+    <value>Autostart erfolgreich deaktiviert</value>
+  </data>
+  <data name="MessageSuccess.Title.Enable" xml:space="preserve">
+    <value>Autostart erfolgreich aktiviert</value>
+  </data>
+  <data name="MessageSuccess.Title.Ignore" xml:space="preserve">
+    <value>Autostart erfolgreich ignoriert</value>
+  </data>
+  <data name="MessageSuccess.Title.Remove" xml:space="preserve">
+    <value>Autostart erfolgreich gelöscht</value>
+  </data>
+  <data name="MessageSuccess.Title.RemoveIgnore" xml:space="preserve">
+    <value>Autostart erfolgreich von Ignorierliste gelöscht</value>
   </data>
 </root>

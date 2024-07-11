@@ -717,7 +717,7 @@ namespace AutoStartConfirm.Business
             {
                 AppStatus.IncrementRunningActionCount();
                 Logger.LogTrace("RemoveIgnoreAutoStart called for {AutoStart}", ignoredAutoStart);
-                if (!await MessageService.ShowRemoveConfirm(ignoredAutoStart))
+                if (!await MessageService.ShowConfirm(ignoredAutoStart))
                 {
                     return;
                 }
@@ -736,7 +736,7 @@ namespace AutoStartConfirm.Business
                     ResetIgnorePropertiesOfAutoStarts(ignoredAutoStart);
                     Logger.LogInformation("Removed ignored {@autoStart}", ignoredAutoStart);
                     SettingSaveTimer.Start();
-                    await MessageService.ShowRemoveSuccess(ignoredAutoStart);
+                    await MessageService.ShowSuccess(ignoredAutoStart);
                 }, Microsoft.UI.Dispatching.DispatcherQueuePriority.High);
             }
             catch (Exception e)

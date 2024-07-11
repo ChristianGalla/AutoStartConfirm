@@ -1098,7 +1098,7 @@ namespace AutoStartConfirm.Business
         {
             Service!.SettingSaveTimer = new(1);
             IgnoredAutoStart ignoredAutoStart = new(AutoStartEntry!);
-            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).Returns(true);
+            A.CallTo(() => MessageService.ShowConfirm(ignoredAutoStart)).Returns(true);
             A.CallTo(() => DispatchService.EnqueueAsync(A<Func<Task>>.Ignored, DispatcherQueuePriority.High)).Invokes(async (Func<Task> callback, DispatcherQueuePriority priority) =>
                 await callback()
             );
@@ -1106,8 +1106,8 @@ namespace AutoStartConfirm.Business
             Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
             await Service!.RemoveIgnoreAutoStart(ignoredAutoStart);
 
-            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => MessageService.ShowRemoveSuccess(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(ignoredAutoStart)).MustHaveHappenedOnceExactly();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
@@ -1118,7 +1118,7 @@ namespace AutoStartConfirm.Business
         public async Task RemoveIgnoreAutoStart_DoesNothingIfNotConfirmed()
         {
             IgnoredAutoStart ignoredAutoStart = new(AutoStartEntry!);
-            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).Returns(false);
+            A.CallTo(() => MessageService.ShowConfirm(ignoredAutoStart)).Returns(false);
             A.CallTo(() => DispatchService.EnqueueAsync(A<Func<Task>>.Ignored, DispatcherQueuePriority.High)).Invokes(async (Func<Task> callback, DispatcherQueuePriority priority) =>
                 await callback()
             );
@@ -1126,8 +1126,8 @@ namespace AutoStartConfirm.Business
             Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
             await Service!.RemoveIgnoreAutoStart(ignoredAutoStart);
 
-            A.CallTo(() => MessageService.ShowRemoveConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => MessageService.ShowRemoveSuccess(A<IgnoredAutoStart>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => MessageService.ShowConfirm(ignoredAutoStart)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => MessageService.ShowSuccess(A<IgnoredAutoStart>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             Assert.AreEqual(1, Service!.IgnoredAutoStarts.Count);

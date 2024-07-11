@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
+using Windows.ApplicationModel.Resources;
 using static AutoStartConfirm.GUI.IMessageService;
 
 namespace AutoStartConfirm.GUI
@@ -45,6 +45,8 @@ namespace AutoStartConfirm.GUI
             get => dialogSemaphore;
         }
 
+        private readonly ResourceLoader ResourceLoader = new("AutoStartConfirmLib/Resources");
+
         public MessageService(
             ILogger<MessageService> logger,
             IDispatchService dispatchService)
@@ -72,7 +74,7 @@ namespace AutoStartConfirm.GUI
 
                         Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                         Title = caption,
-                        CloseButtonText = "Ok",
+                        CloseButtonText = ResourceLoader.GetString($"Message/Button/Ok"),
                         DefaultButton = ContentDialogButton.Close,
                         Content = message
                     };
@@ -104,41 +106,32 @@ namespace AutoStartConfirm.GUI
             await tcs.Task;
         }
 
-        private static string GetPastTenseAction(AutoStartAction action)
-        {
-            return action switch
-            {
-                AutoStartAction.Remove or AutoStartAction.Enable or AutoStartAction.Disable => $"{action.ToString().ToLower()}d",
-                _ => $"{action.ToString().ToLower()}ed",
-            };
-        }
-
         public async Task<bool> ShowConfirm(AutoStartEntry autoStart, AutoStartAction action)
         {
-            return await ShowConfirm(
-                $"Are you sure you want to {action.ToString().ToLower()} this auto start?",
-                @$"Type:
-{autoStart.Category}
-
-Value:
-{autoStart.Value}
-
-Path:
-{autoStart.Path}");
+            return await ShowConfirm(autoStart.Category, autoStart.Value, autoStart.Path, action);
         }
 
-        public async Task<bool> ShowRemoveConfirm(IgnoredAutoStart autoStart)
+        public async Task<bool> ShowConfirm(IgnoredAutoStart autoStart)
         {
+            return await ShowConfirm(autoStart.Category, autoStart.Value, autoStart.Path, AutoStartAction.RemoveIgnore);
+        }
+
+        public async Task<bool> ShowConfirm(Category autoStartCategory, string autoStartValue, string autoStartPath, AutoStartAction action)
+        {
+            var title = ResourceLoader.GetString($"MessageConfirm/Title/{action}");
+            var type = ResourceLoader.GetString("Message/Type");
+            var value = ResourceLoader.GetString("Message/Value");
+            var path = ResourceLoader.GetString("Message/Path");
             return await ShowConfirm(
-                $"Are you sure you want to remove this ignored auto start?",
-                @$"Type:
-{autoStart.Category}
+                title,
+                @$"{type}:
+{autoStartCategory}
 
-Value:
-{autoStart.Value}
+{value}:
+{autoStartValue}
 
-Path:
-{autoStart.Path}");
+{path}:
+{autoStartPath}");
         }
 
         public async Task<bool> ShowConfirm(string caption, string message = "")
@@ -156,8 +149,8 @@ Path:
 
                         Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                         Title = caption,
-                        PrimaryButtonText = "Yes",
-                        CloseButtonText = "No",
+                        PrimaryButtonText = ResourceLoader.GetString($"Message/Button/Yes"),
+                        CloseButtonText = ResourceLoader.GetString($"Message/Button/No"),
                         DefaultButton = ContentDialogButton.Close,
                         Content = message
                     };
@@ -205,7 +198,7 @@ Path:
 
                         Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                         Title = caption,
-                        CloseButtonText = "Ok",
+                        CloseButtonText = ResourceLoader.GetString($"Message/Button/Ok"),
                         DefaultButton = ContentDialogButton.Close,
                         Content = message
                     };
@@ -239,30 +232,30 @@ Path:
 
         public async Task ShowSuccess(AutoStartEntry autoStart, AutoStartAction action)
         {
-            await ShowSuccess(
-                $"Successfully {GetPastTenseAction(action)}ed auto start",
-                @$"Type:
-{autoStart.Category}
-
-Value:
-{autoStart.Value}
-
-Path:
-{autoStart.Path}");
+            await ShowSuccess(autoStart.Category, autoStart.Value, autoStart.Path, action);
         }
 
-        public async Task ShowRemoveSuccess(IgnoredAutoStart autoStart)
+        public async Task ShowSuccess(IgnoredAutoStart autoStart)
         {
+            await ShowSuccess(autoStart.Category, autoStart.Value, autoStart.Path, AutoStartAction.RemoveIgnore);
+        }
+
+        public async Task ShowSuccess(Category autoStartCategory, string autoStartValue, string autoStartPath, AutoStartAction action)
+        {
+            var title = ResourceLoader.GetString($"MessageSuccess/Title/{action}");
+            var type = ResourceLoader.GetString("Message/Type");
+            var value = ResourceLoader.GetString("Message/Value");
+            var path = ResourceLoader.GetString("Message/Path");
             await ShowSuccess(
-                $"Successfully removed ignored auto start",
-                @$"Type:
-{autoStart.Category}
+                title,
+                @$"{type}:
+{autoStartCategory}
 
-Value:
-{autoStart.Value}
+{value}:
+{autoStartValue}
 
-Path:
-{autoStart.Path}");
+{path}:
+{autoStartPath}");
         }
 
         protected virtual void Dispose(bool disposing)
