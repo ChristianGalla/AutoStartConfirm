@@ -276,4 +276,58 @@
   <data name="MessageSuccess.Title.RemoveIgnore" xml:space="preserve">
     <value>Successfully removed auto start from ignore list</value>
   </data>
+  <data name="NotifyIcon.Command.Exit.Description" xml:space="preserve">
+    <value>Exit program</value>
+  </data>
+  <data name="NotifyIcon.Command.Exit.Label" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="NotifyIcon.Command.ShowHide.Description" xml:space="preserve">
+    <value>Show / Hide window</value>
+  </data>
+  <data name="NotifyIcon.Command.ShowHide.Label" xml:space="preserve">
+    <value>Show / Hide window</value>
+  </data>
+  <data name="Notification.Button.Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="Notification.Button.Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="Notification.Button.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Notification.Button.Remove" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Notification.Button.Revert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="Notification.Button.Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Notification.Text.Category" xml:space="preserve">
+    <value>Via {0}</value>
+  </data>
+  <data name="Notification.Text.CurrentVersion" xml:space="preserve">
+    <value>Installed version: {0}</value>
+  </data>
+  <data name="Notification.Text.NewVersion" xml:space="preserve">
+    <value>New version: {0}</value>
+  </data>
+  <data name="Notification.Title.Add" xml:space="preserve">
+    <value>Auto start added</value>
+  </data>
+  <data name="Notification.Title.Disable" xml:space="preserve">
+    <value>Auto start disabled</value>
+  </data>
+  <data name="Notification.Title.Enable" xml:space="preserve">
+    <value>Auto start enabled</value>
+  </data>
+  <data name="Notification.Title.NewVersion" xml:space="preserve">
+    <value>New version available</value>
+  </data>
+  <data name="Notification.Title.Remove" xml:space="preserve">
+    <value>Auto start deleted</value>
+  </data>
 </root>
