@@ -31,6 +31,8 @@
 		<Exec Command="dotnet publish $(ProjectFile) -c $(Configuration) --no-self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" />
 		<Exec Command="dotnet publish $(ProjectFile) -c $(Configuration) --self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_Standalone_$(Architecture)\" />
 
+		<Exec Condition="'$(Configuration)' == 'Release'" Command="del /q $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\\*.pdb"></Exec>
+
 		<!-- Once build is done, we can now get the assembly version to embed in files below -->
 		<!--<GetAssemblyIdentity AssemblyFiles="$(PublishDir)$(Configuration)_$(Architecture)\$(ProjectName).dll">
 			<Output TaskParameter="Assemblies" ItemName="AssemblyVersion"/>

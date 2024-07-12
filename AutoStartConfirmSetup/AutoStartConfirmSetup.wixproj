@@ -1,5 +1,5 @@
 ﻿<Project>
-  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.4" />
+  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="5.0.0" />
   <PropertyGroup>
     <!-- Imported variables section. Default values should be set here for when the project is built from within VS. -->
     <!-- Logic to figure out if we're doing a FrameworkDependent or static build. Do FrameworkDependent by default -->
@@ -44,7 +44,7 @@
     <Content Include="SkipSpecialFiles.xslt" />
   </ItemGroup>
   <!-- Steps to execute after build, but only if called from the Daily.targets file -->
-  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="4.0.4" />
+  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="5.0.0" />
   <PropertyGroup>
     <PreBuildEvent />
   </PropertyGroup>

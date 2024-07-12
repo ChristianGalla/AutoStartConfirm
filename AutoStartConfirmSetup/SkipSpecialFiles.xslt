@@ -23,11 +23,11 @@
     />
 
 	<!-- We can also remove .pdb files too, for example: -->
-	<xsl:key
+	<!--<xsl:key
         name="PdbToRemove"
         match="wix:Component[ substring( wix:File/@Source, string-length( wix:File/@Source ) - 3 ) = '.pdb' ]"
         use="@Id"
-    />
+    />-->
 	
 	<xsl:key
         name="NLogConfigToRemove"
@@ -51,7 +51,7 @@
 	<!-- ...but if the element has the "ExeToRemove" key then don't render anything (i.e. removing it from the output) -->
 	<xsl:template match="*[ self::wix:Component or self::wix:ComponentRef ][ key( 'ExeToRemove', @Id ) ]" />
 
-	<xsl:template match="*[ self::wix:Component or self::wix:ComponentRef ][ key( 'PdbToRemove', @Id ) ]" />
+	<!--<xsl:template match="*[ self::wix:Component or self::wix:ComponentRef ][ key( 'PdbToRemove', @Id ) ]" />-->
 
 	<xsl:template match="*[ self::wix:Component or self::wix:ComponentRef ][ key( 'NLogConfigToRemove', @Id ) ]" />
 
