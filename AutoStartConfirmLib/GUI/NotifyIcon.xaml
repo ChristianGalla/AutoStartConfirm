@@ -8,6 +8,7 @@
         x:Key="ShowHideWindowCommand"
         Label="Show/Hide Window"
         Description="Show/Hide Window"
+        x:Uid="NotifyIcon/Command/ShowHide"
         >
         <XamlUICommand.IconSource>
             <SymbolIconSource Symbol="OpenPane" />
@@ -23,6 +24,7 @@
         x:Key="ExitApplicationCommand"
         Label="Exit"
         Description="Exit"
+        x:Uid="NotifyIcon/Command/Exit"
         >
         <XamlUICommand.IconSource>
             <SymbolIconSource Symbol="ClosePane" />

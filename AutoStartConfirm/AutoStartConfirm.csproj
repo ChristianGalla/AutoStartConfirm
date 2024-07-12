@@ -111,15 +111,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<LicenseFiles Include="$(OutDir)\Licenses\**" />
+		<LicenseFiles Include="..\AutoStartConfirmLib\Licenses\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="$(OutDir)\resources.pri" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(TargetDir)\%(RecursiveDir)\Licenses\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(TargetDir)\%(RecursiveDir)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 
 	<Target Name="AddPayloadsFolder" AfterTargets="Publish">
 		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(PublishDir)\%(RecursiveDir)\Licenses\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(PublishDir)\%(RecursiveDir)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 </Project>

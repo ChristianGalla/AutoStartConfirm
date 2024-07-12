@@ -18,6 +18,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -37,8 +39,8 @@ namespace AutoStartConfirm.GUI
     {
         private bool disposedValue = false;
 
-        public string NavTitile => "Home";
-
+        public string NavTitle { get; set; }
+        
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
         private IAutoStartBusiness? autoStartBusiness;
@@ -136,6 +138,9 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
+
+            var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
+            NavTitle = resourceLoader.GetString("NavigationHome/Content");
         }
 
         public async void CurrentConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -498,7 +503,7 @@ namespace AutoStartConfirm.GUI
             if (!string.IsNullOrWhiteSpace(newText))
             {
                 // Because of a bug in AdvancedCollectionView, currently it is not possible to filter the last element
-                // If tired, ArgumentOutOfRangeException is thrown
+                // If tried, ArgumentOutOfRangeException is thrown
                 // For now ignore ArgumentOutOfRangeException
                 // See https://github.com/CommunityToolkit/WindowsCommunityToolkit/issues/2913
                 try

@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.ApplicationModel.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ namespace AutoStartConfirm.GUI
 {
     public sealed partial class AboutPage : Page, ISubPage
     {
-        public string NavTitile => "About";
+        public string NavTitle { get; set; }
 
 #pragma warning disable CA1822 // Mark members as static
         public string Version
@@ -86,6 +87,9 @@ namespace AutoStartConfirm.GUI
         {
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Enabled;
+
+            var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
+            NavTitle = resourceLoader.GetString("NavigationAbout/Content");
         }
     }
 }

@@ -8,6 +8,6 @@ namespace AutoStartConfirm.GUI
 {
     internal interface ISubPage
     {
-        string NavTitile { get; }
+        string NavTitle { get; }
     }
 }

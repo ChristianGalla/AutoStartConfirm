@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
+using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.Models
 {
@@ -111,8 +112,27 @@ namespace AutoStartConfirm.Models
                 if (change != value)
                 {
                     change = value;
+                    confirmStatusLocalized = null;
                     NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(ConfirmStatusLocalized));
                 }
+            }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        private string? changeLocalized = null;
+
+        public string ChangeLocalized
+        {
+            get
+            {
+                if (changeLocalized == null)
+                {
+                    var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
+                    changeLocalized = resourceLoader.GetString($"ChangeValue{change}");
+                }
+                return changeLocalized;
             }
         }
 
@@ -122,8 +142,26 @@ namespace AutoStartConfirm.Models
                 if (confirmStatus != value)
                 {
                     confirmStatus = value;
+                    confirmStatusLocalized = null;
                     NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(ConfirmStatusLocalized));
                 }
+            }
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        private string? confirmStatusLocalized = null;
+
+        public string ConfirmStatusLocalized
+        {
+            get {
+                if (confirmStatusLocalized == null)
+                {
+                    var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
+                    confirmStatusLocalized = resourceLoader.GetString($"ConfirmStatusValue{confirmStatus}");
+                }
+                return confirmStatusLocalized;
             }
         }
 
@@ -274,9 +312,10 @@ namespace AutoStartConfirm.Models
             return (AutoStartEntry)serializer.Deserialize(ms)!;
         }
 
+        // Notify view to redraw if a property has changed
         // This method is called by the Set accessor of each property.  
         // The CallerMemberName attribute that is applied to the optional propertyName  
-        // parameter causes the property name of the caller to be substituted as an argument.  
+        // parameter causes the property name of the caller to be substituted as an argument.
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (PropertyChanged == null)
