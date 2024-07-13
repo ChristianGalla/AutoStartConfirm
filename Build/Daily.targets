@@ -20,7 +20,7 @@
 
 			<!-- Project-related -->
 			<ProjectName>AutoStartConfirm</ProjectName>
-			<SolutionFile>..\AutoStartConfirm.sln</SolutionFile>
+			<ProjectFile>..\$(ProjectName)\$(ProjectName).csproj</ProjectFile>
 
 			<!-- Insert Debug into the files if we need -->
 			<DebugModifier Condition="'$(Configuration)' == 'Debug'">_Debug</DebugModifier>
@@ -28,8 +28,8 @@
 		</PropertyGroup>
 
 		<!-- Build both framework-dependent and standalone releases -->
-		<Exec Command="dotnet publish $(SolutionFile) -c &quot;$(Configuration) Framework Dependent&quot; --no-self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" />
-		<Exec Command="dotnet publish $(SolutionFile) -c &quot;$(Configuration) Standalone&quot; --self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_Standalone_$(Architecture)\" />
+		<Exec Command="dotnet publish $(ProjectFile) -c &quot;$(Configuration) Framework Dependent&quot; --no-self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" />
+		<Exec Command="dotnet publish $(ProjectFile) -c &quot;$(Configuration) Standalone&quot; --self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_Standalone_$(Architecture)\" />
 
 		<Exec Condition="'$(Configuration)' == 'Release'" Command="del /q $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\\*.pdb"></Exec>
 

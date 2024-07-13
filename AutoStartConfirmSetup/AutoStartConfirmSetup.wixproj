@@ -17,21 +17,31 @@
     <!-- This will be the base name of the output file -->
     <OutputName>$(ProjectName)Setup</OutputName>
     <!-- Default to Debug|x64 if no configuration or platform was given -->
-    <DebugDirModifier Condition="'$(Configuration)' == 'Debug'">_Debug</DebugDirModifier>
+    <DebugDirModifier Condition="'$(Configuration)'=='Debug Framework Dependent'">_Debug</DebugDirModifier>
+    <DebugDirModifier Condition="'$(Configuration)'=='Debug Standalone'">_Debug</DebugDirModifier>
     <!-- Now we can finally determine the base path -->
     <MyBasePath>$(PublishDir)$(Configuration)$(BuildDirModifier)_$(Architecture)</MyBasePath>
     <InstallerPlatform>x64</InstallerPlatform>
     <Platform>x64</Platform>
     <Platforms>x64</Platforms>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
     <DefineConstants>Debug</DefineConstants>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
+    <DefineConstants>Debug</DefineConstants>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
@@ -56,7 +66,7 @@
       <!-- Variables to pass into Product.wxs -->
       <DefineConstants>BasePath=$(MyBasePath);ProjectFullName=$(ProjectFullName)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
+    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="true" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
   </Target>
   <Target Name="AfterBuild">
     <Message Text="BuildType==$(BuildType)" />

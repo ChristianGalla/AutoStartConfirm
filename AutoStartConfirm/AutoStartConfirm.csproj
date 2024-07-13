@@ -22,17 +22,27 @@
 		<Copyright>Copyright © 2020 Christian Galla</Copyright>
 		<Authors>Christian Galla</Authors>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<Configurations>Debug;Release</Configurations>
+		<Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
+	  <OutputPath>bin\x64\Debug\</OutputPath>
+	  <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	  <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
 		<OutputPath>bin\x64\Release\</OutputPath>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
+	  <OutputPath>bin\x64\Release\</OutputPath>
+	  <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	  <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<Content Remove="Assets\Icon.xcf" />
