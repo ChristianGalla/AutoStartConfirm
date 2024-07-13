@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using System.Linq;
 using AutoStartConfirm.Business;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
 
 namespace AutoStartConfirm.GUI
 {
@@ -25,14 +26,34 @@ namespace AutoStartConfirm.GUI
         public MainWindow(
             ILogger<MainWindow> logger,
             IAutoStartBusiness autoStartBusiness
-        ) {
+        )
+        {
             Logger = logger;
             InitializeComponent();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             Activated += MainWindow_Activated;
             Title = "Auto Start Confirm";
+
             Logger.LogTrace("Window opened");
+        }
+
+        /// <summary>
+        /// Fixes invisible top window buttons
+        /// https://github.com/microsoft/microsoft-ui-xaml/issues/9540
+        /// </summary>
+        private void FixTitleIcons()
+        {
+            if (Application.Current.RequestedTheme == ApplicationTheme.Light)
+            {
+                AppWindow.TitleBar.ButtonForegroundColor = ColorHelper.FromArgb(255, 68, 68, 68);
+                AppWindow.TitleBar.ButtonInactiveForegroundColor = ColorHelper.FromArgb(255, 153, 153, 153);
+            }
+            else
+            {
+                AppWindow.TitleBar.ButtonForegroundColor = ColorHelper.FromArgb(255, 202, 202, 202);
+                AppWindow.TitleBar.ButtonInactiveForegroundColor = ColorHelper.FromArgb(255, 102, 102, 102);
+            }
         }
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -47,6 +68,7 @@ namespace AutoStartConfirm.GUI
                 AppTitleTextBlock.Foreground =
                     (SolidColorBrush)Application.Current.Resources["WindowCaptionForeground"];
             }
+            FixTitleIcons();
         }
 
         #region Click handlers
