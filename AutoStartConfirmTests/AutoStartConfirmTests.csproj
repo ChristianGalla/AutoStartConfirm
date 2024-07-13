@@ -13,7 +13,14 @@
 		<Nullable>enable</Nullable>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Connectors\**" />
+	  <EmbeddedResource Remove="Connectors\**" />
+	  <None Remove="Connectors\**" />
+	  <Page Remove="Connectors\**" />
+	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -48,9 +55,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Connectors\" />
-	</ItemGroup>
 
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
@@ -60,4 +64,7 @@
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
+	<ItemGroup>
+	  <PRIResource Remove="Connectors\**" />
+	</ItemGroup>
 </Project>

@@ -214,9 +214,14 @@ namespace AutoStartConfirm.Business
             }
             StartWatcher();
 
-            if (SettingsService.CheckForUpdatesOnStart)
+            try {
+                if (SettingsService.CheckForUpdatesOnStart)
+                {
+                    UpdateService.CheckUpdateAndShowNotification();
+                }
+            }
+            catch (Exception)
             {
-                UpdateService.CheckUpdateAndShowNotification();
             }
         }
 

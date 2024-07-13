@@ -11,6 +11,19 @@
 		<GenerateLibraryLayout>true</GenerateLibraryLayout>
 		<Nullable>enable</Nullable>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
+	  <DefineConstants>$(DefineConstants);DEBUG;FRAMEWORK_DEPENDENT</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
+	  <DefineConstants>$(DefineConstants);FRAMEWORK_DEPENDENT;RELEASE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
+	  <DefineConstants>$(DefineConstants);DEBUG;STANDALONE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
+	  <DefineConstants>$(DefineConstants);RELEASE;STANDALONE</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="GUI\AboutPage.xaml" />

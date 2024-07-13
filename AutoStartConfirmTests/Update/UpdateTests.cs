@@ -95,17 +95,13 @@ namespace AutoStartConfirm.Update
             Service = null;
         }
 
-        //[TestMethod]
-        //public void CheckUpdateAndShowNotification_ShowsNotificationIfUpdateAavailable()
-        //{
-        //    WinRT.ComWrappersSupport.InitializeComWrappers();
-        //    Microsoft.UI.Xaml.Application.Start(async (p) =>
-        //    {
-        //        await Service!.CheckUpdateAndShowNotification();
+        [TestMethod]
+        public async Task CheckUpdateAndShowNotification_ShowsNotificationIfUpdateAavailable()
+        {
+            await Service!.CheckUpdateAndShowNotification();
 
-        //        A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, CurrentVersion, MsiUrl)).MustHaveHappenedOnceExactly();
-        //    });
-        //}
+            A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, "1.0.0", MsiUrl)).MustHaveHappenedOnceExactly();
+        }
 
         [TestMethod]
         public async Task CheckUpdateAndShowNotification_ShouldNotShowNotificationIfNoUpdateAavailable()
@@ -124,6 +120,126 @@ namespace AutoStartConfirm.Update
             await Service!.CheckUpdateAndShowNotification();
 
             A.CallTo(() => NotificationService!.ShowNewVersionNotification(A<string>._, A<string>._, A<string>._)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        public async Task CheckUpdateAndShowNotification_ShouldNotShowNotificationIfNoMsiFound()
+        {
+            ReleaseAssets!.Clear();
+            await Service!.CheckUpdateAndShowNotification();
+
+            A.CallTo(() => NotificationService!.ShowNewVersionNotification(A<string>._, A<string>._, A<string>._)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        public async Task CheckUpdateAndShowNotification_ShouldNotShowNotificationForDebugMsi()
+        {
+            ReleaseAssets!.Clear();
+            ReleaseAssets.Add(
+                new(
+                    url: MsiUrl,
+                    id: 1,
+                    nodeId: "",
+                    name: "AutoStartConfirm_Debug.msi",
+                    label: "",
+                    state: "",
+                    contentType: "",
+                    size: 1,
+                    downloadCount: 1,
+                    createdAt: new DateTimeOffset(),
+                    updatedAt: new DateTimeOffset(),
+                    browserDownloadUrl: MsiUrl,
+                    uploader: null)
+            );
+            await Service!.CheckUpdateAndShowNotification();
+
+            A.CallTo(() => NotificationService!.ShowNewVersionNotification(A<string>._, A<string>._, A<string>._)).MustNotHaveHappened();
+        }
+
+        [TestMethod]
+        public async Task CheckUpdateAndShowNotification_ShowsNotificationForStandaloneIfMsiAvailable()
+        {
+            var StandaloneMsiUrl = "https://www.example.org/AutoStartConfirm_Standalone.msi";
+            var FrameworkDependentMsiUrl = "https://www.example.org/AutoStartConfirm_FrameworkDependent.msi";
+            ReleaseAssets!.Add(
+                new(
+                    url: StandaloneMsiUrl,
+                    id: 1,
+                    nodeId: "",
+                    name: "AutoStartConfirm_Standalone.msi",
+                    label: "",
+                    state: "",
+                    contentType: "",
+                    size: 1,
+                    downloadCount: 1,
+                    createdAt: new DateTimeOffset(),
+                    updatedAt: new DateTimeOffset(),
+                    browserDownloadUrl: StandaloneMsiUrl,
+                    uploader: null)
+            );
+            ReleaseAssets!.Add(
+                new(
+                    url: FrameworkDependentMsiUrl,
+                    id: 1,
+                    nodeId: "",
+                    name: "AutoStartConfirm_FrameworkDependent.msi",
+                    label: "",
+                    state: "",
+                    contentType: "",
+                    size: 1,
+                    downloadCount: 1,
+                    createdAt: new DateTimeOffset(),
+                    updatedAt: new DateTimeOffset(),
+                    browserDownloadUrl: FrameworkDependentMsiUrl,
+                    uploader: null)
+            );
+            Service!.IsStandalone = true;
+            await Service!.CheckUpdateAndShowNotification();
+
+            A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, "1.0.0", StandaloneMsiUrl)).MustHaveHappenedOnceExactly();
+        }
+
+        [TestMethod]
+        public async Task CheckUpdateAndShowNotification_ShowsNotificationForFrameworkDependentIfMsiAvailable()
+        {
+            var StandaloneMsiUrl = "https://www.example.org/AutoStartConfirm_Standalone.msi";
+            var FrameworkDependentMsiUrl = "https://www.example.org/AutoStartConfirm_FrameworkDependent.msi";
+            ReleaseAssets!.Add(
+                new(
+                    url: MsiUrl,
+                    id: 1,
+                    nodeId: "",
+                    name: "AutoStartConfirm_Standalone.msi",
+                    label: "",
+                    state: "",
+                    contentType: "",
+                    size: 1,
+                    downloadCount: 1,
+                    createdAt: new DateTimeOffset(),
+                    updatedAt: new DateTimeOffset(),
+                    browserDownloadUrl: StandaloneMsiUrl,
+                    uploader: null)
+            );
+            ReleaseAssets!.Add(
+                new(
+                    url: MsiUrl,
+                    id: 1,
+                    nodeId: "",
+                    name: "AutoStartConfirm_FrameworkDependent.msi",
+                    label: "",
+                    state: "",
+                    contentType: "",
+                    size: 1,
+                    downloadCount: 1,
+                    createdAt: new DateTimeOffset(),
+                    updatedAt: new DateTimeOffset(),
+                    browserDownloadUrl: FrameworkDependentMsiUrl,
+                    uploader: null)
+            );
+            Service!.IsStandalone = false;
+            await Service!.CheckUpdateAndShowNotification();
+
+            A.CallTo(() => NotificationService!.ShowNewVersionNotification(NewestVersion, "1.0.0", FrameworkDependentMsiUrl)).MustHaveHappenedOnceExactly();
         }
     }
 }

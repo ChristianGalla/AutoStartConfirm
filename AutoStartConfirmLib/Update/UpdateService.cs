@@ -6,6 +6,7 @@ using Octokit;
 using Semver;
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Update
@@ -32,6 +33,8 @@ namespace AutoStartConfirm.Update
             }
         }
 
+        public bool IsStandalone { get; set; }
+
 
         private readonly ISettingsService SettingsService;
         private readonly INotificationService NotificationService;
@@ -43,6 +46,13 @@ namespace AutoStartConfirm.Update
             SettingsService = settingsService;
             NotificationService = notificationService;
             GitHubClient = gitHubClient;
+
+#if FRAMEWORK_DEPENDENT
+            IsStandalone = false;
+#endif
+#if STANDALONE
+            IsStandalone = true;
+#endif
         }
 
         public async Task<Release> GetNewestRelease()
@@ -105,6 +115,15 @@ namespace AutoStartConfirm.Update
             try
             {
                 Logger.LogTrace("CheckUpdateAndShowNotification called");
+                if (IsStandalone)
+                {
+                    Logger.LogInformation("Checking for standalone msi");
+                }
+                else
+                {
+                    Logger.LogInformation("Checking for framework dependent msi");
+                }
+
                 var newestRelease = await GetNewestRelease();
                 var newestSemverVersion = GetSemverVersion(newestRelease);
 
@@ -138,11 +157,34 @@ namespace AutoStartConfirm.Update
                 string? msiUrl = null;
                 foreach (var asset in newestRelease.Assets)
                 {
-                    if (asset.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase))
+                    if (!asset.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase) ||
+                        asset.Name.Contains("Debug", StringComparison.OrdinalIgnoreCase) ||
+                        IsStandalone && !asset.Name.Contains("Standalone", StringComparison.OrdinalIgnoreCase) ||
+                        !IsStandalone && !asset.Name.Contains("FrameworkDependent", StringComparison.OrdinalIgnoreCase))
                     {
+                        continue;
+                    }
+                    msiUrl = asset.BrowserDownloadUrl;
+                    break;
+                }
+                if (msiUrl == null)
+                {
+                    Logger.LogWarning("No fitting msi found");
+                    foreach (var asset in newestRelease.Assets)
+                    {
+                        if (!asset.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase) ||
+                            asset.Name.Contains("Debug", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
                         msiUrl = asset.BrowserDownloadUrl;
                         break;
                     }
+                }
+                if (msiUrl == null)
+                {
+                    Logger.LogError("No msi found");
+                    return;
                 }
                 SettingsService.LastNotifiedNewVersion = newestSemverVersion.ToString();
                 NotificationService.ShowNewVersionNotification(newestSemverVersion.ToString(), CurrentVersion.ToString(), msiUrl);
