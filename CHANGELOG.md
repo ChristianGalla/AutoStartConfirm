@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
-
+### Added
+- German localization (https://github.com/ChristianGalla/AutoStartConfirm/pull/100)
+- 3rd party licenses (https://github.com/ChristianGalla/AutoStartConfirm/pull/94)
 
 ## [3.0.8811] (2024-02-15)
 
