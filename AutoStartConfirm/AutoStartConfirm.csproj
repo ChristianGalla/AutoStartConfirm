@@ -15,7 +15,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<Nullable>enable</Nullable>
-		<PublishSingleFile>true</PublishSingleFile>
+		<PublishSingleFile>false</PublishSingleFile>
 		<ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
 		<AssemblyTitle>Auto Start Confirm</AssemblyTitle>
 		<Product>Auto Start Confirm</Product>
@@ -23,27 +23,25 @@
 		<Authors>Christian Galla</Authors>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
-		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 		<DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
 	  <OutputPath>bin\x64\Debug\</OutputPath>
-	  <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	  <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
 		<OutputPath>bin\x64\Release\</OutputPath>
-		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 		<DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
 	  <OutputPath>bin\x64\Release\</OutputPath>
-	  <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	  <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
+	
 	<ItemGroup>
 		<Content Remove="Assets\Icon.xcf" />
 		<Content Remove="Assets\NotificationIcons.xcf" />
@@ -61,15 +59,6 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\StoreLogo.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	</ItemGroup>
 	<ItemGroup>
 		<None Update="Assets\AddIcon.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -103,41 +92,37 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
-	<PropertyGroup>
-		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-	</PropertyGroup>
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="If Not Exist $(ProjectDir)nlog.config (Copy $(ProjectDir)nlog.sample.config $(ProjectDir)nlog.config)" />
-	</Target>
 
 	<ItemGroup>
 		<DataFiles Include="$(ProjectDir)\nlog.sample.config" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<None Include="..\LICENSE">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<DataFiles Include="..\LICENSE" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<LicenseFiles Include="..\AutoStartConfirmLib\Licenses\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<AdditionalFiles Include="$(OutDir)\resources.pri" />
-	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(TargetDir)\%(RecursiveDir)\Licenses\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(TargetDir)\%(RecursiveDir)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="If Not Exist $(ProjectDir)nlog.config (Copy $(ProjectDir)nlog.sample.config $(ProjectDir)nlog.config)" />
 	</Target>
 
-	<Target Name="AddPayloadsFolder" AfterTargets="Publish">
-		<Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(PublishDir)\%(RecursiveDir)\Licenses\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(PublishDir)\%(RecursiveDir)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	<Target Name="RemoveFoldersWithMuiFilesAfterBuild" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<RemovingFiles Include="$(OutDir)*\*.mui" Exclude="$(OutDir)en-US\*.mui;$(OutDir)de-DE\*.mui" />
+			<RemovingFiles Include="$(OutDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(OutDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
+			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
+		</ItemGroup>
+		<RemoveDir Directories="@(RemovingFolders)" />
+	</Target>
+
+	<Target Name="CustomActionsAfterPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)de-DE\*.mui" />
+			<RemovingFiles Include="$(PublishDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(PublishDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
+			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
+		</ItemGroup>
+		<RemoveDir Directories="@(RemovingFolders)" />
 	</Target>
 </Project>

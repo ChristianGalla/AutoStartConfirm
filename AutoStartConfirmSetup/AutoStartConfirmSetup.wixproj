@@ -46,9 +46,9 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.0" />
-    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.0" />
-    <PackageReference Include="WixToolset.Heat" Version="5.0.0" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.1" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.1" />
+    <PackageReference Include="WixToolset.Heat" Version="5.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.rtf" />
@@ -66,7 +66,7 @@
       <!-- Variables to pass into Product.wxs -->
       <DefineConstants>BasePath=$(MyBasePath);ProjectFullName=$(ProjectFullName)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="true" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
+    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
   </Target>
   <Target Name="AfterBuild">
     <Message Text="BuildType==$(BuildType)" />
