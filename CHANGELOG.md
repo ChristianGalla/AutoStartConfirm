@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [3.1.8968] (2024-07-21)
+
 ### Added
 - German localization (https://github.com/ChristianGalla/AutoStartConfirm/pull/100)
 - 3rd party licenses (https://github.com/ChristianGalla/AutoStartConfirm/pull/94)
@@ -89,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base functionality
 
-[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.0.8811...HEAD
+[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.1.8968...HEAD
+[3.1.8968]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...v3.1.8968
 [3.0.8811]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...v3.0.8811
 [2.1.8572]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8571...v2.1.8572
 [2.1.8571]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.0.8548...v2.1.8571
