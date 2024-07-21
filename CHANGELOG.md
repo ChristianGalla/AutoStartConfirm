@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Invisible title buttons when using accent title bar colors in light mode
+- Pixelated notification area icon on 125% DPI scalling
 
 ## [3.0.8811] (2024-02-15)
 
