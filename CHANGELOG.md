@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - German localization (https://github.com/ChristianGalla/AutoStartConfirm/pull/100)
 - 3rd party licenses (https://github.com/ChristianGalla/AutoStartConfirm/pull/94)
+- Updater installs same version (Framework dependent or standalone) as installed (https://github.com/ChristianGalla/AutoStartConfirm/issues/88)
+- Show deployment type in about page (Framework dependent or standalone)
+
+### Fixed
+- Invisible title buttons when using accent title bar colors in light mode
 
 ## [3.0.8811] (2024-02-15)
 
