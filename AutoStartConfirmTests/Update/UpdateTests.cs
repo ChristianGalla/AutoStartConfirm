@@ -38,8 +38,8 @@ namespace AutoStartConfirm.Update
         [TestInitialize]
         public void TestInitialize()
         {
-            ReleaseAssets = new List<ReleaseAsset>()
-            {
+            ReleaseAssets =
+            [
                 new ReleaseAsset(
                     url: MsiUrl,
                     id: 1,
@@ -54,7 +54,7 @@ namespace AutoStartConfirm.Update
                     updatedAt: new DateTimeOffset(),
                     browserDownloadUrl: MsiUrl,
                     uploader: null)
-            };
+            ];
             Release = new Release(
                 url: Url,
                 htmlUrl: Url,

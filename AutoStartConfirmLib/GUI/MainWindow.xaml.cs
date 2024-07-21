@@ -24,8 +24,7 @@ namespace AutoStartConfirm.GUI
         private readonly ILogger<MainWindow> Logger;
 
         public MainWindow(
-            ILogger<MainWindow> logger,
-            IAutoStartBusiness autoStartBusiness
+            ILogger<MainWindow> logger
         )
         {
             Logger = logger;

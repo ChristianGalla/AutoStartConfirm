@@ -3,7 +3,9 @@
 namespace AutoStartConfirm.Update {
     public interface IUpdateService
     {
-        Task CheckUpdateAndShowNotification();
+        public bool IsStandalone { get; set; }
+
+        public Task CheckUpdateAndShowNotification();
     }
 
 }

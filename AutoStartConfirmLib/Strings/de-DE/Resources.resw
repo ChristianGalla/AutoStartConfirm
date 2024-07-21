@@ -330,4 +330,10 @@
   <data name="Notification.Title.Remove" xml:space="preserve">
     <value>Autostart gelöscht</value>
   </data>
+  <data name="PublishVersion.FrameworkDependent" xml:space="preserve">
+    <value>Framework dependent (Benutzt Systeminstallation vom .NET Framework {0})</value>
+  </data>
+  <data name="PublishVersion.Standalone" xml:space="preserve">
+    <value>Standalone (Enthält .NET Framework {0})</value>
+  </data>
 </root>
