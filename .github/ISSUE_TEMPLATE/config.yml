@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/ChristianGalla/AutoStartConfirm/discussions/new?category=q-a
+    about: Ask a question about the usage of this program or a general question about this project.

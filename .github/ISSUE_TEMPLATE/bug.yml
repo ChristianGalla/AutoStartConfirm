@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a bug.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: checkboxes
+    id: app-version
+    attributes:
+      label: Latest version
+      description: |
+        By submitting this issue, you confirm you are using the [latest version of Auto Start Confirm](https://github.com/ChristianGalla/AutoStartConfirm/releases/latest).
+      options:
+        - label: I am using the latest version of Auto Start Confirm
+          required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Which Windows version are you using?
+      multiple: false
+      options:
+        - Windows 10
+        - Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: windows-subversion
+    attributes:
+      label: Additional details about your Windows installation? (Optional)
+      description: |
+        For example: Which subversion of Windows are you are using (for example Windows 10 Professional x64 22H2)?
+        Please also mention if you are using a preview version.
+        
+        You can get your Windows version for example by using the about page at the settings app.
+        The settings app can be opened via right click on the start menu icon and click on settings.
+        At the bottom of the about page at Windows specifications you can find the version.        
+  - type: dropdown
+    id: language
+    attributes:
+      label: Which Windows language are you using? (Optional)
+      multiple: false
+      options:
+        - English (or other)
+        - German
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output (Optional)
+      description: |
+        Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+      
