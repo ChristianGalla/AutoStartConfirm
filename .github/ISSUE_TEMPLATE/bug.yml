@@ -40,7 +40,7 @@ body:
   - type: textarea
     id: windows-subversion
     attributes:
-      label: Additional details about your Windows installation? (Optional)
+      label: Additional details about your Windows installation?
       description: |
         For example: Which subversion of Windows are you are using (for example Windows 10 Professional x64 22H2)?
         Please also mention if you are using a preview version.
@@ -51,7 +51,7 @@ body:
   - type: dropdown
     id: language
     attributes:
-      label: Which Windows language are you using? (Optional)
+      label: Which Windows language are you using?
       multiple: false
       options:
         - English (or other)
@@ -59,7 +59,7 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Relevant log output (Optional)
+      label: Relevant log output
       description: |
         Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
