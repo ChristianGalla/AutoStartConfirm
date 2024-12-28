@@ -38,7 +38,7 @@ namespace AutoStartConfirm
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public virtual void TestCleanup()
         {
             Fake.ClearRecordedCalls(ServiceProvider);
 

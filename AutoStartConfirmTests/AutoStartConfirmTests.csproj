@@ -1,76 +1,72 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.18362.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
-		<RootNamespace>AutoStartConfirmTests</RootNamespace>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x64</Platforms>
-		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
-		<UseWinUI>true</UseWinUI>
-		<EnableMsixTooling>true</EnableMsixTooling>
-		<Nullable>enable</Nullable>
-		<PublishReadyToRun>false</PublishReadyToRun>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
-	</PropertyGroup>
-	<ItemGroup>
-	  <Compile Remove="Connectors\**" />
-	  <EmbeddedResource Remove="Connectors\**" />
-	  <None Remove="Connectors\**" />
-	  <Page Remove="Connectors\**" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<ProjectCapability Include="TestContainer" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="FakeItEasy" Version="8.2.0" />
-		<PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.9.0">
-			<ExcludeAssets>build</ExcludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240404000" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
-		<PackageReference Include="MSTest.TestAdapter" Version="3.3.1" />
-		<PackageReference Include="MSTest.TestFramework" Version="3.3.1" />
-		<Manifest Include="$(ApplicationManifest)" />
-	</ItemGroup>
-
-	<!-- 
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+    <RootNamespace>AutoStartConfirmTests</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <Nullable>enable</Nullable>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Connectors\**" />
+    <EmbeddedResource Remove="Connectors\**" />
+    <None Remove="Connectors\**" />
+    <Page Remove="Connectors\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectCapability Include="TestContainer" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FakeItEasy" Version="8.3.0" />
+    <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.12.0">
+      <ExcludeAssets>build</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.7.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.7.0" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+  <!-- 
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget
     package has not yet been restored.
   -->
-	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-		<ProjectCapability Include="Msix" />
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj" />
-	</ItemGroup>
-
-	<!-- 
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj" />
+  </ItemGroup>
+  <!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
     Explorer "Package and Publish" context menu entry to be enabled for this project even if 
     the Windows App SDK Nuget package has not yet been restored.
   -->
-	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
-	  <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
-	  <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
-	  <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
-	  <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup>
-	  <PRIResource Remove="Connectors\**" />
-	</ItemGroup>
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Remove="Connectors\**" />
+  </ItemGroup>
 </Project>

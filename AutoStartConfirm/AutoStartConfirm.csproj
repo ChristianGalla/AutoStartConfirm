@@ -1,128 +1,117 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.18362.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x64</Platforms>
-		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-		<UseWinUI>true</UseWinUI>
-		<EnableMsixTooling>true</EnableMsixTooling>
-		<WindowsPackageType>None</WindowsPackageType>
-		<PublishUrl>publish\</PublishUrl>
-		<Deterministic>false</Deterministic>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<EnableWindowsTargeting>true</EnableWindowsTargeting>
-		<Nullable>enable</Nullable>
-		<PublishSingleFile>false</PublishSingleFile>
-		<ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
-		<AssemblyTitle>Auto Start Confirm</AssemblyTitle>
-		<Product>Auto Start Confirm</Product>
-		<Copyright>Copyright © 2020 Christian Galla</Copyright>
-		<Authors>Christian Galla</Authors>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
-		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
-		<OutputPath>bin\x64\Debug\</OutputPath>
-		<DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
-	  <OutputPath>bin\x64\Debug\</OutputPath>
-	  <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
-		<OutputPath>bin\x64\Release\</OutputPath>
-		<DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
-	  <OutputPath>bin\x64\Release\</OutputPath>
-	  <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	
-	<ItemGroup>
-		<Content Remove="Assets\Icon.xcf" />
-		<Content Remove="Assets\NotificationIcons.xcf" />
-	</ItemGroup>
-	<ItemGroup>
-		<Page Remove="TrayIconResources.xaml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="nlog.sample.config">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="nlog.config">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="Assets\AddIcon.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Assets\RemoveIcon.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj">
-			<Private>True</Private>
-			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
-		</ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Properties\Settings.Designer.cs">
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Update="Assets\Icon.ico">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-		<DataFiles Include="$(ProjectDir)\nlog.sample.config" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\LICENSE">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<DataFiles Include="..\LICENSE" />
-	</ItemGroup>
-	
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="If Not Exist $(ProjectDir)nlog.config (Copy $(ProjectDir)nlog.sample.config $(ProjectDir)nlog.config)" />
-	</Target>
-
-	<Target Name="RemoveFoldersWithMuiFilesAfterBuild" AfterTargets="PostBuildEvent">
-		<ItemGroup>
-			<RemovingFiles Include="$(OutDir)*\*.mui" Exclude="$(OutDir)en-US\*.mui;$(OutDir)de-DE\*.mui" />
-			<RemovingFiles Include="$(OutDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(OutDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
-			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
-		</ItemGroup>
-		<RemoveDir Directories="@(RemovingFolders)" />
-	</Target>
-
-	<Target Name="CustomActionsAfterPublish" AfterTargets="Publish">
-		<ItemGroup>
-			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)de-DE\*.mui" />
-			<RemovingFiles Include="$(PublishDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(PublishDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
-			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
-		</ItemGroup>
-		<RemoveDir Directories="@(RemovingFolders)" />
-	</Target>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <PublishUrl>publish\</PublishUrl>
+    <Deterministic>false</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <PublishSingleFile>false</PublishSingleFile>
+    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <AssemblyTitle>Auto Start Confirm</AssemblyTitle>
+    <Product>Auto Start Confirm</Product>
+    <Copyright>Copyright © 2020 Christian Galla</Copyright>
+    <Authors>Christian Galla</Authors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="Assets\Icon.xcf" />
+    <Content Remove="Assets\NotificationIcons.xcf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="TrayIconResources.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="nlog.sample.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Assets\AddIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\RemoveIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AutoStartConfirmLib\AutoStartConfirmLib.csproj">
+      <Private>True</Private>
+      <CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="Assets\Icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <DataFiles Include="$(ProjectDir)\nlog.sample.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <DataFiles Include="..\LICENSE" />
+  </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="If Not Exist $(ProjectDir)nlog.config (Copy $(ProjectDir)nlog.sample.config $(ProjectDir)nlog.config)" />
+  </Target>
+  <Target Name="RemoveFoldersWithMuiFilesAfterBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <RemovingFiles Include="$(OutDir)*\*.mui" Exclude="$(OutDir)en-US\*.mui;$(OutDir)de-DE\*.mui" />
+      <RemovingFiles Include="$(OutDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(OutDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
+      <RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <RemoveDir Directories="@(RemovingFolders)" />
+  </Target>
+  <Target Name="CustomActionsAfterPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)de-DE\*.mui" />
+      <RemovingFiles Include="$(PublishDir)*\Microsoft.Win32.TaskScheduler.resources.dll" Exclude="$(PublishDir)de\Microsoft.Win32.TaskScheduler.resources.dll" />
+      <RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <RemoveDir Directories="@(RemovingFolders)" />
+  </Target>
 </Project>

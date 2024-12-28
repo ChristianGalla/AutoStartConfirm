@@ -72,7 +72,7 @@ namespace AutoStartConfirm.Business
         }
 
         [TestCleanup]
-        public new void TestCleanup()
+        public override void TestCleanup()
         {
             base.TestCleanup();
             Fake.ClearRecordedCalls(LogService);
