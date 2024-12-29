@@ -15,6 +15,7 @@ using AutoStartConfirm.Update;
 
 namespace AutoStartConfirm
 {
+    [TestClass]
     public class TestsBase
     {
         protected static readonly IServiceProvider ServiceProvider = A.Fake<IServiceProvider>();
