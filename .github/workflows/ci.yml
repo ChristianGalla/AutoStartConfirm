@@ -85,10 +85,10 @@ jobs:
       run: dotnet restore AutoStartConfirmTests\AutoStartConfirmTests.csproj
     
     - name: Build tests
-      run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false
+      run: msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false -p:OutputPath="bin/x64/Release/win-x64/"
       
     - name: Test solution
-      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\net8.0-windows10.0.18362.0\win-x64\AutoStartConfirmTests.dll"
+      run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\win-x64\AutoStartConfirmTests.dll"
     
     - uses: actions/upload-artifact@v4
       name: Upload artifacts
