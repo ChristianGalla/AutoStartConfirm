@@ -88,7 +88,7 @@ namespace AutoStartConfirm.Update
         }
 
         [TestCleanup]
-        public new void TestCleanup()
+        public override void TestCleanup()
         {
             base.TestCleanup();
             Fake.ClearRecordedCalls(LogService);

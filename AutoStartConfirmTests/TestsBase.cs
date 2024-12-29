@@ -15,6 +15,7 @@ using AutoStartConfirm.Update;
 
 namespace AutoStartConfirm
 {
+    [TestClass]
     public class TestsBase
     {
         protected static readonly IServiceProvider ServiceProvider = A.Fake<IServiceProvider>();
@@ -38,7 +39,7 @@ namespace AutoStartConfirm
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public virtual void TestCleanup()
         {
             Fake.ClearRecordedCalls(ServiceProvider);
 

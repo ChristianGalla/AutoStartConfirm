@@ -34,6 +34,9 @@
             <Component Id="cmpUAgOCxvPCecQ9c_ff3LYuLbm.QY" Guid="*">
                 <File Id="filGbqoXGe8pkr2Se9CGrG7jfZaHCI" KeyPath="yes" Source="$(var.BasePath)\clrgc.dll" />
             </Component>
+            <Component Id="cmpiWpeZpQoGEveqbl9OS.u1cxLVJ0" Guid="*">
+                <File Id="filDOpsQ3jtNSL_dnPBHzIisA3BzVI" KeyPath="yes" Source="$(var.BasePath)\clrgcexp.dll" />
+            </Component>
             <Component Id="cmpAbUBASXweNCGsFcPPx9s8Ox7h8w" Guid="*">
                 <File Id="filbHWGze1uOocohbXJxB77hvrV3FY" KeyPath="yes" Source="$(var.BasePath)\clrjit.dll" />
             </Component>
@@ -340,6 +343,9 @@
             <Component Id="cmpKZltQgCImQuGoIGea7msYS3WwJ4" Guid="*">
                 <File Id="fil9XYfQsKB8UkbEvTPMyu9Pj3luDg" KeyPath="yes" Source="$(var.BasePath)\Microsoft.AspNetCore.SignalR.Protocols.Json.dll" />
             </Component>
+            <Component Id="cmpnmMkBV.uZ2kbzNBRbqnF2vaDYR8" Guid="*">
+                <File Id="filiuV2Z09IpmgHJv7cd0vy4XIo8SQ" KeyPath="yes" Source="$(var.BasePath)\Microsoft.AspNetCore.StaticAssets.dll" />
+            </Component>
             <Component Id="cmpeew3_mQwhrV.QkaAQ2xcgfiOYfg" Guid="*">
                 <File Id="fil8rA7yZJN8Sjn0VfPZtIFW8cQMbI" KeyPath="yes" Source="$(var.BasePath)\Microsoft.AspNetCore.StaticFiles.dll" />
             </Component>
@@ -532,6 +538,9 @@
             <Component Id="cmpUTcouYylk6Z3frMonEQ0ipt1FUU" Guid="*">
                 <File Id="filXlPFYzYhKMEDT4f9LjJVHivl0Cs" KeyPath="yes" Source="$(var.BasePath)\Microsoft.UI.Input.dll" />
             </Component>
+            <Component Id="cmpNBcsg087wQ_07Y_eb6dCz1aDJF0" Guid="*">
+                <File Id="filj5FU3hLMbANe3kKm1JffLzFXXP4" KeyPath="yes" Source="$(var.BasePath)\Microsoft.UI.pri" />
+            </Component>
             <Component Id="cmp3y3VuehY6vLl_Nq5bcu9QrODlGw" Guid="*">
                 <File Id="filYJ6pnR19vNvqG11AKv5gqol1L_s" KeyPath="yes" Source="$(var.BasePath)\Microsoft.UI.Text.winmd" />
             </Component>
@@ -631,6 +640,9 @@
             <Component Id="cmpGyltGb75R24CzkrUIe5.Gbno_Bg" Guid="*">
                 <File Id="filmcp4xcf.4wGcHkagbZtdLRTqFhM" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.AppNotifications.winmd" />
             </Component>
+            <Component Id="cmp6dGRk5tJi5qZSUBM6puzTjV7dqQ" Guid="*">
+                <File Id="filLnHh1iNwq4LV06kEuScURIYGW6w" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.Globalization.winmd" />
+            </Component>
             <Component Id="cmpwoFjy9zd0eIyYUkrTYTOgYyk374" Guid="*">
                 <File Id="filkaoWRnQ8TwObRaf9zFsIkJt2CoM" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.Management.Deployment.Projection.dll" />
             </Component>
@@ -651,6 +663,12 @@
             </Component>
             <Component Id="cmpUISJp4awz6P6HyOmQ6uNdkzznZQ" Guid="*">
                 <File Id="filK_Ru5NbeUFk1J5GkeXhPJo9LrZI" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.Security.AccessControl.winmd" />
+            </Component>
+            <Component Id="cmprIliVIMhnbqxbha5bQpwhlxHxf4" Guid="*">
+                <File Id="filH3E4PZJnlAEfYRvd8nAiR0s2v98" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.Storage.Projection.dll" />
+            </Component>
+            <Component Id="cmpxhPvhSS_5feiRQNVdyw84S6x2sI" Guid="*">
+                <File Id="filJtsPAaN.37QBN03mwXMqSvfZyGc" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.Storage.winmd" />
             </Component>
             <Component Id="cmpQH5CqPS4VY5i9wJNvhFC4x8P79E" Guid="*">
                 <File Id="filW.htDPfItKBO6tr8nj3egFYhlHk" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Windows.System.Power.Projection.dll" />
@@ -696,6 +714,9 @@
             </Component>
             <Component Id="cmpEqwjYPpNBfqeE8bSvHI3DivseMs" Guid="*">
                 <File Id="filw28zUITjYNLDz1W0zSw25xyFfnk" KeyPath="yes" Source="$(var.BasePath)\mscordaccore_amd64_amd64_8.0.724.31311.dll" />
+            </Component>
+            <Component Id="cmp33sTYUrdi12OW6n0AHVYts6SlUg" Guid="*">
+                <File Id="filB_WiQBUXPlzL3RIVrXVhGb8.VjQ" KeyPath="yes" Source="$(var.BasePath)\mscordaccore_amd64_amd64_9.0.24.52809.dll" />
             </Component>
             <Component Id="cmpeKa3htuYIH.0Oc4R7irkvP9cOPY" Guid="*">
                 <File Id="filoCeV6jcMMN4bMQB7l5PRiqAhJIM" KeyPath="yes" Source="$(var.BasePath)\mscordbi.dll" />
@@ -1009,6 +1030,9 @@
             <Component Id="cmp5CLfWg3O.hLYgyNRf_xHv_tjCR0" Guid="*">
                 <File Id="fil2DrwUn6LaGKJqbRDX_4mBIh7FNA" KeyPath="yes" Source="$(var.BasePath)\System.Private.Uri.dll" />
             </Component>
+            <Component Id="cmpE.cwXnpdYwIhX6QUtuoJ7Q6PB.8" Guid="*">
+                <File Id="filzGXoueC1D90dzrt3F49MLSy3OPE" KeyPath="yes" Source="$(var.BasePath)\System.Private.Windows.Core.dll" />
+            </Component>
             <Component Id="cmpkKSPYasjSe8leYm1xv1l6Gezbys" Guid="*">
                 <File Id="fil2qYz2PxmfveEThG7ChuBbPr0QYw" KeyPath="yes" Source="$(var.BasePath)\System.Private.Xml.dll" />
             </Component>
@@ -1254,6 +1278,12 @@
             </Component>
             <Component Id="cmpDHgSJ6LfSXtFNzZFspjFpCzz9sk" Guid="*">
                 <File Id="filDbiGi1lKlbnB2MmE1SjRrkmAdSg" KeyPath="yes" Source="$(var.BasePath)\System.Xml.XPath.XDocument.dll" />
+            </Component>
+            <Component Id="cmp6QxuPecnEgYiui3cZEKkyoSSJhE" Guid="*">
+                <File Id="filul4BTTruUDEGAFJmPvglBHU_Seg" KeyPath="yes" Source="$(var.BasePath)\WebView2Loader.dll" />
+            </Component>
+            <Component Id="cmpj0_.hOz5cQLkm2taGsarK5qMPO8" Guid="*">
+                <File Id="filMCMir7kG7OCEKKmRoFGnb0SYY3A" KeyPath="yes" Source="$(var.BasePath)\WindowsAppRuntime.DeploymentExtensions.OneCore.dll" />
             </Component>
             <Component Id="cmpelATLTqZJhOWLI62tauZWI9.r8I" Guid="*">
                 <File Id="filGxDs5tF7iIndK0mMnECfEbsXcl8" KeyPath="yes" Source="$(var.BasePath)\WindowsAppRuntime.png" />
@@ -1983,6 +2013,15 @@
                     </Component>
                 </Directory>
             </Directory>
+            <Directory Id="dirFJAGdos3pUF6_caURKbsOIDsfB4" Name="runtimes">
+                <Directory Id="dirtgugK0aCxF1xYvflWOHK9QYw9dU" Name="win-x64">
+                    <Directory Id="dir65oChd.pOrN_fENw3pPavTfdOqU" Name="native">
+                        <Component Id="cmpb6ALsTCF.t5KcgGNfDukI_UZKX8" Guid="*">
+                            <File Id="filBe47cvfycWIu.Gefyw6ol5.lP2U" KeyPath="yes" Source="$(var.BasePath)\runtimes\win-x64\native\WebView2Loader.dll" />
+                        </Component>
+                    </Directory>
+                </Directory>
+            </Directory>
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -1998,6 +2037,7 @@
             <ComponentRef Id="cmpSmYtsyDk0PBa354M2tCkjF42AMs" />
             <ComponentRef Id="cmpX_ixfRkPsZziQsYqN7waQoVmljk" />
             <ComponentRef Id="cmpUAgOCxvPCecQ9c_ff3LYuLbm.QY" />
+            <ComponentRef Id="cmpiWpeZpQoGEveqbl9OS.u1cxLVJ0" />
             <ComponentRef Id="cmpAbUBASXweNCGsFcPPx9s8Ox7h8w" />
             <ComponentRef Id="cmpVsTWXXpHkcdiDk9IWcuJNJYJw_U" />
             <ComponentRef Id="cmpaMXvA.Zhimb9jjJQPZ21_jt7U_I" />
@@ -2100,6 +2140,7 @@
             <ComponentRef Id="cmphhOYIaVdPzSLFJuYfnvoXnalvVo" />
             <ComponentRef Id="cmpqlVxbvE.e7LzZ_l2LVEMdWOD95g" />
             <ComponentRef Id="cmpKZltQgCImQuGoIGea7msYS3WwJ4" />
+            <ComponentRef Id="cmpnmMkBV.uZ2kbzNBRbqnF2vaDYR8" />
             <ComponentRef Id="cmpeew3_mQwhrV.QkaAQ2xcgfiOYfg" />
             <ComponentRef Id="cmp.13s6cGgv_8K9cYUuju_lUAUDec" />
             <ComponentRef Id="cmpvU4gm_dxI75HeIHrTmr5_FFdQkk" />
@@ -2164,6 +2205,7 @@
             <ComponentRef Id="cmpSHOKFUZ2ygw6QTZNQSZsrA3yKKU" />
             <ComponentRef Id="cmpFjopehLF7Bde6.Ea7er_bN_gIEI" />
             <ComponentRef Id="cmpUTcouYylk6Z3frMonEQ0ipt1FUU" />
+            <ComponentRef Id="cmpNBcsg087wQ_07Y_eb6dCz1aDJF0" />
             <ComponentRef Id="cmp3y3VuehY6vLl_Nq5bcu9QrODlGw" />
             <ComponentRef Id="cmpAMkDtwEhc.oRz534ymXESSqnMrs" />
             <ComponentRef Id="cmp3IT49s7n5GHeNz.H_19qXGqkmiI" />
@@ -2197,6 +2239,7 @@
             <ComponentRef Id="cmpHhNmUEA9MiUqGyfRzVgsXbjdAhk" />
             <ComponentRef Id="cmpiCC03OvtfxAOnSIGkVigD5TbDWE" />
             <ComponentRef Id="cmpGyltGb75R24CzkrUIe5.Gbno_Bg" />
+            <ComponentRef Id="cmp6dGRk5tJi5qZSUBM6puzTjV7dqQ" />
             <ComponentRef Id="cmpwoFjy9zd0eIyYUkrTYTOgYyk374" />
             <ComponentRef Id="cmpc30duEDLeXQ_VC5FYHTB64e8N0c" />
             <ComponentRef Id="cmpv.8dI7M6p6KoDG4n0vFbQQsJqJA" />
@@ -2204,6 +2247,8 @@
             <ComponentRef Id="cmpkMJQD.u55eSpHtvj9yE9_S8XW4w" />
             <ComponentRef Id="cmpIkP7SMTiTR1uFEGrUEmGQqGkyQA" />
             <ComponentRef Id="cmpUISJp4awz6P6HyOmQ6uNdkzznZQ" />
+            <ComponentRef Id="cmprIliVIMhnbqxbha5bQpwhlxHxf4" />
+            <ComponentRef Id="cmpxhPvhSS_5feiRQNVdyw84S6x2sI" />
             <ComponentRef Id="cmpQH5CqPS4VY5i9wJNvhFC4x8P79E" />
             <ComponentRef Id="cmpUjjspSChWJHk8VM8fOm8D4f_wr8" />
             <ComponentRef Id="cmp22ucg7csUpkbCa4twGnG50O6sUk" />
@@ -2219,6 +2264,7 @@
             <ComponentRef Id="cmp6JiTMWLQhzbS8YmBFU.sLoUVZuo" />
             <ComponentRef Id="cmp5.PpWzcn5KG4UIn4dzgJpP2c9Ks" />
             <ComponentRef Id="cmpEqwjYPpNBfqeE8bSvHI3DivseMs" />
+            <ComponentRef Id="cmp33sTYUrdi12OW6n0AHVYts6SlUg" />
             <ComponentRef Id="cmpeKa3htuYIH.0Oc4R7irkvP9cOPY" />
             <ComponentRef Id="cmpZfdHMjBqma26BCbqG2mDxuU47K0" />
             <ComponentRef Id="cmprb56nUlE74SB8nLWTl3XeF_TBYI" />
@@ -2323,6 +2369,7 @@
             <ComponentRef Id="cmpPUAPylT8AIQhpTHf._pSzdqMZy0" />
             <ComponentRef Id="cmpxi4xqkoLJBzBm2zL1SYjLAo5NWc" />
             <ComponentRef Id="cmp5CLfWg3O.hLYgyNRf_xHv_tjCR0" />
+            <ComponentRef Id="cmpE.cwXnpdYwIhX6QUtuoJ7Q6PB.8" />
             <ComponentRef Id="cmpkKSPYasjSe8leYm1xv1l6Gezbys" />
             <ComponentRef Id="cmpw4sl9bKW038AdffO5076ITXEUT8" />
             <ComponentRef Id="cmpv8UcaaeCWgYHmD0AGFzdcfMMutQ" />
@@ -2405,6 +2452,8 @@
             <ComponentRef Id="cmpjAmaaNhAGsJtcVyj5JIxuV_vDd8" />
             <ComponentRef Id="cmpdLPKGSsX1KeeQz2Oqy_HlJTwR.s" />
             <ComponentRef Id="cmpDHgSJ6LfSXtFNzZFspjFpCzz9sk" />
+            <ComponentRef Id="cmp6QxuPecnEgYiui3cZEKkyoSSJhE" />
+            <ComponentRef Id="cmpj0_.hOz5cQLkm2taGsarK5qMPO8" />
             <ComponentRef Id="cmpelATLTqZJhOWLI62tauZWI9.r8I" />
             <ComponentRef Id="cmprINbX0LFFefBgNx90.JYNhXzxX8" />
             <ComponentRef Id="cmps7pOA1ZYGD3L77dIo6QTxE5W224" />
@@ -2643,6 +2692,7 @@
             <ComponentRef Id="cmpZyB9d129U8S6MFnPV8DgN0cceTQ" />
             <ComponentRef Id="cmp6Z2GgMJ5R8pQkoh7KlZAfKV_EJs" />
             <ComponentRef Id="cmpxMBe49l2d9811zlpR638AjJoDXM" />
+            <ComponentRef Id="cmpb6ALsTCF.t5KcgGNfDukI_UZKX8" />
         </ComponentGroup>
     </Fragment>
 </Wix>
