@@ -2,36 +2,17 @@
 // Licensed under the MIT License.
 
 using AutoStartConfirm.Business;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
-using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.UI;
 using CommunityToolkit.WinUI.UI.Controls;
+using CommunityToolkit.WinUI.Collections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using Microsoft.VisualBasic;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 namespace AutoStartConfirm.GUI
 {
