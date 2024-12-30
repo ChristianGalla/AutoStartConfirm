@@ -241,13 +241,8 @@ namespace AutoStartConfirm
         {
             NotifyIcon.Exit += ExitHandler;
             NotifyIcon.ToggleMainWindow += ToggleMainWindowHandler;
-            // disabled until https://github.com/HavenDV/H.NotifyIcon/issues/186 is fixed
-            //TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
-            //TrayIcon.ForceCreate();
-            DispatchService.TryEnqueue(() =>
-            {
-                Window?.Show();
-            });
+            TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
+            TrayIcon.ForceCreate();
 
             // Listen to notification activation
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
