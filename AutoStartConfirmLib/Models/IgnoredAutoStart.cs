@@ -19,7 +19,9 @@ namespace AutoStartConfirm.Models
     [Serializable]
     public class IgnoredAutoStart: INotifyPropertyChanged {
         private string value;
+        private CompareType? valueCompare;
         private string path;
+        private CompareType? pathCompare;
         private Category category;
 
         [field: NonSerialized]
@@ -37,6 +39,28 @@ namespace AutoStartConfirm.Models
             }
         }
 
+        public CompareType ValueCompare
+        {
+            get => valueCompare ?? CompareType.Equal;
+            [MemberNotNull(nameof(valueCompare))]
+            set
+            {
+                if (valueCompare != value)
+                {
+                    valueCompare = value;
+                    // NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public string ValueCompareAsString
+        {
+            get
+            {
+                return ValueCompare.ToString();
+            }
+        }
+
         public required string Path {
             get => path;
             [MemberNotNull(nameof(path))]
@@ -46,6 +70,28 @@ namespace AutoStartConfirm.Models
                     path = value;
                     NotifyPropertyChanged();
                 }
+            }
+        }
+
+        public CompareType PathCompare
+        {
+            get => pathCompare ?? CompareType.Equal;
+            [MemberNotNull(nameof(pathCompare))]
+            set
+            {
+                if (pathCompare != value)
+                {
+                    pathCompare = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public string PathCompareAsString
+        {
+            get
+            {
+                return PathCompare.ToString();
             }
         }
 
@@ -123,6 +169,18 @@ namespace AutoStartConfirm.Models
                 catch {
                 }
             });
+        }
+
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (!Equals(field, newValue))
+            {
+                field = newValue;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+
+            return false;
         }
     }
 }

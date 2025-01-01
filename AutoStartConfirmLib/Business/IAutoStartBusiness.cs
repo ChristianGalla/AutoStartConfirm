@@ -48,7 +48,7 @@ namespace AutoStartConfirm.Business {
         bool CanAutoStartBeDisabled(AutoStartEntry autoStart);
         bool CanAutoStartBeEnabled(AutoStartEntry autoStart);
         bool CanAutoStartBeRemoved(AutoStartEntry autoStart);
-        bool CanAutoStartBeIgnored(AutoStartEntry autoStart);
+        bool IsAutoStartIgnored(AutoStartEntry autoStart);
 
         #region AutoStart changes
         Task AddAutoStart(AutoStartEntry autoStart, bool showDialogsAndCatchErrors = true);
@@ -96,5 +96,6 @@ namespace AutoStartConfirm.Business {
         bool IsOwnAutoStart(AutoStartEntry autoStart);
         Task ClearHistory();
         void Run();
+        void UpdateIgnoredAutoStart(IgnoredAutoStart ignoredAutoStart);
     }
 }

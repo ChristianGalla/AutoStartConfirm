@@ -13,6 +13,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using Windows.ApplicationModel.Resources;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace AutoStartConfirm.GUI
 {
@@ -114,6 +117,9 @@ namespace AutoStartConfirm.GUI
                 return ignoredCollectionView;
             }
         }
+
+        // public IEnumerable<string> CompareTypeItemSource = Enum.GetValues(typeof(CompareType)).Cast<CompareType>().Select(v => v.ToString());
+        public static readonly IEnumerable<CompareType> CompareTypeItemSource = Enum.GetValues(typeof(CompareType)).Cast<CompareType>();
 
         public MainPage()
         {
@@ -508,6 +514,68 @@ namespace AutoStartConfirm.GUI
                 catch (ArgumentOutOfRangeException)
                 {
                 }
+            }
+        }
+
+        private CompareType? valueBeforeEdit;
+
+        private async void IgnoredAutoStartGrid_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
+        {
+            try
+            {
+                var ignoredAutoStart = (IgnoredAutoStart)e.Row.DataContext;
+                if ((string)e.Column.Tag == "ValueCompare" && valueBeforeEdit != ignoredAutoStart.ValueCompare)
+                {
+                    if (ignoredAutoStart.ValueCompare == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Value = Regex.Escape(ignoredAutoStart.Value);
+                    }
+                    if(valueBeforeEdit == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Value = Regex.Unescape(ignoredAutoStart.Value);
+                    }
+                }
+                if ((string)e.Column.Tag == "PathCompare" && valueBeforeEdit != ignoredAutoStart.PathCompare)
+                {
+                    if (ignoredAutoStart.PathCompare == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Path = Regex.Escape(ignoredAutoStart.Path);
+                    }
+                    if (valueBeforeEdit == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Path = Regex.Unescape(ignoredAutoStart.Path);
+                    }
+                }
+                AutoStartBusiness.UpdateIgnoredAutoStart(ignoredAutoStart);
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to save changed to ignored auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
+            }
+        }
+
+        private async void IgnoredAutoStartGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            try
+            {
+                var ignoredAutoStart = (IgnoredAutoStart)e.Row.DataContext;
+                if ((string)e.Column.Tag == "ValueCompare")
+                {
+                    valueBeforeEdit = ignoredAutoStart.ValueCompare;
+                }
+                if ((string)e.Column.Tag == "PathCompare")
+                {
+                    valueBeforeEdit = ignoredAutoStart.PathCompare;
+                }
+                AutoStartBusiness.UpdateIgnoredAutoStart(ignoredAutoStart);
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to save changed to ignored auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
         }
     }

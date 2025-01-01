@@ -21,12 +21,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Xml.Serialization;
 using static AutoStartConfirm.GUI.IMessageService;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AutoStartConfirm.Business
 {
@@ -774,23 +776,41 @@ namespace AutoStartConfirm.Business
             return ConnectorService.CanBeRemoved(autoStart);
         }
 
-        public bool CanAutoStartBeIgnored(AutoStartEntry autoStart)
+        public bool IsAutoStartIgnored(AutoStartEntry autoStart)
         {
             foreach (var ignoredAutoStart in IgnoredAutoStarts)
             {
                 if (IsAutoStartIgnored(autoStart, ignoredAutoStart))
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
 
         private static bool IsAutoStartIgnored(AutoStartEntry autoStart, IgnoredAutoStart ignoredAutoStart)
         {
-            return ignoredAutoStart.Category == autoStart.Category &&
-                   ignoredAutoStart.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase) &&
-                   ignoredAutoStart.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase);
+            if (ignoredAutoStart.Category != autoStart.Category)
+            {
+                return false;
+            }
+            if (IsPathOrValueIgnored(autoStart.Path, ignoredAutoStart.Path, ignoredAutoStart.PathCompare) &&
+                IsPathOrValueIgnored(autoStart.Value, ignoredAutoStart.Value, ignoredAutoStart.ValueCompare))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsPathOrValueIgnored(string current, string target, CompareType compareType)
+        {
+            return compareType switch
+            {
+                CompareType.Equal => current.Equals(target, StringComparison.OrdinalIgnoreCase),
+                CompareType.StartsWith => current.StartsWith(target, StringComparison.OrdinalIgnoreCase),
+                CompareType.RegEx => Regex.Match(current, target).Success,
+                _ => throw new NotImplementedException($"Handling of compare type {compareType} is not implemented"),
+            };
         }
 
         public async Task<bool> LoadCanBeAdded(AutoStartEntry autoStart)
@@ -835,7 +855,7 @@ namespace AutoStartConfirm.Business
             {
                 autoStart.CanBeIgnoredLoader ??= Task<bool>.Run(() => {
                     var oldValue = autoStart.CanBeIgnored;
-                    var newValue = CanAutoStartBeIgnored(autoStart);
+                    var newValue = !IsAutoStartIgnored(autoStart);
                     if (oldValue != newValue)
                     {
                         autoStart.CanBeIgnored = newValue;
@@ -1304,6 +1324,14 @@ namespace AutoStartConfirm.Business
             Logger.LogTrace("History cleared");
         }
 
+        public void UpdateIgnoredAutoStart(IgnoredAutoStart ignoredAutoStart)
+        {
+            Logger.LogTrace("Updating ignored auto start {autoStart}", ignoredAutoStart);
+            ResetIgnorePropertiesOfAutoStarts(ignoredAutoStart);
+            Logger.LogTrace("Saving ignored auto starts to file {path}", PathToIgnoredAutoStarts);
+            SaveAutoStarts(PathToIgnoredAutoStarts, IgnoredAutoStarts);
+        }
+
         #endregion
 
         #region Event handlers
@@ -1325,7 +1353,7 @@ namespace AutoStartConfirm.Business
                         Logger.LogInformation("Own auto start added");
                         AppStatus.HasOwnAutoStart = true;
                     }
-                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && !IsAutoStartIgnored(autostart))
                     {
                         NotificationService.ShowNewAutoStartEntryNotification(autostart);
                     }
@@ -1356,7 +1384,7 @@ namespace AutoStartConfirm.Business
                     CurrentAutoStarts.Add(autostartCopy);
                     AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
-                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && !IsAutoStartIgnored(autostart))
                     {
                         NotificationService.ShowEnabledAutoStartEntryNotification(autostart);
                     }
@@ -1387,7 +1415,7 @@ namespace AutoStartConfirm.Business
                     CurrentAutoStarts.Add(autostartCopy);
                     AllHistoryAutoStarts.Add(autostartCopy);
                     HistoryAutoStarts.Add(autostartCopy);
-                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && !IsAutoStartIgnored(autostart))
                     {
                         NotificationService.ShowDisabledAutoStartEntryNotification(autostart);
                     }
@@ -1421,7 +1449,7 @@ namespace AutoStartConfirm.Business
                         Logger.LogInformation("Own auto start removed");
                         AppStatus.HasOwnAutoStart = false;
                     }
-                    if (NotificationsEnabled && CanAutoStartBeIgnored(autostart))
+                    if (NotificationsEnabled && !IsAutoStartIgnored(autostart))
                     {
                         NotificationService.ShowRemovedAutoStartEntryNotification(autostart);
                     }

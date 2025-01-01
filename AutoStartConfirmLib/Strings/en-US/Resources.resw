@@ -336,4 +336,10 @@
   <data name="PublishVersion.Standalone" xml:space="preserve">
     <value>Standalone (Contains .NET Framweork {0})</value>
   </data>
+  <data name="ColumnValueCompare.Header" xml:space="preserve">
+    <value>Compare</value>
+  </data>
+  <data name="ColumnPathCompare.Header" xml:space="preserve">
+    <value>Compare</value>
+  </data>
 </root>
