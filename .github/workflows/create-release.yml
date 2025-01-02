@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/ci.yml
+    with:
+      attestation: true
   
   create_release:
     needs: build
