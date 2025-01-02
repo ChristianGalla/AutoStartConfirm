@@ -2,6 +2,12 @@ name: Build & Test
 
 on:
   workflow_call:
+    inputs:
+      attestation:
+        type: boolean
+        description: 'Attest artifacts'
+        required: false
+        default: false
     outputs:
       version_number:
           description: "Build version number"
@@ -23,6 +29,11 @@ on:
       - 'AutoStartConfirmTests/**'
       - '.github/workflows/**'
 
+permissions:
+  id-token: write
+  contents: read
+  attestations: write
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -96,3 +107,21 @@ jobs:
         name: AutoStartConfirmSetup
         path: build\publish\*.msi
         if-no-files-found: error
+
+    - uses: anchore/sbom-action@v0
+      with:
+        artifact-name: sbom.spdx
+        output-file: sbom.spdx
+        
+    - name: Generate artifact attestation
+      if: ${{ inputs.attestation }}
+      uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: build\publish\*.msi
+        
+    - name: Generate SBOM attestation
+      if: ${{ inputs.attestation }}
+      uses: actions/attest-sbom@v1
+      with:
+        subject-path: build\publish\*.msi
+        sbom-path: bom.spdx
