@@ -3,9 +3,16 @@ name: Create release
 on:
   workflow_dispatch:
 
+permissions:
+  attestations: write
+  contents: read
+  id-token: write
+  
 jobs:
   build:
     uses: ./.github/workflows/ci.yml
+    with:
+      attestation: true
   
   create_release:
     needs: build
