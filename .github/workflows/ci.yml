@@ -120,10 +120,19 @@ jobs:
         path: build\publish\*.msi
         if-no-files-found: error
 
-    - uses: anchore/sbom-action@v0
+    - name: Generate framework dependent SBOM
+      uses: anchore/sbom-action@v0
       with:
-        artifact-name: sbom.spdx
-        output-file: sbom.spdx
+        artifact-name: FrameworkDependent.sbom.spdx.json
+        output-file: FrameworkDependent.sbom.spdx.json
+        file: ./Build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.deps.json
+
+    - name: Generate standalone SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        artifact-name: Standalone.sbom.spdx.json
+        output-file: Standalone.sbom.spdx.json
+        file: ./Build/publish/Release_Standalone_win-x64/AutoStartConfirm.deps.json
         
     - name: Generate artifact attestation
       if: ${{ inputs.attestation }}
@@ -140,7 +149,7 @@ jobs:
         subject-path: build\publish\AutoStartConfirmSetup_FrameworkDependent.msi
         sbom-path: FrameworkDependent.sbom.spdx.json
         
-    - name: Generate FrameworkDependent SBOM attestation
+    - name: Generate standalone SBOM attestation
       if: ${{ inputs.attestation }}
       id: sbom-standalone-attestation
       uses: actions/attest-sbom@v1
