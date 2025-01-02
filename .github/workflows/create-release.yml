@@ -29,10 +29,15 @@ jobs:
         with:
           name: AutoStartConfirmSetup
         
-      - name: Download sbom.spdx artifact
+      - name: Download framework dependent SBOM artifact
         uses: actions/download-artifact@v4.1.8
         with:
-          name: sbom.spdx
+          name: FrameworkDependent.sbom.spdx.json
+        
+      - name: Download standalone SBOM artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: Standalone.sbom.spdx.json
           
       - name: Create tag and release
         run: |
