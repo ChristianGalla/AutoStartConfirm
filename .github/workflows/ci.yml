@@ -124,4 +124,4 @@ jobs:
       uses: actions/attest-sbom@v1
       with:
         subject-path: build\publish\*.msi
-        sbom-path: bom.spdx
+        sbom-path: sbom.spdx
