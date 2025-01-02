@@ -15,9 +15,12 @@ on:
       setup_attestation_url:
         description: "Setup attestation url"
         value: ${{ jobs.build.outputs.setup_attestation_url }}
-      sbom_attestation_url:
-        description: "SBOM attestation url"
-        value: ${{ jobs.build.outputs.sbom_attestation_url }}
+      sbom_framework_dependent_attestation_url:
+        description: "SBOM framework dependent attestation url"
+        value: ${{ jobs.build.outputs.sbom_framework_dependent_attestation_url }}
+      sbom_standalone_attestation_url:
+        description: "SBOM standalone attestation url"
+        value: ${{ jobs.build.outputs.sbom_standalone_attestation_url }}
   push:
     branches: [ master ]
     paths:
@@ -47,7 +50,8 @@ jobs:
     outputs:
       version_number: ${{ steps.get-version-number.outputs.version_number }}      
       setup_attestation_url: ${{ steps.setup-attestation.outputs.attestation-url }}
-      sbom_attestation_url: ${{ steps.sbom-attestation.outputs.attestation-url }}
+      sbom_framework_dependent_attestation_url: ${{ steps.sbom-framework-dependent-attestation.outputs.attestation-url }}
+      sbom_standalone_attestation_url: ${{ steps.sbom-standalone-attestation.outputs.attestation-url }}
 
     steps:
     - uses: actions/checkout@v4
@@ -128,10 +132,18 @@ jobs:
       with:
         subject-path: build\publish\*.msi
         
-    - name: Generate SBOM attestation
+    - name: Generate framework dependent SBOM attestation
       if: ${{ inputs.attestation }}
-      id: sbom-attestation
+      id: sbom-framework-dependent-attestation
       uses: actions/attest-sbom@v1
       with:
-        subject-path: build\publish\*.msi
-        sbom-path: sbom.spdx
+        subject-path: build\publish\AutoStartConfirmSetup_FrameworkDependent.msi
+        sbom-path: FrameworkDependent.sbom.spdx.json
+        
+    - name: Generate FrameworkDependent SBOM attestation
+      if: ${{ inputs.attestation }}
+      id: sbom-standalone-attestation
+      uses: actions/attest-sbom@v1
+      with:
+        subject-path: build\publish\AutoStartConfirmSetup_Standalone.msi
+        sbom-path: Standalone.sbom.spdx.json
