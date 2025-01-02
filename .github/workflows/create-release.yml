@@ -43,7 +43,7 @@ jobs:
         run: |
           $v = "${{needs.build.outputs.version_number}}" -split "\."
           $semver = ($v | Select-Object -SkipLast 1) -join "."
-          gh release create "v$semver" -d -p --title "$semver" --generate-notes --notes "<h2>Attestation reports</h2><ul><li>[Setup files](${{ needs.build.outputs.setup_attestation_url }})</li><li>[Framework dependent SBOM](${{ needs.build.outputs.sbom_framework_dependent_attestation_url }})</li><li>[Standalone SBOM](${{ needs.build.outputs.sbom_standalone_attestation_url }})</li></ul>" AutoStartConfirmSetup_Standalone.msi AutoStartConfirmSetup_FrameworkDependent.msi Standalone.sbom.spdx.json FrameworkDependent.sbom.spdx.json
+          gh release create "v$semver" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup_Standalone.msi AutoStartConfirmSetup_FrameworkDependent.msi Standalone.sbom.spdx.json FrameworkDependent.sbom.spdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh        
