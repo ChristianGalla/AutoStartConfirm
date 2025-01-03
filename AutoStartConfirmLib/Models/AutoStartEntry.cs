@@ -1,5 +1,4 @@
-﻿using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
+﻿using AutoStartConfirm.Helpers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -8,18 +7,16 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
 using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.Models
 {
     [XmlInclude(typeof(FolderAutoStartEntry)), XmlInclude(typeof(RegistryAutoStartEntry)), XmlInclude(typeof(ScheduledTaskAutoStartEntry)), XmlInclude(typeof(ServiceAutoStartEntry))]
     [Serializable]
-    public abstract class AutoStartEntry : INotifyPropertyChanged {
+    public abstract class AutoStartEntry : INotifyPropertyChanged
+    {
         private Guid id = Guid.NewGuid();
         private string value;
         private string path;
@@ -60,10 +57,12 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public required string Value {
+        public required string Value
+        {
             get => value;
             [MemberNotNull(nameof(value))]
-            set {
+            set
+            {
                 if (this.value != value)
                 {
                     this.value = value;
@@ -72,10 +71,12 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public required string Path {
+        public required string Path
+        {
             get => path;
             [MemberNotNull(nameof(path))]
-            set {
+            set
+            {
                 if (path != value)
                 {
                     path = value;
@@ -84,9 +85,11 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public required Category Category {
+        public required Category Category
+        {
             get => category;
-            set {
+            set
+            {
                 if (category != value)
                 {
                     category = value;
@@ -95,9 +98,11 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public DateTime? Date {
+        public DateTime? Date
+        {
             get => date;
-            set {
+            set
+            {
                 if (date != value)
                 {
                     date = value;
@@ -106,9 +111,11 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public Change? Change {
+        public Change? Change
+        {
             get => change;
-            set {
+            set
+            {
                 if (change != value)
                 {
                     change = value;
@@ -136,9 +143,11 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public ConfirmStatus ConfirmStatus {
+        public ConfirmStatus ConfirmStatus
+        {
             get => confirmStatus;
-            set {
+            set
+            {
                 if (confirmStatus != value)
                 {
                     confirmStatus = value;
@@ -155,7 +164,8 @@ namespace AutoStartConfirm.Models
 
         public string ConfirmStatusLocalized
         {
-            get {
+            get
+            {
                 if (confirmStatusLocalized == null)
                 {
                     var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
@@ -165,9 +175,11 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public bool? IsEnabled {
+        public bool? IsEnabled
+        {
             get => isEnabled;
-            set {
+            set
+            {
                 if (isEnabled != value)
                 {
                     isEnabled = value;
@@ -180,9 +192,11 @@ namespace AutoStartConfirm.Models
         [JsonIgnore]
         internal readonly object LoaderLock = new();
 
-        public bool? CanBeEnabled {
+        public bool? CanBeEnabled
+        {
             get => canBeEnabled;
-            set {
+            set
+            {
                 if (canBeEnabled != value)
                 {
                     canBeEnabled = value;
@@ -199,9 +213,11 @@ namespace AutoStartConfirm.Models
             set;
         }
 
-        public bool? CanBeDisabled {
+        public bool? CanBeDisabled
+        {
             get => canBeDisabled;
-            set {
+            set
+            {
                 if (canBeDisabled != value)
                 {
                     canBeDisabled = value;
@@ -218,9 +234,11 @@ namespace AutoStartConfirm.Models
             set;
         }
 
-        public bool? CanBeAdded {
+        public bool? CanBeAdded
+        {
             get => canBeAdded;
-            set {
+            set
+            {
                 if (canBeAdded != value)
                 {
                     canBeAdded = value;
@@ -238,9 +256,11 @@ namespace AutoStartConfirm.Models
         }
 
 
-        public bool? CanBeRemoved {
+        public bool? CanBeRemoved
+        {
             get => canBeRemoved;
-            set {
+            set
+            {
                 if (canBeRemoved != value)
                 {
                     canBeRemoved = value;
@@ -279,31 +299,40 @@ namespace AutoStartConfirm.Models
             set;
         }
 
-        public string CategoryAsString {
-            get {
+        public string CategoryAsString
+        {
+            get
+            {
                 return Category.ToString();
             }
         }
 
-        public AutoStartEntry() {
+        public AutoStartEntry()
+        {
         }
 
-        public override bool Equals(object? obj) {
+        public override bool Equals(object? obj)
+        {
             // Check for null and compare run-time types.
-            if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
                 return false;
-            } else {
+            }
+            else
+            {
                 AutoStartEntry o = (AutoStartEntry)obj;
                 return Id == o.Id ||
                     Category == o.Category && Value == o.Value && Path == o.Path;
             }
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
         }
 
-        public AutoStartEntry DeepCopy() {
+        public AutoStartEntry DeepCopy()
+        {
             using var ms = new MemoryStream();
             XmlSerializer serializer = new(typeof(AutoStartEntry));
             serializer.Serialize(ms, this);
@@ -333,7 +362,8 @@ namespace AutoStartConfirm.Models
                     // string.Empty calls are needed for bindings to the whole object
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
                 }
-                catch {
+                catch
+                {
                 }
             });
         }

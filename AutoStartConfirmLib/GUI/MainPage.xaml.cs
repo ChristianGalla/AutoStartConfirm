@@ -2,36 +2,20 @@
 // Licensed under the MIT License.
 
 using AutoStartConfirm.Business;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
-using AutoStartConfirm.Properties;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.UI;
+using CommunityToolkit.WinUI.Collections;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using Microsoft.VisualBasic;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 namespace AutoStartConfirm.GUI
 {
@@ -40,7 +24,7 @@ namespace AutoStartConfirm.GUI
         private bool disposedValue = false;
 
         public string NavTitle { get; set; }
-        
+
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
         private IAutoStartBusiness? autoStartBusiness;
@@ -133,6 +117,9 @@ namespace AutoStartConfirm.GUI
                 return ignoredCollectionView;
             }
         }
+
+        // public IEnumerable<string> CompareTypeItemSource = Enum.GetValues(typeof(CompareType)).Cast<CompareType>().Select(v => v.ToString());
+        public static readonly IEnumerable<CompareType> CompareTypeItemSource = Enum.GetValues(typeof(CompareType)).Cast<CompareType>();
 
         public MainPage()
         {
@@ -262,9 +249,13 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public static void Sorting(object? _, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
+        public static void Sorting(object? _, DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
         {
             var newSortColumn = e.Column.Tag.ToString();
+            if (newSortColumn == null)
+            {
+                return;
+            }
             collectionView.SortDescriptions.Clear();
             switch (e.Column.SortDirection)
             {
@@ -292,17 +283,17 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public void CurrentSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void CurrentSorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, AutoStartCollectionView, CurrentAutoStartGrid);
         }
 
-        public void HistorySorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void HistorySorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, HistoryAutoStartCollectionView, HistoryAutoStartGrid);
         }
 
-        public void IgnoredSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void IgnoredSorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, IgnoredCollectionView, IgnoredAutoStartGrid);
         }
@@ -527,6 +518,106 @@ namespace AutoStartConfirm.GUI
                 catch (ArgumentOutOfRangeException)
                 {
                 }
+            }
+        }
+
+        private CompareType? valueBeforeEdit;
+
+        private async void IgnoredAutoStartGrid_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
+        {
+            try
+            {
+                var ignoredAutoStart = (IgnoredAutoStart)e.Row.DataContext;
+                if ((string)e.Column.Tag == "ValueCompare" && valueBeforeEdit != ignoredAutoStart.ValueCompare)
+                {
+                    if (ignoredAutoStart.ValueCompare == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Value = EscapeRegex(ignoredAutoStart.Value);
+                    }
+                    if (valueBeforeEdit == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Value = UnescapeRegex(ignoredAutoStart.Value);
+                    }
+                }
+                if ((string)e.Column.Tag == "PathCompare" && valueBeforeEdit != ignoredAutoStart.PathCompare)
+                {
+                    if (ignoredAutoStart.PathCompare == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Path = EscapeRegex(ignoredAutoStart.Path);
+                    }
+                    if (valueBeforeEdit == CompareType.RegEx)
+                    {
+                        ignoredAutoStart.Path = UnescapeRegex(ignoredAutoStart.Path);
+                    }
+                }
+                AutoStartBusiness.UpdateIgnoredAutoStart(ignoredAutoStart);
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to save changed to ignored auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
+            }
+        }
+
+        /// <summary>
+        /// Tries to unescape regex charecters when switching from regex to non regex comparison.
+        /// Returns unmodified value if the regex has invalid escaping.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string UnescapeRegex(string value)
+        {
+            try
+            {
+                var unescapedContent = Regex.Unescape(value);
+                if (unescapedContent.StartsWith('^'))
+                {
+                    unescapedContent = unescapedContent.Substring(1);
+                }
+                if (unescapedContent.EndsWith('$'))
+                {
+                    unescapedContent = unescapedContent.Substring(0, unescapedContent.Length - 1);
+                }
+                return unescapedContent;
+            }
+            catch (Exception)
+            {
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Escapes regex charecters when switching from non regex to regex comparison.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string EscapeRegex(string value)
+        {
+            var escapedContent = Regex.Escape(value);
+            return $"^{escapedContent}$";
+        }
+
+        private async void IgnoredAutoStartGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            try
+            {
+                var ignoredAutoStart = (IgnoredAutoStart)e.Row.DataContext;
+                if ((string)e.Column.Tag == "ValueCompare")
+                {
+                    valueBeforeEdit = ignoredAutoStart.ValueCompare;
+                }
+                if ((string)e.Column.Tag == "PathCompare")
+                {
+                    valueBeforeEdit = ignoredAutoStart.PathCompare;
+                }
+                AutoStartBusiness.UpdateIgnoredAutoStart(ignoredAutoStart);
+            }
+            catch (Exception ex)
+            {
+                const string errmsg = "Failed to save changed to ignored auto start";
+                Logger.LogError(ex, errmsg);
+                await MessageService.ShowError(errmsg, ex);
             }
         }
     }

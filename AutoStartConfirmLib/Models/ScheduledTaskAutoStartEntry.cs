@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 
 namespace AutoStartConfirm.Models
 {
     [Serializable]
-    public class ScheduledTaskAutoStartEntry: AutoStartEntry {
+    public class ScheduledTaskAutoStartEntry : AutoStartEntry
+    {
     }
 }

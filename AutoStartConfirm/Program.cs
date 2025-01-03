@@ -1,28 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using AutoStartConfirm.Business;
 using AutoStartConfirm.Connectors;
 using AutoStartConfirm.GUI;
+using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
-using NLog.Web;
-using Microsoft.UI.Dispatching;
-using System.IO;
-using Microsoft.Windows.AppLifecycle;
-using Windows.ApplicationModel.Activation;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using AutoStartConfirm.Helpers;
-using NLog.Config;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
+using Microsoft.Windows.AppLifecycle;
 using NLog;
+using NLog.Web;
 using Octokit;
-using AutoStartConfirm.Business;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 
 namespace AutoStartConfirm
 {
@@ -87,7 +86,7 @@ namespace AutoStartConfirm
 
         private static void ConfigureServices(ServiceCollection services)
         {
-            
+
             services
                 .AddLogging(loggingBuilder =>
                 {
@@ -97,7 +96,7 @@ namespace AutoStartConfirm
                     loggingBuilder.AddNLogWeb((IServiceProvider serviceProvider) =>
                     {
                         var nlogPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "nlog.config");
-                        var logFactory = new NLog.LogFactory();
+                        var logFactory = new LogFactory();
                         logFactory.Setup().LoadConfigurationFromFile(nlogPath);
                         logFactory.ServiceRepository.RegisterService(typeof(IJsonConverter), new JsonNetSerializer());
                         return logFactory;
@@ -114,7 +113,8 @@ namespace AutoStartConfirm
                 .AddSingleton<IMessageService, MessageService>()
                 .AddSingleton<ISettingsService, SettingsService>()
                 .AddSingleton<IUpdateService, UpdateService>()
-                .AddSingleton<IGitHubClient>(ServiceProvider => {
+                .AddSingleton<IGitHubClient>(ServiceProvider =>
+                {
                     return new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
                 });
             AutoStartConnectorService.ConfigureServices(services);

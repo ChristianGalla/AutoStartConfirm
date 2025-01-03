@@ -3,6 +3,7 @@
 namespace AutoStartConfirm.Models
 {
     [Serializable]
-    public class FolderAutoStartEntry: AutoStartEntry {
+    public class FolderAutoStartEntry : AutoStartEntry
+    {
     }
 }

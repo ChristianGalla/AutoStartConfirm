@@ -1,5 +1,7 @@
-﻿namespace AutoStartConfirm.Models {
-    public enum Category {
+﻿namespace AutoStartConfirm.Models
+{
+    public enum Category
+    {
         BootExecute,
         AppInit32,
         AppInit64,

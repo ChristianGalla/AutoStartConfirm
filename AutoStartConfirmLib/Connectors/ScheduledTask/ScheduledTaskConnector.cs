@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoStartConfirm.Models;
-using Microsoft.Win32.TaskScheduler;
-using System.Threading;
-using System.Collections.Concurrent;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32.TaskScheduler;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace AutoStartConfirm.Connectors.ScheduledTask
 {
@@ -74,7 +74,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             return ret;
         }
 
-        private ScheduledTaskAutoStartEntry GetAutoStartEntry(Microsoft.Win32.TaskScheduler.Task task)
+        private ScheduledTaskAutoStartEntry GetAutoStartEntry(Task task)
         {
             return new ScheduledTaskAutoStartEntry()
             {
@@ -293,7 +293,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     }
                     task.Folder.DeleteTask(task.Name);
                     Logger.LogInformation("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
-                    if(LastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart))
+                    if (LastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart))
                     {
                         RemoveHandler(removedAutoStart);
                     }

@@ -1,27 +1,15 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.ApplicationModel.Resources;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using AutoStartConfirm.Update;
-using AutoStartConfirm.Business;
-using Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using System;
+using System.IO;
+using System.Reflection;
+using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.GUI
 {
@@ -46,7 +34,8 @@ namespace AutoStartConfirm.GUI
 
         public string PublishVersion
         {
-            get {
+            get
+            {
                 if (UpdateService.IsStandalone)
                 {
                     return string.Format(ResourceLoader.GetString("PublishVersion/Standalone"), Environment.Version.ToString());

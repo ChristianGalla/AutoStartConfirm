@@ -9,8 +9,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:AutoStartConfirm.Models"
-    d:DataContext="{d:DesignInstance Type=models:AutoStartEntry}"
+    xmlns:models="using:AutoStartConfirm.Models" xmlns:converters="using:AutoStartConfirm.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -36,6 +35,7 @@
                         AutoGenerateColumns="False"
                         CanUserSortColumns="True"
                         Sorting="CurrentSorting"
+                        d:DataContext="{d:DesignInstance Type=models:AutoStartEntry}"
                         ItemsSource="{x:Bind AutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
@@ -96,7 +96,8 @@
                         MinWidth="200"
                         AutoGenerateColumns="False"
                         CanUserSortColumns="True"
-                        Sorting="HistorySorting"
+                        Sorting="HistorySorting"                    
+                        d:DataContext="{d:DesignInstance Type=models:AutoStartEntry}"
                         ItemsSource="{x:Bind HistoryAutoStartCollectionView, Mode=OneWay}">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
@@ -152,7 +153,10 @@
                         AutoGenerateColumns="False"
                         CanUserSortColumns="True"
                         Sorting="IgnoredSorting"
-                        ItemsSource="{x:Bind IgnoredCollectionView, Mode=OneWay}">
+                        CellEditEnded="IgnoredAutoStartGrid_CellEditEnded"
+                        PreparingCellForEdit="IgnoredAutoStartGrid_PreparingCellForEdit"
+                        d:DataContext="{d:DesignInstance Type=models:IgnoredAutoStart}"
+                        ItemsSource="{x:Bind IgnoredCollectionView, Mode=OneTime}">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTemplateColumn x:Uid="ColumnActions" Tag="Actions" CanUserSort="False">
                             <controls:DataGridTemplateColumn.CellTemplate>
@@ -171,8 +175,10 @@
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
                         <controls:DataGridTextColumn x:Uid="ColumnCategory" Binding="{Binding CategoryAsString, Mode=OneWay}" Tag="CategoryAsString" />
-                        <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=OneWay}" Tag="Value" />
-                        <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=OneWay}" Tag="Path" />
+                        <controls:DataGridTextColumn x:Uid="ColumnValue" Binding="{Binding Value, Mode=TwoWay}" Tag="Value" IsReadOnly="False" />
+                        <controls:DataGridComboBoxColumn x:Uid="ColumnValueCompare" Binding="{Binding ValueCompare, Mode=TwoWay}" IsReadOnly="False" Tag="ValueCompare" ItemsSource="{x:Bind local:MainPage.CompareTypeItemSource, Mode=OneTime}" />
+                        <controls:DataGridTextColumn x:Uid="ColumnPath" Binding="{Binding Path, Mode=TwoWay}" Tag="Path" IsReadOnly="False" />
+                        <controls:DataGridComboBoxColumn x:Uid="ColumnPathCompare" Binding="{Binding PathCompare, Mode=TwoWay}" IsReadOnly="False" Tag="PathCompare" ItemsSource="{x:Bind local:MainPage.CompareTypeItemSource, Mode=OneTime}" />
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>

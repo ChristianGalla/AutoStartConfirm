@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoStartConfirm.Models;
-using System.IO;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace AutoStartConfirm.Connectors.Folder
 {

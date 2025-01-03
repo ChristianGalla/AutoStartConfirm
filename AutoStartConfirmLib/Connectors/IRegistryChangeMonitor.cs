@@ -1,4 +1,5 @@
-﻿namespace AutoStartConfirm.Connectors {
+﻿namespace AutoStartConfirm.Connectors
+{
     public interface IRegistryChangeMonitor
     {
         public string? RegistryPath { get; set; }

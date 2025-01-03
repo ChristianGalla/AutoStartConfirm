@@ -1,18 +1,20 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace AutoStartConfirm.Models {
-    public class ConnectorEnableRow {
+﻿namespace AutoStartConfirm.Models
+{
+    public class ConnectorEnableRow
+    {
         private Category category;
 
-        public Category Category {
+        public Category Category
+        {
             get => category;
-            set {
+            set
+            {
                 category = value;
             }
         }
 
-        public string CategoryName {
+        public string CategoryName
+        {
             get => category.ToString();
         }
 

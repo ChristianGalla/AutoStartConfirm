@@ -2,7 +2,6 @@
 using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Connectors.ScheduledTask;
 using AutoStartConfirm.Connectors.Services;
-using AutoStartConfirm.GUI;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,14 +10,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Windows;
-using System.Xml.Serialization;
 
 namespace AutoStartConfirm.Connectors
 {
-    public class AutoStartConnectorService : IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector>, IAutoStartConnectorService {
+    public class AutoStartConnectorService : IEnumerable<IAutoStartConnector>, IEnumerable, IDisposable, IReadOnlyCollection<IAutoStartConnector>, IReadOnlyList<IAutoStartConnector>, IAutoStartConnectorService
+    {
 
         #region Attributes
 
@@ -28,9 +24,12 @@ namespace AutoStartConfirm.Connectors
 
         private Dictionary<Category, IAutoStartConnector>? enabledConnectors;
 
-        public Dictionary<Category, IAutoStartConnector> EnabledConnectors {
-            get {
-                if (enabledConnectors == null) {
+        public Dictionary<Category, IAutoStartConnector> EnabledConnectors
+        {
+            get
+            {
+                if (enabledConnectors == null)
+                {
                     CreateOrUpdateEnabledConnectors();
                 }
                 return enabledConnectors!;
@@ -106,7 +105,8 @@ namespace AutoStartConfirm.Connectors
             IScheduledTaskConnector scheduledTaskConnector,
             IDeviceServiceConnector deviceServiceConnector,
             IOtherServiceConnector otherServiceConnector
-        ) {
+        )
+        {
             Logger = logger;
             SettingsService = settingsService;
             SettingsService.SettingsSaving += SettingsSavingHandler;
@@ -183,16 +183,22 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        private void CreateOrUpdateEnabledConnectors() {
+        private void CreateOrUpdateEnabledConnectors()
+        {
             var newEnabledConnectors = new Dictionary<Category, IAutoStartConnector>();
-            foreach (var connector in AllConnectors.Values) {
+            foreach (var connector in AllConnectors.Values)
+            {
                 var isEnabled = !SettingsService.DisabledConnectors.Contains(connector.Category.ToString());
-                if (isEnabled) {
+                if (isEnabled)
+                {
                     newEnabledConnectors.Add(connector.Category, connector);
                 }
-                if (isEnabled && WatcherStarted) {
+                if (isEnabled && WatcherStarted)
+                {
                     connector.StartWatcher();
-                } else {
+                }
+                else
+                {
                     connector.StopWatcher();
                 }
             }
@@ -267,10 +273,12 @@ namespace AutoStartConfirm.Connectors
                 .AddSingleton<IOtherServiceConnector, OtherServiceConnector>();
         }
 
-        public IList<AutoStartEntry> GetCurrentAutoStarts() {
+        public IList<AutoStartEntry> GetCurrentAutoStarts()
+        {
             Logger.LogTrace("GetCurrentAutoStarts called");
             var ret = new List<AutoStartEntry>();
-            foreach (var connector in EnabledConnectors.Values) {
+            foreach (var connector in EnabledConnectors.Values)
+            {
                 var connectorAutoStarts = connector.GetCurrentAutoStarts();
                 ret.AddRange(connectorAutoStarts);
             }
@@ -290,7 +298,8 @@ namespace AutoStartConfirm.Connectors
         #endregion
 
         #region Event handlers
-        private void AddHandler(AutoStartEntry addedAutostart) {
+        private void AddHandler(AutoStartEntry addedAutostart)
+        {
             Logger.LogTrace("AddHandler called");
             if (addedAutostart.IsEnabled == null)
             {
@@ -300,29 +309,34 @@ namespace AutoStartConfirm.Connectors
             Add?.Invoke(addedAutostart);
         }
 
-        private void RemoveHandler(AutoStartEntry removedAutostart) {
+        private void RemoveHandler(AutoStartEntry removedAutostart)
+        {
             Logger.LogTrace("RemoveHandler called");
             removedAutostart.IsEnabled = null;
             Remove?.Invoke(removedAutostart);
         }
 
-        private void EnableHandler(AutoStartEntry enabledAutostart) {
+        private void EnableHandler(AutoStartEntry enabledAutostart)
+        {
             Logger.LogTrace("EnableHandler called");
             enabledAutostart.IsEnabled = true;
             Enable?.Invoke(enabledAutostart);
         }
 
-        private void DisableHandler(AutoStartEntry disabledAutostart) {
+        private void DisableHandler(AutoStartEntry disabledAutostart)
+        {
             Logger.LogTrace("DisableHandler called");
             disabledAutostart.IsEnabled = false;
             Disable?.Invoke(disabledAutostart);
         }
 
-        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e) {
+        private void SettingsLoadedHandler(object sender, SettingsLoadedEventArgs e)
+        {
             CreateOrUpdateEnabledConnectors();
         }
 
-        private void SettingsSavingHandler(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void SettingsSavingHandler(object sender, System.ComponentModel.CancelEventArgs e)
+        {
             CreateOrUpdateEnabledConnectors();
         }
 
@@ -332,72 +346,92 @@ namespace AutoStartConfirm.Connectors
 
         public Category Category => throw new NotImplementedException();
 
-        public bool CanBeAdded(AutoStartEntry autoStart) {
+        public bool CanBeAdded(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("Checking if auto start {@autoStart} can be added", autoStart);
             return AllConnectors[autoStart.Category].CanBeAdded(autoStart);
         }
 
-        public bool CanBeRemoved(AutoStartEntry autoStart) {
+        public bool CanBeRemoved(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("Checking if auto start {@autoStart} can be removed", autoStart);
             return AllConnectors[autoStart.Category].CanBeRemoved(autoStart);
         }
 
-        public void AddAutoStart(AutoStartEntry autoStart) {
+        public void AddAutoStart(AutoStartEntry autoStart)
+        {
             Logger.LogInformation("Adding auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].AddAutoStart(autoStart);
         }
 
-        public void RemoveAutoStart(AutoStartEntry autoStart) {
+        public void RemoveAutoStart(AutoStartEntry autoStart)
+        {
             Logger.LogInformation("Removing auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].RemoveAutoStart(autoStart);
         }
 
-        public bool CanBeEnabled(AutoStartEntry autoStart) {
+        public bool CanBeEnabled(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("Checking if auto start {@autoStart} can be enabled", autoStart);
             return AllConnectors[autoStart.Category].CanBeEnabled(autoStart);
         }
 
-        public bool CanBeDisabled(AutoStartEntry autoStart) {
+        public bool CanBeDisabled(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("Checking if auto start {@autoStart} can be disabled", autoStart);
             return AllConnectors[autoStart.Category].CanBeDisabled(autoStart);
         }
 
-        public bool IsEnabled(AutoStartEntry autoStart) {
+        public bool IsEnabled(AutoStartEntry autoStart)
+        {
             return AllConnectors[autoStart.Category].IsEnabled(autoStart);
         }
 
-        public void EnableAutoStart(AutoStartEntry autoStart) {
+        public void EnableAutoStart(AutoStartEntry autoStart)
+        {
             Logger.LogInformation("Enabling auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].EnableAutoStart(autoStart);
         }
 
-        public void DisableAutoStart(AutoStartEntry autoStart) {
+        public void DisableAutoStart(AutoStartEntry autoStart)
+        {
             Logger.LogInformation("Disabling auto start {@autoStart}", autoStart);
             AllConnectors[autoStart.Category].DisableAutoStart(autoStart);
         }
 
-        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart)
+        {
             return AllConnectors[autoStart.Category].IsAdminRequiredForChanges(autoStart);
         }
 
-        public void StartWatcher() {
+        public void StartWatcher()
+        {
             Logger.LogInformation("Starting watchers");
             WatcherStarted = true;
-            foreach (var connector in EnabledConnectors.Values) {
-                try {
+            foreach (var connector in EnabledConnectors.Values)
+            {
+                try
+                {
                     connector.StartWatcher();
-                } catch (NotImplementedException) {
+                }
+                catch (NotImplementedException)
+                {
                 }
             }
         }
 
-        public void StopWatcher() {
+        public void StopWatcher()
+        {
             Logger.LogInformation("Stopping watchers");
             WatcherStarted = false;
-            foreach (var connector in EnabledConnectors.Values) {
-                try {
+            foreach (var connector in EnabledConnectors.Values)
+            {
+                try
+                {
                     connector.StopWatcher();
-                } catch (NotImplementedException) {
+                }
+                catch (NotImplementedException)
+                {
                 }
             }
         }
@@ -406,12 +440,16 @@ namespace AutoStartConfirm.Connectors
         #region IDisposable Support
         private bool disposedValue = false;
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     SettingsService.SettingsSaving -= SettingsSavingHandler;
                     SettingsService.SettingsLoaded -= SettingsLoadedHandler;
-                    foreach (var connector in AllConnectors.Values) {
+                    foreach (var connector in AllConnectors.Values)
+                    {
                         connector.Add -= AddHandler;
                         connector.Remove -= RemoveHandler;
                         connector.Enable -= EnableHandler;
@@ -425,7 +463,8 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -436,11 +475,13 @@ namespace AutoStartConfirm.Connectors
 
         public IAutoStartConnector this[int index] => ((IReadOnlyList<IAutoStartConnector>)EnabledConnectors)[index];
 
-        public IEnumerator GetEnumerator() {
+        public IEnumerator GetEnumerator()
+        {
             return ((IEnumerable)EnabledConnectors).GetEnumerator();
         }
 
-        IEnumerator<IAutoStartConnector> IEnumerable<IAutoStartConnector>.GetEnumerator() {
+        IEnumerator<IAutoStartConnector> IEnumerable<IAutoStartConnector>.GetEnumerator()
+        {
             return ((IEnumerable<IAutoStartConnector>)EnabledConnectors).GetEnumerator();
         }
         #endregion

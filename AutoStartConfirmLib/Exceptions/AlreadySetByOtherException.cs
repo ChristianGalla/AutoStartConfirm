@@ -2,16 +2,20 @@
 
 namespace AutoStartConfirm.Exceptions
 {
-    public class AlreadySetByOtherException : InvalidOperationException {
-        public AlreadySetByOtherException() {
+    public class AlreadySetByOtherException : InvalidOperationException
+    {
+        public AlreadySetByOtherException()
+        {
         }
 
         public AlreadySetByOtherException(string message)
-            : base(message) {
+            : base(message)
+        {
         }
 
         public AlreadySetByOtherException(string message, Exception inner)
-            : base(message, inner) {
+            : base(message, inner)
+        {
         }
     }
 }

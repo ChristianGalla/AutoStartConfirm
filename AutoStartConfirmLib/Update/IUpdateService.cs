@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
-namespace AutoStartConfirm.Update {
+namespace AutoStartConfirm.Update
+{
     public interface IUpdateService
     {
         public bool IsStandalone { get; set; }

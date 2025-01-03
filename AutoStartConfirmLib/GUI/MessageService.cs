@@ -14,7 +14,8 @@ using static AutoStartConfirm.GUI.IMessageService;
 
 namespace AutoStartConfirm.GUI
 {
-    public class MessageService : IMessageService, IDisposable {
+    public class MessageService : IMessageService, IDisposable
+    {
 
         private readonly ILogger<MessageService> Logger;
 
@@ -41,7 +42,8 @@ namespace AutoStartConfirm.GUI
         private readonly SemaphoreSlim dialogSemaphore = new(1, 1);
 
         // only one dialog is allowed at the same time
-        public SemaphoreSlim DialogSemaphore {
+        public SemaphoreSlim DialogSemaphore
+        {
             get => dialogSemaphore;
         }
 
@@ -55,7 +57,8 @@ namespace AutoStartConfirm.GUI
             DispatchService = dispatchService;
         }
 
-        public async Task ShowError(string caption, Exception error) {
+        public async Task ShowError(string caption, Exception error)
+        {
             await ShowError(caption, error.Message);
         }
 

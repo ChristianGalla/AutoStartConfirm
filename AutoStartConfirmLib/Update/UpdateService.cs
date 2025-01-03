@@ -1,12 +1,10 @@
 ﻿using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.Logging;
-using NLog;
 using Octokit;
 using Semver;
 using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Update
@@ -41,7 +39,8 @@ namespace AutoStartConfirm.Update
 
         private readonly IGitHubClient GitHubClient;
 
-        public UpdateService(ILogger<UpdateService> logger, ISettingsService settingsService, INotificationService notificationService, IGitHubClient gitHubClient) {
+        public UpdateService(ILogger<UpdateService> logger, ISettingsService settingsService, INotificationService notificationService, IGitHubClient gitHubClient)
+        {
             Logger = logger;
             SettingsService = settingsService;
             NotificationService = notificationService;

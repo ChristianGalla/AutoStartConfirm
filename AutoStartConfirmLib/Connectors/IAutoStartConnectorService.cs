@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AutoStartConfirm.Connectors {
-    public interface IAutoStartConnectorService {
+namespace AutoStartConfirm.Connectors
+{
+    public interface IAutoStartConnectorService
+    {
         IAutoStartConnector this[int index] { get; }
 
         Category Category { get; }

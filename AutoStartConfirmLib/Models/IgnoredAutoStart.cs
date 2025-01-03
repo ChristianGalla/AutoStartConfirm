@@ -1,34 +1,33 @@
-﻿using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
+﻿using AutoStartConfirm.Helpers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
 
 namespace AutoStartConfirm.Models
 {
     [Serializable]
-    public class IgnoredAutoStart: INotifyPropertyChanged {
+    public class IgnoredAutoStart : INotifyPropertyChanged
+    {
         private string value;
+        private CompareType? valueCompare;
         private string path;
+        private CompareType? pathCompare;
         private Category category;
 
         [field: NonSerialized]
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public required string Value {
+        public required string Value
+        {
             get => value;
             [MemberNotNull(nameof(value))]
-            set {
+            set
+            {
                 if (this.value != value)
                 {
                     this.value = value;
@@ -37,10 +36,34 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public required string Path {
+        public CompareType ValueCompare
+        {
+            get => valueCompare ?? CompareType.Equal;
+            [MemberNotNull(nameof(valueCompare))]
+            set
+            {
+                if (valueCompare != value)
+                {
+                    valueCompare = value;
+                    // NotifyPropertyChanged(); // raises an exception
+                }
+            }
+        }
+
+        public string ValueCompareAsString
+        {
+            get
+            {
+                return ValueCompare.ToString();
+            }
+        }
+
+        public required string Path
+        {
             get => path;
             [MemberNotNull(nameof(path))]
-            set {
+            set
+            {
                 if (path != value)
                 {
                     path = value;
@@ -49,9 +72,33 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public required Category Category {
+        public CompareType PathCompare
+        {
+            get => pathCompare ?? CompareType.Equal;
+            [MemberNotNull(nameof(pathCompare))]
+            set
+            {
+                if (pathCompare != value)
+                {
+                    pathCompare = value;
+                    // NotifyPropertyChanged(); // raises an exception
+                }
+            }
+        }
+
+        public string PathCompareAsString
+        {
+            get
+            {
+                return PathCompare.ToString();
+            }
+        }
+
+        public required Category Category
+        {
             get => category;
-            set {
+            set
+            {
                 if (category != value)
                 {
                     category = value;
@@ -60,13 +107,16 @@ namespace AutoStartConfirm.Models
             }
         }
 
-        public string CategoryAsString {
-            get {
+        public string CategoryAsString
+        {
+            get
+            {
                 return Category.ToString();
             }
         }
 
-        public IgnoredAutoStart() {
+        public IgnoredAutoStart()
+        {
         }
 
         [SetsRequiredMembers]
@@ -77,21 +127,27 @@ namespace AutoStartConfirm.Models
             Value = autoStart.Value;
         }
 
-        public override bool Equals(object? obj) {
+        public override bool Equals(object? obj)
+        {
             // Check for null and compare run-time types.
-            if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
                 return false;
-            } else {
+            }
+            else
+            {
                 IgnoredAutoStart o = (IgnoredAutoStart)obj;
                 return Category == o.Category && Value == o.Value && Path == o.Path;
             }
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return Category.GetHashCode() ^ Value.GetHashCode() ^ Path.GetHashCode();
         }
 
-        public AutoStartEntry DeepCopy() {
+        public AutoStartEntry DeepCopy()
+        {
             using var ms = new MemoryStream();
             XmlSerializer serializer = new(typeof(AutoStartEntry));
             serializer.Serialize(ms, this);
@@ -120,9 +176,22 @@ namespace AutoStartConfirm.Models
                     // string.Empty calls are needed for bindings to the whole object
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
                 }
-                catch {
+                catch
+                {
                 }
             });
+        }
+
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (!Equals(field, newValue))
+            {
+                field = newValue;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+
+            return false;
         }
     }
 }

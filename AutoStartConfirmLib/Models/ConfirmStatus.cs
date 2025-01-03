@@ -1,6 +1,7 @@
 ﻿namespace AutoStartConfirm.Models
 {
-    public enum ConfirmStatus {
+    public enum ConfirmStatus
+    {
         New,
         Confirmed,
         Reverted,

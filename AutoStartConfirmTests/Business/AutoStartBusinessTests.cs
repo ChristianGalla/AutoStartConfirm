@@ -1,27 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.GUI;
+using AutoStartConfirm.Models;
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using FakeItEasy;
-using AutoStartConfirm.Models;
-using AutoStartConfirm.Exceptions;
-using AutoStartConfirm.Properties;
-using AutoStartConfirm.Connectors.Registry;
-using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Notifications;
-using AutoStartConfirm.Update;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Windows.Services.Maps;
-using Octokit;
-using AutoStartConfirmTests;
-using AutoStartConfirm.Business;
-using AutoStartConfirm.Connectors;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Dispatching;
 
 namespace AutoStartConfirm.Business
 {
@@ -908,7 +894,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Add += Raise.FreeForm.With(AutoStartEntry);
@@ -946,7 +933,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Enable += Raise.FreeForm.With(AutoStartEntry);
@@ -984,7 +972,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Disable += Raise.FreeForm.With(AutoStartEntry);
@@ -1022,7 +1011,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Remove += Raise.FreeForm.With(AutoStartEntry);
@@ -1131,6 +1121,175 @@ namespace AutoStartConfirm.Business
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<Exception>.Ignored)).MustNotHaveHappened();
             A.CallTo(() => MessageService.ShowError(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
             Assert.AreEqual(1, Service!.IgnoredAutoStarts.Count);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+
+            var ret = Service.IsAutoStartIgnored(AutoStartEntry!);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotEqualIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Equal,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start 2 Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsTrueIfEqualIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Equal,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsTrue(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotStartsWithIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.StartsWith,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run2\\"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsTrueIfStartsWithIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.StartsWith,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsTrue(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotStarWildcardIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Wildcard,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\* 2 Start Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsTrueIfStarWildcardIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Wildcard,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\* Start Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsTrue(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotQuestionmarkWildcardIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Wildcard,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto ?tart 2 Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsTrueIfQuestionmarkWildcardIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.Wildcard,
+                Path = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto ?tart Confirm"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsTrue(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsFalseIfNotRegexIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.RegEx,
+                Path = "^HKEY_CURRENT_USER\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\.* Start 2 Confirm$"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsFalse(ret);
+        }
+
+        [TestMethod]
+        public void IsAutoStartIgnored_ReturnsTrueIfRegexIgnored()
+        {
+            Assert.AreEqual(0, Service!.IgnoredAutoStarts.Count);
+            var ignoredAutoStart = new IgnoredAutoStart(OwnAutoStartEntry)
+            {
+                PathCompare = CompareType.RegEx,
+                Path = "^HKEY_CURRENT_USER\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\.* Start Confirm$"
+            };
+
+            Service!.IgnoredAutoStarts.Add(ignoredAutoStart);
+
+            var ret = Service.IsAutoStartIgnored(OwnAutoStartEntry);
+            Assert.IsTrue(ret);
         }
     }
 }

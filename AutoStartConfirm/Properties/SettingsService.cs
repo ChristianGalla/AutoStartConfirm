@@ -1,5 +1,4 @@
-﻿using AutoStartConfirm.Notifications;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,7 +6,8 @@ using System.Configuration;
 
 namespace AutoStartConfirm.Properties
 {
-    public class SettingsService : ISettingsService, IDisposable {
+    public class SettingsService : ISettingsService, IDisposable
+    {
 
         private readonly ILogger<SettingsService> Logger;
 
@@ -16,9 +16,11 @@ namespace AutoStartConfirm.Properties
         /// <summary>
         /// Ensures a valid configuration exists and upgrades configuration from a previous version if needed
         /// </summary>
-        private void EnsureConfiguration() {
+        private void EnsureConfiguration()
+        {
             Logger.LogDebug("Ensuring configuration");
-            if (Settings.Default.UpgradeRequired) {
+            if (Settings.Default.UpgradeRequired)
+            {
                 Logger.LogInformation("Upgrading configuration");
                 Settings.Default.Upgrade();
                 Settings.Default.UpgradeRequired = false;
@@ -58,7 +60,8 @@ namespace AutoStartConfirm.Properties
             }
         }
 
-        public string LastNotifiedNewVersion {
+        public string LastNotifiedNewVersion
+        {
             get
             {
                 return Settings.Default.LastNotifiedNewVersion;
@@ -96,7 +99,8 @@ namespace AutoStartConfirm.Properties
         /// </summary>
         public void Save() => Settings.Default.Save();
 
-        public SettingsService(ILogger<SettingsService> logger) {
+        public SettingsService(ILogger<SettingsService> logger)
+        {
             Logger = logger;
             EnsureConfiguration();
             Settings.Default.SettingChanging += SettingChangingHandler;
@@ -105,15 +109,18 @@ namespace AutoStartConfirm.Properties
             Settings.Default.SettingsLoaded += SettingsLoadedHandler;
         }
 
-        private void SettingChangingHandler(object sender, SettingChangingEventArgs e) {
+        private void SettingChangingHandler(object sender, SettingChangingEventArgs e)
+        {
             SettingChanging?.Invoke(sender, e);
         }
 
-        private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e) {
+        private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
+        {
             PropertyChanged?.Invoke(sender, e);
         }
 
-        private void SettingsSavingHandler(object sender, CancelEventArgs e) {
+        private void SettingsSavingHandler(object sender, CancelEventArgs e)
+        {
             Logger.LogInformation("Settings saving");
             SettingsSaving?.Invoke(sender, e);
         }
@@ -124,9 +131,12 @@ namespace AutoStartConfirm.Properties
             SettingsLoaded?.Invoke(sender, e);
         }
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Settings.Default.SettingChanging -= SettingChangingHandler;
                     Settings.Default.PropertyChanged -= PropertyChangedHandler;
                     Settings.Default.SettingsSaving -= SettingsSavingHandler;
@@ -136,7 +146,8 @@ namespace AutoStartConfirm.Properties
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

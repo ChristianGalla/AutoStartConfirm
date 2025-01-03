@@ -1,31 +1,19 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Notifications;
+﻿using AutoStartConfirm.Business;
+using AutoStartConfirm.GUI;
+using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using H.NotifyIcon;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Microsoft.UI.Xaml;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Windows.Foundation.Collections;
-using AutoStartConfirm.GUI;
-using AutoStartConfirm.Properties;
-using AutoStartConfirm.Update;
 using System.Xml.Serialization;
-using Microsoft.Extensions.Logging;
-using H.NotifyIcon;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Windows.UI.ViewManagement;
-using Microsoft.Toolkit.Uwp.Notifications;
-using Microsoft.UI.Dispatching;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Business;
+using Windows.Foundation.Collections;
 
 namespace AutoStartConfirm
 {
@@ -237,17 +225,12 @@ namespace AutoStartConfirm
         }
 
         #region Event handlers
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             NotifyIcon.Exit += ExitHandler;
             NotifyIcon.ToggleMainWindow += ToggleMainWindowHandler;
-            // disabled until https://github.com/HavenDV/H.NotifyIcon/issues/186 is fixed
-            //TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
-            //TrayIcon.ForceCreate();
-            DispatchService.TryEnqueue(() =>
-            {
-                Window?.Show();
-            });
+            TrayIcon = (TaskbarIcon)NotifyIcon["TrayIcon"];
+            TrayIcon.ForceCreate();
 
             // Listen to notification activation
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
@@ -260,7 +243,8 @@ namespace AutoStartConfirm
                 ValueSet userInput = toastArgs.UserInput;
 
                 // Need to dispatch to UI thread if performing UI operations
-                DispatchService.TryEnqueue(() => {
+                DispatchService.TryEnqueue(() =>
+                {
                     Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
                     if (args.TryGetValue("action", out string? action))
                     {

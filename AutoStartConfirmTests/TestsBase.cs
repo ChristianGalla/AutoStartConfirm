@@ -1,17 +1,16 @@
-﻿using AutoStartConfirm.Connectors.Registry;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Properties;
-using FakeItEasy;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using AutoStartConfirm.Notifications;
-using Octokit;
-using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Connectors;
+using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.GUI;
+using AutoStartConfirm.Helpers;
+using AutoStartConfirm.Models;
+using AutoStartConfirm.Notifications;
+using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using FakeItEasy;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Octokit;
+using System;
 
 namespace AutoStartConfirm
 {
@@ -23,7 +22,7 @@ namespace AutoStartConfirm
         protected ISettingsService SettingsService = A.Fake<ISettingsService>();
         protected ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
         protected IDispatchService DispatchService = A.Fake<IDispatchService>();
-        
+
         protected IUacService UacService = A.Fake<IUacService>();
         protected INotificationService NotificationService = A.Fake<INotificationService>();
         protected IGitHubClient GitHubClient = A.Fake<IGitHubClient>();

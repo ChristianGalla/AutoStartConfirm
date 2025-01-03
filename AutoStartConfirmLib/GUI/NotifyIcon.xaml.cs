@@ -1,17 +1,11 @@
-﻿using H.NotifyIcon;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoStartConfirm.GUI
 {
 
-    public partial class NotifyIcon: ResourceDictionary
+    public partial class NotifyIcon : ResourceDictionary
     {
 
         public NotifyIcon()

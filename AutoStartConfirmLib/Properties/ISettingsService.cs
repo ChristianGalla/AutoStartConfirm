@@ -3,8 +3,10 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
 
-namespace AutoStartConfirm.Properties {
-    public interface ISettingsService: IDisposable {
+namespace AutoStartConfirm.Properties
+{
+    public interface ISettingsService : IDisposable
+    {
         StringCollection DisabledConnectors { get; set; }
 
         bool CheckForUpdatesOnStart { get; set; }

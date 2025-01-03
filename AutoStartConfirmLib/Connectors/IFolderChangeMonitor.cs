@@ -2,7 +2,8 @@
 
 namespace AutoStartConfirm.Connectors
 {
-    public interface IFolderChangeMonitor {
+    public interface IFolderChangeMonitor
+    {
         string BasePath { get; set; }
         Category Category { get; set; }
 
