@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Helpers
 {
-    public class DispatchService: IDispatchService
+    public class DispatchService : IDispatchService
     {
         private readonly DispatcherQueue dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 

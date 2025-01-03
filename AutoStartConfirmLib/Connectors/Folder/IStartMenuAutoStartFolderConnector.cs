@@ -1,8 +1,6 @@
-﻿using AutoStartConfirm.Models;
-
-namespace AutoStartConfirm.Connectors.Folder
+﻿namespace AutoStartConfirm.Connectors.Folder
 {
-    public interface IStartMenuAutoStartFolderConnector: IAutoStartConnector, IFolderConnector
+    public interface IStartMenuAutoStartFolderConnector : IAutoStartConnector, IFolderConnector
     {
     }
 }

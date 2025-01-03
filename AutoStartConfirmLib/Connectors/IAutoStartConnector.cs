@@ -9,7 +9,8 @@ namespace AutoStartConfirm.Connectors
     public delegate void AutoStartChangeHandler(AutoStartEntry e);
     #endregion
 
-    public interface IAutoStartConnector : IDisposable {
+    public interface IAutoStartConnector : IDisposable
+    {
         #region Fields
         Category Category { get; }
         #endregion

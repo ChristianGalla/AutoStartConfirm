@@ -14,7 +14,8 @@ namespace AutoStartConfirm.Notifications
 
         private readonly ResourceLoader ResourceLoader = new("AutoStartConfirmLib/Resources");
 
-        public NotificationService(ILogger<NotificationService> logger) {
+        public NotificationService(ILogger<NotificationService> logger)
+        {
             Logger = logger;
         }
 
@@ -45,7 +46,8 @@ namespace AutoStartConfirm.Notifications
 
         public void ShowEnabledAutoStartEntryNotification(AutoStartEntry autostart)
         {
-            try {
+            try
+            {
                 Logger.LogTrace("ShowEnabledAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewAdd")
@@ -60,14 +62,17 @@ namespace AutoStartConfirm.Notifications
                     .Show();
 
                 Logger.LogTrace("ShowEnabledAutoStartEntryNotification finished");
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Logger.LogError(e, "Failed to show enabled auto start notification");
             }
         }
 
         public void ShowRemovedAutoStartEntryNotification(AutoStartEntry autostart)
         {
-            try {
+            try
+            {
                 Logger.LogTrace("ShowRemovedAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewRemove")
@@ -81,14 +86,17 @@ namespace AutoStartConfirm.Notifications
                     .Show();
 
                 Logger.LogTrace("ShowRemovedAutoStartEntryNotification finished");
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Logger.LogError(e, "Failed to show removed auto start notification");
             }
         }
 
         public void ShowDisabledAutoStartEntryNotification(AutoStartEntry autostart)
         {
-            try {
+            try
+            {
                 Logger.LogTrace("ShowDisabledAutoStartEntryNotification called for {@autostart}", autostart);
                 new ToastContentBuilder()
                     .AddArgument("action", "viewAdd")
@@ -102,7 +110,9 @@ namespace AutoStartConfirm.Notifications
                     .AddButton(ResourceLoader.GetString("Notification/Button/Remove"), ToastActivationType.Background, new ToastArguments().Add("action", "revertRemove").Add("id", autostart.Id.ToString()).ToString())
                     .Show();
                 Logger.LogTrace("ShowDisabledAutoStartEntryNotification finished");
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Logger.LogError(e, "Failed to show disabled auto start notification");
             }
         }

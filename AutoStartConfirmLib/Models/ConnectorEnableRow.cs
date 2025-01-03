@@ -1,16 +1,20 @@
 ﻿namespace AutoStartConfirm.Models
 {
-    public class ConnectorEnableRow {
+    public class ConnectorEnableRow
+    {
         private Category category;
 
-        public Category Category {
+        public Category Category
+        {
             get => category;
-            set {
+            set
+            {
                 category = value;
             }
         }
 
-        public string CategoryName {
+        public string CategoryName
+        {
             get => category.ToString();
         }
 

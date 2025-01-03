@@ -6,7 +6,8 @@ using System.IO;
 
 namespace AutoStartConfirm.Connectors
 {
-    public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor {
+    public class FolderChangeMonitor : IDisposable, IFolderChangeMonitor
+    {
         #region Fields
         private readonly ILogger<FolderChangeMonitor> Logger;
         private readonly IDispatchService DispatchService;
@@ -29,9 +30,11 @@ namespace AutoStartConfirm.Connectors
             DispatchService = dispatchService;
         }
 
-        public void Start() {
+        public void Start()
+        {
             Logger.LogTrace("Starting monitoring of {BasePath}", BasePath);
-            watcher = new FileSystemWatcher(BasePath) {
+            watcher = new FileSystemWatcher(BasePath)
+            {
                 NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
                                  | NotifyFilters.DirectoryName
@@ -53,8 +56,10 @@ namespace AutoStartConfirm.Connectors
 
         }
 
-        public void Stop() {
-            if (watcher != null) {
+        public void Stop()
+        {
+            if (watcher != null)
+            {
                 Logger.LogTrace("Stopping monitoring of {BasePath}", BasePath);
                 watcher.Created -= OnCreated;
                 watcher.Deleted -= OnDeleted;
@@ -71,7 +76,8 @@ namespace AutoStartConfirm.Connectors
             {
                 return;
             }
-            if (e.Name.ToLower() == "desktop.ini") {
+            if (e.Name.ToLower() == "desktop.ini")
+            {
                 return;
             }
             Logger.LogTrace("Created: {FullPath}", e.FullPath);
@@ -95,7 +101,8 @@ namespace AutoStartConfirm.Connectors
             {
                 return;
             }
-            if (e.Name.ToLower() == "desktop.ini") {
+            if (e.Name.ToLower() == "desktop.ini")
+            {
                 return;
             }
             Logger.LogTrace("Deleted: {FullPath}", e.FullPath);
@@ -119,7 +126,8 @@ namespace AutoStartConfirm.Connectors
             {
                 return;
             }
-            if (e.Name.ToLower() == "desktop.ini") {
+            if (e.Name.ToLower() == "desktop.ini")
+            {
                 return;
             }
             Logger.LogTrace("Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
@@ -149,7 +157,8 @@ namespace AutoStartConfirm.Connectors
             });
         }
 
-        private void OnError(object sender, ErrorEventArgs e) {
+        private void OnError(object sender, ErrorEventArgs e)
+        {
             Logger.LogError("Error on monitoring of {BasePath}: {@Exception}", BasePath, e);
         }
 
@@ -162,8 +171,10 @@ namespace AutoStartConfirm.Connectors
 
         #region Dispose
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
                 if (disposing)
                 {
                     Stop();
@@ -173,7 +184,8 @@ namespace AutoStartConfirm.Connectors
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

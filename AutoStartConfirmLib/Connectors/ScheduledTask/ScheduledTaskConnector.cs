@@ -293,7 +293,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
                     }
                     task.Folder.DeleteTask(task.Name);
                     Logger.LogInformation("Removed {Value} from {Path}", ScheduledTaskAutoStartEntry.Value, ScheduledTaskAutoStartEntry.Path);
-                    if(LastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart))
+                    if (LastAutoStartEntries.TryRemove(ScheduledTaskAutoStartEntry.Path, out AutoStartEntry? removedAutoStart))
                     {
                         RemoveHandler(removedAutoStart);
                     }

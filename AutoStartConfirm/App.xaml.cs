@@ -243,7 +243,8 @@ namespace AutoStartConfirm
                 ValueSet userInput = toastArgs.UserInput;
 
                 // Need to dispatch to UI thread if performing UI operations
-                DispatchService.TryEnqueue(() => {
+                DispatchService.TryEnqueue(() =>
+                {
                     Logger.LogTrace("Handling action {Arguments} {UserInput}", toastArgs.Argument, userInput);
                     if (args.TryGetValue("action", out string? action))
                     {

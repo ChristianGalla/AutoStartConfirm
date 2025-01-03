@@ -3,6 +3,7 @@
 namespace AutoStartConfirm.Models
 {
     [Serializable]
-    public class ScheduledTaskAutoStartEntry: AutoStartEntry {
+    public class ScheduledTaskAutoStartEntry : AutoStartEntry
+    {
     }
 }

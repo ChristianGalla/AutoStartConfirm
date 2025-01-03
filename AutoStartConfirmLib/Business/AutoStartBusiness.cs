@@ -28,7 +28,8 @@ namespace AutoStartConfirm.Business
 
     public delegate void AutoStartsChangeHandler(AutoStartEntry e);
 
-    public class AutoStartBusiness : IDisposable, IAutoStartBusiness {
+    public class AutoStartBusiness : IDisposable, IAutoStartBusiness
+    {
         #region Fields
         private readonly ILogger<AutoStartBusiness> Logger;
 
@@ -44,12 +45,15 @@ namespace AutoStartConfirm.Business
 
         private string? currentExePath;
 
-        public string CurrentExePath {
-            get {
+        public string CurrentExePath
+        {
+            get
+            {
                 currentExePath ??= Environment.ProcessPath!;
                 return currentExePath;
             }
-            set {
+            set
+            {
                 currentExePath = value;
             }
         }
@@ -93,11 +97,15 @@ namespace AutoStartConfirm.Business
 
         private readonly IDispatchService DispatchService;
 
-        public bool HasOwnAutoStart {
-            get {
+        public bool HasOwnAutoStart
+        {
+            get
+            {
                 var currentAutoStarts = CurrentUserRun64Connector.GetCurrentAutoStarts();
-                foreach (var autoStart in currentAutoStarts) {
-                    if (IsOwnAutoStart(autoStart)) {
+                foreach (var autoStart in currentAutoStarts)
+                {
+                    if (IsOwnAutoStart(autoStart))
+                    {
                         return true;
                     }
                 }
@@ -156,7 +164,8 @@ namespace AutoStartConfirm.Business
             IAppStatus appStatus,
             IUpdateService updateService,
             INotificationService notificationService
-        ) {
+        )
+        {
             Logger = logger;
             ConnectorService = connectorService;
             SettingsService = settingsService;
@@ -209,7 +218,8 @@ namespace AutoStartConfirm.Business
             }
             StartWatcher();
 
-            try {
+            try
+            {
                 if (SettingsService.CheckForUpdatesOnStart)
                 {
                     UpdateService.CheckUpdateAndShowNotification();
@@ -273,11 +283,14 @@ namespace AutoStartConfirm.Business
             Logger.LogTrace("HandleSettingChanges completed");
         }
 
-        public bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value) {
+        public bool TryGetCurrentAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value)
+        {
             Logger.LogTrace("TryGetCurrentAutoStart called for {AutoStartId}", Id);
             value = null;
-            foreach (var autoStart in AllCurrentAutoStarts) {
-                if (autoStart.Id == Id) {
+            foreach (var autoStart in AllCurrentAutoStarts)
+            {
+                if (autoStart.Id == Id)
+                {
                     value = autoStart;
                     return true;
                 }
@@ -285,11 +298,14 @@ namespace AutoStartConfirm.Business
             return false;
         }
 
-        public bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value) {
+        public bool TryGetHistoryAutoStart(Guid Id, [NotNullWhen(returnValue: true)] out AutoStartEntry? value)
+        {
             Logger.LogTrace("TryGetHistoryAutoStart called for {AutoStartId}", Id);
             value = null;
-            foreach (var autoStart in AllHistoryAutoStarts) {
-                if (autoStart.Id == Id) {
+            foreach (var autoStart in AllHistoryAutoStarts)
+            {
+                if (autoStart.Id == Id)
+                {
                     value = autoStart;
                     return true;
                 }
@@ -299,8 +315,10 @@ namespace AutoStartConfirm.Business
 
         #region AutoStart changes
 
-        public async Task ConfirmAdd(Guid Id) {
-            await Task.Run(() => {
+        public async Task ConfirmAdd(Guid Id)
+        {
+            await Task.Run(() =>
+            {
                 Logger.LogTrace("ConfirmAdd called for {AutoStartId}", Id);
                 if (TryGetHistoryAutoStart(Id, out AutoStartEntry? addedAutoStart))
                 {
@@ -317,28 +335,34 @@ namespace AutoStartConfirm.Business
 
         public async Task ConfirmRemove(Guid Id)
         {
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 Logger.LogTrace("ConfirmRemove called for {AutoStartId}", Id);
-                if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
+                if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart))
+                {
                     autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
                     Logger.LogInformation("Confirmed remove of {@autoStart}", autoStart);
                 }
             });
         }
 
-        public async Task ConfirmAdd(AutoStartEntry autoStart) {
+        public async Task ConfirmAdd(AutoStartEntry autoStart)
+        {
             autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
             await ConfirmAdd(autoStart.Id);
         }
 
-        public async Task ConfirmRemove(AutoStartEntry autoStart) {
+        public async Task ConfirmRemove(AutoStartEntry autoStart)
+        {
             autoStart.ConfirmStatus = ConfirmStatus.Confirmed;
             await ConfirmRemove(autoStart.Id);
         }
 
-        public async Task RemoveAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
+        public async Task RemoveAutoStart(Guid Id, bool showDialogsAndCatchErrors = true)
+        {
             Logger.LogTrace("RemoveAutoStart called for {AutoStartId}", Id);
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart))
+            {
                 await RemoveAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
@@ -405,9 +429,11 @@ namespace AutoStartConfirm.Business
             }
         }
 
-        public async Task DisableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
+        public async Task DisableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true)
+        {
             Logger.LogTrace("DisableAutoStart called for {AutoStartId}", Id);
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart))
+            {
                 await DisableAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
@@ -469,9 +495,11 @@ namespace AutoStartConfirm.Business
             }
         }
 
-        public async Task AddAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
+        public async Task AddAutoStart(Guid Id, bool showDialogsAndCatchErrors = true)
+        {
             Logger.LogTrace("AddAutoStart called for {AutoStartId}", Id);
-            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart)) {
+            if (TryGetHistoryAutoStart(Id, out AutoStartEntry? autoStart))
+            {
                 await AddAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
@@ -541,9 +569,11 @@ namespace AutoStartConfirm.Business
             }
         }
 
-        public async Task EnableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true) {
+        public async Task EnableAutoStart(Guid Id, bool showDialogsAndCatchErrors = true)
+        {
             Logger.LogTrace("EnableAutoStart called for {AutoStartId}", Id);
-            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart)) {
+            if (TryGetCurrentAutoStart(Id, out AutoStartEntry? autoStart))
+            {
                 await EnableAutoStart(autoStart, showDialogsAndCatchErrors);
             }
             else
@@ -753,19 +783,23 @@ namespace AutoStartConfirm.Business
 
         #endregion
 
-        public bool CanAutoStartBeEnabled(AutoStartEntry autoStart) {
+        public bool CanAutoStartBeEnabled(AutoStartEntry autoStart)
+        {
             return ConnectorService.CanBeEnabled(autoStart);
         }
 
-        public bool CanAutoStartBeDisabled(AutoStartEntry autoStart) {
+        public bool CanAutoStartBeDisabled(AutoStartEntry autoStart)
+        {
             return ConnectorService.CanBeDisabled(autoStart);
         }
 
-        public bool CanAutoStartBeAdded(AutoStartEntry autoStart) {
+        public bool CanAutoStartBeAdded(AutoStartEntry autoStart)
+        {
             return ConnectorService.CanBeAdded(autoStart);
         }
 
-        public bool CanAutoStartBeRemoved(AutoStartEntry autoStart) {
+        public bool CanAutoStartBeRemoved(AutoStartEntry autoStart)
+        {
             return ConnectorService.CanBeRemoved(autoStart);
         }
 
@@ -820,7 +854,8 @@ namespace AutoStartConfirm.Business
         {
             lock (autoStart.LoaderLock)
             {
-                autoStart.CanBeAddedLoader ??= Task<bool>.Run(() => {
+                autoStart.CanBeAddedLoader ??= Task<bool>.Run(() =>
+                {
                     var oldValue = autoStart.CanBeAdded;
                     var newValue = CanAutoStartBeAdded(autoStart);
                     if (oldValue != newValue)
@@ -838,7 +873,8 @@ namespace AutoStartConfirm.Business
         {
             lock (autoStart.LoaderLock)
             {
-                autoStart.CanBeRemovedLoader ??= Task<bool>.Run(() => {
+                autoStart.CanBeRemovedLoader ??= Task<bool>.Run(() =>
+                {
                     var oldValue = autoStart.CanBeRemoved;
                     var newValue = CanAutoStartBeRemoved(autoStart);
                     if (oldValue != newValue)
@@ -856,7 +892,8 @@ namespace AutoStartConfirm.Business
         {
             lock (autoStart.LoaderLock)
             {
-                autoStart.CanBeIgnoredLoader ??= Task<bool>.Run(() => {
+                autoStart.CanBeIgnoredLoader ??= Task<bool>.Run(() =>
+                {
                     var oldValue = autoStart.CanBeIgnored;
                     var newValue = !IsAutoStartIgnored(autoStart);
                     if (oldValue != newValue)
@@ -874,7 +911,8 @@ namespace AutoStartConfirm.Business
         {
             lock (autoStart.LoaderLock)
             {
-                autoStart.CanBeEnabledLoader ??= Task<bool>.Run(() => {
+                autoStart.CanBeEnabledLoader ??= Task<bool>.Run(() =>
+                {
                     var oldValue = autoStart.CanBeEnabled;
                     var newValue = CanAutoStartBeEnabled(autoStart);
                     if (oldValue != newValue)
@@ -890,9 +928,10 @@ namespace AutoStartConfirm.Business
 
         public async Task<bool> LoadCanBeDisabled(AutoStartEntry autoStart)
         {
-            lock(autoStart.LoaderLock)
+            lock (autoStart.LoaderLock)
             {
-                autoStart.CanBeDisabledLoader ??= Task<bool>.Run(() => {
+                autoStart.CanBeDisabledLoader ??= Task<bool>.Run(() =>
+                {
                     var oldValue = autoStart.CanBeDisabled;
                     var newValue = CanAutoStartBeDisabled(autoStart);
                     if (oldValue != newValue)
@@ -914,14 +953,16 @@ namespace AutoStartConfirm.Business
         {
             foreach (var autoStart in AllCurrentAutoStarts)
             {
-                if (IsAutoStartIgnored(autoStart, ignoredAutoStart)) {
+                if (IsAutoStartIgnored(autoStart, ignoredAutoStart))
+                {
                     autoStart.CanBeIgnored = null;
                     autoStart.CanBeIgnoredLoader = null;
                 }
             }
             foreach (var autoStart in AllHistoryAutoStarts)
             {
-                if (IsAutoStartIgnored(autoStart, ignoredAutoStart)) {
+                if (IsAutoStartIgnored(autoStart, ignoredAutoStart))
+                {
                     autoStart.CanBeIgnored = null;
                     autoStart.CanBeIgnoredLoader = null;
                 }
@@ -932,7 +973,8 @@ namespace AutoStartConfirm.Business
         /// Resets all dynamic properties of all known auto starts at the same path as the given one.
         /// </summary>
         /// <param name="autoStart"></param>
-        public void ResetEditablePropertiesOfAutoStarts(AutoStartEntry autoStart) {
+        public void ResetEditablePropertiesOfAutoStarts(AutoStartEntry autoStart)
+        {
             ResetEditablePropertiesOfCurrentAutoStarts(autoStart);
             ResetEditablePropertiesOfHistoryAutoStarts(autoStart);
         }
@@ -940,8 +982,10 @@ namespace AutoStartConfirm.Business
         /// <summary>
         /// Resets all dynamic properties of all current auto starts.
         /// </summary>
-        public void ResetEditablePropertiesOfAllCurrentAutoStarts() {
-            foreach (var autoStart in CurrentAutoStarts) {
+        public void ResetEditablePropertiesOfAllCurrentAutoStarts()
+        {
+            foreach (var autoStart in CurrentAutoStarts)
+            {
                 var autoStartValue = autoStart;
                 ResetAllDynamicFields(autoStartValue);
             }
@@ -951,12 +995,15 @@ namespace AutoStartConfirm.Business
         /// Resets all dynamic properties of all current auto starts at the same path as the given one.
         /// </summary>
         /// <param name="autoStart"></param>
-        public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart) {
-            foreach (var currentAutoStart in AllCurrentAutoStarts) {
+        public void ResetEditablePropertiesOfCurrentAutoStarts(AutoStartEntry autoStart)
+        {
+            foreach (var currentAutoStart in AllCurrentAutoStarts)
+            {
                 var autoStartValue = currentAutoStart;
                 if (autoStartValue.Category != autoStart.Category ||
                     !autoStartValue.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase) ||
-                    !autoStartValue.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                    !autoStartValue.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
                 }
                 ResetAllDynamicFields(autoStartValue);
@@ -966,8 +1013,10 @@ namespace AutoStartConfirm.Business
         /// <summary>
         /// Resets all dynamic properties of all history auto starts.
         /// </summary>
-        public void ResetEditablePropertiesOfAllHistoryAutoStarts() {
-            foreach (var autoStart in AllHistoryAutoStarts) {
+        public void ResetEditablePropertiesOfAllHistoryAutoStarts()
+        {
+            foreach (var autoStart in AllHistoryAutoStarts)
+            {
                 ResetAllDynamicFields(autoStart);
             }
         }
@@ -976,18 +1025,22 @@ namespace AutoStartConfirm.Business
         /// Resets all dynamic properties of all history auto starts at the same path as the given one.
         /// </summary>
         /// <param name="autoStart"></param>
-        public void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart) {
-            foreach (var historyAutoStart in AllHistoryAutoStarts) {
-                if (historyAutoStart.Category != autoStart.Category || 
+        public void ResetEditablePropertiesOfHistoryAutoStarts(AutoStartEntry autoStart)
+        {
+            foreach (var historyAutoStart in AllHistoryAutoStarts)
+            {
+                if (historyAutoStart.Category != autoStart.Category ||
                     !historyAutoStart.Path.Equals(autoStart.Path, StringComparison.OrdinalIgnoreCase) ||
-                    !historyAutoStart.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase)) {
+                    !historyAutoStart.Value.Equals(autoStart.Value, StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
                 }
                 ResetAllDynamicFields(historyAutoStart);
             }
         }
 
-        private static void ResetAllDynamicFields(AutoStartEntry autoStartValue) {
+        private static void ResetAllDynamicFields(AutoStartEntry autoStartValue)
+        {
             autoStartValue.CanBeAdded = null;
             autoStartValue.CanBeRemoved = null;
             autoStartValue.CanBeEnabled = null;
@@ -1000,31 +1053,40 @@ namespace AutoStartConfirm.Business
             autoStartValue.CanBeIgnoredLoader = null;
         }
 
-        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("IsAdminRequiredForChanges called");
             return ConnectorService.IsAdminRequiredForChanges(autoStart);
         }
 
-        public IList<AutoStartEntry> GetCurrentAutoStarts() {
+        public IList<AutoStartEntry> GetCurrentAutoStarts()
+        {
             Logger.LogTrace("GetCurrentAutoStarts called");
             return ConnectorService.GetCurrentAutoStarts();
         }
 
-        public bool GetValidAutoStartFileExists() {
+        public bool GetValidAutoStartFileExists()
+        {
             Logger.LogTrace("GetAutoStartFileExists called");
-            if (!File.Exists(PathToLastAutoStarts)) {
+            if (!File.Exists(PathToLastAutoStarts))
+            {
                 return false;
             }
-            try {
+            try
+            {
                 GetSavedAutoStarts<AutoStartEntry>(PathToLastAutoStarts);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
             return true;
         }
 
-        public ObservableCollection<T> GetSavedAutoStarts<T>(string path) {
-            try {
+        public ObservableCollection<T> GetSavedAutoStarts<T>(string path)
+        {
+            try
+            {
                 Logger.LogTrace("Loading auto starts from file {path}", path);
                 ObservableCollection<T>? ret = null;
                 if (File.Exists($"{path}.xml"))
@@ -1045,15 +1107,19 @@ namespace AutoStartConfirm.Business
                     }
                 }
                 return ret ?? new ObservableCollection<T>();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 const string message = "Failed to load last auto starts";
                 Logger.LogError(ex, message);
                 throw new Exception(message, ex); ;
             }
         }
 
-        public void SaveAutoStarts() {
-            try {
+        public void SaveAutoStarts()
+        {
+            try
+            {
                 Logger.LogInformation("Saving current known auto starts");
                 Logger.LogTrace("Saving current auto starts to file {path}", PathToLastAutoStarts);
                 SaveAutoStarts(PathToLastAutoStarts, AllCurrentAutoStarts);
@@ -1062,33 +1128,44 @@ namespace AutoStartConfirm.Business
                 Logger.LogTrace("Saving ignored auto starts to file {path}", PathToIgnoredAutoStarts);
                 SaveAutoStarts(PathToIgnoredAutoStarts, IgnoredAutoStarts);
                 Logger.LogInformation("Saved all auto starts");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 const string message = "Failed to save current auto starts";
                 Logger.LogError(ex, message);
                 throw new Exception(message, ex); ;
             }
         }
 
-        private void SaveAutoStarts(string path, ObservableCollection<AutoStartEntry> dictionary) {
+        private void SaveAutoStarts(string path, ObservableCollection<AutoStartEntry> dictionary)
+        {
             Logger.LogTrace("Saving auto starts to file {path}", path);
-            try {
-                try {
+            try
+            {
+                try
+                {
                     var folderPath = PathToLastAutoStarts[..path.LastIndexOf(Path.DirectorySeparatorChar)];
                     Directory.CreateDirectory(folderPath);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     var err = new Exception($"Failed to create folder for file {path}", ex);
                     throw err;
                 }
-                try {
+                try
+                {
                     using Stream stream = new FileStream($"{path}.xml", FileMode.Create, FileAccess.Write, FileShare.None);
                     XmlSerializer serializer = new(typeof(ObservableCollection<AutoStartEntry>));
                     serializer.Serialize(stream, dictionary);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     var err = new Exception($"Failed to write file {path}", ex);
                     throw err;
                 }
                 Logger.LogTrace("Saved auto starts to file {path}", path);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to save auto starts to file {path}", path);
                 throw new Exception($"Failed to save auto starts to file {path}", ex);
@@ -1133,40 +1210,53 @@ namespace AutoStartConfirm.Business
         /// <summary>
         /// Loads current autostarts, compares to last saved and fires add or remove events if necessary
         /// </summary>
-        public void LoadCurrentAutoStarts() {
-            try {
+        public void LoadCurrentAutoStarts()
+        {
+            try
+            {
                 Logger.LogInformation("Comparing current auto starts to last saved");
 
                 // get last saved auto starts
                 ObservableCollection<AutoStartEntry> lastSavedAutoStarts;
-                try {
+                try
+                {
                     lastSavedAutoStarts = GetSavedAutoStarts<AutoStartEntry>(PathToLastAutoStarts);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Logger.LogError(ex, "Failed to load last saved auto starts");
                     lastSavedAutoStarts = new ObservableCollection<AutoStartEntry>();
                 }
                 AllCurrentAutoStarts.Clear();
                 var lastSavedAutoStartsDictionary = new Dictionary<Guid, AutoStartEntry>();
-                foreach(var lastSavedAutoStart in lastSavedAutoStarts) {
-                    if (lastSavedAutoStart.Date == null) {
+                foreach (var lastSavedAutoStart in lastSavedAutoStarts)
+                {
+                    if (lastSavedAutoStart.Date == null)
+                    {
                         lastSavedAutoStart.Date = DateTime.Now;
                     }
                     lastSavedAutoStartsDictionary.Add(lastSavedAutoStart.Id, lastSavedAutoStart);
-                    if (SettingsService.DisabledConnectors.Contains(lastSavedAutoStart.Category.ToString())) {
+                    if (SettingsService.DisabledConnectors.Contains(lastSavedAutoStart.Category.ToString()))
+                    {
                         AllCurrentAutoStarts.Add(lastSavedAutoStart);
                     }
                 }
 
                 // get history auto starts
-                try {
+                try
+                {
                     allHistoryAutoStarts = GetSavedAutoStarts<AutoStartEntry>(PathToHistoryAutoStarts);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Logger.LogError(ex, "Failed to load auto starts history");
                     allHistoryAutoStarts = new ObservableCollection<AutoStartEntry>();
                 }
                 HistoryAutoStarts.Clear();
-                foreach (var lastAutostart in allHistoryAutoStarts) {
-                    if (!SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString())) {
+                foreach (var lastAutostart in allHistoryAutoStarts)
+                {
+                    if (!SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString()))
+                    {
                         HistoryAutoStarts.Add(lastAutostart);
                     }
                 }
@@ -1183,16 +1273,22 @@ namespace AutoStartConfirm.Business
 
                 // get current auto starts
                 IList<AutoStartEntry> currentAutoStarts;
-                try {
+                try
+                {
                     currentAutoStarts = GetCurrentAutoStarts();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     var err = new Exception("Failed to get current auto starts", ex);
                     throw err;
                 }
                 var currentAutoStartDictionary = new Dictionary<Guid, AutoStartEntry>();
-                foreach (var currentAutoStart in currentAutoStarts) {
-                    foreach (var lastAutoStart in lastSavedAutoStarts) {
-                        if (currentAutoStart.Equals(lastAutoStart)) {
+                foreach (var currentAutoStart in currentAutoStarts)
+                {
+                    foreach (var lastAutoStart in lastSavedAutoStarts)
+                    {
+                        if (currentAutoStart.Equals(lastAutoStart))
+                        {
                             currentAutoStart.Id = lastAutoStart.Id;
                             break;
                         }
@@ -1202,9 +1298,11 @@ namespace AutoStartConfirm.Business
 
                 // get auto starts to remove
                 var autoStartsToRemove = new List<AutoStartEntry>();
-                foreach (var lastAutostart in lastSavedAutoStarts) {
+                foreach (var lastAutostart in lastSavedAutoStarts)
+                {
                     if (!currentAutoStartDictionary.ContainsKey(lastAutostart.Id) &&
-                        !SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString())) {
+                        !SettingsService.DisabledConnectors.Contains(lastAutostart.Category.ToString()))
+                    {
                         autoStartsToRemove.Add(lastAutostart);
                     }
                 }
@@ -1212,61 +1310,77 @@ namespace AutoStartConfirm.Business
                 // get auto starts to add
                 var autoStartsToAdd = new List<AutoStartEntry>();
                 CurrentAutoStarts.Clear();
-                foreach (var currentAutoStart in currentAutoStarts) {
-                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? lastAutoStartEntry)) {
+                foreach (var currentAutoStart in currentAutoStarts)
+                {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? lastAutoStartEntry))
+                    {
                         CurrentAutoStarts.Add(lastAutoStartEntry);
                         AllCurrentAutoStarts.Add(lastAutoStartEntry);
-                    } else {
+                    }
+                    else
+                    {
                         // add handler will add auto start later to CurrentAutoStarts collection
                         autoStartsToAdd.Add(currentAutoStart);
                     }
                 }
 
                 // call remove handlers
-                foreach (var removedAutoStart in autoStartsToRemove) {
+                foreach (var removedAutoStart in autoStartsToRemove)
+                {
                     RemoveHandler(removedAutoStart);
                 }
 
                 // call add handlers
-                foreach (var addedAutoStart in autoStartsToAdd) {
+                foreach (var addedAutoStart in autoStartsToAdd)
+                {
                     AddHandler(addedAutoStart);
                 }
 
                 // call enable / disable handlers
-                foreach (var currentAutoStart in currentAutoStarts) {
+                foreach (var currentAutoStart in currentAutoStarts)
+                {
                     bool wasEnabled = true;
-                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? oldAutoStart)) {
+                    if (lastSavedAutoStartsDictionary.TryGetValue(currentAutoStart.Id, out AutoStartEntry? oldAutoStart))
+                    {
                         wasEnabled = oldAutoStart.IsEnabled.GetValueOrDefault(true);
                     }
                     var nowEnabled = ConnectorService.IsEnabled(currentAutoStart);
                     currentAutoStart.IsEnabled = nowEnabled;
-                    if (nowEnabled && !wasEnabled) {
+                    if (nowEnabled && !wasEnabled)
+                    {
                         EnableHandler(currentAutoStart);
-                    } else if (!nowEnabled && wasEnabled) {
+                    }
+                    else if (!nowEnabled && wasEnabled)
+                    {
                         DisableHandler(currentAutoStart);
                     }
                 }
                 Logger.LogTrace("LoadCurrentAutoStarts finished");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 const string message = "Failed to compare current auto starts to last saved";
                 Logger.LogError(ex, message);
                 throw new Exception(message, ex);
             }
         }
 
-        public void StartWatcher() {
+        public void StartWatcher()
+        {
             Logger.LogInformation("Starting watchers");
             ConnectorService.StartWatcher();
             Logger.LogInformation("Started watchers");
         }
 
-        public void StopWatcher() {
+        public void StopWatcher()
+        {
             Logger.LogTrace("Stopping watchers");
             ConnectorService.StopWatcher();
             Logger.LogTrace("Stopped watchers");
         }
 
-        public bool IsOwnAutoStart(AutoStartEntry autoStart) {
+        public bool IsOwnAutoStart(AutoStartEntry autoStart)
+        {
             return autoStart.Category == Category.CurrentUserRun64 &&
             autoStart.Path == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Auto Start Confirm" &&
             autoStart.Value == CurrentExePath;
@@ -1338,7 +1452,8 @@ namespace AutoStartConfirm.Business
         #endregion
 
         #region Event handlers
-        private void AddHandler(AutoStartEntry autostart) {
+        private void AddHandler(AutoStartEntry autostart)
+        {
             DispatchService.TryEnqueue(() =>
             {
                 try

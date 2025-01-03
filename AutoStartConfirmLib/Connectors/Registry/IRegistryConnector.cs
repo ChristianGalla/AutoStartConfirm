@@ -1,6 +1,6 @@
 ﻿namespace AutoStartConfirm.Connectors.Registry
 {
-    public interface IRegistryConnector: IAutoStartConnector
+    public interface IRegistryConnector : IAutoStartConnector
     {
         public string BasePath { get; }
 

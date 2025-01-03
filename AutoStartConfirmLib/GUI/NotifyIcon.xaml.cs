@@ -5,7 +5,7 @@ using System;
 namespace AutoStartConfirm.GUI
 {
 
-    public partial class NotifyIcon: ResourceDictionary
+    public partial class NotifyIcon : ResourceDictionary
     {
 
         public NotifyIcon()

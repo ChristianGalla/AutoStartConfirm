@@ -3,8 +3,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirm.GUI {
-    public interface IMessageService {
+namespace AutoStartConfirm.GUI
+{
+    public interface IMessageService
+    {
         public enum AutoStartAction
         {
             Add,
@@ -15,7 +17,8 @@ namespace AutoStartConfirm.GUI {
             RemoveIgnore,
         }
 
-        public SemaphoreSlim DialogSemaphore {
+        public SemaphoreSlim DialogSemaphore
+        {
             get;
         }
 

@@ -894,7 +894,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Add += Raise.FreeForm.With(AutoStartEntry);
@@ -932,7 +933,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Enable += Raise.FreeForm.With(AutoStartEntry);
@@ -970,7 +972,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Disable += Raise.FreeForm.With(AutoStartEntry);
@@ -1008,7 +1011,8 @@ namespace AutoStartConfirm.Business
                 Service!.IgnoredAutoStarts.Add(new IgnoredAutoStart(AutoStartEntry!));
             }
 
-            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) => {
+            A.CallTo(() => DispatchService.TryEnqueue(A<DispatcherQueueHandler>.Ignored)).Invokes((DispatcherQueueHandler callback) =>
+            {
                 callback();
             }).Returns(true);
             ConnectorService.Remove += Raise.FreeForm.With(AutoStartEntry);

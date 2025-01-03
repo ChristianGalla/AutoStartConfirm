@@ -34,7 +34,8 @@ namespace AutoStartConfirm.GUI
 
         public string PublishVersion
         {
-            get {
+            get
+            {
                 if (UpdateService.IsStandalone)
                 {
                     return string.Format(ResourceLoader.GetString("PublishVersion/Standalone"), Environment.Version.ToString());

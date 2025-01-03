@@ -24,7 +24,7 @@ namespace AutoStartConfirm.GUI
         private bool disposedValue = false;
 
         public string NavTitle { get; set; }
-        
+
         private readonly IServiceScope ServiceScope = Ioc.Default.CreateScope();
 
         private IAutoStartBusiness? autoStartBusiness;

@@ -86,7 +86,7 @@ namespace AutoStartConfirm
 
         private static void ConfigureServices(ServiceCollection services)
         {
-            
+
             services
                 .AddLogging(loggingBuilder =>
                 {
@@ -113,7 +113,8 @@ namespace AutoStartConfirm
                 .AddSingleton<IMessageService, MessageService>()
                 .AddSingleton<ISettingsService, SettingsService>()
                 .AddSingleton<IUpdateService, UpdateService>()
-                .AddSingleton<IGitHubClient>(ServiceProvider => {
+                .AddSingleton<IGitHubClient>(ServiceProvider =>
+                {
                     return new GitHubClient(new ProductHeaderValue("AutoStartConfirm"));
                 });
             AutoStartConnectorService.ConfigureServices(services);

@@ -31,8 +31,10 @@ namespace AutoStartConfirm.GUI
         private ISettingsService? settingsService;
 #pragma warning restore CA2213 // Disposable fields should be disposed
 
-        public ISettingsService SettingsService {
-            get {
+        public ISettingsService SettingsService
+        {
+            get
+            {
                 settingsService ??= ServiceScope.ServiceProvider.GetRequiredService<ISettingsService>();
                 return settingsService;
             }

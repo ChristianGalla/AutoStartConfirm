@@ -22,7 +22,7 @@ namespace AutoStartConfirm
         protected ISettingsService SettingsService = A.Fake<ISettingsService>();
         protected ICurrentUserRun64Connector CurrentUserRun64Connector = A.Fake<ICurrentUserRun64Connector>();
         protected IDispatchService DispatchService = A.Fake<IDispatchService>();
-        
+
         protected IUacService UacService = A.Fake<IUacService>();
         protected INotificationService NotificationService = A.Fake<INotificationService>();
         protected IGitHubClient GitHubClient = A.Fake<IGitHubClient>();

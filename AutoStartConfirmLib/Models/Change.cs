@@ -1,6 +1,7 @@
 ﻿namespace AutoStartConfirm.Models
 {
-    public enum Change {
+    public enum Change
+    {
         Added,
         Removed,
         Enabled,

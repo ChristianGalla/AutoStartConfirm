@@ -17,9 +17,11 @@ namespace AutoStartConfirm.Connectors
 
         private string? disableBasePath;
 
-        public string? DisableBasePath {
+        public string? DisableBasePath
+        {
             get => disableBasePath;
-            set {
+            set
+            {
                 disableBasePath = value;
                 RegistryChangeMonitor.RegistryPath = disableBasePath;
             }

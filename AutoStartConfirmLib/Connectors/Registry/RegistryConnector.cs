@@ -10,7 +10,8 @@ using System.Management;
 
 namespace AutoStartConfirm.Connectors.Registry
 {
-    abstract public class RegistryConnector : IRegistryConnector, IAutoStartConnector, IDisposable {
+    abstract public class RegistryConnector : IRegistryConnector, IAutoStartConnector, IDisposable
+    {
 
         private readonly ILogger<RegistryConnector> Logger;
 
@@ -23,11 +24,13 @@ namespace AutoStartConfirm.Connectors.Registry
         public abstract string[]? ValueNames { get; }
 
 
-        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart) {
+        public bool IsAdminRequiredForChanges(AutoStartEntry autoStart)
+        {
             return BasePath.StartsWith("HKEY_LOCAL_MACHINE");
         }
 
-        protected virtual bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level) {
+        protected virtual bool GetIsAutoStartEntry(RegistryKey currentKey, string valueName, int level)
+        {
             return ValueNames == null || ValueNames.Contains(valueName);
         }
 
@@ -51,43 +54,55 @@ namespace AutoStartConfirm.Connectors.Registry
             RegistryChangeMonitor.Changed += ChangeHandler;
         }
 
-        private void ChangeHandler(object sender, EventArrivedEventArgs e) {
+        private void ChangeHandler(object sender, EventArrivedEventArgs e)
+        {
             Logger.LogTrace("ChangeHandler called for {BasePath}", BasePath);
             var newAutostarts = GetCurrentAutoStarts();
             var addedAutostarts = new List<RegistryAutoStartEntry>();
             var removedAutostarts = new List<RegistryAutoStartEntry>();
-            foreach (var newAutostart in newAutostarts) {
+            foreach (var newAutostart in newAutostarts)
+            {
                 var found = false;
-                foreach (var lastAutostart in lastAutostarts!) {
-                    if (newAutostart.Equals(lastAutostart)) {
+                foreach (var lastAutostart in lastAutostarts!)
+                {
+                    if (newAutostart.Equals(lastAutostart))
+                    {
                         found = true;
                         break;
                     }
                 }
-                if (!found) {
+                if (!found)
+                {
                     addedAutostarts.Add((RegistryAutoStartEntry)newAutostart);
                 }
             }
-            foreach (var lastAutostart in lastAutostarts!) {
+            foreach (var lastAutostart in lastAutostarts!)
+            {
                 var found = false;
-                foreach (var newAutostart in newAutostarts) {
-                    if (newAutostart.Equals(lastAutostart)) {
+                foreach (var newAutostart in newAutostarts)
+                {
+                    if (newAutostart.Equals(lastAutostart))
+                    {
                         found = true;
                         break;
                     }
                 }
-                if (!found) {
+                if (!found)
+                {
                     removedAutostarts.Add(lastAutostart);
                 }
             }
-            foreach (var addedAutostart in addedAutostarts) {
+            foreach (var addedAutostart in addedAutostarts)
+            {
                 Add?.Invoke(addedAutostart);
             }
-            foreach (var removedAutostart in removedAutostarts) {
+            foreach (var removedAutostart in removedAutostarts)
+            {
                 Remove?.Invoke(removedAutostart);
             }
             lastAutostarts.Clear();
-            foreach (var newAutoStartEntry in newAutostarts) {
+            foreach (var newAutoStartEntry in newAutostarts)
+            {
                 lastAutostarts.Add((RegistryAutoStartEntry)newAutoStartEntry);
             }
         }
@@ -102,21 +117,29 @@ namespace AutoStartConfirm.Connectors.Registry
         /// <param name="currentKey"></param>
         /// <param name="recursive"></param>
         /// <returns></returns>
-        public IList<RegistryAutoStartEntry> GetCurrentAutoStarts(RegistryKey currentKey, bool recursive = false, int level = 0) {
+        public IList<RegistryAutoStartEntry> GetCurrentAutoStarts(RegistryKey currentKey, bool recursive = false, int level = 0)
+        {
             var ret = new List<RegistryAutoStartEntry>();
             var valueNames = currentKey.GetValueNames();
-            foreach (var valueName in valueNames) {
-                try {
+            foreach (var valueName in valueNames)
+            {
+                try
+                {
                     var valueKind = currentKey.GetValueKind(valueName);
-                    switch (valueKind) {
+                    switch (valueKind)
+                    {
                         case RegistryValueKind.String:
-                        case RegistryValueKind.ExpandString: {
+                        case RegistryValueKind.ExpandString:
+                            {
                                 string? value = (string?)currentKey.GetValue(valueName, null);
-                                if (value == null) {
+                                if (value == null)
+                                {
                                     continue;
                                 }
-                                if (value.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
-                                    var newAutoStart = new RegistryAutoStartEntry {
+                                if (value.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level))
+                                {
+                                    var newAutoStart = new RegistryAutoStartEntry
+                                    {
                                         Category = Category,
                                         Value = value.ToString(),
                                         Path = $"{currentKey}\\{valueName}",
@@ -127,14 +150,19 @@ namespace AutoStartConfirm.Connectors.Registry
                                 }
                                 break;
                             }
-                        case RegistryValueKind.MultiString: {
+                        case RegistryValueKind.MultiString:
+                            {
                                 IEnumerable<string>? value = (IEnumerable<string>?)currentKey.GetValue(valueName, null);
-                                if (value == null) {
+                                if (value == null)
+                                {
                                     continue;
                                 }
-                                foreach (var subValue in value) {
-                                    if (subValue.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level)) {
-                                        var newAutoStart = new RegistryAutoStartEntry {
+                                foreach (var subValue in value)
+                                {
+                                    if (subValue.Length > 0 && GetIsAutoStartEntry(currentKey, valueName, level))
+                                    {
+                                        var newAutoStart = new RegistryAutoStartEntry
+                                        {
                                             Category = Category,
                                             Value = subValue.ToString(),
                                             Path = $"{currentKey}\\{valueName}",
@@ -155,14 +183,18 @@ namespace AutoStartConfirm.Connectors.Registry
                             Logger.LogTrace("Skipping {valueName} from {currentKey} because of not implemented type {type}", valueName, currentKey, valueKind);
                             break;
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     var err = new Exception($"Failed to get \"{valueName}\" from \"{currentKey}\"", ex);
                     throw err;
                 }
             }
-            if (recursive) {
+            if (recursive)
+            {
                 var subKeyNames = currentKey.GetSubKeyNames();
-                foreach (var subKeyName in subKeyNames) {
+                foreach (var subKeyName in subKeyNames)
+                {
                     using var subKey = currentKey.OpenSubKey(subKeyName);
                     if (subKey != null)
                     {
@@ -174,11 +206,13 @@ namespace AutoStartConfirm.Connectors.Registry
             return ret;
         }
 
-        public virtual IList<AutoStartEntry> GetCurrentAutoStarts() {
+        public virtual IList<AutoStartEntry> GetCurrentAutoStarts()
+        {
             Logger.LogTrace("GetCurrentAutoStarts called for {BasePath}", BasePath);
-            try {
+            try
+            {
                 var ret = new List<AutoStartEntry>();
-                using RegistryKey baseRegistryKey = GetBaseRegistry() ;
+                using RegistryKey baseRegistryKey = GetBaseRegistry();
                 var subKeyPath = BasePath[(BasePath.IndexOf('\\') + 1)..];
                 using RegistryKey? rootKey = baseRegistryKey.OpenSubKey(subKeyPath);
                 if (rootKey == null)
@@ -209,26 +243,35 @@ namespace AutoStartConfirm.Connectors.Registry
                 }
                 Logger.LogTrace("Got current auto starts");
                 return ret;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 const string message = "Failed to get current auto starts";
                 Logger.LogError(ex, message);
                 throw new Exception(message, ex);
             }
         }
 
-        private static RegistryKey GetBaseRegistry(string basePath) {
+        private static RegistryKey GetBaseRegistry(string basePath)
+        {
             RegistryKey registryKey;
-            if (basePath.StartsWith("HKEY_LOCAL_MACHINE")) {
+            if (basePath.StartsWith("HKEY_LOCAL_MACHINE"))
+            {
                 registryKey = Microsoft.Win32.Registry.LocalMachine;
-            } else if (basePath.StartsWith("HKEY_CURRENT_USER")) {
+            }
+            else if (basePath.StartsWith("HKEY_CURRENT_USER"))
+            {
                 registryKey = Microsoft.Win32.Registry.CurrentUser;
-            } else {
+            }
+            else
+            {
                 throw new ArgumentOutOfRangeException($"Unknown registry base path for \"{basePath}\"");
             }
             return registryKey;
         }
 
-        private RegistryKey GetBaseRegistry() {
+        private RegistryKey GetBaseRegistry()
+        {
             return GetBaseRegistry(BasePath);
         }
 
@@ -240,7 +283,8 @@ namespace AutoStartConfirm.Connectors.Registry
         /// See https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regnotifychangekeyvalue
         /// Not monitored are changes via RegRestoreKey https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regrestorekeya
         /// </remarks>
-        public void StartWatcher() {
+        public void StartWatcher()
+        {
             Logger.LogTrace("StartWatcher called for {BasePath}", BasePath);
             if (RegistryChangeMonitor.Monitoring)
             {
@@ -260,7 +304,8 @@ namespace AutoStartConfirm.Connectors.Registry
             Logger.LogTrace("Watcher started");
         }
 
-        public void StopWatcher() {
+        public void StopWatcher()
+        {
             Logger.LogTrace("StopWatcher called for {BasePath}", BasePath);
             if (DisableBasePath != null)
             {
@@ -270,37 +315,49 @@ namespace AutoStartConfirm.Connectors.Registry
             Logger.LogTrace("Stopped watcher");
         }
 
-        public bool CanBeAdded(AutoStartEntry autoStart) {
+        public bool CanBeAdded(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("CanBeAdded called for {Value} in {Path}", autoStart.Value, autoStart.Path);
-            try {
+            try
+            {
                 AddAutoStart(autoStart, true);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
             return true;
         }
 
-        public bool CanBeRemoved(AutoStartEntry autoStart) {
+        public bool CanBeRemoved(AutoStartEntry autoStart)
+        {
             Logger.LogTrace("CanBeRemoved called for {Value} in {Path}", autoStart.Value, autoStart.Path);
-            try {
+            try
+            {
                 RemoveAutoStart(autoStart, true);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
             return true;
         }
 
-        public void AddAutoStart(AutoStartEntry autoStart) {
+        public void AddAutoStart(AutoStartEntry autoStart)
+        {
             AddAutoStart(autoStart, false);
         }
 
-        public void RemoveAutoStart(AutoStartEntry autoStart) {
+        public void RemoveAutoStart(AutoStartEntry autoStart)
+        {
             RemoveAutoStart(autoStart, false);
         }
 
-        protected void AddAutoStart(AutoStartEntry autoStart, bool dryRun) {
+        protected void AddAutoStart(AutoStartEntry autoStart, bool dryRun)
+        {
             Logger.LogTrace("AddAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStart.Value, autoStart.Path, dryRun);
-            if (autoStart is not RegistryAutoStartEntry) {
+            if (autoStart is not RegistryAutoStartEntry)
+            {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
             RegistryAutoStartEntry regAutoStart = (RegistryAutoStartEntry)autoStart;
@@ -398,9 +455,11 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        protected void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun) {
+        protected void RemoveAutoStart(AutoStartEntry autoStartEntry, bool dryRun)
+        {
             Logger.LogTrace("RemoveAutoStart called for {Value} in {Path} (dryRun: {DryRun})", autoStartEntry.Value, autoStartEntry.Path, dryRun);
-            if (autoStartEntry is not RegistryAutoStartEntry) {
+            if (autoStartEntry is not RegistryAutoStartEntry)
+            {
                 throw new ArgumentException("Parameter must be of type RegistryAutoStartEntry");
             }
             var registryAutoStartEntry = (RegistryAutoStartEntry)autoStartEntry;
@@ -479,58 +538,74 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        public bool CanBeEnabled(AutoStartEntry autoStart) {
-            if (DisableBasePath == null) {
+        public bool CanBeEnabled(AutoStartEntry autoStart)
+        {
+            if (DisableBasePath == null)
+            {
                 return false;
             }
             return RegistryDisableService.CanBeEnabled(autoStart);
         }
 
-        public bool CanBeDisabled(AutoStartEntry autoStart) {
-            if (DisableBasePath == null) {
+        public bool CanBeDisabled(AutoStartEntry autoStart)
+        {
+            if (DisableBasePath == null)
+            {
                 return false;
             }
             return RegistryDisableService.CanBeDisabled(autoStart);
         }
 
-        public void EnableAutoStart(AutoStartEntry autoStart) {
-            if (DisableBasePath == null) {
+        public void EnableAutoStart(AutoStartEntry autoStart)
+        {
+            if (DisableBasePath == null)
+            {
                 throw new NotImplementedException();
             }
             RegistryDisableService.EnableAutoStart(autoStart);
         }
 
-        public void DisableAutoStart(AutoStartEntry autoStart) {
-            if (DisableBasePath == null) {
+        public void DisableAutoStart(AutoStartEntry autoStart)
+        {
+            if (DisableBasePath == null)
+            {
                 throw new NotImplementedException();
             }
             RegistryDisableService.DisableAutoStart(autoStart);
         }
 
-        public bool IsEnabled(AutoStartEntry autoStart) {
-            if (DisableBasePath == null) {
+        public bool IsEnabled(AutoStartEntry autoStart)
+        {
+            if (DisableBasePath == null)
+            {
                 return true;
             }
             return RegistryDisableService.CanBeDisabled(autoStart);
         }
 
-        private void EnableHandler(string name) {
+        private void EnableHandler(string name)
+        {
             Logger.LogTrace("EnableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
-            foreach (var currentAutoStart in currentAutoStarts) {
+            foreach (var currentAutoStart in currentAutoStarts)
+            {
                 var currentDisableName = currentAutoStart.Path[(currentAutoStart.Path.LastIndexOf('\\') + 1)..];
-                if (currentDisableName == name) {
+                if (currentDisableName == name)
+                {
                     Enable?.Invoke(currentAutoStart);
                 }
             }
         }
 
-        private void DisableHandler(string name) {
+        private void DisableHandler(string name)
+        {
             Logger.LogTrace("DisableHandler called");
             var currentAutoStarts = GetCurrentAutoStarts();
-            foreach (var currentAutoStart in currentAutoStarts) {
+            foreach (var currentAutoStart in currentAutoStarts)
+            {
                 var currentDisableName = currentAutoStart.Path[(currentAutoStart.Path.LastIndexOf('\\') + 1)..];
-                if (currentDisableName == name) {
+                if (currentDisableName == name)
+                {
                     Disable?.Invoke(currentAutoStart);
                 }
             }
@@ -541,9 +616,12 @@ namespace AutoStartConfirm.Connectors.Registry
         #region IDisposable Support
         private bool disposedValue = false;
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     StopWatcher();
                     RegistryDisableService.Enable -= EnableHandler;
                     RegistryDisableService.Disable -= DisableHandler;
@@ -554,12 +632,14 @@ namespace AutoStartConfirm.Connectors.Registry
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        public void Open(AutoStartEntry autoStart) {
+        public void Open(AutoStartEntry autoStart)
+        {
             throw new NotImplementedException();
         }
 

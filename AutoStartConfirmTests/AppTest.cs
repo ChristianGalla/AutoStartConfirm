@@ -10,22 +10,7 @@
 //using FakeItEasy;
 //using Microsoft.Extensions.DependencyInjection;
 //using Microsoft.Extensions.Logging;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Models;
-using AutoStartConfirm.Notifications;
-using AutoStartConfirm.Properties;
-using AutoStartConfirm.Update;
-using FakeItEasy;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoStartConfirmTests
 {

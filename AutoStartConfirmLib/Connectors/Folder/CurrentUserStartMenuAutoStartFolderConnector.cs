@@ -19,7 +19,7 @@ namespace AutoStartConfirm.Connectors.Folder
             ILogger<FolderConnector> logger,
             IRegistryDisableService registryDisableService,
             IFolderChangeMonitor folderChangeMonitor
-        ): base(logger, registryDisableService, folderChangeMonitor)
+        ) : base(logger, registryDisableService, folderChangeMonitor)
         {
         }
 

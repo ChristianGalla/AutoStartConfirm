@@ -1,7 +1,8 @@
 ﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
 
-namespace AutoStartConfirm.Connectors.Registry {
+namespace AutoStartConfirm.Connectors.Registry
+{
     public class CurrentUserRun32Connector : RegistryConnector, ICurrentUserRun32Connector
     {
 

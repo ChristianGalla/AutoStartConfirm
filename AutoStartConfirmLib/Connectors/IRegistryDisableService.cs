@@ -1,8 +1,10 @@
 ﻿using AutoStartConfirm.Models;
 using System.Collections.Generic;
 
-namespace AutoStartConfirm.Connectors {
-    public interface IRegistryDisableService {
+namespace AutoStartConfirm.Connectors
+{
+    public interface IRegistryDisableService
+    {
         string? DisableBasePath { get; set; }
 
         event EnableChangeHandler? Disable;
