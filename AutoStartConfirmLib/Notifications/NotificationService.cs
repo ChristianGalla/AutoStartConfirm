@@ -1,9 +1,7 @@
-﻿using AutoStartConfirm.GUI;
-using AutoStartConfirm.Models;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.Notifications

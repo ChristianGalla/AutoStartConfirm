@@ -1,15 +1,11 @@
-﻿using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Models;
-using AutoStartConfirm.Properties;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.ObjectModel;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Linq;
-using AutoStartConfirm.Business;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
+using System;
+using System.Linq;
 
 namespace AutoStartConfirm.GUI
 {

@@ -1,7 +1,5 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace AutoStartConfirm.Models {
+﻿namespace AutoStartConfirm.Models
+{
     public class ConnectorEnableRow {
         private Category category;
 

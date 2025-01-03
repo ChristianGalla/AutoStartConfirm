@@ -1,27 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.GUI;
+using AutoStartConfirm.Models;
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using FakeItEasy;
-using AutoStartConfirm.Models;
-using AutoStartConfirm.Exceptions;
-using AutoStartConfirm.Properties;
-using AutoStartConfirm.Connectors.Registry;
-using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Notifications;
-using AutoStartConfirm.Update;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Windows.Services.Maps;
-using Octokit;
-using AutoStartConfirmTests;
-using AutoStartConfirm.Business;
-using AutoStartConfirm.Connectors;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Dispatching;
 
 namespace AutoStartConfirm.Business
 {

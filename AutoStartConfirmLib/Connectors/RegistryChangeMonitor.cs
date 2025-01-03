@@ -1,16 +1,7 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Management;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Threading;
-using AutoStartConfirm.Connectors.Registry;
-using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
-using Windows.Devices.Geolocation;
-using Windows.Web;
 
 namespace AutoStartConfirm.Connectors
 {

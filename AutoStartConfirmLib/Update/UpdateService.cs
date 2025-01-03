@@ -1,12 +1,10 @@
 ﻿using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.Logging;
-using NLog;
 using Octokit;
 using Semver;
 using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Update

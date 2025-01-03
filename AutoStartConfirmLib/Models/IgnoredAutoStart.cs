@@ -1,18 +1,12 @@
-﻿using AutoStartConfirm.GUI;
-using AutoStartConfirm.Helpers;
+﻿using AutoStartConfirm.Helpers;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
 
 namespace AutoStartConfirm.Models
 {

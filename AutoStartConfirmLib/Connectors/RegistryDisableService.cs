@@ -1,10 +1,10 @@
-﻿using AutoStartConfirm.Models;
-using AutoStartConfirm.Exceptions;
+﻿using AutoStartConfirm.Exceptions;
+using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Management;
-using Microsoft.Extensions.Logging;
 
 namespace AutoStartConfirm.Connectors
 {

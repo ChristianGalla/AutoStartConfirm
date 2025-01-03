@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AutoStartConfirm.Exceptions;
 using AutoStartConfirm.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
-using System.Windows;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using AutoStartConfirm.Exceptions;
 using System.Management;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 
 namespace AutoStartConfirm.Connectors.Registry
 {

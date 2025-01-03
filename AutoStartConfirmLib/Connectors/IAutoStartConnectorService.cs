@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AutoStartConfirm.Connectors {
+namespace AutoStartConfirm.Connectors
+{
     public interface IAutoStartConnectorService {
         IAutoStartConnector this[int index] { get; }
 

@@ -2,7 +2,6 @@
 using AutoStartConfirm.Connectors.Registry;
 using AutoStartConfirm.Connectors.ScheduledTask;
 using AutoStartConfirm.Connectors.Services;
-using AutoStartConfirm.GUI;
 using AutoStartConfirm.Models;
 using AutoStartConfirm.Properties;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +10,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Windows;
-using System.Xml.Serialization;
 
 namespace AutoStartConfirm.Connectors
 {

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoStartConfirm.Models;
-using Microsoft.Win32.TaskScheduler;
-using System.Threading;
-using System.Collections.Concurrent;
+﻿using AutoStartConfirm.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32.TaskScheduler;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace AutoStartConfirm.Connectors.ScheduledTask
 {

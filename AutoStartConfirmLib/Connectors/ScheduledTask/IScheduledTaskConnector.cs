@@ -1,5 +1,4 @@
 ﻿using AutoStartConfirm.Models;
-using System.Collections.Generic;
 
 namespace AutoStartConfirm.Connectors.ScheduledTask
 {

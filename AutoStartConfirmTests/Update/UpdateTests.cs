@@ -1,24 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Threading.Tasks;
-using FakeItEasy;
-using AutoStartConfirm.Notifications;
-using Semver;
-using AutoStartConfirm.Properties;
-using Octokit;
-using System.Collections.Generic;
-using System.Net.Mime;
-using System.Security.Policy;
-using AutoStartConfirm.Connectors.Registry;
-using AutoStartConfirm.Connectors;
-using AutoStartConfirm.Helpers;
-using AutoStartConfirm.Models;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using System.Xml.Linq;
-using AutoStartConfirmTests;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Octokit;
+using Semver;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AutoStartConfirm.Update
 {

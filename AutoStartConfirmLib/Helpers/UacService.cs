@@ -1,10 +1,4 @@
-﻿using Microsoft.Win32;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System;
-
-namespace AutoStartConfirm.Helpers
+﻿namespace AutoStartConfirm.Helpers
 {
     public class UacService : IUacService
     {

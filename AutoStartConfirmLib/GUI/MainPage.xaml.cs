@@ -4,18 +4,18 @@
 using AutoStartConfirm.Business;
 using AutoStartConfirm.Models;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.WinUI.UI.Controls;
 using CommunityToolkit.WinUI.Collections;
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using Windows.ApplicationModel.Resources;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.GUI
 {

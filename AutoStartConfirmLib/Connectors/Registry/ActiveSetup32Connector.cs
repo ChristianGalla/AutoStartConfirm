@@ -2,7 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
-namespace AutoStartConfirm.Connectors.Registry {
+namespace AutoStartConfirm.Connectors.Registry
+{
     public class ActiveSetup32Connector : RegistryConnector, IActiveSetup32Connector
     {
 

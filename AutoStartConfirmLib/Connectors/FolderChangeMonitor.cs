@@ -1,12 +1,8 @@
-﻿using AutoStartConfirm.Connectors.Folder;
-using AutoStartConfirm.Helpers;
+﻿using AutoStartConfirm.Helpers;
 using AutoStartConfirm.Models;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Windows;
 
 namespace AutoStartConfirm.Connectors
 {
