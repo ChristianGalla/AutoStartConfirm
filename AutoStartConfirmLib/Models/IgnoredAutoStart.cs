@@ -48,7 +48,7 @@ namespace AutoStartConfirm.Models
                 if (valueCompare != value)
                 {
                     valueCompare = value;
-                    // NotifyPropertyChanged();
+                    // NotifyPropertyChanged(); // raises an exception
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace AutoStartConfirm.Models
                 if (pathCompare != value)
                 {
                     pathCompare = value;
-                    NotifyPropertyChanged();
+                    // NotifyPropertyChanged(); // raises an exception
                 }
             }
         }

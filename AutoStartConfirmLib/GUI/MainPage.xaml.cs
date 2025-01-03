@@ -528,22 +528,22 @@ namespace AutoStartConfirm.GUI
                 {
                     if (ignoredAutoStart.ValueCompare == CompareType.RegEx)
                     {
-                        ignoredAutoStart.Value = Regex.Escape(ignoredAutoStart.Value);
+                        ignoredAutoStart.Value = EscapeRegex(ignoredAutoStart.Value);
                     }
-                    if(valueBeforeEdit == CompareType.RegEx)
+                    if (valueBeforeEdit == CompareType.RegEx)
                     {
-                        ignoredAutoStart.Value = Regex.Unescape(ignoredAutoStart.Value);
+                        ignoredAutoStart.Value = UnescapeRegex(ignoredAutoStart.Value);
                     }
                 }
                 if ((string)e.Column.Tag == "PathCompare" && valueBeforeEdit != ignoredAutoStart.PathCompare)
                 {
                     if (ignoredAutoStart.PathCompare == CompareType.RegEx)
                     {
-                        ignoredAutoStart.Path = Regex.Escape(ignoredAutoStart.Path);
+                        ignoredAutoStart.Path = EscapeRegex(ignoredAutoStart.Path);
                     }
                     if (valueBeforeEdit == CompareType.RegEx)
                     {
-                        ignoredAutoStart.Path = Regex.Unescape(ignoredAutoStart.Path);
+                        ignoredAutoStart.Path = UnescapeRegex(ignoredAutoStart.Path);
                     }
                 }
                 AutoStartBusiness.UpdateIgnoredAutoStart(ignoredAutoStart);
@@ -554,6 +554,44 @@ namespace AutoStartConfirm.GUI
                 Logger.LogError(ex, errmsg);
                 await MessageService.ShowError(errmsg, ex);
             }
+        }
+
+        /// <summary>
+        /// Tries to unescape regex charecters when switching from regex to non regex comparison.
+        /// Returns unmodified value if the regex has invalid escaping.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string UnescapeRegex(string value)
+        {
+            try
+            {
+                var unescapedContent = Regex.Unescape(value);
+                if (unescapedContent.StartsWith('^'))
+                {
+                    unescapedContent = unescapedContent.Substring(1);
+                }
+                if (unescapedContent.EndsWith('$'))
+                {
+                    unescapedContent = unescapedContent.Substring(0, unescapedContent.Length - 1);
+                }
+                return unescapedContent;
+            }
+            catch (Exception)
+            {
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Escapes regex charecters when switching from non regex to regex comparison.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string EscapeRegex(string value)
+        {
+            var escapedContent = Regex.Escape(value);
+            return $"^{escapedContent}$";
         }
 
         private async void IgnoredAutoStartGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
