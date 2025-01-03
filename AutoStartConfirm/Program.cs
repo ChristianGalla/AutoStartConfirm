@@ -96,7 +96,7 @@ namespace AutoStartConfirm
                     loggingBuilder.AddNLogWeb((IServiceProvider serviceProvider) =>
                     {
                         var nlogPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "nlog.config");
-                        var logFactory = new NLog.LogFactory();
+                        var logFactory = new LogFactory();
                         logFactory.Setup().LoadConfigurationFromFile(nlogPath);
                         logFactory.ServiceRepository.RegisterService(typeof(IJsonConverter), new JsonNetSerializer());
                         return logFactory;

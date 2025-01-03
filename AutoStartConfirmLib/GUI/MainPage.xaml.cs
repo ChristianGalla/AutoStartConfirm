@@ -249,9 +249,13 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public static void Sorting(object? _, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
+        public static void Sorting(object? _, DataGridColumnEventArgs e, AdvancedCollectionView collectionView, DataGrid dataGrid)
         {
             var newSortColumn = e.Column.Tag.ToString();
+            if (newSortColumn == null)
+            {
+                return;
+            }
             collectionView.SortDescriptions.Clear();
             switch (e.Column.SortDirection)
             {
@@ -279,17 +283,17 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        public void CurrentSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void CurrentSorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, AutoStartCollectionView, CurrentAutoStartGrid);
         }
 
-        public void HistorySorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void HistorySorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, HistoryAutoStartCollectionView, HistoryAutoStartGrid);
         }
 
-        public void IgnoredSorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        public void IgnoredSorting(object sender, DataGridColumnEventArgs e)
         {
             Sorting(sender, e, IgnoredCollectionView, IgnoredAutoStartGrid);
         }

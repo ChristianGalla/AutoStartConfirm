@@ -225,7 +225,7 @@ namespace AutoStartConfirm
         }
 
         #region Event handlers
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             NotifyIcon.Exit += ExitHandler;
             NotifyIcon.ToggleMainWindow += ToggleMainWindowHandler;

@@ -107,7 +107,7 @@ namespace AutoStartConfirm.Business
 
         private readonly IUacService UacService;
 
-        public System.Timers.Timer SettingSaveTimer;
+        public Timer SettingSaveTimer;
 
         public string RevertAddParameterName
         {

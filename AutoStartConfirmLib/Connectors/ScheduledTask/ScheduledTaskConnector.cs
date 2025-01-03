@@ -74,7 +74,7 @@ namespace AutoStartConfirm.Connectors.ScheduledTask
             return ret;
         }
 
-        private ScheduledTaskAutoStartEntry GetAutoStartEntry(Microsoft.Win32.TaskScheduler.Task task)
+        private ScheduledTaskAutoStartEntry GetAutoStartEntry(Task task)
         {
             return new ScheduledTaskAutoStartEntry()
             {
