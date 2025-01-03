@@ -7,7 +7,6 @@ using AutoStartConfirm.Models;
 using AutoStartConfirm.Notifications;
 using AutoStartConfirm.Properties;
 using AutoStartConfirm.Update;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,17 +17,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using System.Windows;
 using System.Xml.Serialization;
 using static AutoStartConfirm.GUI.IMessageService;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AutoStartConfirm.Business
 {
@@ -809,8 +802,18 @@ namespace AutoStartConfirm.Business
                 CompareType.Equal => current.Equals(target, StringComparison.OrdinalIgnoreCase),
                 CompareType.StartsWith => current.StartsWith(target, StringComparison.OrdinalIgnoreCase),
                 CompareType.RegEx => Regex.Match(current, target).Success,
+                CompareType.Wildcard => WildcardCompare(current, target),
                 _ => throw new NotImplementedException($"Handling of compare type {compareType} is not implemented"),
             };
+        }
+
+        private static bool WildcardCompare(string current, string target)
+        {
+            var regexTarget = Regex.Escape(target);
+            regexTarget = $"^{regexTarget}$";
+            regexTarget = regexTarget.Replace("\\*", ".*");
+            regexTarget = regexTarget.Replace("\\?", ".?");
+            return Regex.Match(current, regexTarget).Success;
         }
 
         public async Task<bool> LoadCanBeAdded(AutoStartEntry autoStart)

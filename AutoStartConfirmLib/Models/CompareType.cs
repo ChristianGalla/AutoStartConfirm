@@ -2,6 +2,7 @@
     public enum CompareType {
         Equal,
         StartsWith,
+        Wildcard,
         RegEx,
     }
 }
