@@ -2,10 +2,25 @@ name: Build & Test
 
 on:
   workflow_call:
+    inputs:
+      attestation:
+        type: boolean
+        description: 'Attest artifacts'
+        required: false
+        default: false
     outputs:
       version_number:
-          description: "Build version number"
-          value: ${{ jobs.build.outputs.version_number }}
+        description: "Build version number"
+        value: ${{ jobs.build.outputs.version_number }}
+      setup_attestation_url:
+        description: "Setup attestation url"
+        value: ${{ jobs.build.outputs.setup_attestation_url }}
+      sbom_framework_dependent_attestation_url:
+        description: "SBOM framework dependent attestation url"
+        value: ${{ jobs.build.outputs.sbom_framework_dependent_attestation_url }}
+      sbom_standalone_attestation_url:
+        description: "SBOM standalone attestation url"
+        value: ${{ jobs.build.outputs.sbom_standalone_attestation_url }}
   push:
     branches: [ master ]
     paths:
@@ -23,12 +38,20 @@ on:
       - 'AutoStartConfirmTests/**'
       - '.github/workflows/**'
 
+permissions:
+  id-token: write
+  contents: read
+  attestations: write
+  
 jobs:
   build:
     runs-on: windows-latest
     
     outputs:
-      version_number: ${{ steps.get-version-number.outputs.version_number }}
+      version_number: ${{ steps.get-version-number.outputs.version_number }}      
+      setup_attestation_url: ${{ steps.setup-attestation.outputs.attestation-url }}
+      sbom_framework_dependent_attestation_url: ${{ steps.sbom-framework-dependent-attestation.outputs.attestation-url }}
+      sbom_standalone_attestation_url: ${{ steps.sbom-standalone-attestation.outputs.attestation-url }}
 
     steps:
     - uses: actions/checkout@v4
@@ -96,3 +119,53 @@ jobs:
         name: AutoStartConfirmSetup
         path: build\publish\*.msi
         if-no-files-found: error
+
+    - name: Generate framework dependent SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        artifact-name: FrameworkDependent.sbom.spdx.json
+        output-file: FrameworkDependent.sbom.spdx.json
+        file: ./Build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.deps.json
+
+    - name: Generate standalone SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        artifact-name: Standalone.sbom.spdx.json
+        output-file: Standalone.sbom.spdx.json
+        file: ./Build/publish/Release_Standalone_win-x64/AutoStartConfirm.deps.json
+        
+    - name: Generate artifact attestation
+      if: ${{ inputs.attestation }}
+      id: setup-attestation
+      uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: |
+          build/publish/*.msi
+          build/publish/**/AutoStartConfirmLib.dll
+          build/publish/**/AutoStartConfirmLib.pdb
+          build/publish/**/AutoStartConfirm.dll
+          build/publish/**/AutoStartConfirm.exe
+          build/publish/**/AutoStartConfirm.pdb
+          build/publish/**/AutoStartConfirm.deps.json
+        
+    - name: Generate framework dependent SBOM attestation
+      if: ${{ inputs.attestation }}
+      id: sbom-framework-dependent-attestation
+      uses: actions/attest-sbom@v1
+      with:
+        subject-path: |
+          build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.dll
+          build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.exe
+          build/publish/AutoStartConfirmSetup_FrameworkDependent.msi
+        sbom-path: FrameworkDependent.sbom.spdx.json
+        
+    - name: Generate standalone SBOM attestation
+      if: ${{ inputs.attestation }}
+      id: sbom-standalone-attestation
+      uses: actions/attest-sbom@v1
+      with:
+        subject-path: |
+          build/publish/Release_Standalone_win-x64/AutoStartConfirm.dll
+          build/publish/Release_Standalone_win-x64/AutoStartConfirm.exe
+          build/publish/AutoStartConfirmSetup_Standalone.msi
+        sbom-path: Standalone.sbom.spdx.json

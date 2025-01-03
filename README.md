@@ -18,6 +18,7 @@ Therefore, this program monitors whether a program wants to start automatically 
 * [Changelog](#changelog)
 * [Installation](#installation)
   * [Windows Package Manager (Winget)](#windows-package-manager-winget)
+* [Artifact attestation](#artifact-attestation)
 * [Usage documentation](#usage-documentation)
 * [Usage warning](#usage-warning)
 * [State of development](#state-of-development)
@@ -51,6 +52,22 @@ You can install it using the following command prompt or PowerShell command:
 
 ```powershell
 winget install ChristianGalla.AutoStartConfirm
+```
+
+## Artifact attestation
+
+For all releases after January 2025 this project uses [artifact attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds).
+
+You can verify if your Auto Start Confirm installer, executable or dynamic link library file has been generated inside a release workflow of this repository by using the following command after installing the [GitHub CLI](https://github.com/cli/cli#installation):
+
+```powershell
+gh attestation verify --repo ChristianGalla/AutoStartConfirm AutoStartConfirmSetup_Standalone.msi
+```
+
+Also, you can verify the software bill of materials (SBOM):
+
+```powershell
+gh attestation verify --repo ChristianGalla/AutoStartConfirm --predicate-type https://spdx.dev/Document/v2.3 --format=json AutoStartConfirmSetup_Standalone.msi
 ```
 
 ## Usage documentation

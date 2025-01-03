@@ -3,9 +3,16 @@ name: Create release
 on:
   workflow_dispatch:
 
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+  
 jobs:
   build:
     uses: ./.github/workflows/ci.yml
+    with:
+      attestation: true
   
   create_release:
     needs: build
@@ -17,16 +24,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Download build artifact
+      - name: Download setup artifact
         uses: actions/download-artifact@v4.1.8
         with:
           name: AutoStartConfirmSetup
+        
+      - name: Download framework dependent SBOM artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: FrameworkDependent.sbom.spdx.json
+        
+      - name: Download standalone SBOM artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: Standalone.sbom.spdx.json
           
       - name: Create tag and release
         run: |
           $v = "${{needs.build.outputs.version_number}}" -split "\."
           $semver = ($v | Select-Object -SkipLast 1) -join "."
-          gh release create "v$semver" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup_Standalone.msi AutoStartConfirmSetup_FrameworkDependent.msi
+          gh release create "v$semver" -d -p --title "$semver" --generate-notes AutoStartConfirmSetup_Standalone.msi AutoStartConfirmSetup_FrameworkDependent.msi Standalone.sbom.spdx.json FrameworkDependent.sbom.spdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh        
