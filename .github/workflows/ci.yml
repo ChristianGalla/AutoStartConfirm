@@ -139,14 +139,24 @@ jobs:
       id: setup-attestation
       uses: actions/attest-build-provenance@v2
       with:
-        subject-path: build\publish\*.msi
+        subject-path: |
+          build/publish/*.msi
+          build/publish/**/AutoStartConfirmLib.dll
+          build/publish/**/AutoStartConfirmLib.pdb
+          build/publish/**/AutoStartConfirm.dll
+          build/publish/**/AutoStartConfirm.exe
+          build/publish/**/AutoStartConfirm.pdb
+          build/publish/**/AutoStartConfirm.deps.json
         
     - name: Generate framework dependent SBOM attestation
       if: ${{ inputs.attestation }}
       id: sbom-framework-dependent-attestation
       uses: actions/attest-sbom@v1
       with:
-        subject-path: build\publish\AutoStartConfirmSetup_FrameworkDependent.msi
+        subject-path: |
+          build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.dll
+          build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.exe
+          build/publish/AutoStartConfirmSetup_FrameworkDependent.msi
         sbom-path: FrameworkDependent.sbom.spdx.json
         
     - name: Generate standalone SBOM attestation
@@ -154,5 +164,8 @@ jobs:
       id: sbom-standalone-attestation
       uses: actions/attest-sbom@v1
       with:
-        subject-path: build\publish\AutoStartConfirmSetup_Standalone.msi
+        subject-path: |
+          build/publish/Release_Standalone_win-x64/AutoStartConfirm.dll
+          build/publish/Release_Standalone_win-x64/AutoStartConfirm.exe
+          build/publish/AutoStartConfirmSetup_Standalone.msi
         sbom-path: Standalone.sbom.spdx.json
