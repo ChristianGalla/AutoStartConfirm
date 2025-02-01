@@ -41,12 +41,14 @@
       },
       "H.NotifyIcon.WinUI": {
         "type": "Direct",
-        "requested": "[2.0.131, )",
-        "resolved": "2.0.131",
-        "contentHash": "W+C+Nl1XhsGMbPjW0GyK311qJa8uTeqXZJ7WziPjgqTPDis8tIhWKh+/nB9Jz0XPBSQntQzmIkrSiUwmohee9g==",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "iWaNX3qbcOWisPygW091RFzY1tl//Nm2HCIzBxFDoz+cpRhdInuV/xelqQ8WQTM0z5PamA9+FgGlSYygzu18Gw==",
         "dependencies": {
-          "H.NotifyIcon": "2.0.131",
-          "Microsoft.WindowsAppSDK": "1.4.231115000"
+          "H.NotifyIcon": "2.2.0",
+          "Microsoft.WindowsAppSDK": "1.6.241114003",
+          "System.Collections.Immutable": "9.0.0",
+          "System.Reflection.Metadata": "9.0.0"
         }
       },
       "Microsoft.CSharp": {
@@ -194,18 +196,18 @@
       },
       "H.GeneratedIcons.System.Drawing": {
         "type": "Transitive",
-        "resolved": "2.0.131",
-        "contentHash": "QoNGQrhxzG+dQufa4xRjSqihMy5aVVVZqQUt0fLJbwhs7rcM4hpN1qVkZpZEkHsRgrHfFBC/Ursjh8STY/sg7A==",
+        "resolved": "2.2.0",
+        "contentHash": "KJ/hQZTtW3w8Rw8ktogAwY9AcVzpUldVprTD3eyQ1XyZINLHBQqgtu0ZArmuYlp+lUR0lsqAmaARXZIOFBWmQg==",
         "dependencies": {
-          "System.Drawing.Common": "8.0.0"
+          "System.Drawing.Common": "9.0.0"
         }
       },
       "H.NotifyIcon": {
         "type": "Transitive",
-        "resolved": "2.0.131",
-        "contentHash": "mdznQAfcJFehblFoDUvtmdm1Y9+u1eMN1ffORbdYv5EwreMxkCwvdj8qQn3qnUo9EIJ6h5Xdgqey9Nj4us8w7w==",
+        "resolved": "2.2.0",
+        "contentHash": "x3rk9dLAXpMrfngnC7oHmYF4sULEpEdD9hLMIt0W41MZ8WYeCY63SeyJX1TKcvJ7BI24JciLxhXOuWrSRCEiQA==",
         "dependencies": {
-          "H.GeneratedIcons.System.Drawing": "2.0.131"
+          "H.GeneratedIcons.System.Drawing": "2.2.0"
         }
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
@@ -279,8 +281,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+        "resolved": "9.0.0",
+        "contentHash": "z8FfGIaoeALdD+KF44A2uP8PZIQQtDGiXsOLuN8nohbKhkyKt7zGaZb+fKiCxTuBqG22Q7myIAioSWaIcOOrOw=="
       },
       "NLog.Extensions.Logging": {
         "type": "Transitive",
@@ -297,6 +299,11 @@
         "resolved": "9.0.0",
         "contentHash": "oTE5IfuMoET8yaZP/vdvy9xO47guAv/rOhe4DODuFBN3ySprcQOlXqO3j+e/H/YpKKR5sglrxRaZ2HYOhNJrqA=="
       },
+      "System.Collections.Immutable": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "QhkXUl2gNrQtvPmtBTQHb0YsUrDiDQ2QS09YbtTTiSjGcf7NBqtYbrG/BE06zcBPCKEwQGzIv13IVdXNOSub2w=="
+      },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -304,16 +311,24 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "JkbHJjtI/dWc5dfmEdJlbe3VwgZqCkZRtfuWFh5GOv0f+gGCfBtzMpIVkmdkj2AObO9y+oiOi81UGwH3aBYuqA==",
+        "resolved": "9.0.0",
+        "contentHash": "uoozjI3+dlgKh2onFJcz8aNLh6TRCPlLSh8Dbuljc8CdvqXrxHOVysJlrHvlsOCqceqGBR1wrMPxlnzzhynktw==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "8.0.0"
+          "Microsoft.Win32.SystemEvents": "9.0.0"
         }
       },
       "System.Reflection.Emit": {
         "type": "Transitive",
         "resolved": "4.7.0",
         "contentHash": "VR4kk8XLKebQ4MZuKuIni/7oh+QGFmZW3qORd1GvBq/8026OpW501SzT/oypwiQl4TvT8ErnReh/NzY9u+C6wQ=="
+      },
+      "System.Reflection.Metadata": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "ANiqLu3DxW9kol/hMmTWbt3414t9ftdIuiIU7j80okq2YzAueo120M442xk1kDJWtmZTqWQn7wHDvMRipVOEOQ==",
+        "dependencies": {
+          "System.Collections.Immutable": "9.0.0"
+        }
       },
       "System.Security.AccessControl": {
         "type": "Transitive",
@@ -381,8 +396,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+        "resolved": "9.0.0",
+        "contentHash": "z8FfGIaoeALdD+KF44A2uP8PZIQQtDGiXsOLuN8nohbKhkyKt7zGaZb+fKiCxTuBqG22Q7myIAioSWaIcOOrOw=="
       },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
