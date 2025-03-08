@@ -58,7 +58,7 @@ jobs:
 
     # install .NET 7 for license downloader and newer for app
     - name: install .NET versions
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: | 
           7.x
