@@ -55,6 +55,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: install .NET versions
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version:  | 
+          '7' # license downloader
+          '8' # app
+        include-prerelease: false
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
