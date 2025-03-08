@@ -61,8 +61,8 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: | 
-          7 
-          8
+          7.x
+          8.x
         include-prerelease: false
     
     - name: Setup MSBuild
