@@ -30,13 +30,20 @@
             <StackPanel Orientation="Vertical" Margin="24">
 
                 <Button x:Name="ClearHistoryButton" Margin="0,0,0,25" Click="ClearHistoryButton_Click" x:Uid="ButtonClearHistory" />
-                
+
                 <ToggleSwitch 
-                    Margin="0,0,0,25"
+                    Margin="0,0,0,0"
+                    IsEnabled="{x:Bind AppStatus.IsNotOwnAutoStartToggling, Mode=OneWay}"
                     IsOn="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"
                     Name="OwnAutoStartToggle"
                     Toggled="OwnAutoStart_Toggled"
                     x:Uid="ToggleOwnAutoStart"/>
+                
+                <ProgressRing
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,25"
+                    IsActive="{x:Bind AppStatus.IsOwnAutoStartToggling, Mode=OneWay}"
+                    Width="32"/>
 
                 <ToggleSwitch x:Name="UpdateCheckCheckbox"
                           Margin="0,0,0,25"

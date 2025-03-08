@@ -26,6 +26,34 @@ namespace AutoStartConfirm.Models
             }
         }
 
+        protected bool isOwnAutoStartToggling = false;
+
+        // toggling own auto start can be slow because of OS / antimalware software => show busy indicator during toggling
+        public bool IsOwnAutoStartToggling
+        {
+            get
+            {
+                return isOwnAutoStartToggling;
+            }
+            set
+            {
+                isOwnAutoStartToggling = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public bool IsNotOwnAutoStartToggling
+        {
+            get
+            {
+                return !isOwnAutoStartToggling;
+            }
+            set
+            {
+                isOwnAutoStartToggling = !value;
+                NotifyPropertyChanged();
+            }
+        }
+
         protected int runningActionCount = 0;
 
         public AppStatus()

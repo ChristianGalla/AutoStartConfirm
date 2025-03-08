@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.GUI
@@ -132,7 +133,7 @@ namespace AutoStartConfirm.GUI
 
 
 #pragma warning disable IDE0060 // Remove unused parameter
-        private async void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
+        private void OwnAutoStart_Toggled(object sender, RoutedEventArgs e)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
@@ -144,7 +145,19 @@ namespace AutoStartConfirm.GUI
             {
                 return;
             }
-            await AutoStartBusiness.ToggleOwnAutoStart();
+            var toggleThread = new Thread(new ThreadStart(async () =>
+            {
+                try
+                {
+                    AppStatus.IsOwnAutoStartToggling = true;
+                    await AutoStartBusiness.ToggleOwnAutoStart();
+                }
+                finally
+                {
+                    AppStatus.IsOwnAutoStartToggling = false;
+                }
+            }));
+            toggleThread.Start();
         }
 
 
