@@ -60,8 +60,8 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version:  | 
-          '7' # license downloader
-          '8' # app
+          7 # license downloader
+          8 # app
         include-prerelease: false
     
     - name: Setup MSBuild
