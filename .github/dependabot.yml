@@ -6,7 +6,11 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/" # Location of package manifests
+    directories:
+      - "/AutoStartConfirm"
+      - "/AutoStartConfirmLib"
+      - "/AutoStartConfirmSetup"
+      - "/AutoStartConfirmTests"
     schedule:
       interval: "monthly"
 
