@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AutoStartConfirmTest (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AutoStartConfirmTest (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
