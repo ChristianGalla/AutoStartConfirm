@@ -160,7 +160,7 @@ jobs:
     - name: Generate framework dependent SBOM attestation
       if: ${{ inputs.attestation }}
       id: sbom-framework-dependent-attestation
-      uses: actions/attest-sbom@v1
+      uses: actions/attest-sbom@v3
       with:
         subject-path: |
           build/publish/Release_FrameworkDependent_win-x64/AutoStartConfirm.dll
@@ -171,7 +171,7 @@ jobs:
     - name: Generate standalone SBOM attestation
       if: ${{ inputs.attestation }}
       id: sbom-standalone-attestation
-      uses: actions/attest-sbom@v1
+      uses: actions/attest-sbom@v3
       with:
         subject-path: |
           build/publish/Release_Standalone_win-x64/AutoStartConfirm.dll
