@@ -146,7 +146,7 @@ jobs:
     - name: Generate artifact attestation
       if: ${{ inputs.attestation }}
       id: setup-attestation
-      uses: actions/attest-build-provenance@v2
+      uses: actions/attest-build-provenance@v3
       with:
         subject-path: |
           build/publish/*.msi
