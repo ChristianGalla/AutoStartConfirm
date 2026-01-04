@@ -22,7 +22,7 @@ jobs:
         run: echo new version ${{ needs.build.outputs.version_number }}
         
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Download setup artifact
         uses: actions/download-artifact@v4.1.9
