@@ -122,7 +122,7 @@ jobs:
     - name: Test solution
       run: vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\win-x64\AutoStartConfirmTests.dll"
     
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       name: Upload artifacts
       with:
         name: AutoStartConfirmSetup
