@@ -1,5 +1,5 @@
-﻿<Project>
-  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="5.0.0" />
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="7.0.0" />
   <PropertyGroup>
     <!-- Imported variables section. Default values should be set here for when the project is built from within VS. -->
     <!-- Logic to figure out if we're doing a FrameworkDependent or static build. Do FrameworkDependent by default -->
@@ -46,16 +46,16 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
-    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
-    <PackageReference Include="WixToolset.Heat" Version="5.0.2" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.Heat" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.rtf" />
     <Content Include="SkipSpecialFiles.xslt" />
   </ItemGroup>
   <!-- Steps to execute after build, but only if called from the Daily.targets file -->
-  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="5.0.0" />
+  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="7.0.0" />
   <PropertyGroup>
     <PreBuildEvent />
   </PropertyGroup>
