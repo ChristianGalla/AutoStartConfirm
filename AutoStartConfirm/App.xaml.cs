@@ -55,16 +55,12 @@ namespace AutoStartConfirm
         private bool disposedValue;
 
 
-        public App(
-            ILogger<App> logger,
-            IAppStatus appStatus,
-            IAutoStartBusiness autoStartService,
-            IDispatchService dispatchService)
+        public App()
         {
-            Logger = logger;
-            AppStatus = appStatus;
-            AutoStartBusiness = autoStartService;
-            DispatchService = dispatchService;
+            Logger = Ioc.Default.GetRequiredService<ILogger<App>>();
+            AppStatus = Ioc.Default.GetRequiredService<IAppStatus>();
+            AutoStartBusiness = Ioc.Default.GetRequiredService<IAutoStartBusiness>();
+            DispatchService = Ioc.Default.GetRequiredService<IDispatchService>();
 
             UnhandledException += UnhandledExceptionHandler;
 
