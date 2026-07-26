@@ -89,9 +89,6 @@
     </None>
     <DataFiles Include="Licenses\**" />
   </ItemGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="If Not Exist $(ProjectDir)Licenses (dotnet-project-licenses -i .\AutoStartConfirmLib.csproj -o Licenses -t --timeout 60 -e -c -f Licenses -u --outfile Licenses.txt)" />
-  </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
