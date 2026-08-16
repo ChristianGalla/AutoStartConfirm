@@ -194,8 +194,7 @@ namespace AutoStartConfirm
             else
             {
                 Logger.LogTrace("Showing main window");
-                Window.Show();
-                Window.Activate();
+                Window.ShowAndActivate();
             }
         }
 
@@ -250,7 +249,7 @@ namespace AutoStartConfirm
                             case "viewRemove":
                                 // todo: implement ShowRemoved
                                 // AutoStartBusiness.ShowRemoved(Guid.Parse(args["id"]));
-                                Window?.Show();
+                                Window?.ShowAndActivate();
                                 break;
                             case "revertRemove":
                                 AutoStartBusiness.AddAutoStart(Guid.Parse(args["id"]));
@@ -261,7 +260,7 @@ namespace AutoStartConfirm
                             case "viewAdd":
                                 // todo: implement ShowAdd
                                 // AutoStartBusiness.ShowAdd(Guid.Parse(args["id"]));
-                                Window?.Show();
+                                Window?.ShowAndActivate();
                                 break;
                             case "revertAdd":
                                 AutoStartBusiness.RemoveAutoStart(Guid.Parse(args["id"]));
@@ -295,7 +294,7 @@ namespace AutoStartConfirm
                     else
                     {
                         Logger.LogTrace("Missing action");
-                        Window?.Show();
+                        Window?.ShowAndActivate();
                     }
                 });
             };

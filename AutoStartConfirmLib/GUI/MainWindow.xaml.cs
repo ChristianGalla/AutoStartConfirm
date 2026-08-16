@@ -6,6 +6,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
+using WinRT.Interop;
 
 namespace AutoStartConfirm.GUI
 {
@@ -50,6 +52,22 @@ namespace AutoStartConfirm.GUI
                 AppWindow.TitleBar.ButtonForegroundColor = ColorHelper.FromArgb(255, 202, 202, 202);
                 AppWindow.TitleBar.ButtonInactiveForegroundColor = ColorHelper.FromArgb(255, 102, 102, 102);
             }
+        }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        /// <summary>
+        /// Shows the window (if hidden) and brings it to the foreground,
+        /// giving it focus.
+        /// </summary>
+        public void ShowAndActivate()
+        {
+            AppWindow.Show();
+            var hWnd = WindowNative.GetWindowHandle(this);
+            SetForegroundWindow(hWnd);
+            Activate();
         }
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
