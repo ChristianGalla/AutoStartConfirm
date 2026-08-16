@@ -40,6 +40,14 @@ removed auto-starts.
   - `Notifications/`, `Update/`, `Exceptions/`, `Strings/` – toast
     notifications, self-update via Octokit/GitHub releases, custom
     exceptions, localized strings.
+  - `Strings/` – localization resources, one `Resources.resw` per
+    culture: `en-US` (default) and `de-DE`. Loaded at runtime via
+    `Windows.ApplicationModel.Resources.ResourceLoader` with resource map
+    id `"AutoStartConfirmLib/Resources"` (e.g. `new
+    ResourceLoader("AutoStartConfirmLib/Resources").GetString("Some/Key")`),
+    used throughout `GUI/`, `Notifications/`, and `Models/AutoStartEntry.cs`.
+    When adding a new user-facing string, add the key to **both**
+    `Strings/en-US/Resources.resw` and `Strings/de-DE/Resources.resw`.
 - `AutoStartConfirmSetup/` – WiX installer project (produces
   `AutoStartConfirmSetup_Standalone.msi` and
   `AutoStartConfirmSetup_FrameworkDependent.msi`).
