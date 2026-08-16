@@ -41,9 +41,19 @@ There are two versions:
 
 Usually, you should download and install **AutoStartConfirmSetup_Standalone.msi**. This version includes all dependencies and can easily be installed on any computer.
 
-The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) and is therefore much smaller.
-If multiple programs are using this runtime, it is possible to save disk space having only one central runtime installation.
-When using this installer, you are responsible for installing the runtime. If it is not installed, the program cannot run.
+The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the **.NET Desktop Runtime** and is therefore much smaller.
+If multiple programs are using the runtime, only one central runtime installation can save disk space and enable independent security updates.
+When using this installer, you are responsible for installing the correct runtime version. If it is not installed, the program cannot run.
+
+The .NET Desktop Runtime depends on the program version:
+
+| Program version        | .NET Desktop Runtime | Microsoft's Runtime support end date |
+|------------------------|------------------------------|-----------------------------|
+| 4.X.Y (future release) | [10.0](https://dotnet.microsoft.com/download/dotnet/10.0) | 2028-11-10 |
+| 3.X.Y                  | [8.0](https://dotnet.microsoft.com/download/dotnet/8.0) | 2026-11-10 |
+| 2.X.Y                  | [7.0](https://dotnet.microsoft.com/download/dotnet/7.0) | 2024-05-14 |
+| 1.X.Y                  | [4.7](https://dotnet.microsoft.com/download/dotnet-framework/net47)| - |
+
 
 ### Windows Package Manager (Winget)
 
