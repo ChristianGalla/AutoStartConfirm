@@ -12,8 +12,9 @@
 	  <EnableMsixTooling>true</EnableMsixTooling>
 	  <Nullable>enable</Nullable>
 	  <PublishReadyToRun>false</PublishReadyToRun>
-	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-  </PropertyGroup>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+	</PropertyGroup>
 
   <ItemGroup>
     <Page Remove="UnitTestApp.xaml" />
