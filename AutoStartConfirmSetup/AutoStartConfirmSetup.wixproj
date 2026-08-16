@@ -30,6 +30,7 @@
      lives in its own component ("MainExecutable"), separate from the shortcut components, so the shortcuts
      can be installed/removed independently (e.g. desktop shortcut is conditional) without affecting the exe. -->
     <SuppressIces>ICE69</SuppressIces>
+    <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
     <DefineConstants>Debug</DefineConstants>
