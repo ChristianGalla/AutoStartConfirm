@@ -32,6 +32,8 @@ Requires Windows + Visual Studio (WinUI 3 / Windows App SDK workload) or the .NE
 
 Building the app project alone (e.g. via `msbuild`/`dotnet build` on `AutoStartConfirm.csproj`/`AutoStartConfirmLib.csproj` or the `AutoStartConfirmSetup` WiX project directly) does not produce a working installer, since the setup project consumes a published app output. For any full build that must include the `AutoStartConfirmSetup` MSIs, always use the `.bat` files in `Build/` (`Daily_Debug.bat`/`Daily_Release.bat`, which wrap `Daily.targets`) rather than invoking `msbuild`/`dotnet build` on individual projects.
 
+**Never build `AutoStartConfirmSetup` (the WiX project) directly** — e.g. never run `msbuild AutoStartConfirmSetup\AutoStartConfirmSetup.wixproj` or build it via Visual Studio's "Build"/"Rebuild" on that project alone. Its build/publish input and output paths (the published app files it packages) are only wired up correctly when driven through `Build\Daily_Debug.bat`/`Build\Daily_Release.bat` (via `Daily.targets`), which first publish the app and then invoke the setup project with the right properties. Building the setup project directly will fail or silently package stale/missing files.
+
 ```powershell
 # Restore
 nuget restore AutoStartConfirm.sln
