@@ -97,7 +97,7 @@ jobs:
       run: nuget restore AutoStartConfirm.sln
  
     - name: Extract 3rd party licenses
-      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {.\Build\Update-ThirdPartyLicenses.ps1}
+      run: if (-not (Test-Path AutoStartConfirmLib\Licenses)) {.\Build\Export-ThirdPartyLicenses.ps1}
 
     - name: Build product
       run: msbuild build/Daily.targets /property:Configuration=Release
