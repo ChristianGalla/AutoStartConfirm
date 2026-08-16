@@ -24,6 +24,11 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <!-- MRT Core / ResourceLoader expects the main app's resource index file to be named
+         "resources.pri" next to the executable. The Microsoft.Windows.SDK.BuildTools.MSIX
+         package no longer applies this naming automatically for WinExe output, so it must
+         be set explicitly here to avoid a FileNotFoundException from ResourceLoader at runtime. -->
+    <ProjectPriFileName>resources.pri</ProjectPriFileName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
     <OutputPath>bin\x64\Debug\</OutputPath>
