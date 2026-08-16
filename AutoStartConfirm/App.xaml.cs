@@ -195,6 +195,7 @@ namespace AutoStartConfirm
             {
                 Logger.LogTrace("Showing main window");
                 Window.Show();
+                Window.Activate();
             }
         }
 
