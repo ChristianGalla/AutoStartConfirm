@@ -15,7 +15,6 @@ Windows tray app (WinUI 3 / Windows App SDK) that monitors Windows auto-start lo
   - `Strings/` – localization resources, one `Resources.resw` per culture: `en-US` (default) and `de-DE`. Loaded at runtime via `Windows.ApplicationModel.Resources.ResourceLoader` with resource map id `"AutoStartConfirmLib/Resources"` (e.g. `new ResourceLoader("AutoStartConfirmLib/Resources").GetString("Some/Key")`), used throughout `GUI/`, `Notifications/`, and `Models/AutoStartEntry.cs`. When adding a new user-facing string, add the key to **both** `Strings/en-US/Resources.resw` and `Strings/de-DE/Resources.resw`.
 - `AutoStartConfirmSetup/` – WiX installer project (produces `AutoStartConfirmSetup_Standalone.msi` and `AutoStartConfirmSetup_FrameworkDependent.msi`). MSI (not the more typical MSIX packaging for WinUI 3 apps) is used deliberately: a bundled/MSIX-packaged WinUI 3 app runs with limited permissions and cannot reliably monitor/modify auto-start locations that require elevated (admin) access (registry Run keys under `HKLM`, services, scheduled tasks, etc.), which MSIX's sandboxing restricts. Don't switch this project to MSIX packaging without re-validating those elevated-permission scenarios.
 - `AutoStartConfirmTest/` – **current** MSTest test project (net10, referenced in `AutoStartConfirm.sln`). Tests live under `Business/` and reuse `TestsBase.cs` for shared `FakeItEasy` fakes.
-- `AutoStartConfirmTests/` – older duplicate test project (net8), not part of the `.sln` but still built/run by `.github/workflows/ci.yml`. Keep these two projects' test files in sync until the CI workflow and solution are unified onto a single test project; check both when adding/changing tests for `AutoStartBusiness`.
 - `Build/` – `Daily.targets`/`Daily_Debug.bat`/`Daily_Release.bat` drive MSBuild + WiX packaging for local/CI builds.
 
 ## Key conventions
@@ -44,13 +43,13 @@ Build\Daily_Release.bat
 # Daily.targets is what these .bat files call under the hood:
 msbuild build/Daily.targets /property:Configuration=Release
 
-# Build & run all tests (matches CI, uses AutoStartConfirmTests project)
-dotnet restore AutoStartConfirmTests\AutoStartConfirmTests.csproj
-msbuild AutoStartConfirmTests\AutoStartConfirmTests.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false -p:OutputPath="bin/x64/Release/win-x64/"
-vstest.console.exe /Platform:x64 "AutoStartConfirmTests\bin\x64\Release\win-x64\AutoStartConfirmTests.dll"
+# Build & run all tests (matches CI, uses AutoStartConfirmTest project)
+dotnet restore AutoStartConfirmTest\AutoStartConfirmTest.csproj
+msbuild AutoStartConfirmTest\AutoStartConfirmTest.csproj -p:Configuration=Release -p:Platform=x64 -p:PublishReadyToRun=false -p:OutputPath="bin/x64/Release/win-x64/"
+vstest.console.exe /Platform:x64 "AutoStartConfirmTest\bin\x64\Release\win-x64\AutoStartConfirmTest.dll"
 
 # Run a single test class/method (vstest.console.exe filter)
-vstest.console.exe /Platform:x64 /Tests:AutoStartBusinessTests.SomeTestMethod "AutoStartConfirmTests\bin\x64\Release\win-x64\AutoStartConfirmTests.dll"
+vstest.console.exe /Platform:x64 /Tests:AutoStartBusinessTests.SomeTestMethod "AutoStartConfirmTest\bin\x64\Release\win-x64\AutoStartConfirmTest.dll"
 ```
 
 For the solution's current test project (`AutoStartConfirmTest`, net10),

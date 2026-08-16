@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AutoStartConfirmTests.TestHelpers
+namespace AutoStartConfirmTest.TestHelpers
 {
     public class STATestClassAttribute : TestClassAttribute
     {

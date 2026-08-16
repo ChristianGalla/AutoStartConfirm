@@ -12,7 +12,7 @@
 //using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AutoStartConfirmTests
+namespace AutoStartConfirmTest
 {
     [TestClass]
     public class AppTest

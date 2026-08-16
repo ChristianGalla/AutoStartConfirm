@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AutoStartConfirmTests.TestHelpers
+namespace AutoStartConfirmTest.TestHelpers
 {
     public class STATestMethodAttribute(
         TestMethodAttribute? testMethodAttribute,

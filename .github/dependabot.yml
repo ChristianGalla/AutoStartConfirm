@@ -9,7 +9,7 @@ updates:
     directories:
       - "/AutoStartConfirm"
       - "/AutoStartConfirmLib"
-      - "/AutoStartConfirmTests"
+      - "/AutoStartConfirmTest"
     schedule:
       interval: "monthly"
 
