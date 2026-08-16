@@ -49,6 +49,16 @@
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
+  <!-- When invoked from Daily.targets, $(Configuration) is the plain value (e.g. "Release") for both
+       BuildType variants, and BuildType is passed as a separate property. This means the configuration-based
+       conditions above never match in that scenario, causing both BuildType variants to share the same
+       OutputPath/IntermediateOutputPath and MSBuild's incremental build then reuses cached (up-to-date)
+       outputs, producing byte-identical MSIs. Append BuildDirModifier (unique per BuildType) to guarantee
+       distinct output/intermediate directories regardless of how Configuration is passed in. -->
+  <PropertyGroup>
+    <OutputPath>bin\$(Platform)\$(Configuration)$(BuildDirModifier)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)$(BuildDirModifier)\</IntermediateOutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
     <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
