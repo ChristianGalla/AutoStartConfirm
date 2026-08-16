@@ -64,6 +64,7 @@
 			<Files Include="$(var.BasePath)\**">
 				<Exclude Files="$(var.BasePath)\$(var.ProjectName).exe" />
 				<Exclude Files="$(var.BasePath)\nlog.sample.config" />
+				<Exclude Files="$(var.BasePath)\nlog.config" />
 			</Files>
 		</ComponentGroup>
 
