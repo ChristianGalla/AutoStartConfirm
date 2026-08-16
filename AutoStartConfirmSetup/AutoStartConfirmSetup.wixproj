@@ -48,11 +48,9 @@
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
     <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
-    <PackageReference Include="WixToolset.Heat" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.rtf" />
-    <Content Include="SkipSpecialFiles.xslt" />
   </ItemGroup>
   <!-- Steps to execute after build, but only if called from the Daily.targets file -->
   <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="7.0.0" />
@@ -62,11 +60,9 @@
   <Target Name="BeforeBuild">
     <!-- Get version number of assembly -->
     <PropertyGroup>
-      <LinkerBaseInputPaths>$(MyBasePath)</LinkerBaseInputPaths>
       <!-- Variables to pass into Product.wxs -->
       <DefineConstants>BasePath=$(MyBasePath);ProjectFullName=$(ProjectFullName)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="$(ProjectName).wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="$(ProjectName)_Project" SuppressCom="true" Directory="$(MyBasePath)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="SkipSpecialFiles.xslt" />
   </Target>
   <Target Name="AfterBuild">
     <Message Text="BuildType==$(BuildType)" />
