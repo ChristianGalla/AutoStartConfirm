@@ -1,14 +1,17 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
+using AutoStartConfirm.Models;
 using AutoStartConfirm.Update;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using Windows.ApplicationModel.Resources;
 
 namespace AutoStartConfirm.GUI
@@ -88,21 +91,41 @@ namespace AutoStartConfirm.GUI
             }
         }
 
-        private string? _thirdPartyLicenses;
+        private IReadOnlyList<ThirdPartyLicenseEntry>? _thirdPartyLicenses;
         private bool disposedValue;
 
-        public string? ThirdPartyLicenses
+        public IReadOnlyList<ThirdPartyLicenseEntry> ThirdPartyLicenses
         {
             get
             {
                 if (_thirdPartyLicenses == null)
                 {
-                    string path = @"Licenses\Licenses.txt";
+                    var entries = new List<ThirdPartyLicenseEntry>();
+                    string licensesDirectory = @"Licenses";
+                    string path = Path.Combine(licensesDirectory, "Licenses.json");
 
                     if (File.Exists(path))
                     {
-                        _thirdPartyLicenses = File.ReadAllText(path);
+                        var json = File.ReadAllText(path);
+                        var parsedEntries = JsonSerializer.Deserialize<List<ThirdPartyLicenseEntry>>(json);
+                        if (parsedEntries != null)
+                        {
+                            foreach (var entry in parsedEntries)
+                            {
+                                if (!string.IsNullOrEmpty(entry.LicenseFile))
+                                {
+                                    var licenseFilePath = Path.Combine(licensesDirectory, entry.LicenseFile);
+                                    if (File.Exists(licenseFilePath))
+                                    {
+                                        entry.LicenseFilePath = licenseFilePath;
+                                    }
+                                }
+                                entries.Add(entry);
+                            }
+                        }
                     }
+
+                    _thirdPartyLicenses = entries;
                 }
                 return _thirdPartyLicenses;
             }
@@ -115,6 +138,15 @@ namespace AutoStartConfirm.GUI
 
             var resourceLoader = new ResourceLoader("AutoStartConfirmLib/Resources");
             NavTitle = resourceLoader.GetString("NavigationAbout/Content");
+        }
+
+        private async void LicenseFileButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (sender is Microsoft.UI.Xaml.Controls.Button { Tag: string licenseFilePath } && File.Exists(licenseFilePath))
+            {
+                var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(Path.GetFullPath(licenseFilePath));
+                await Windows.System.Launcher.LaunchFileAsync(file);
+            }
         }
 
         private void Dispose(bool disposing)

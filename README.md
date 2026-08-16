@@ -41,7 +41,7 @@ There are two versions:
 
 Usually, you should download and install **AutoStartConfirmSetup_Standalone.msi**. This version includes all dependencies and can easily be installed on any computer.
 
-The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) and is therefore much smaller.
+The installer **AutoStartConfirmSetup_FrameworkDependent.msi** includes all dependencies except the [.NET Desktop Runtime 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) and is therefore much smaller.
 If multiple programs are using this runtime, it is possible to save disk space having only one central runtime installation.
 When using this installer, you are responsible for installing the runtime. If it is not installed, the program cannot run.
 
@@ -156,9 +156,10 @@ There are some NuGet dependencies that must be installed before it can be compil
 
 To build the installers using the [WiX Toolset](https://wixtoolset.org/) execute [Build/Daily_Debug.bat](Build/Daily_Debug.bat) for a debug or [Build/Daily_Release.bat](Build/Daily_Release.bat) for a release version build.
 
-To extract third party licenses run:
+To extract third party licenses run [Build/Export-ThirdPartyLicenses.ps1](Build/Export-ThirdPartyLicenses.ps1):
 
 ```powershell
-dotnet tool install --global dotnet-project-licenses
-dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+.\Build\Export-ThirdPartyLicenses.ps1
 ```
+
+This installs the `nuget-license` and `Pandoc` tools if needed, extracts the license information for `AutoStartConfirmLib`'s dependencies into `AutoStartConfirmLib\Licenses\Licenses.json` (read by the app's about page to render a table of package name, version, author, project url and downloaded license file), downloads the individual license texts and converts any HTML license file to plain text, since HTML should not be rendered inside the app for security reasons.

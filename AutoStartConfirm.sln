@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.9.12105.275 stable
+VisualStudioVersion = 18.9.12105.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStartConfirm", "AutoStartConfirm\AutoStartConfirm.csproj", "{BC458D72-75B1-4DBD-8532-7D6D0E58FC21}"
 EndProject
@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FCDFE959
 		build\Daily.targets = build\Daily.targets
 		Build\Daily_Debug.bat = Build\Daily_Debug.bat
 		Build\Daily_Release.bat = Build\Daily_Release.bat
+		Build\Export-ThirdPartyLicenses.ps1 = Build\Export-ThirdPartyLicenses.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStartConfirmLib", "AutoStartConfirmLib\AutoStartConfirmLib.csproj", "{E7F9B8FE-D6E1-429C-96F1-9C7A64AA7C74}"

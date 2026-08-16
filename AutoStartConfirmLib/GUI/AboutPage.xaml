@@ -6,16 +6,23 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:AutoStartConfirm.GUI"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:models="using:AutoStartConfirm.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Margin="24">
-        <ScrollViewer>
+    <Page.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Page.Resources>
 
-            <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap" Grid.Row="0">
+    <ScrollViewer>
+        <StackPanel Orientation="Vertical" Margin="24">
+
+            <TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap">
                 <Bold>Auto Start Confirm</Bold>
+                <LineBreak />
                 <LineBreak />
                 Version <Run Text="{x:Bind Path=Version, Mode=OneTime}"></Run>
                 <LineBreak />
@@ -24,20 +31,57 @@
                 <Run Text="{x:Bind Path=Copyright, Mode=OneTime}"></Run>
                 <LineBreak />
                 <Hyperlink NavigateUri="https://github.com/ChristianGalla/AutoStartConfirm">https://github.com/ChristianGalla/AutoStartConfirm</Hyperlink>
-                <LineBreak />
-                <LineBreak />
-                <LineBreak />
+            </TextBlock>
+
+            <TextBlock TextWrapping="Wrap" Margin="0,24,0,0">
                 <Bold>License:</Bold>
                 <LineBreak />
                 <LineBreak />
                 <Run Text="{x:Bind Path=License, Mode=OneTime}"></Run>
-                <LineBreak />
-                <LineBreak />
+            </TextBlock>
+
+            <TextBlock TextWrapping="Wrap" Margin="0,24,0,0">
                 <Bold>Third party licenses:</Bold>
                 <LineBreak />
                 <LineBreak />
-                <Run Text="{x:Bind Path=ThirdPartyLicenses, Mode=OneTime}"></Run>
             </TextBlock>
-        </ScrollViewer>
-    </Grid>
+            
+            <controls:DataGrid
+                    x:Name="ThirdPartyLicensesGrid"
+                    AutoGenerateColumns="False"
+                    CanUserSortColumns="True"
+                    MinHeight="200"
+                    MinWidth="1000"
+                    IsReadOnly="True"
+                    d:DataContext="{d:DesignInstance Type=models:ThirdPartyLicenseEntry}"
+                    ItemsSource="{x:Bind Path=ThirdPartyLicenses, Mode=OneTime}">
+                <controls:DataGrid.Columns>
+                    <controls:DataGridTextColumn Header="Package" Binding="{Binding PackageId}" Tag="PackageId" />
+                    <controls:DataGridTextColumn Header="Version" Binding="{Binding PackageVersion}" Tag="PackageVersion" />
+                    <controls:DataGridTemplateColumn Header="License" Tag="LicenseFile" CanUserSort="False">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:ThirdPartyLicenseEntry">
+                                <Button
+                                        Tag="{x:Bind LicenseFilePath, Mode=OneTime}"
+                                        Content="View license"
+                                        Click="LicenseFileButton_Click"
+                                        Visibility="{x:Bind HasLicenseFile, Mode=OneTime, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                    <controls:DataGridTextColumn Header="Author" Binding="{Binding Authors}" Tag="Authors" />
+                    <controls:DataGridTemplateColumn Header="Project url" Tag="PackageProjectUrl" CanUserSort="False">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:ThirdPartyLicenseEntry">
+                                <HyperlinkButton
+                                        NavigateUri="{x:Bind PackageProjectUrl, Mode=OneTime}"
+                                        Content="{x:Bind PackageProjectUrl, Mode=OneTime}"
+                                        Visibility="{x:Bind HasPackageProjectUrl, Mode=OneTime, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

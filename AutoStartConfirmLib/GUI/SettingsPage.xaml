@@ -23,45 +23,40 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Page.Content>
+    <ScrollViewer>
 
-        <ScrollViewer>
+        <StackPanel Orientation="Vertical" Margin="24">
 
-            <StackPanel Orientation="Vertical" Margin="24">
+            <Button x:Name="ClearHistoryButton" Margin="0,0,0,25" Click="ClearHistoryButton_Click" x:Uid="ButtonClearHistory" />
 
-                <Button x:Name="ClearHistoryButton" Margin="0,0,0,25" Click="ClearHistoryButton_Click" x:Uid="ButtonClearHistory" />
-
-                <ToggleSwitch 
-                    Margin="0,0,0,0"
-                    IsEnabled="{x:Bind AppStatus.IsNotOwnAutoStartToggling, Mode=OneWay}"
-                    IsOn="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"
-                    Name="OwnAutoStartToggle"
-                    Toggled="OwnAutoStart_Toggled"
-                    x:Uid="ToggleOwnAutoStart"/>
+            <ToggleSwitch 
+                Margin="0,0,0,0"
+                IsEnabled="{x:Bind AppStatus.IsNotOwnAutoStartToggling, Mode=OneWay}"
+                IsOn="{x:Bind AppStatus.HasOwnAutoStart, Mode=OneWay}"
+                Name="OwnAutoStartToggle"
+                Toggled="OwnAutoStart_Toggled"
+                x:Uid="ToggleOwnAutoStart"/>
                 
-                <ProgressRing
-                    HorizontalAlignment="Left"
-                    Margin="0,0,0,25"
-                    IsActive="{x:Bind AppStatus.IsOwnAutoStartToggling, Mode=OneWay}"
-                    Width="32"/>
+            <ProgressRing
+                HorizontalAlignment="Left"
+                Margin="0,0,0,25"
+                IsActive="{x:Bind AppStatus.IsOwnAutoStartToggling, Mode=OneWay}"
+                Width="32"/>
 
-                <ToggleSwitch x:Name="UpdateCheckCheckbox"
-                          Margin="0,0,0,25"
-                          IsOn="{x:Bind SettingsService.CheckForUpdatesOnStart, Mode=TwoWay}"
-                          ToolTipService.ToolTip="Enable"
-                          x:Uid="ToggleUpdateCheck"/>
+            <ToggleSwitch x:Name="UpdateCheckCheckbox"
+                        Margin="0,0,0,25"
+                        IsOn="{x:Bind SettingsService.CheckForUpdatesOnStart, Mode=TwoWay}"
+                        ToolTipService.ToolTip="Enable"
+                        x:Uid="ToggleUpdateCheck"/>
 
-                <ListView
-                    x:Name="EnabledConnectorList"
-                    SelectionMode="None"
-                    ItemsSource="{x:Bind Connectors.Values, Mode=OneTime}"
-                    ItemTemplate="{StaticResource ConnectorListViewTemplate}"
-                    x:Uid="ListEnabledConnectors"/>
+            <ListView
+                x:Name="EnabledConnectorList"
+                SelectionMode="None"
+                ItemsSource="{x:Bind Connectors.Values, Mode=OneTime}"
+                ItemTemplate="{StaticResource ConnectorListViewTemplate}"
+                x:Uid="ListEnabledConnectors"/>
 
-            </StackPanel>
-        </ScrollViewer>
-
-    </Page.Content>
-
+        </StackPanel>
+    </ScrollViewer>
 
 </Page>

@@ -58,12 +58,13 @@ build/run the same way but point at
 `AutoStartConfirmTest\AutoStartConfirmTest.csproj` and its output DLL.
 
 To regenerate third-party license files (required before building
-`AutoStartConfirmLib` if `Licenses/` is missing):
+`AutoStartConfirmLib` if `Licenses/` is missing), run [Build/Update-ThirdPartyLicenses.ps1](Build/Update-ThirdPartyLicenses.ps1):
 
 ```powershell
-dotnet tool install --global dotnet-project-licenses
-dotnet-project-licenses -i AutoStartConfirmLib -o AutoStartConfirmLib\Licenses -t --timeout 60 -e -c -f AutoStartConfirmLib\Licenses -u
+.\Build\Update-ThirdPartyLicenses.ps1
 ```
+
+This installs the `nuget-license` and `Pandoc` tools if needed, extracts the license information for `AutoStartConfirmLib`'s dependencies into `AutoStartConfirmLib\Licenses\Licenses.json` (read by `GUI/AboutPage.xaml.cs`/`AboutPage.xaml` to render a `DataGrid` table of package name, version, author, project url and downloaded license file), downloads the individual license texts and converts any HTML license file to plain text, since HTML must not be rendered inside the app for security reasons.
 
 ## Build & Installer Notes
 
