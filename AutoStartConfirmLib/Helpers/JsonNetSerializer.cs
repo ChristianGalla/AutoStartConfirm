@@ -21,7 +21,7 @@ namespace AutoStartConfirm.Helpers
         /// <param name="value">The object to serialize to JSON.</param>
         /// <param name="builder">Output destination.</param>
         /// <returns>Serialize succeeded (true/false)</returns>
-        public bool SerializeObject(object value, StringBuilder builder)
+        public bool SerializeObject(object? value, StringBuilder builder)
         {
             try
             {
