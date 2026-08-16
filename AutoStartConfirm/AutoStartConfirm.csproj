@@ -28,6 +28,10 @@
          package no longer applies this naming automatically for WinExe output, so it must
          be set explicitly here to avoid a FileNotFoundException from ResourceLoader at runtime. -->
     <ProjectPriFileName>resources.pri</ProjectPriFileName>
+    <!-- Ensures F5 picks up GUI changes from the referenced AutoStartConfirmLib project; VS's
+         fast up-to-date check is evaluated per-project, so the startup project also needs this
+         disabled to force re-checking/re-copying the library's updated output. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
     <OutputPath>bin\x64\Debug_FrameworkDependent\</OutputPath>

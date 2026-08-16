@@ -12,6 +12,10 @@
     <Nullable>enable</Nullable>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <Configurations>Debug Framework Dependent;Release Framework Dependent;Debug Standalone;Release Standalone</Configurations>
+    <!-- WinUI XAML/XBF/PRI generation for this library isn't reliably tracked by Visual Studio's
+         fast up-to-date check, so F5 can run stale GUI code after editing .xaml files here unless
+         a full rebuild is forced. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
     <DefineConstants>$(DefineConstants);DEBUG;FRAMEWORK_DEPENDENT</DefineConstants>
