@@ -12,7 +12,6 @@
     <PublishUrl>publish\</PublishUrl>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <PublishSingleFile>false</PublishSingleFile>
@@ -31,24 +30,28 @@
     <ProjectPriFileName>resources.pri</ProjectPriFileName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>bin\x64\Debug_FrameworkDependent\</OutputPath>
     <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <SelfContained>false</SelfContained>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Standalone|x64'">
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>bin\x64\Debug_Standalone\</OutputPath>
     <DefineConstants>$(DefineConstants);DEBUG;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <SelfContained>true</SelfContained>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Framework Dependent|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
+    <OutputPath>bin\x64\Release_FrameworkDependent\</OutputPath>
     <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <SelfContained>false</SelfContained>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Standalone|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
+    <OutputPath>bin\x64\Release_Standalone\</OutputPath>
     <DefineConstants>$(DefineConstants);RELEASE;DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <SelfContained>true</SelfContained>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\Icon.xcf" />

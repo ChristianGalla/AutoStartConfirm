@@ -25,9 +25,28 @@
 			<!-- Insert Debug into the files if we need -->
 			<DebugModifier Condition="'$(Configuration)' == 'Debug'">_Debug</DebugModifier>
 
+			<!-- Library project referenced by the app; must be cleaned alongside it -->
+			<LibProjectFile>..\AutoStartConfirmLib\AutoStartConfirmLib.csproj</LibProjectFile>
+
+			<!-- Directories to purge before building, to avoid stale incremental-build artifacts
+					 (e.g. a self-contained runtimeconfig.json being reused for a framework-dependent
+					 publish) affecting the outputs below. -->
+			<ProjectDirPath>..\$(ProjectName)\</ProjectDirPath>
+			<LibProjectDirPath>..\AutoStartConfirmLib\</LibProjectDirPath>
+
 		</PropertyGroup>
 
-		<!-- Build both framework-dependent and standalone releases -->
+		<Message Text="Cleaning previous build artifacts..."/>
+		<RemoveDir Directories="$(ProjectDirPath)obj" Condition="Exists('$(ProjectDirPath)obj')"/>
+		<RemoveDir Directories="$(ProjectDirPath)bin" Condition="Exists('$(ProjectDirPath)bin')"/>
+		<RemoveDir Directories="$(LibProjectDirPath)obj" Condition="Exists('$(LibProjectDirPath)obj')"/>
+		<RemoveDir Directories="$(LibProjectDirPath)bin" Condition="Exists('$(LibProjectDirPath)bin')"/>
+		<RemoveDir Directories="$(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" Condition="Exists('$(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\')"/>
+		<RemoveDir Directories="$(PublishDir)$(Configuration)_Standalone_$(Architecture)\" Condition="Exists('$(PublishDir)$(Configuration)_Standalone_$(Architecture)\')"/>
+
+		<!-- Build both framework-dependent and standalone releases. Each configuration uses a distinct
+				 OutputPath (see AutoStartConfirm.csproj), so the two publishes below no longer share
+				 intermediate/apphost artifacts and an inter-publish clean is not required. -->
 		<Exec Command="dotnet publish $(ProjectFile) -c &quot;$(Configuration) Framework Dependent&quot; --no-self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_FrameworkDependent_$(Architecture)\" />
 		<Exec Command="dotnet publish $(ProjectFile) -c &quot;$(Configuration) Standalone&quot; --self-contained -r $(Architecture) -p:Platform=$(Platform) --output $(PublishDir)$(Configuration)_Standalone_$(Architecture)\" />
 
