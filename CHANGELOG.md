@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.9725] (2026-08-17)
+### Added
+- open main window on click on toast notification
+- show busy indicator on adding own auto start
+- show dependency licenses as table
+- update dependencies
+
+### Breaking changes
+- framework dependent version now requires .NET 10
+
+### Fixed
+- window is opened in the background on toast notification click
+- app is opened in the background on try icon click
 
 ## [3.2.9134] (2025-01-03)
 ### Added
@@ -100,7 +113,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base functionality
 
-[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.1.8968...HEAD
+[Unreleased]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v4.0.9725...HEAD
+[4.0.9725]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.2.9134...v4.0.9725
 [3.2.9134]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v3.1.8968...v3.2.9134
 [3.1.8968]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...v3.1.8968
 [3.0.8811]: https://github.com/ChristianGalla/AutoStartConfirm/compare/v2.1.8572...v3.0.8811
