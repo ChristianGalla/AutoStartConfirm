@@ -116,6 +116,13 @@
 			<DialogRef Id="ProgressDlg" />
 			<DialogRef Id="ResumeDlg" />
 			<DialogRef Id="UserExit" />
+			<DialogRef Id="LicenseAgreementDlg" />
+			<DialogRef Id="VerifyReadyDlg" />
+			<DialogRef Id="MaintenanceWelcomeDlg" />
+			<DialogRef Id="MaintenanceTypeDlg" />
+			<DialogRef Id="ExitDialog" />
+			<DialogRef Id="CancelDlg" />
+			<DialogRef Id="InvalidDirDlg" />
 
 			<Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath_$(sys.BUILDARCHSHORT)" Order="3" />
 			<Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4" Condition="NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID&lt;&gt;&quot;1&quot;" />
@@ -132,10 +139,10 @@
 			 point of view), so the wizard fell through to the License/Install-Directory pages exactly like a
 			 fresh install instead of updating in place. Skip straight to VerifyReadyDlg for upgrades, same as
 			 for patches/repairs. -->
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="(Installed AND PATCH) OR WIX_UPGRADE_DETECTED" />
+			<Publish Dialog="CustomWelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
+			<Publish Dialog="CustomWelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="(Installed AND PATCH) OR WIX_UPGRADE_DETECTED" />
 
-			<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+			<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="CustomWelcomeDlg" />
 			<Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Condition="LicenseAccepted = &quot;1&quot;" />
 			
 
@@ -152,7 +159,7 @@
 
 			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="AdditionalSettingsDlg" Order="1" Condition="NOT Installed" />
 			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed AND NOT PATCH" />
-			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="Installed AND PATCH" />
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomWelcomeDlg" Order="2" Condition="Installed AND PATCH" />
 
 			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
 
@@ -182,6 +189,36 @@
 
 
 			</Dialog>
+		</UI>
+
+		<!-- Custom welcome dialog with a distinct Id (CustomWelcomeDlg) so it never collides
+		 with the extension's built-in WelcomeDlg symbol. All navigation that used to target
+		 the stock WelcomeDlg has been repointed to CustomWelcomeDlg above, and an explicit
+		 InstallUISequence entry below shows it as the first dialog of the wizard. Tells the
+		 user which version is about to be installed and whether this is a fresh installation
+		 or an update over an already-installed version (WIX_UPGRADE_DETECTED is set by the
+		 MajorUpgrade element when an older version is found, see comment above). -->
+		<UI>
+			<Dialog Id="CustomWelcomeDlg" Width="370" Height="270" Title="[ProductName] Setup">
+				<Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="WixUI_Bmp_Dialog" />
+				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+				<Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Bigger}Welcome to the [ProductName] Setup Wizard" />
+
+				<Control Id="FreshInstallDescription" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="This will install [ProductName] version [ProductVersion] on your computer." ShowCondition="NOT WIX_UPGRADE_DETECTED" HideCondition="WIX_UPGRADE_DETECTED" />
+
+				<Control Id="UpdateDescription" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="An earlier version of [ProductName] is installed on your computer. This wizard will update it to version [ProductVersion]." ShowCondition="WIX_UPGRADE_DETECTED" HideCondition="NOT WIX_UPGRADE_DETECTED" />
+
+				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" Disabled="yes" />
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+					<Publish Event="SpawnDialog" Value="CancelDlg" />
+				</Control>
+			</Dialog>
+
+			<InstallUISequence>
+				<Show Dialog="CustomWelcomeDlg" Before="ProgressDlg" Condition="NOT Installed OR PATCH OR WIX_UPGRADE_DETECTED" />
+			</InstallUISequence>
 		</UI>
 
 	</Fragment>
