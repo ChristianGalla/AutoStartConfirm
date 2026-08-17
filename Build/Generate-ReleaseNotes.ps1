@@ -24,10 +24,16 @@
 .PARAMETER RepoUrl
 	The base URL of the GitHub repository (e.g. https://github.com/owner/repo).
 	If omitted, it is derived from the "origin" git remote.
+
+.PARAMETER NewTag
+	The tag of the release being generated. If provided (together with
+	LastTag), a "Full Changelog" compare link from LastTag to NewTag is
+	appended to the release notes.
 #>
 param(
 	[string]$LastTag,
-	[string]$RepoUrl
+	[string]$RepoUrl,
+	[string]$NewTag
 )
 
 $ErrorActionPreference = "Stop"
@@ -230,6 +236,12 @@ if ($newContributorLines.Count -gt 0) {
 	$notes.Add("")
 	$notes.Add("## New Contributors")
 	$notes.AddRange($newContributorLines)
+}
+
+if ($LastTag) {
+	$compareTo = if ($NewTag) { $NewTag } else { "master" }
+	$notes.Add("")
+	$notes.Add("**Full Changelog**: $RepoUrl/compare/$LastTag...$compareTo")
 }
 
 $notes -join "`n"
