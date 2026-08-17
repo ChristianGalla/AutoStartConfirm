@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - window is opened in the background on toast notification click
-- app is opened in the background on try icon click
+- app is opened in the background on tray icon click
 
 ## [3.2.9134] (2025-01-03)
 ### Added
