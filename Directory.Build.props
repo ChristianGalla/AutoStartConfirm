@@ -2,4 +2,26 @@
  <PropertyGroup>
    <EnableWindowsTargeting>true</EnableWindowsTargeting>
  </PropertyGroup>
+ <!-- Centralized version info, shared by all projects in the solution (AutoStartConfirm,
+      AutoStartConfirmLib, AutoStartConfirmTest) via MSBuild's automatic Directory.Build.props
+      discovery (walks up from each project directory to the solution root).
+
+      AutoStartConfirmSetup (the WiX installer) does not read these properties directly; instead
+      Product.wxs binds the MSI package Version to !(bind.FileVersion.MainExecutable), i.e. the
+      native file version resource embedded in AutoStartConfirm.exe by $(FileVersion) below, so it
+      automatically stays in sync without needing its own copy of these values.
+
+      Build/Revision auto-increment on every build (days since 2000-01-01 / seconds-since-midnight
+      divided by 2), so each build produces a distinct, increasing version. This is required for
+      AutoStartConfirmSetup's MajorUpgrade to detect a newer version and perform an in-place
+      upgrade instead of a side-by-side install. -->
+ <PropertyGroup>
+   <VersionMajor>4</VersionMajor>
+   <VersionMinor>0</VersionMinor>
+   <AutoVersionBuild>$([System.DateTime]::Now.Subtract($([System.DateTime]::Parse('2000-01-01'))).Days)</AutoVersionBuild>
+   <AutoVersionRevision>$([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalSeconds), 2).ToString('F0'))</AutoVersionRevision>
+   <Version>$(VersionMajor).$(VersionMinor).$(AutoVersionBuild).$(AutoVersionRevision)</Version>
+   <FileVersion>$(Version)</FileVersion>
+   <AssemblyVersion>$(Version)</AssemblyVersion>
+ </PropertyGroup>
 </Project>

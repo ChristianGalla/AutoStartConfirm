@@ -33,6 +33,8 @@ Building the app project alone (e.g. via `msbuild`/`dotnet build` on `AutoStartC
 
 **Never build `AutoStartConfirmSetup` (the WiX project) directly** — e.g. never run `msbuild AutoStartConfirmSetup\AutoStartConfirmSetup.wixproj` or build it via Visual Studio's "Build"/"Rebuild" on that project alone. Its build/publish input and output paths (the published app files it packages) are only wired up correctly when driven through `Build\Daily_Debug.bat`/`Build\Daily_Release.bat` (via `Daily.targets`), which first publish the app and then invoke the setup project with the right properties. Building the setup project directly will fail or silently package stale/missing files.
 
+`Build\Daily_Debug.bat` can be executed by the AI agent at any time, on its own initiative, without asking the user for confirmation first — treat it like any other local build command (e.g. `dotnet build`). Everything it does (publish + WiX packaging) is local to the repo/workspace and produces no side effects outside it, so no user interaction is required before running it.
+
 ```powershell
 # Restore
 nuget restore AutoStartConfirm.sln

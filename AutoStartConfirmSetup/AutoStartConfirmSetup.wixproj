@@ -29,7 +29,12 @@
     <!-- ICE69: expected false positive - the shortcuts intentionally target the file "MainExecutable" which
      lives in its own component ("MainExecutable"), separate from the shortcut components, so the shortcuts
      can be installed/removed independently (e.g. desktop shortcut is conditional) without affecting the exe. -->
-    <SuppressIces>ICE69</SuppressIces>
+    <!-- ICE61: expected false positive - Product.wxs sets MajorUpgrade AllowSameVersionUpgrades="yes" so that
+     re-running the installer for the same version (e.g. same-day builds sharing the auto-incrementing
+     Build/Revision from Directory.Build.props) still performs an in-place upgrade instead of failing/no-op.
+     This intentionally makes the upgrade range's Maximum equal to the current product version, which is
+     exactly what ICE61 flags. -->
+    <SuppressIces>ICE69;ICE61</SuppressIces>
     <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Framework Dependent|x64'">

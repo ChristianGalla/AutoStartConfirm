@@ -51,4 +51,7 @@ using System.Runtime.Versioning;
 // Sie können alle Werte angeben oder Standardwerte für die Build- und Revisionsnummern verwenden,
 // indem Sie "*" wie unten gezeigt eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.0.*")]
+// AssemblyVersion is intentionally NOT declared here: this file is static and never regenerated,
+// so a hardcoded value would go stale. It is instead generated on every build from the centralized
+// $(AssemblyVersion) property (see Directory.Build.props) by the GenerateAssemblyVersionAttribute
+// target in AutoStartConfirm.csproj.

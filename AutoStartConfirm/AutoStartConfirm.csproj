@@ -130,4 +130,21 @@
     </ItemGroup>
     <RemoveDir Directories="@(RemovingFolders)" />
   </Target>
+  <!-- GenerateAssemblyInfo is false (see above) because AssemblyInfo.cs already hand-authors several
+       attributes (AssemblyTitle, AssemblyProduct, etc.) that would otherwise collide with the SDK's
+       auto-generated ones. AssemblyInfo.cs itself is a static, non-regenerated file, so it cannot hold
+       an up-to-date AssemblyVersion sourced from the centralized $(AssemblyVersion) property (see
+       Directory.Build.props). This target regenerates just the AssemblyVersion attribute on every
+       build, independent of GenerateAssemblyInfo, so it always reflects the current version. -->
+  <Target Name="GenerateAssemblyVersionAttribute" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <AssemblyVersionAttribute Include="System.Reflection.AssemblyVersionAttribute">
+        <_Parameter1>$(AssemblyVersion)</_Parameter1>
+      </AssemblyVersionAttribute>
+    </ItemGroup>
+    <WriteCodeFragment Language="C#" OutputDirectory="$(IntermediateOutputPath)" AssemblyAttributes="@(AssemblyVersionAttribute)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+  </Target>
 </Project>

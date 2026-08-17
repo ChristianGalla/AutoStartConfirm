@@ -3,7 +3,7 @@
 
 		<WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" />
 		<MediaTemplate EmbedCab="yes" />
 
 		<Feature Id="Complete" Title="Auto Start Confirm" Description="The complete package." Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
@@ -123,8 +123,17 @@
 			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
 			<Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication" Condition="START_AFTER_INSTALL = 1" />
 
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed" />
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
+			<!-- WIX_UPGRADE_DETECTED is set automatically by the MajorUpgrade element (via FindRelatedProducts)
+			 when this package is about to perform a major upgrade over an already-installed older version.
+			 (Note: this is NOT the same as the hand-authored "UPGRADINGPRODUCTCODE" property name sometimes
+			 seen in traditional MSI authoring - WiX's MajorUpgrade convenience element always uses
+			 WIX_UPGRADE_DETECTED.) Without checking it here, "Installed" alone is never true for that scenario
+			 (this package always gets a new ProductCode, so it is not yet "Installed" from the new session's
+			 point of view), so the wizard fell through to the License/Install-Directory pages exactly like a
+			 fresh install instead of updating in place. Skip straight to VerifyReadyDlg for upgrades, same as
+			 for patches/repairs. -->
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="(Installed AND PATCH) OR WIX_UPGRADE_DETECTED" />
 
 			<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
 			<Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Condition="LicenseAccepted = &quot;1&quot;" />
