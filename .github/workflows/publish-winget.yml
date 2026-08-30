@@ -6,7 +6,7 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal9/winget-releaser@main
+      - uses: vedantmgoyal9/winget-releaser@2
         with:
           identifier: ChristianGalla.AutoStartConfirm
           installers-regex: '^AutoStartConfirmSetup_Standalone\.msi$'
