@@ -1,0 +1,16 @@
+name: AutoStartConfirm
+version: 1.0.0
+description: APM project for AutoStartConfirm
+author: Christian Galla
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
+targets:
+  - copilot
+dependencies:
+  apm:
+    - github/awesome-copilot/plugins/edge-ai-tasks#marketplace
+    - github/awesome-copilot/plugins/csharp-dotnet-development#marketplace
+  mcp: []
+includes: auto
+scripts: {}

@@ -1,0 +1,26 @@
+lockfile_version: '1'
+apm_version: 0.32.0
+dependencies:
+- repo_url: github/awesome-copilot
+  name: csharp-dotnet-development
+  host: github.com
+  resolved_commit: 862a5f885f67b3723149356b19aee060d96128d5
+  resolved_ref: marketplace
+  version: 1.2.0
+  virtual_path: plugins/csharp-dotnet-development
+  is_virtual: true
+  package_type: agent_plugin
+  content_hash: sha256:c1e5d0416c678a2b0b314a92f82f14e18e7a007e6e7e28ec76dc5a0677221dcb
+  declared_license: MIT
+- repo_url: github/awesome-copilot
+  name: edge-ai-tasks
+  host: github.com
+  resolved_commit: 862a5f885f67b3723149356b19aee060d96128d5
+  resolved_ref: marketplace
+  version: 1.0.0
+  virtual_path: plugins/edge-ai-tasks
+  is_virtual: true
+  package_type: agent_plugin
+  content_hash: sha256:068f8a24a13388f8db9c5bd82f4a72f81fc7f6646fdee2b208c0faf3dbfcb7e1
+  declared_license: MIT
+deployments: []
