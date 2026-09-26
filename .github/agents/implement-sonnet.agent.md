@@ -2,7 +2,7 @@
 description: 'Implements an existing plan file for AutoStartConfirm as an expert .NET engineer. Does not re-plan.'
 name: 'Implement (Sonnet)'
 model: 'Claude Sonnet 5'
-tools: ['changes', 'codebase', 'edit/editFiles', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'problems', 'runCommands', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'usages']
+tools: [vscode/installExtension, vscode/newWorkspace, vscode/runCommand, execute/getTerminalOutput, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/testFailure, read/problems, read/readFile, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, web/githubRepo, vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename, vscodeGeneral/runTests, vscodeGeneral/testFailure]
 ---
 
 # Implement Agent

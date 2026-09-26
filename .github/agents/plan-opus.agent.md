@@ -2,7 +2,7 @@
 description: 'Plans changes for AutoStartConfirm and writes a plan file. Research and planning only - never edits source code.'
 name: 'Plan (Opus)'
 model: 'Claude Opus 5'
-tools: ['changes', 'search/codebase', 'edit/editFiles', 'fetch', 'findTestFiles', 'githubRepo', 'problems', 'runCommands', 'search', 'search/searchResults', 'usages']
+tools: [execute/getTerminalOutput, execute/runInTerminal, read/problems, read/readFile, read/terminalSelection, read/terminalLastCommand, edit/editFiles, search, web/fetch, web/githubRepo, vscodeTasks/problems]
 ---
 
 # Plan Agent
