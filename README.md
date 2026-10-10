@@ -49,7 +49,7 @@ The .NET Desktop Runtime depends on the program version:
 
 | Program version        | .NET Desktop Runtime | Microsoft's Runtime support end date |
 |------------------------|------------------------------|-----------------------------|
-| 4.X.Y (future release) | [10.0](https://dotnet.microsoft.com/download/dotnet/10.0) | 2028-11-10 |
+| 4.X.Y                  | [10.0](https://dotnet.microsoft.com/download/dotnet/10.0) | 2028-11-10 |
 | 3.X.Y                  | [8.0](https://dotnet.microsoft.com/download/dotnet/8.0) | 2026-11-10 |
 | 2.X.Y                  | [7.0](https://dotnet.microsoft.com/download/dotnet/7.0) | 2024-05-14 |
 | 1.X.Y                  | [4.7](https://dotnet.microsoft.com/download/dotnet-framework/net47)| - |
