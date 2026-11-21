@@ -19,6 +19,18 @@ Follow the vendored Task Researcher and Task Planner instructions, in this order
 
 Read those files before you start and treat them as your operating instructions.
 
+- They are already on disk (installed by APM). Read them from the LOCAL workspace with
+  the file-read tool, not the terminal, and never fetch them from GitHub or any URL.
+- `github/awesome-copilot` in the path is only the APM package folder name, not a remote.
+- If a file is missing locally, stop and ask the user to run `apm install`. Do not use an online copy.
+
+## Tool usage overrides (take precedence over the vendored files)
+
+- Ignore the `tools:` front matter of the vendored files; use only the tools of this agent.
+- `#githubRepo:` / `#fetch:` in the templates are optional citation formats, not mandatory
+  steps. Use web lookups only for third-party library docs, never for these instructions.
+- Use the terminal only for commands (build, git, searches); read files with the file tools.
+
 ## Hard constraints
 
 - You MUST NOT modify any source code, project files, resources or configuration.

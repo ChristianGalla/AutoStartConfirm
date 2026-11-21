@@ -2,6 +2,11 @@
 
 Windows tray app (WinUI 3 / Windows App SDK) that monitors Windows auto-start locations (registry Run keys, services, scheduled tasks, startup folders, group policy scripts, etc.) and asks the user to confirm newly added or removed auto-starts.
 
+## General Guidelines
+- Prefer using available tools instead of executing terminal commands whenever a fitting tool exists. 
+- If no fitting tool is currently installed, consider whether a suitable tool should be added and ask the user before adding it.
+- Always ask before executing any web research to find a fitting tool.
+
 ## Solution layout
 
 - `AutoStartConfirm/` – only the application entry point. `Program.cs` (`Main`) registers services via `Program.ConfigureServices` and resolves them via `Ioc.Default` (CommunityToolkit.Mvvm) / constructor injection. The actual WinUI 3 GUI (tray icon, windows, pages, notifications) lives in `AutoStartConfirmLib/GUI/`, not in this project.
@@ -34,8 +39,6 @@ Building the app project alone (e.g. via `msbuild`/`dotnet build` on `AutoStartC
 **Never build `AutoStartConfirmSetup` (the WiX project) directly** — e.g. never run `msbuild AutoStartConfirmSetup\AutoStartConfirmSetup.wixproj` or build it via Visual Studio's "Build"/"Rebuild" on that project alone. Its build/publish input and output paths (the published app files it packages) are only wired up correctly when driven through `Build\Daily_Debug.bat`/`Build\Daily_Release.bat` (via `Daily.targets`), which first publish the app and then invoke the setup project with the right properties. Building the setup project directly will fail or silently package stale/missing files.
 
 `Build\Daily_Debug.bat` can be executed by the AI agent at any time, on its own initiative, without asking the user for confirmation first — treat it like any other local build command (e.g. `dotnet build`). Everything it does (publish + WiX packaging) is local to the repo/workspace and produces no side effects outside it, so no user interaction is required before running it.
-
-```powershell
 # Restore
 nuget restore AutoStartConfirm.sln
 
@@ -52,19 +55,13 @@ vstest.console.exe /Platform:x64 "AutoStartConfirmTest\bin\x64\Release\win-x64\A
 
 # Run a single test class/method (vstest.console.exe filter)
 vstest.console.exe /Platform:x64 /Tests:AutoStartBusinessTests.SomeTestMethod "AutoStartConfirmTest\bin\x64\Release\win-x64\AutoStartConfirmTest.dll"
-```
-
 For the solution's current test project (`AutoStartConfirmTest`, net10),
 build/run the same way but point at
 `AutoStartConfirmTest\AutoStartConfirmTest.csproj` and its output DLL.
 
 To regenerate third-party license files (required before building
 `AutoStartConfirmLib` if `Licenses/` is missing), run [Build/Export-ThirdPartyLicenses.ps1](Build/Export-ThirdPartyLicenses.ps1):
-
-```powershell
 .\Build\Export-ThirdPartyLicenses.ps1
-```
-
 This installs the `nuget-license` and `Pandoc` tools if needed, extracts the license information for `AutoStartConfirmLib`'s dependencies into `AutoStartConfirmLib\Licenses\Licenses.json` (read by `GUI/AboutPage.xaml.cs`/`AboutPage.xaml` to render a `DataGrid` table of package name, version, author, project url and downloaded license file), downloads the individual license texts and converts any HTML license file to plain text, since HTML must not be rendered inside the app for security reasons.
 
 ## Build & Installer Notes
