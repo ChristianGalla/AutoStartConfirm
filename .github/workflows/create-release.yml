@@ -27,17 +27,17 @@ jobs:
           fetch-depth: 0
         
       - name: Download setup artifact
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: AutoStartConfirmSetup
         
       - name: Download framework dependent SBOM artifact
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: FrameworkDependent.sbom.spdx.json
         
       - name: Download standalone SBOM artifact
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: Standalone.sbom.spdx.json
           
